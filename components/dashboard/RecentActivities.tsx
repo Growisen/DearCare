@@ -2,10 +2,10 @@ import { Card } from "../ui/card"
 import { Activity } from "lucide-react"
 
 const activities = [
-  { text: "New nurse assignment in California", time: "2h ago" },
-  { text: "Staff training session completed", time: "4h ago" },
-  { text: "Assigned a nurse to client", time: "6h ago" },
-  { text: "New client onboarding completed", time: "8h ago" }
+  { text: "New nurse assignment in Kochi", time: "2h ago" },
+  { text: "Staff training at Kaloor center completed", time: "4h ago" },
+  { text: "Nurse assigned to client in Trivandrum", time: "6h ago" },
+  { text: "New client onboarding in Thrissur", time: "8h ago" }
 ]
 
 export default function RecentActivities() {

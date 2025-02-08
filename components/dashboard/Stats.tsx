@@ -5,18 +5,20 @@ import { Users, Calendar, Building2, Activity, TrendingUp } from "lucide-react"
 interface Stat {
   title: string;
   value: number;
-  icon: any;
+  icon: LucideIcon;
   trend: string;
   trendUp: boolean;
   bgColor: string;
   iconColor: string;
 }
 
-const stats = [
-    { title: "Active Nurses", value: 245, icon: Users, trend: "+12%", trendUp: true, bgColor: "bg-blue-100/30", iconColor: "text-blue-500" },
-    { title: "Current Assignments", value: 182, icon: Calendar, trend: "+8%", trendUp: true, bgColor: "bg-emerald-100/30", iconColor: "text-emerald-500" },
-    { title: "Open Requests", value: 28, icon: Activity, trend: "-2%", trendUp: false, bgColor: "bg-amber-100/30", iconColor: "text-amber-500" },
-    { title: "Active Clients", value: 73, icon: Building2, trend: "+5%", trendUp: true, bgColor: "bg-purple-100/30", iconColor: "text-purple-500" },
+import { LucideIcon } from "lucide-react";
+
+const stats: Stat[] = [
+    { title: "Active Nurses", value: 125, icon: Users, trend: "+8%", trendUp: true, bgColor: "bg-blue-100/30", iconColor: "text-blue-500" },
+    { title: "Current Assignments", value: 98, icon: Calendar, trend: "+5%", trendUp: true, bgColor: "bg-emerald-100/30", iconColor: "text-emerald-500" },
+    { title: "Open Requests", value: 15, icon: Activity, trend: "-3%", trendUp: false, bgColor: "bg-amber-100/30", iconColor: "text-amber-500" },
+    { title: "Active Clients", value: 42, icon: Building2, trend: "+4%", trendUp: true, bgColor: "bg-purple-100/30", iconColor: "text-purple-500" },
 ]
 
 export default function Stats() {

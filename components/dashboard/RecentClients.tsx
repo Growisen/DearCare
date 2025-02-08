@@ -3,18 +3,18 @@ import { Users, Search, Download, MoreVertical } from "lucide-react"
 import { useState } from "react"
 
 const recentClients = [
-  { name: "John Doe", email: "john@example.com", phone: "123-456-7890", location: "California", status: "Waiting", added: "2 days ago" },
-  { name: "Jane Smith", email: "jane@example.com", phone: "987-654-3210", location: "New York", status: "Assigned", added: "3 days ago" },
-  { name: "Michael Johnson", email: "michael@example.com", phone: "456-789-0123", location: "Texas", status: "Assigned", added: "5 days ago" },
-  { name: "Sarah Wilson", email: "sarah@example.com", phone: "789-123-4560", location: "Florida", status: "Waiting", added: "6 days ago" },
-  { name: "Robert Brown", email: "robert@example.com", phone: "321-654-0987", location: "Arizona", status: "Assigned", added: "1 week ago" },
+  { name: "Anoop Kumar", email: "anoop@example.com", phone: "944-756-7890", location: "Kochi", status: "Waiting", added: "2 days ago" },
+  { name: "Priya Thomas", email: "priya@example.com", phone: "855-654-3210", location: "Trivandrum", status: "Assigned", added: "3 days ago" },
+  { name: "Mohammed Rashid", email: "rashid@example.com", phone: "944-789-0123", location: "Calicut", status: "Assigned", added: "5 days ago" },
+  { name: "Lakshmi Menon", email: "lakshmi@example.com", phone: "934-123-4560", location: "Thrissur", status: "Waiting", added: "6 days ago" },
+  { name: "Rajesh Nair", email: "rajesh@example.com", phone: "944-654-0987", location: "Kannur", status: "Assigned", added: "1 week ago" },
 ];
 
 export default function RecentClients() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', location: '', status: 'Waiting' });
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     // Add logic to handle new client submission

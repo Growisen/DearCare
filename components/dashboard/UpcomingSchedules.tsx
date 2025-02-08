@@ -8,11 +8,11 @@ interface Schedule {
   urgent?: boolean;
 }
 
-const schedules = [
-    { text: "Team Meeting", time: "2:00 PM", location: "Room A", urgent: true },
-    { text: "Client Review", time: "4:30 PM", location: "Virtual" },
-    { text: "New Hire Orientation", time: "Tomorrow, 10 AM", location: "Training" },
-    { text: "Monthly Report Due", time: "Friday", location: "Docs" },
+const schedules: Schedule[] = [
+    { text: "Staff Meeting at Kochi Branch", time: "2:00 PM", location: "Kochi Office", urgent: true },
+    { text: "Patient Review - Trivandrum", time: "4:30 PM", location: "Virtual" },
+    { text: "New Staff Orientation", time: "Tomorrow, 10 AM", location: "Kaloor Training Center" },
+    { text: "Monthly Report for Kerala Operations", time: "Friday", location: "Docs" },
 ]
 
 export default function UpcomingSchedules() {
