@@ -23,16 +23,17 @@ interface Nurse {
   experience: number
   reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
   image?: File;
+  preferredLocations: string[];
 }
 
 const mockNurses: Nurse[] = [
   {
     _id: "1",
-    firstName: "Alice",
-    lastName: "Johnson",
-    location: "New York",
+    firstName: "Anjali",
+    lastName: "Menon",
+    location: "Kochi",
     status: "unassigned",
-    email: "alice.johnson@example.com",
+    email: "anjali.menon@example.com",
     phoneNumber: "123-456-7890",
     gender: "Female",
     dob: "1990-01-01",
@@ -43,15 +44,16 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
       { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
-    ]
+    ],
+    preferredLocations: ["Kochi", "Thiruvananthapuram"]
   },
   {
     _id: "2",
-    firstName: "Bob",
-    lastName: "Smith",
-    location: "Los Angeles",
+    firstName: "Ravi",
+    lastName: "Nair",
+    location: "Thiruvananthapuram",
     status: "assigned",
-    email: "bob.smith@example.com",
+    email: "ravi.nair@example.com",
     phoneNumber: "987-654-3210",
     gender: "Male",
     dob: "1985-05-15",
@@ -60,16 +62,17 @@ const mockNurses: Nurse[] = [
     experience: 8,
     rating: 4,
     reviews: [
-      { id: "r3", text: "Good service.", date: "2020-03-10", rating: 4, reviewer: "Alice Johnson" }
-    ]
+      { id: "r3", text: "Good service.", date: "2020-03-10", rating: 4, reviewer: "Anjali Menon" }
+    ],
+    preferredLocations: ["Thiruvananthapuram"]
   },
   {
     _id: "3",
-    firstName: "Carol",
-    lastName: "White",
-    location: "Chicago",
+    firstName: "Lakshmi",
+    lastName: "Pillai",
+    location: "Kozhikode",
     status: "leave",
-    email: "carol.white@example.com",
+    email: "lakshmi.pillai@example.com",
     phoneNumber: "456-789-0123",
     gender: "Female",
     dob: "1992-03-10",
@@ -78,16 +81,17 @@ const mockNurses: Nurse[] = [
     experience: 3,
     rating: 4.2,
     reviews: [
-      { id: "r4", text: "Very caring.", date: "2021-11-20", rating: 5, reviewer: "Bob Smith" }
-    ]
+      { id: "r4", text: "Very caring.", date: "2021-11-20", rating: 5, reviewer: "Ravi Nair" }
+    ],
+    preferredLocations: ["Kozhikode"]
   },
   {
     _id: "4",
-    firstName: "David",
-    lastName: "Brown",
-    location: "Houston",
+    firstName: "Manu",
+    lastName: "Varma",
+    location: "Thrissur",
     status: "pending",
-    email: "david.brown@example.com",
+    email: "manu.varma@example.com",
     phoneNumber: "321-654-0987",
     gender: "Male",
     dob: "1980-07-20",
@@ -96,16 +100,17 @@ const mockNurses: Nurse[] = [
     experience: 10,
     rating: 3,
     reviews: [
-      { id: "r5", text: "Average performance.", date: "2019-08-05", rating: 3, reviewer: "Carol White" }
-    ]
+      { id: "r5", text: "Average performance.", date: "2019-08-05", rating: 3, reviewer: "Lakshmi Pillai" }
+    ],
+    preferredLocations: ["Thrissur"]
   },
   {
     _id: "5",
-    firstName: "Eve",
-    lastName: "Davis",
-    location: "Phoenix",
+    firstName: "Meera",
+    lastName: "Das",
+    location: "Kannur",
     status: "rejected",
-    email: "eve.davis@example.com",
+    email: "meera.das@example.com",
     phoneNumber: "654-321-9876",
     gender: "Female",
     dob: "1988-11-30",
@@ -114,26 +119,28 @@ const mockNurses: Nurse[] = [
     experience: 7,
     rating: 4.6,
     reviews: [
-      { id: "r6", text: "Excellent nurse!", date: "2020-12-12", rating: 5, reviewer: "David Brown" }
-    ]
+      { id: "r6", text: "Excellent nurse!", date: "2020-12-12", rating: 5, reviewer: "Manu Varma" }
+    ],
+    preferredLocations: ["Kannur"]
   },
   {
     _id: "6",
-    firstName: "Teresa",
-    lastName: "Garcia",
-    location: "New York",
+    firstName: "Suresh",
+    lastName: "Kumar",
+    location: "Kochi",
     status: "under_review",
-    email: "teresa.garcia@gmail.com",
+    email: "suresh.kumar@gmail.com",
     phoneNumber: "654-321-9876",
-    gender: "Female",
+    gender: "Male",
     dob: "1988-11-30",
     salaryCap: 65000,
     hiringDate: "2015-11-30",
     experience: 7,
     rating: 2.6,
     reviews: [
-      { id: "r7", text: "Needs improvement.", date: "2021-05-18", rating: 2, reviewer: "Eve Davis" }
-    ]
+      { id: "r7", text: "Needs improvement.", date: "2021-05-18", rating: 2, reviewer: "Meera Das" }
+    ],
+    preferredLocations: ["Kochi"]
   }
 ]
 
@@ -143,11 +150,20 @@ const filterOptions = [
     setValue: "setSelectedLocation",
     options: [
       { value: "all", label: "All Locations" },
-      { value: "New York", label: "New York" },
-      { value: "Los Angeles", label: "Los Angeles" },
-      { value: "Chicago", label: "Chicago" },
-      { value: "Houston", label: "Houston" },
-      { value: "Phoenix", label: "Phoenix" }
+      { value: "Thiruvananthapuram", label: "Thiruvananthapuram" },
+      { value: "Kollam", label: "Kollam" },
+      { value: "Pathanamthitta", label: "Pathanamthitta" },
+      { value: "Alappuzha", label: "Alappuzha" },
+      { value: "Kottayam", label: "Kottayam" },
+      { value: "Idukki", label: "Idukki" },
+      { value: "Ernakulam", label: "Ernakulam" },
+      { value: "Thrissur", label: "Thrissur" },
+      { value: "Palakkad", label: "Palakkad" },
+      { value: "Malappuram", label: "Malappuram" },
+      { value: "Kozhikode", label: "Kozhikode" },
+      { value: "Wayanad", label: "Wayanad" },
+      { value: "Kannur", label: "Kannur" },
+      { value: "Kasaragod", label: "Kasaragod" }
     ]
   },
   {
@@ -210,7 +226,7 @@ export default function NursesPage() {
   const [showAddNurse, setShowAddNurse] = useState(false)
 
   const filteredNurses = mockNurses.filter(nurse => {
-    const matchesLocation = selectedLocation === "all" || nurse.location === selectedLocation
+    const matchesLocation = selectedLocation === "all" || nurse.preferredLocations.includes(selectedLocation)
     const matchesStatus = selectedStatus === "all" || nurse.status === selectedStatus
     const matchesExperience = selectedExperience === "all" || 
       (selectedExperience === "less_than_1" && (nurse.experience ?? 0) < 1) ||

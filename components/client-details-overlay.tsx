@@ -22,6 +22,8 @@ interface ClientDetailsProps {
     description?: string;
     medications?: string[];
     specialInstructions?: string;
+    nurseLocation?: { lat: number; lng: number };
+    clientLocation?: { lat: number; lng: number };
   };
   onClose: () => void;
 }

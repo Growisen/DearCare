@@ -1,4 +1,5 @@
 import React from 'react';
+import Map from '../map/Map';
 
 interface ApprovedContentProps {
   client: {
@@ -7,6 +8,8 @@ interface ApprovedContentProps {
     condition?: string;
     medications?: string[];
     specialInstructions?: string;
+    nurseLocation?: { lat: number; lng: number };
+    clientLocation?: { lat: number; lng: number };
   };
 }
 
@@ -68,6 +71,12 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
           <div>
             <h4 className="text-sm font-medium text-gray-900 mb-2">Care Instructions</h4>
             <p className="text-sm text-gray-600">{client.specialInstructions}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Nurse Location</h4>
+            <div className="h-64 rounded-lg overflow-hidden shadow-lg border border-gray-200">
+              <Map nurseLocation={client.nurseLocation} clientLocation={client.clientLocation} />
+            </div>
           </div>
         </div>
       </div>

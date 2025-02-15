@@ -14,6 +14,7 @@ interface Nurse {
   status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected"
   rating ?: number
   experience: number
+  preferredLocations: string[]
 }
 
 const statusColors = {
@@ -41,7 +42,7 @@ const NurseCard = ({ nurse, onReviewDetails }: { nurse: Nurse, onReviewDetails: 
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-medium text-gray-900">{`${nurse.firstName} ${nurse.lastName}`}</h3>
-          <p className="text-sm text-gray-600">{nurse.location}</p>
+          {/* <p className="text-sm text-gray-600">{nurse.location}</p> */}
         </div>
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status]}`}>
           <StatusIcon className="w-3.5 h-3.5" />

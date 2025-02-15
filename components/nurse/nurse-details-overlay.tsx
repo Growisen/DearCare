@@ -6,7 +6,7 @@ import { UnderReviewContent } from './UnderReview';
 import { PendingContent } from './PendingContent';
 import { RejectedContent } from './RejectedContent';
 
-interface ClientDetailsProps {
+interface NurseDetailsProps {
   nurse: {
     _id: string;
     firstName: string;
@@ -23,11 +23,12 @@ interface ClientDetailsProps {
     experience?: number;
     reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
     image?: File;
+    preferredLocations: string[];
   };
   onClose: () => void;
 }
 
-export function NurseDetailsOverlay({ nurse, onClose }: ClientDetailsProps) {
+export function NurseDetailsOverlay({ nurse, onClose }: NurseDetailsProps) {
   const renderStatusSpecificContent = () => {
     switch (nurse.status) {
       case "assigned":

@@ -14,6 +14,7 @@ interface Nurse {
     status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected"
     rating?: number
     experience: number
+    preferredLocations: string[]
 }
 
 const statusColors = {
@@ -36,10 +37,9 @@ const statusIcons = {
 
 const NurseTable = ({ nurses, onReviewDetails }: { nurses: Nurse[], onReviewDetails: (nurse: Nurse) => void }) => (
   <table className="w-full">
-    <thead className="bg-gray-50 border-b border-gray-200 text-md">
+    <thead className="bg-gray-50 border-b border-gray-200">
       <tr className="text-left">
         <th className="py-4 px-6 font-semibold text-gray-700">Nurse Name</th>
-        <th className="py-4 px-6 font-semibold text-gray-700">Location</th>
         <th className="py-4 px-6 font-semibold text-gray-700">Status</th>
         <th className="py-4 px-6 font-semibold text-gray-700">Experience</th>
         <th className="py-4 px-6 font-semibold text-gray-700">Rating</th>
@@ -47,13 +47,12 @@ const NurseTable = ({ nurses, onReviewDetails }: { nurses: Nurse[], onReviewDeta
         <th className="py-4 px-6 font-semibold text-gray-700">Actions</th>
       </tr>
     </thead>
-    <tbody className="divide-y divide-gray-200 text-sm">
+    <tbody className="divide-y divide-gray-200">
       {nurses.map((nurse) => {
         const StatusIcon = statusIcons[nurse.status]
         return (
           <tr key={nurse._id} className="hover:bg-gray-50/50">
             <td className="py-4 px-6 text-gray-900 font-medium">{`${nurse.firstName} ${nurse.lastName}`}</td>
-            <td className="py-4 px-6 text-gray-700">{nurse.location}</td>
             <td className="py-4 px-6">
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status]}`}>
                 <StatusIcon className="w-3.5 h-3.5" />
@@ -61,13 +60,14 @@ const NurseTable = ({ nurses, onReviewDetails }: { nurses: Nurse[], onReviewDeta
               </span>
             </td>
             <td className="py-4 px-6 text-gray-700">{nurse.experience} years</td>
-            <td className="py-4 px-6 text-gray-700 flex items-center gap-1">
-              {nurse.rating} <Star className="w-4 h-4 text-yellow-500" />
+            <td className="py-4 px-6 text-gray-700 align-middle">
+              {nurse.rating} <Star className="inline ml-1 sm:mb-1 w-4 h-4 text-yellow-500" />
             </td>
             <td className="py-4 px-6">
               <div>
                 <div className="text-gray-900">{nurse.email}</div>
                 <div className="text-gray-600">{nurse.phoneNumber}</div>
+                {/* <div className="text-gray-600">{nurse.location}</div> */}
               </div>
             </td>
             <td className="py-4 px-6">

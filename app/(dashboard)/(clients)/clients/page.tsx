@@ -20,6 +20,8 @@ interface Client {
   description?: string
   medications?: string[]
   specialInstructions?: string
+  nurseLocation?: { lat: number; lng: number }
+  clientLocation?: { lat: number; lng: number }
 }
 
 const mockClients: Client[] = [
@@ -55,7 +57,9 @@ const mockClients: Client[] = [
     condition: "Post Hip Surgery",
     description: "Patient requires assistance with mobility and physical therapy exercises",
     medications: ["Pain medication - 3 times daily", "Blood thinners - morning", "Antibiotics - twice daily"],
-    specialInstructions: "Ensure patient does hip exercises twice daily. Monitor wound site for any signs of infection."
+    specialInstructions: "Ensure patient does hip exercises twice daily. Monitor wound site for any signs of infection.",
+    nurseLocation: { lat: 12.9716, lng: 77.5946 },
+    clientLocation: { lat: 12.9352, lng: 77.6245 }
   },
   {
     id: "4",
