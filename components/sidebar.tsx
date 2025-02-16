@@ -54,12 +54,14 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               { icon: Calendar, label: "Schedule", href: "/schedule" },
               { icon: ClipboardList, label: "Reports", href: "/reports" },
               { icon: Settings, label: "Settings", href: "/settings" },
+              { icon: LogOut, label: "Logout", href: "#", onClick: () => signOut() },
             ].map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={item.onClick}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative
                     ${isActive 
                       ? 'bg-white/15 text-white' 
@@ -89,14 +91,6 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
             })}
           </nav>
         </div>
-      </div>
-      <div className="p-4">
-        <button onClick={() => signOut()} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-white/70 hover:bg-white/10 hover:text-white w-full">
-          <div className="transition-all duration-200 p-1 rounded-lg group-hover:bg-white/15 group-hover:text-white">
-            <LogOut className="w-[18px] h-[18px]" />
-          </div>
-          <span className="text-sm tracking-wide group-hover:font-medium">Logout</span>
-        </button>
       </div>
     </div>
   )

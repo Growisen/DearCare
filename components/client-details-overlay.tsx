@@ -15,6 +15,7 @@ interface ClientDetailsProps {
     service: string;
     requestDate: string;
     status: string;
+    location: string;
     assignedNurse?: string;
     nurseContact?: string;
     shift?: string;
@@ -32,6 +33,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
   const renderStatusSpecificContent = () => {
     switch (client.status) {
       case "approved":
+      case "assigned":
         return <ApprovedContent client={client} />;
       case "under_review":
         return <UnderReviewContent />;

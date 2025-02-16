@@ -10,10 +10,11 @@ interface Client {
   name: string
   requestDate: string
   service: string
-  status: "pending" | "under_review" | "approved" | "rejected"
+  status: "pending" | "under_review" | "approved" | "rejected"| "assigned"
   email: string
   phone: string
-  assignedNurse?: string
+  location: string
+  assignedNurse?: string 
   nurseContact?: string
   shift?: string
   condition?: string
@@ -32,7 +33,8 @@ const mockClients: Client[] = [
     service: "Home Care",
     status: "pending",
     email: "arunkumar@gmail.com",
-    phone: "9847123456"
+    phone: "9847123456",
+    location: "Kottayam"
   },
   {
     id: "2",
@@ -41,25 +43,27 @@ const mockClients: Client[] = [
     service: "Elder Care",
     status: "under_review",
     email: "priyamenon@gmail.com",
-    phone: "9745678901"
+    phone: "9745678901",
+    location: "Kochi"
   },
   {
     id: "3",
     name: "Thomas George",
     requestDate: "2024-01-13",
     service: "Post-Surgery Care",
-    status: "approved",
+    status: "assigned",
     email: "thomasgeorge@gmail.com",
     phone: "9895234567",
-    assignedNurse: "Mary Johnson",
+    assignedNurse: "1", 
     nurseContact: "9876543210",
     shift: "Morning (8 AM - 4 PM)",
     condition: "Post Hip Surgery",
     description: "Patient requires assistance with mobility and physical therapy exercises",
     medications: ["Pain medication - 3 times daily", "Blood thinners - morning", "Antibiotics - twice daily"],
-    specialInstructions: "Ensure patient does hip exercises twice daily. Monitor wound site for any signs of infection.",
+    specialInstructions: "Ensure patient does skip exercises twice daily. Monitor wound site for any signs of infection.",
     nurseLocation: { lat: 12.9716, lng: 77.5946 },
-    clientLocation: { lat: 12.9352, lng: 77.6245 }
+    clientLocation: { lat: 12.9352, lng: 77.6245 },
+    location: "Malappuram"
   },
   {
     id: "4",
@@ -68,7 +72,8 @@ const mockClients: Client[] = [
     service: "Home Care",
     status: "rejected",
     email: "lakshmink@gmail.com",
-    phone: "9946789012"
+    phone: "9946789012",
+    location: "Thiruvananthapuram"
   },
   {
     id: "5",
@@ -77,7 +82,8 @@ const mockClients: Client[] = [
     service: "Elder Care",
     status: "pending",
     email: "rashidm@gmail.com",
-    phone: "9847890123"
+    phone: "9847890123",
+    location: "Kozhikode"
   },
   {
     id: "6",
@@ -85,8 +91,11 @@ const mockClients: Client[] = [
     requestDate: "2024-01-11",
     service: "Physiotherapy",
     status: "approved",
+    condition: "Post Hip Surgery",
+    description: "Patient requires assistance with mobility and physical therapy exercises",
     email: "susanphilip@gmail.com",
-    phone: "9947567890"
+    phone: "9947567890",
+    location: "Kollam"
   },
   {
     id: "7",
@@ -95,7 +104,8 @@ const mockClients: Client[] = [
     service: "Home Care",
     status: "under_review",
     email: "rajeshk@gmail.com",
-    phone: "9847345678"
+    phone: "9847345678",
+    location: "Thrissur"
   },
   {
     id: "8",
@@ -104,7 +114,8 @@ const mockClients: Client[] = [
     service: "Post-Surgery Care",
     status: "pending",
     email: "anjalim@gmail.com",
-    phone: "9946234567"
+    phone: "9946234567",
+    location: "Alappuzha"
   },
   {
     id: "9",
@@ -112,8 +123,10 @@ const mockClients: Client[] = [
     requestDate: "2024-01-13",
     service: "Elder Care",
     status: "approved",
+    description: "Patient requires assistance with mobility and physical therapy exercises",
     email: "josephm@gmail.com",
-    phone: "9895678901"
+    phone: "9895678901",
+    location: "Palakkad"
   },
   {
     id: "10",
@@ -122,7 +135,8 @@ const mockClients: Client[] = [
     service: "Physiotherapy",
     status: "under_review",
     email: "fathimaz@gmail.com",
-    phone: "9847456789"
+    phone: "9847456789",
+    location: "Kannur"
   }
 ]
 
@@ -136,14 +150,16 @@ export default function ClientsPage() {
     pending: "bg-yellow-100 text-yellow-700 border border-yellow-200",
     under_review: "bg-blue-100 text-blue-700 border border-blue-200",
     approved: "bg-green-100 text-green-700 border border-green-200",
-    rejected: "bg-red-100 text-red-700 border border-red-200"
+    rejected: "bg-red-100 text-red-700 border border-red-200",
+    assigned: "bg-green-300 text-green-700 border border-green-300"
   }
 
   const statusIcons = {
     pending: Clock,
     under_review: Eye,
     approved: CheckCircle,
-    rejected: AlertCircle
+    rejected: AlertCircle,
+    assigned: CheckCircle
   }
 
   const filteredClients = mockClients.filter(client => {
@@ -194,7 +210,7 @@ export default function ClientsPage() {
           {/* Desktop view buttons */}
           <div className="hidden sm:block overflow-x-auto -mx-4 px-4">
             <div className="flex gap-2 min-w-max">
-              {["approved", "pending", "under_review", "rejected"].map((status) => (
+              {["approved", "pending", "under_review", "rejected", "assigned"].map((status) => (
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
@@ -223,7 +239,7 @@ export default function ClientsPage() {
                 paddingRight: `2.5rem`
               }}
             >
-              {["approved", "pending", "under_review", "rejected"].map((status) => (
+              {["approved", "pending", "under_review", "rejected", "assigned"].map((status) => (
                 <option key={status} value={status} className="py-2">
                   {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
                 </option>
