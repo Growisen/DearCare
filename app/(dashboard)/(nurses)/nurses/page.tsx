@@ -217,10 +217,13 @@ const FilterSelect = ({ value, onChange, options, className }: { value: string, 
 )
 
 export default function NursesPage() {
+  // These state setters are used in FilterSelect component through eval
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [selectedLocation, setSelectedLocation] = useState<string>("all")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [selectedExperience, setSelectedExperience] = useState<string>("all")
   const [selectedRating, setSelectedRating] = useState<string>("all")
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)

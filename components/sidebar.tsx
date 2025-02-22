@@ -1,4 +1,5 @@
 "use client"
+import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -9,6 +10,13 @@ import { useEffect } from "react"
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
 
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    const sidebar = document.getElementById('sidebar')
+    if (sidebar && !sidebar.contains(event.target as Node)) {
+      onClose()
+    }
+  }, [onClose])
+
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('click', handleClickOutside)
@@ -18,14 +26,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
     return () => {
       document.removeEventListener('click', handleClickOutside)
     }
-  }, [isOpen])
-
-  const handleClickOutside = (event: MouseEvent) => {
-    const sidebar = document.getElementById('sidebar')
-    if (sidebar && !sidebar.contains(event.target as Node)) {
-      onClose()
-    }
-  }
+  }, [isOpen, handleClickOutside])
 
   return (
     <div id="sidebar" className={`w-48 h-screen bg-dCblue fixed left-0 top-0 shadow-[1px_0_3px_0_rgb(0,0,0,0.2)] z-50 rounded-r-2xl flex flex-col justify-between transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>

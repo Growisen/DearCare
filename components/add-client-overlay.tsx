@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronDown, Check } from 'lucide-react';
+import React from 'react';
+import { X } from 'lucide-react';
 
 interface AddClientProps {
   onClose: () => void;

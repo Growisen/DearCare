@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Map from '../map/Map';
 
 interface ApprovedContentProps {
   client: {
@@ -9,25 +8,65 @@ interface ApprovedContentProps {
     location: string;
     condition?: string
     assignedNurse?: string;
-    medications?: string[]
-    specialInstructions?: string
-    nurseLocation?: { lat: number; lng: number }
-    clientLocation?: { lat: number; lng: number }
+    medications?: string[];
+    specialInstructions?: string;
+    nurseLocation?: { lat: number; lng: number };
+    clientLocation?: { lat: number; lng: number };
   };
+}
+
+interface Review {
+  id: string;
+  text: string;
+  date: string;
+  rating: number;
+  reviewer: string;
+}
+
+interface Nurse {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  location: string;
+  status: string;
+  email: string;
+  phoneNumber: string;
+  gender: string;
+  dob: string;
+  salaryPerHour: number;
+  hiringDate: string;
+  experience: number;
+  rating: number;
+  reviews: Review[];
+  preferredLocations: string[];
+}
+
+interface FilterDropdownProps {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
+interface FilterInputProps {
+  label: string;
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const ratingOptions = ['All Ratings', ...[1, 2, 3, 4, 5].map(rating => `<=${rating}`)];
 const experienceOptions = ['All Experience', ...Array.from({ length: 11 }, (_, i) => i.toString())];
 const salaryOptions = ['All Salaries', ...[500, 600, 700, 800, 900, 1000].map(String)];
 
-const FilterInput = ({ label, type, value, onChange }: { label: string, type: string, value: any, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
+const FilterInput = ({ label, type, value, onChange }: FilterInputProps) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     <input type={type} value={value} onChange={onChange} className="w-full p-2 border rounded-lg" />
   </div>
 );
 
-const FilterDropdown = ({ label, options, value, onChange }: { label: string, options: string[], value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
+const FilterDropdown = ({ label, options, value, onChange }: FilterDropdownProps) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     <select value={value} onChange={onChange} className="w-full p-2 border rounded-lg">
@@ -38,7 +77,7 @@ const FilterDropdown = ({ label, options, value, onChange }: { label: string, op
   </div>
 );
 
-const NurseCard = ({ nurse, onRemove, isAssigned = false }: { nurse: any, onRemove: (id: string) => void, isAssigned?: boolean }) => (
+const NurseCard = ({ nurse, onRemove, isAssigned = false }: { nurse: Nurse, onRemove: (id: string) => void, isAssigned?: boolean }) => (
   <div 
     key={nurse._id}
     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -121,12 +160,14 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
 
   const assignedNurse = nurses.find(nurse => nurse._id === client.assignedNurse);
 
-  const handleAssignNurse = (nurseId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAssignNurse = async (nurseId: string) => {
     setShowNurseList(false);
     // Here you would typically make an API call to update the assignment
   };
 
-  const handleRemoveNurse = (nurseId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleUnassignNurse = async (nurseId: string) => {
     // Here you would typically make an API call to remove the assignment
   };
 
@@ -291,7 +332,7 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
               {assignedNurse ? (
                 <NurseCard 
                   nurse={assignedNurse} 
-                  onRemove={handleRemoveNurse} 
+                  onRemove={handleUnassignNurse} 
                   isAssigned={true}
                 />
               ) : (
@@ -346,7 +387,7 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
             )}
             <div className="space-y-4">
               {filteredNurses.map((nurse) => (
-                <NurseCard key={nurse._id} nurse={nurse} onRemove={handleRemoveNurse} />
+                <NurseCard key={nurse._id} nurse={nurse} onRemove={handleUnassignNurse} />
               ))}
               {filteredNurses.length === 0 && (
                 <p className="text-center text-gray-500 py-4">
