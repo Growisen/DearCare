@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
+    "@react-google-maps/api": "^2.20.6",
+    "@types/gsap": "^3.0.0",
     "framer-motion": "^12.1.0",
+    "gsap": "^3.12.7",
     "lucide-react": "^0.474.0",
     "next": "15.1.6",
     "next-auth": "^4.24.11",

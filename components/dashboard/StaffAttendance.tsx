@@ -39,21 +39,21 @@ export default function StaffAttendance({ currentTime }: StaffAttendanceProps) {
               <UserCheck className="w-4 h-4 text-emerald-500" />
               <span className="text-sm text-gray-700">Present</span>
             </div>
-            <span className="font-semibold text-emerald-600">189</span>
+            <span className="font-semibold text-emerald-600">95</span>
           </div>
           <div className="flex items-center justify-between p-2 bg-rose-50/50 rounded-lg">
             <div className="flex items-center gap-1.5">
               <UserX className="w-4 h-4 text-rose-500" />
               <span className="text-sm text-gray-700">Absent</span>
             </div>
-            <span className="font-semibold text-rose-600">33</span>
+            <span className="font-semibold text-rose-600">12</span>
           </div>
           <div className="flex items-center justify-between p-2 bg-indigo-50/50 rounded-lg">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-indigo-500" />
               <span className="text-sm text-gray-700">On Leave</span>
             </div>
-            <span className="font-semibold text-indigo-600">5</span>
+            <span className="font-semibold text-indigo-600">3</span>
           </div>
         </div>
       </div>

@@ -31,7 +31,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
           ))}
         </div>
 
-        <div className="flex-1 flex justify-end max-w-3xl ml-4 md:ml-8 hidden sm:flex">
+        <div className="flex-1 flex justify-end max-w-3xl ml-4 md:ml-8 sm:flex">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
