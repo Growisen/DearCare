@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Calendar, Briefcase, User, CheckCircle } from 'lucide-react';
+import Image from 'next/image';
 
 interface NurseInformationProps {
   nurse: {
@@ -44,10 +45,12 @@ export function NurseInformation({ nurse }: NurseInformationProps) {
         {/* Profile Image Section */}
         {nurse.image ? (
           <div className="relative">
-            <img 
+            <Image 
               src={URL.createObjectURL(nurse.image)} 
               alt={`${nurse.firstName} ${nurse.lastName}`} 
-              className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+              width={100}
+              height={100}
+              className="rounded-full object-cover border-2 border-gray-200 shadow-sm"
             />
             <div className="absolute bottom-0 right-0 bg-green-500 w-3 h-3 rounded-full border-2 border-white" />
           </div>
