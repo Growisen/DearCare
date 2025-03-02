@@ -1,23 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { login } from "@/lib/jwt";
 
 const LoginPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = (e: React.FormEvent) => {
-    // console.log("helloo");
-    // e.preventDefault();
-    // router.push('/dashboard');
+  const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Use the global auth object directly
-    window.auth.login();
+
+    const formData = new FormData(e.currentTarget);
+    try {
+      await login(formData);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Login failed", error);
+      alert("Invalid credentials");
+    }
   };
 
   return (
@@ -41,40 +45,43 @@ const LoginPage = () => {
           </motion.div>
 
           <form onSubmit={handleSignIn} className="space-y-5">
-            {[{ Icon: Mail, type: "email", placeholder: "Email Address" },
-              { Icon: Lock, type: showPassword ? "text" : "password", placeholder: "Password" },
-            ].map(({ Icon, type, placeholder }, i) => (
-              <motion.div key={i} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.1, type: "spring" }}>
-                <div className="relative group">
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-dCblue/70 group-focus-within:text-dCorange transition-colors" />
-                  <input
-                    type={type}
-                    required
-                    placeholder={placeholder}
-                    className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
-                  />
-                  {placeholder === "Password" && (
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-dCblue/70 hover:text-dCorange transition-colors text-sm"
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="submit"
-              className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
-            >
-              Sign In
-              <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </motion.button>
-          </form>
+      {[
+        { Icon: Mail, type: "email", placeholder: "Email Address", name: "email" },
+        { Icon: Lock, type: showPassword ? "text" : "password", placeholder: "Password", name: "password" },
+      ].map(({ Icon, type, placeholder, name }, i) => (
+        <motion.div key={i} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.1, type: "spring" }}>
+          <div className="relative group">
+            <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-dCblue/70 group-focus-within:text-dCorange transition-colors" />
+            <input
+              type={type}
+              name={name}
+              required
+              placeholder={placeholder}
+              className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
+            />
+            {placeholder === "Password" && (
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-dCblue/70 hover:text-dCorange transition-colors text-sm"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            )}
+          </div>
+        </motion.div>
+      ))}
+
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        type="submit"
+        className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
+      >
+        Sign In
+        <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+      </motion.button>
+    </form>
 
           <div className="text-center">
             <a href="#" className="text-xs text-dCblue hover:text-dCorange transition">Forgot Password?</a>

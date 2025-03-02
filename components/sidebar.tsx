@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
+import router from "next/router"
+import { logout } from "@/lib/jwt"
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
@@ -16,6 +18,12 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
       onClose()
     }
   }, [onClose])
+
+  const handleSignOut = async () => {
+    await logout();
+    router.push("/");
+    console.log("hi")
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -55,7 +63,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               { icon: Calendar, label: "Schedule", href: "/schedule" },
               { icon: ClipboardList, label: "Reports", href: "/reports" },
               { icon: Settings, label: "Settings", href: "/settings" },
-              { icon: LogOut, label: "Logout", href: "#", onClick: () => signOut() },
+              { icon: LogOut, label: "Logout", href: "#", onClick: () => handleSignOut() },
             ].map((item) => {
               const isActive = pathname === item.href
               return (
