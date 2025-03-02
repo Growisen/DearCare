@@ -1,21 +1,5 @@
 import { CheckCircle, Clock, AlertCircle } from "lucide-react"
-
-interface Nurse {
-  _id: string
-  firstName: string
-  lastName: string
-  email: string
-  location: string
-  phoneNumber: string
-  gender: string
-  dob: string
-  salaryCap: number
-  hiringDate?: string
-  status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected"
-  rating ?: number
-  experience: number
-  preferredLocations: string[]
-}
+import { Nurse } from "@/types/staff.types"
 
 const statusColors = {
   assigned: "bg-green-100 text-green-700 border border-green-200",

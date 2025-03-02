@@ -1,21 +1,5 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Star } from "lucide-react"
-
-interface Nurse {
-    _id: string
-    firstName: string
-    lastName: string
-    email: string
-    location: string
-    phoneNumber: string
-    gender: string
-    dob: string
-    salaryCap: number
-    hiringDate?: string
-    status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected"
-    rating?: number
-    experience: number
-    preferredLocations: string[]
-}
+import { Nurse } from "@/types/staff.types"
 
 const statusColors = {
   assigned: "bg-green-200 text-green-800 border border-green-300",
@@ -49,12 +33,12 @@ const NurseTable = ({ nurses, onReviewDetails }: { nurses: Nurse[], onReviewDeta
     </thead>
     <tbody className="divide-y divide-gray-200">
       {nurses.map((nurse) => {
-        const StatusIcon = statusIcons[nurse.status]
+        const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
         return (
           <tr key={nurse._id} className="hover:bg-gray-50/50">
             <td className="py-4 px-6 text-gray-900 font-medium">{`${nurse.firstName} ${nurse.lastName}`}</td>
             <td className="py-4 px-6">
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status]}`}>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status as keyof typeof statusColors]}`}>
                 <StatusIcon className="w-3.5 h-3.5" />
                 {nurse.status.replace("_", " ").charAt(0).toUpperCase() + nurse.status.slice(1).replace("_", " ")}
               </span>

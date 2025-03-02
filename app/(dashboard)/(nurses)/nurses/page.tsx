@@ -6,25 +6,7 @@ import { NurseDetailsOverlay } from "../../../../components/nurse/nurse-details-
 import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "../../../../components/nurse/NurseTable"
 import NurseCard from "../../../../components/nurse/NurseCard"
-
-interface Nurse {
-  _id: string
-  firstName: string
-  lastName: string
-  email: string
-  location: string
-  phoneNumber: string
-  gender: string
-  dob: string
-  salaryCap: number
-  hiringDate?: string
-  status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected"
-  rating ?: number
-  experience: number
-  reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
-  image?: File;
-  preferredLocations: string[];
-}
+import { Nurse } from "@/types/staff.types"
 
 const mockNurses: Nurse[] = [
   {
@@ -45,7 +27,8 @@ const mockNurses: Nurse[] = [
       { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
       { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
     ],
-    preferredLocations: ["Kochi", "Thiruvananthapuram"]
+    preferredLocations: ["Kochi", "Thiruvananthapuram"],
+    salaryPerHour: 25, // Add this field
   },
   {
     _id: "2",
@@ -64,7 +47,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r3", text: "Good service.", date: "2020-03-10", rating: 4, reviewer: "Anjali Menon" }
     ],
-    preferredLocations: ["Thiruvananthapuram"]
+    preferredLocations: ["Thiruvananthapuram"],
+    salaryPerHour: 30, // Add this field
   },
   {
     _id: "3",
@@ -83,7 +67,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r4", text: "Very caring.", date: "2021-11-20", rating: 5, reviewer: "Ravi Nair" }
     ],
-    preferredLocations: ["Kozhikode"]
+    preferredLocations: ["Kozhikode"],
+    salaryPerHour: 28, // Add this field
   },
   {
     _id: "4",
@@ -102,7 +87,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r5", text: "Average performance.", date: "2019-08-05", rating: 3, reviewer: "Lakshmi Pillai" }
     ],
-    preferredLocations: ["Thrissur"]
+    preferredLocations: ["Thrissur"],
+    salaryPerHour: 35, // Add this field
   },
   {
     _id: "5",
@@ -121,7 +107,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r6", text: "Excellent nurse!", date: "2020-12-12", rating: 5, reviewer: "Manu Varma" }
     ],
-    preferredLocations: ["Kannur"]
+    preferredLocations: ["Kannur"],
+    salaryPerHour: 32, // Add this field
   },
   {
     _id: "6",
@@ -140,7 +127,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r7", text: "Needs improvement.", date: "2021-05-18", rating: 2, reviewer: "Meera Das" }
     ],
-    preferredLocations: ["Kochi"]
+    preferredLocations: ["Kochi"],
+    salaryPerHour: 27, // Add this field
   }
 ]
 

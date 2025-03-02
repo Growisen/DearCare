@@ -1,59 +1,11 @@
 import React, { useState } from 'react';
+import { 
+  ApprovedContentProps,  
+  FilterDropdownProps, 
+  FilterInputProps 
+} from '../../types/client.types';
 
-interface ApprovedContentProps {
-  client: {
-    id: string
-    shift?: string
-    description?: string
-    location: string;
-    condition?: string
-    assignedNurse?: string;
-    medications?: string[];
-    specialInstructions?: string;
-    nurseLocation?: { lat: number; lng: number };
-    clientLocation?: { lat: number; lng: number };
-  };
-}
-
-interface Review {
-  id: string;
-  text: string;
-  date: string;
-  rating: number;
-  reviewer: string;
-}
-
-interface Nurse {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  location: string;
-  status: string;
-  email: string;
-  phoneNumber: string;
-  gender: string;
-  dob: string;
-  salaryPerHour: number;
-  hiringDate: string;
-  experience: number;
-  rating: number;
-  reviews: Review[];
-  preferredLocations: string[];
-}
-
-interface FilterDropdownProps {
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-}
-
-interface FilterInputProps {
-  label: string;
-  type: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+import { Nurse } from '@/types/staff.types';
 
 const ratingOptions = ['All Ratings', ...[1, 2, 3, 4, 5].map(rating => `<=${rating}`)];
 const experienceOptions = ['All Experience', ...Array.from({ length: 11 }, (_, i) => i.toString())];
@@ -113,7 +65,7 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
   const [showNurseList, setShowNurseList] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedClient, setEditedClient] = useState(client);
-  const [filters, setFilters] = useState({ experience: 'All Experience', rating: 'All Ratings', salary: 'All Salaries', location: client.location });
+  const [filters, setFilters] = useState({ experience: 'All Experience', rating: 'All Ratings', salary: 'All Salaries', location: client.location || '' });
   const [searchTerm, setSearchTerm] = useState('');
 
   const [nurses] = useState([
@@ -122,12 +74,13 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
       firstName: "Anjali",
       lastName: "Menon",
       location: "Kochi",
-      status: "unassigned",
+      status: "unassigned" as const,
       email: "anjali.menon@example.com",
       phoneNumber: "123-456-7890",
       gender: "Female",
       dob: "1990-01-01",
       salaryPerHour: 900,
+      salaryCap: 1200, 
       hiringDate: "2020-01-01",
       experience: 5,
       rating: 4.5,
@@ -142,12 +95,13 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
       firstName: "Ravi",
       lastName: "Nair",
       location: "Thiruvananthapuram",
-      status: "assigned",
+      status: "assigned" as const,
       email: "ravi.nair@example.com",
       phoneNumber: "987-654-3210",
       gender: "Male",
       dob: "1985-05-15",
       salaryPerHour: 800,
+      salaryCap: 1000, 
       hiringDate: "2018-05-15",
       experience: 8,
       rating: 4,

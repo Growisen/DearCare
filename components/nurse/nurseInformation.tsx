@@ -1,19 +1,11 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Calendar, Briefcase, User, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
+import { Nurse } from '@/types/staff.types';
 
 interface NurseInformationProps {
-  nurse: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    location: string;
-    phoneNumber: string;
-    gender: string;
-    dob: string;
-    experience?: number;
+  nurse: Omit<Nurse, '_id' | 'salaryCap' | 'salaryPerHour' | 'status'> & {
     image?: File;
-    preferredLocations: string[];
   };
 }
 

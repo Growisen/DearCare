@@ -1,18 +1,9 @@
 import { Card } from "../ui/card"
 import { CountUp } from "use-count-up"
 import { Users, Calendar, Building2, Activity, TrendingUp } from "lucide-react"
+import { Stat } from "@/types/dashboard.types";
 
-interface Stat {
-  title: string;
-  value: number;
-  icon: LucideIcon;
-  trend: string;
-  trendUp: boolean;
-  bgColor: string;
-  iconColor: string;
-}
 
-import { LucideIcon } from "lucide-react";
 
 const stats: Stat[] = [
     { title: "Active Nurses", value: 125, icon: Users, trend: "+8%", trendUp: true, bgColor: "bg-blue-100/30", iconColor: "text-blue-500" },

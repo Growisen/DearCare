@@ -5,28 +5,8 @@ import { ApprovedContent } from './ApprovedContent';
 import { UnderReviewContent } from './UnderReview';
 import { PendingContent } from './PendingContent';
 import { RejectedContent } from './RejectedContent';
+import { NurseDetailsProps } from "../../types/staff.types";
 
-interface NurseDetailsProps {
-  nurse: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    location: string;
-    phoneNumber: string;
-    gender: string;
-    dob: string;
-    salaryCap: number;
-    hiringDate?: string;
-    status: string;
-    rating?: number;
-    experience?: number;
-    reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
-    image?: File;
-    preferredLocations: string[];
-  };
-  onClose: () => void;
-}
 
 export function NurseDetailsOverlay({ nurse, onClose }: NurseDetailsProps) {
   const renderStatusSpecificContent = () => {
