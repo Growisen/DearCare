@@ -11,9 +11,13 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = (e: React.FormEvent) => {
-    console.log("helloo");
+    // console.log("helloo");
+    // e.preventDefault();
+    // router.push('/dashboard');
     e.preventDefault();
-    router.push('/dashboard');
+    
+    // Use the global auth object directly
+    window.auth.login();
   };
 
   return (
