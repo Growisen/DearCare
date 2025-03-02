@@ -14,8 +14,8 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { signIn,signUp } = useAuth()
+ 
+  const { signIn } = useAuth()
 
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
