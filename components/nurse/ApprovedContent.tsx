@@ -1,14 +1,7 @@
 import React from 'react';
 import { Star, Calendar, MessageCircle } from 'lucide-react';
 
-interface ApprovedContentProps {
-  nurse: {
-    _id: string;
-    hiringDate?: string;
-    rating?: number;  
-    reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
-  };
-}
+import { ApprovedContentProps } from "../../types/staff.types"
 
 export function ApprovedContent({ nurse }: ApprovedContentProps) {
   const formatDate = (dateString?: string) => {
@@ -66,7 +59,7 @@ export function ApprovedContent({ nurse }: ApprovedContentProps) {
         </div>
 
         {/* Hiring Date Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-4 h-4 text-blue-500" />
             <h3 className="text-base font-semibold text-gray-800">Hired on</h3>

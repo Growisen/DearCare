@@ -1,9 +1,6 @@
 import { Card } from "../ui/card"
 import { Users, UserCheck, UserX, Calendar } from "lucide-react"
-
-interface StaffAttendanceProps {
-  currentTime: string;
-}
+import { StaffAttendanceProps } from "@/types/staff.types"; 
 
 export default function StaffAttendance({ currentTime }: StaffAttendanceProps) {
   return (

@@ -1,10 +1,6 @@
 import React from 'react';
 import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
-
-interface MapProps {
-  nurseLocation?: { lat: number; lng: number };
-  clientLocation?: { lat: number; lng: number };
-}
+import { MapProps } from "../../types/map.types"
 
 const mapContainerStyle = {
   width: '100%',

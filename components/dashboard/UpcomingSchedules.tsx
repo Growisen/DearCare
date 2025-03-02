@@ -1,12 +1,6 @@
 import { Card } from "../ui/card"
 import { Calendar } from "lucide-react"
-
-interface Schedule {
-  text: string;
-  time: string;
-  location: string;
-  urgent?: boolean;
-}
+import { Schedule } from "@/types/dashboard.types"
 
 const schedules: Schedule[] = [
     { text: "Staff Meeting at Kochi Branch", time: "2:00 PM", location: "Kochi Office", urgent: true },

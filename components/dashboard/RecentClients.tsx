@@ -1,16 +1,7 @@
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Users, Search, Download, MoreVertical, Mail, Phone } from "lucide-react"
-
-interface Client {
-  id: string
-  name: string
-  requestDate: string
-  service: string
-  status: 'pending' | 'under_review' | 'approved' | 'rejected'
-  email: string
-  phone: string
-}
+import { Client } from "../../types/client.types"
 
 const recentClients: Client[] = [
   { id: "1", name: "Anoop Kumar", requestDate: "2024-01-15", service: "Home Care", status: "pending", email: "anoop@example.com", phone: "944-756-7890" },
@@ -26,6 +17,7 @@ const getStatusStyles = (status: Client['status']) => {
     pending: 'bg-amber-100 text-amber-700',
     under_review: 'bg-blue-100 text-blue-700',
     rejected: 'bg-red-100 text-red-700',
+    assigned: 'bg-purple-100 text-purple-700',
   }
   return styles[status] || 'bg-gray-100 text-gray-700'
 }

@@ -1,17 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-
-interface AddClientProps {
-  onClose: () => void;
-  onAdd: (client: {
-    fullName: string;
-    phoneNumber: string;
-    emailAddress: string;
-    serviceRequired: string;
-    medicalCondition: string;
-    careDescription: string;
-  }) => void;
-}
+import { AddClientProps } from '@/types/client.types';
 
 const InputField = ({ label, type = 'text', placeholder }: { label: string, type?: string, placeholder: string }) => (
   <div>

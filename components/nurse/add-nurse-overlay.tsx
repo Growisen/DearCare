@@ -1,33 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon, ChevronDown, Check } from 'lucide-react';
+import { AddNurseProps, DropdownProps } from '@/types/staff.types';
 
 const locationsInKerala = ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad", "Kannur", "Kottayam", "Malappuram"];
 
-interface AddNurseProps {
-  onClose: () => void;
-  onAdd: (nurse: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    location: string;
-    phoneNumber: string;
-    gender: string;
-    dob: string;
-    experience: number;
-    image?: File;
-    preferredLocations: string[];
-  }) => void;
-}
 
-interface DropdownProps {
-  label: string;
-  options: string[];
-  selectedOptions: string[];
-  toggleOption: (option: string) => void;
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
-}
 
 const InputField = ({ label, type = 'text', placeholder }: { label: string, type?: string, placeholder: string }) => (
   <div>

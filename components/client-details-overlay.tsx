@@ -5,29 +5,8 @@ import { ApprovedContent } from '../components/client/ApprovedContent';
 import { UnderReviewContent } from '../components/client/UnderReview';
 import { PendingContent } from '../components/client/PendingContent';
 import { RejectedContent } from '../components/client/RejectedContent';
+import { ClientDetailsProps } from '../types/client.types';
 
-interface ClientDetailsProps {
-  client: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    service: string;
-    requestDate: string;
-    status: string;
-    location: string;
-    assignedNurse?: string;
-    nurseContact?: string;
-    shift?: string;
-    condition?: string;
-    description?: string;
-    medications?: string[];
-    specialInstructions?: string;
-    nurseLocation?: { lat: number; lng: number };
-    clientLocation?: { lat: number; lng: number };
-  };
-  onClose: () => void;
-}
 
 export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
   const renderStatusSpecificContent = () => {
