@@ -5,23 +5,48 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/jwt";
+
+import { useAuth } from '@/contexts/AuthContext'
 
 const LoginPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  const { signIn,signUp } = useAuth()
 
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    try {
-      await login(formData);
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Login failed", error);
-      alert("Invalid credentials");
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    setIsLoading(true);
+  setError(null);
+  
+  try {
+    const { error, success } = await signIn(email, password);
+    
+    if (error) {
+      setError(error.message || 'Invalid credentials');
+      return;
     }
+    
+    if (success) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+      router.push(redirectTo);
+    }
+  } catch (error) {
+    console.error("Login failed", error);
+    setError('An unexpected error occurred');
+  } finally {
+    setIsLoading(false);
+  }
+
+
+
   };
 
   return (
@@ -93,3 +118,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

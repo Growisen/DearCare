@@ -7,10 +7,11 @@ import { signOut } from "next-auth/react"
 import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
 import router from "next/router"
-import { logout } from "@/lib/jwt"
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
+  const { signOut } = useAuth()
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const sidebar = document.getElementById('sidebar')
@@ -20,9 +21,10 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
   }, [onClose])
 
   const handleSignOut = async () => {
-    await logout();
-    router.push("/");
-    console.log("hi")
+    await signOut();
+    router.push("/")
+    
+   
   };
 
   useEffect(() => {
