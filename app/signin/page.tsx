@@ -14,6 +14,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { signIn,signUp } = useAuth()
 
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
@@ -23,30 +24,33 @@ const LoginPage = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     setIsLoading(true);
-  setError(null);
+    setError(null);
   
-  try {
-    const { error, success } = await signIn(email, password);
-    
-    if (error) {
-      setError(error.message || 'Invalid credentials');
-      return;
+    try {
+      const { error, success } = await signIn(email, password);
+      
+      if (error) {
+        console.log("Authentication error:", error);
+          if (error.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password');
+        } else if (error.message.includes('Email not confirmed')) {
+          setError('Please verify your email address before signing in');
+        } else {
+          setError(error.message || 'Invalid credentials');
+        }
+      }
+      
+      if (success) {
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+        router.push(redirectTo);
+      }
+    } catch (error) {
+      console.error("Login failed", error);
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
-    
-    if (success) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const redirectTo = searchParams.get('redirectTo') || '/dashboard';
-      router.push(redirectTo);
-    }
-  } catch (error) {
-    console.error("Login failed", error);
-    setError('An unexpected error occurred');
-  } finally {
-    setIsLoading(false);
-  }
-
-
-
   };
 
   return (
@@ -70,43 +74,54 @@ const LoginPage = () => {
           </motion.div>
 
           <form onSubmit={handleSignIn} className="space-y-5">
-      {[
-        { Icon: Mail, type: "email", placeholder: "Email Address", name: "email" },
-        { Icon: Lock, type: showPassword ? "text" : "password", placeholder: "Password", name: "password" },
-      ].map(({ Icon, type, placeholder, name }, i) => (
-        <motion.div key={i} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.1, type: "spring" }}>
-          <div className="relative group">
-            <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-dCblue/70 group-focus-within:text-dCorange transition-colors" />
-            <input
-              type={type}
-              name={name}
-              required
-              placeholder={placeholder}
-              className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
-            />
-            {placeholder === "Password" && (
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dCblue/70 hover:text-dCorange transition-colors text-sm"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            )}
-          </div>
-        </motion.div>
-      ))}
+            {[
+              { Icon: Mail, type: "email", placeholder: "Email Address", name: "email" },
+              { Icon: Lock, type: showPassword ? "text" : "password", placeholder: "Password", name: "password" },
+            ].map(({ Icon, type, placeholder, name }, i) => (
+              <motion.div key={i} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.1, type: "spring" }}>
+                <div className="relative group">
+                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-dCblue/70 group-focus-within:text-dCorange transition-colors" />
+                  <input
+                    type={type}
+                    name={name}
+                    required
+                    placeholder={placeholder}
+                    className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
+                  />
+                  {placeholder === "Password" && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-dCblue/70 hover:text-dCorange transition-colors text-sm"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
 
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        type="submit"
-        className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
-      >
-        Sign In
-        <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-      </motion.button>
-    </form>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
+            >
+              Sign In
+              <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </form>
 
           <div className="text-center">
             <a href="#" className="text-xs text-dCblue hover:text-dCorange transition">Forgot Password?</a>

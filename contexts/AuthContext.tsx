@@ -57,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Authentication methods
   const signIn = async (email: string, password: string) => {
     try {
-        console.log("email",password)
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
