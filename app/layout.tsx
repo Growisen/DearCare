@@ -57,8 +57,9 @@ export default function RootLayout({
         {showContent() ? (
           children
         ) : (
-          <div className="flex items-center justify-center h-screen">
-            <p>Redirecting...</p>
+          <div className="flex flex-col items-center justify-center h-screen bg-white">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-sm text-gray-600 font-medium">Please wait...</p>
           </div>
         )}
       </body>
