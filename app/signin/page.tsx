@@ -5,39 +5,33 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import { useAuth } from '@/contexts/AuthContext'
+import { signIn } from "@/app/actions/auth"; // Import the server action directly
 
 const LoginPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
- 
-  const { signIn } = useAuth()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
     setIsLoading(true);
     setError(null);
-  
+
     try {
-      const { error, success } = await signIn(email, password);
+      const formData = new FormData(e.currentTarget);
+      // Use the server action directly
+      const { error, success } = await signIn(formData);
       
       if (error) {
-        console.log("Authentication error:", error);
-          if (error.message.includes('Invalid login credentials')) {
+        if (error.includes('Invalid login credentials')) {
           setError('Invalid email or password');
-        } else if (error.message.includes('Email not confirmed')) {
+        } else if (error.includes('Email not confirmed')) {
           setError('Please verify your email address before signing in');
         } else {
-          setError(error.message || 'Invalid credentials');
+          setError(error || 'Invalid credentials');
         }
+        return;
       }
       
       if (success) {
@@ -45,7 +39,8 @@ const LoginPage = () => {
         const redirectTo = searchParams.get('redirectTo') || '/dashboard';
         router.push(redirectTo);
       }
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error("Login failed", error);
       setError('An unexpected error occurred');
     } finally {
@@ -118,7 +113,7 @@ const LoginPage = () => {
               disabled={isLoading}
               className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
             >
-              Sign In
+              {isLoading ? "Signing In..." : "Sign In"}
               <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </form>
@@ -133,4 +128,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
