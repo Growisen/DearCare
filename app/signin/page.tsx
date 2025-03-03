@@ -15,7 +15,7 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null)
   
  
-  const { signIn } = useAuth()
+  const { signIn,signUp } = useAuth()
 
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

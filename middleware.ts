@@ -17,9 +17,15 @@ export async function middleware(req: NextRequest) {
   
   // Define public routes that don't require authentication
   const publicRoutes = ['/signin', '/register', '/', '/about']
-  const isPublicRoute = publicRoutes.includes(pathname) || 
-                       pathname.startsWith('/api/') || 
+  const isPublicRoute = publicRoutes.includes(pathname) ||
+                       pathname.startsWith('/api/') ||
                        pathname.includes('.')
+  
+  // Check if user is authenticated and trying to access signin page
+  if (session && pathname === '/signin') {
+    // Redirect authenticated users trying to access signin page to dashboard
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
   
   // Check auth status and redirect if needed
   if (!session && !isPublicRoute) {
@@ -29,7 +35,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
   
-  // Allow authenticated users to access protected routes
+  // Allow all other requests to proceed
   return res
 }
 

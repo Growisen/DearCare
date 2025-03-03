@@ -1,4 +1,5 @@
-// contexts/AuthContext.tsx
+'use client';
+
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
@@ -27,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   useEffect(() => {
-    // Get session and user on mount
+    
     const getInitialSession = async () => {
       setIsLoading(true)
       

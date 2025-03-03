@@ -1,16 +1,18 @@
-"use client"
+"use client";
 import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
-import router from "next/router"
+
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
   const { signOut } = useAuth()
+  const router = useRouter();
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const sidebar = document.getElementById('sidebar')
