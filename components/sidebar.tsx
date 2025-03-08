@@ -5,7 +5,6 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
-import router from "next/router"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
@@ -21,9 +20,6 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/")
-    
-   
   };
 
   useEffect(() => {
