@@ -9,7 +9,7 @@ export type BaseNurseFields = {
     dob: string;
     experience: number;
     preferredLocations: string[];
-    image?: File;
+    image?: File | null;
 }
 
 // Full Nurse type extending base fields
@@ -56,4 +56,48 @@ export interface DropdownProps {
 export type NurseDetailsProps = {
     nurse: Nurse;
     onClose: () => void;
+}
+
+export interface NurseFormData {
+  personalDetails: {
+    firstName: string;
+    lastName: string;
+    gender: string;
+    maritalStatus: string;
+    dateOfBirth: string;
+    age: number;
+    religion: string;
+    motherTongue: string;
+  };
+  contactInfo: {
+    address: string;
+    city: string;
+    taluk: string;
+    pinCode: string;
+    state: string;
+    phone: string;
+  };
+  documents: {
+    aadhar: File | null;
+    rationCard: File | null;
+    education: File | null;
+    experience: File | null;
+    noc: File | null;
+  };
+  references: Array<{
+    name: string;
+    phone: string;
+    relation: string;
+    recommendation?: string;
+  }>;
+  workDetails: {
+    serviceType: string;
+    shiftingPattern: string;
+    staffCategory: string;
+  };
+  healthInfo: {
+    currentHealth: string;
+    disability: string;
+    sourceOfInformation: string;
+  };
 }
