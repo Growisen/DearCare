@@ -30,17 +30,9 @@ export interface Nurse extends BaseNurseFields {
 }
 
 // Simplified props interfaces using composition
-export interface StaffAttendanceProps {
-    currentTime: string;
-}
-
 export interface AddNurseProps {
     onClose: () => void;
     onAdd: (nurse: BaseNurseFields) => void;
-}
-
-export interface ApprovedContentProps {
-    nurse: Pick<Nurse, '_id' | 'hiringDate' | 'rating' | 'reviews'>;
 }
 
 export interface DropdownProps {
@@ -50,7 +42,7 @@ export interface DropdownProps {
     toggleOption: (option: string) => void;
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-    dropdownRef: React.RefObject<HTMLDivElement | null>;
+    dropdownRef: React.RefObject<HTMLDivElement>;
 }
 
 export type NurseDetailsProps = {
@@ -59,45 +51,46 @@ export type NurseDetailsProps = {
 }
 
 export interface NurseFormData {
-  personalDetails: {
-    firstName: string;
-    lastName: string;
-    gender: string;
-    maritalStatus: string;
-    dateOfBirth: string;
-    age: number;
-    religion: string;
-    motherTongue: string;
-  };
-  contactInfo: {
-    address: string;
-    city: string;
-    taluk: string;
-    pinCode: string;
-    state: string;
-    phone: string;
-  };
-  documents: {
-    aadhar: File | null;
-    rationCard: File | null;
-    education: File | null;
-    experience: File | null;
-    noc: File | null;
-  };
-  references: Array<{
+  first_name: string;
+  last_name: string;
+  gender: string;
+  date_of_birth: string;
+  age: number | ''; 
+  address: string;
+  city: string;
+  taluk: string;
+  state: string;
+  pin_code: string;
+  phone_number: string;
+  languages: string[];
+  noc_status: string;
+  service_type: string;
+  shift_pattern: string;
+  category: string;
+  experience: string;
+  marital_status: string;
+  religion: string;
+  mother_tongue: string;
+}
+
+export interface NurseReferenceData {
+  reference_name: string;
+  reference_phone: string;
+  reference_relation: string;
+  reference_address: string;
+  recommendation_details: string;
+  employer_name: string;
+  employment_duration: string;
+  employer_contact: string;
+  family_references: Array<{
     name: string;
-    phone: string;
     relation: string;
-    recommendation?: string;
+    phone: string;
   }>;
-  workDetails: {
-    serviceType: string;
-    shiftingPattern: string;
-    staffCategory: string;
-  };
-  healthInfo: {
-    currentHealth: string;
-    disability: string;
-    sourceOfInformation: string;
-  };
+}
+
+export interface NurseHealthData {
+  health_status: string;
+  disability: string;
+  source: string;
 }
