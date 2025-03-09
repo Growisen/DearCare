@@ -12,6 +12,7 @@
     "@headlessui/react": "^2.2.0",
     "@react-google-maps/api": "^2.20.6",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.49.1",
     "@types/gsap": "^3.0.0",
     "framer-motion": "^12.1.0",
