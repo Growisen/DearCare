@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { AddNurseProps, DropdownProps, BaseNurseFields } from '@/types/staff.types';
+import { AddNurseProps, DropdownProps, BaseNurseFields, NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types';
 
 const FORM_CONFIG = {
   options: {
@@ -25,7 +25,7 @@ const FORM_CONFIG = {
       "Lead From Csv"
     ] as string[]
   },
-  steps: ["Personal Details", "Contact Information", "Document Upload", "References", "Work Details", "Health & Additional Info"],
+  steps: ["Personal Details", "Contact Information", "References", "Work Details", "Health & Additional Info", "Document Upload"],
   styles: {
     input: "w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200",
     label: "block text-sm font-medium text-gray-700 mb-1",
@@ -54,9 +54,9 @@ const Fields = {
     </FormField>
   ),
 
-  Select: ({ label, options }: { label: string, options: string[] }) => (
+  Select: ({ label, options, value, onChange }: { label: string, options: string[], value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
     <FormField label={label}>
-      <select className={FORM_CONFIG.styles.input}>
+      <select className={FORM_CONFIG.styles.input} value={value} onChange={onChange}>
         <option value="">Select {label.toLowerCase()}</option>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
@@ -168,9 +168,7 @@ const Fields = {
 
 // Step content components
 const StepContent = {
-  Personal: () => {
-    const [age, setAge] = useState<number | ''>('');
-
+  Personal: ({ formData, setFormData }: { formData: NurseFormData, setFormData: React.Dispatch<React.SetStateAction<NurseFormData>> }) => {
     const calculateAge = (dob: string) => {
       if (!dob) return;
       const birthDate = new Date(dob);
@@ -181,80 +179,139 @@ const StepContent = {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         calculatedAge--;
       }
-      setAge(calculatedAge);
+      setFormData(prev => ({ ...prev, age: calculatedAge }));
     };
 
     return (
       <FormLayout>
-        <Fields.Input label="First Name" placeholder="Enter first name" />
-        <Fields.Input label="Last Name" placeholder="Enter last name" />
-        <Fields.Select label="Gender" options={["Male", "Female"]} />
-        <Fields.Select label="Marital Status" options={FORM_CONFIG.options.maritalStatus} />
+        <Fields.Input label="First Name" placeholder="Enter first name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
+        <Fields.Input label="Last Name" placeholder="Enter last name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
+        <Fields.Select label="Gender" options={["Male", "Female"]} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} />
+        <Fields.Select label="Marital Status" options={FORM_CONFIG.options.maritalStatus} value={formData.marital_status} onChange={(e) => setFormData({ ...formData, marital_status: e.target.value })} />
         <Fields.Input 
           label="Date of Birth" 
           type="date" 
           placeholder="" 
-          onChange={(e) => calculateAge(e.target.value)}
+          value={formData.date_of_birth}
+          onChange={(e) => {
+            setFormData({ ...formData, date_of_birth: e.target.value });
+            calculateAge(e.target.value);
+          }}
         />
         <Fields.Input 
           label="Age" 
           type="number" 
-          value={age} 
+          value={formData.age} 
           disabled 
           placeholder="Auto-calculated"
         />
-        <Fields.Select label="Religion" options={FORM_CONFIG.options.religions} />
-        <Fields.Input label="Mother Tongue" placeholder="Enter mother tongue" />
+        <Fields.Select label="Religion" options={FORM_CONFIG.options.religions} value={formData.religion} onChange={(e) => setFormData({ ...formData, religion: e.target.value })} />
+        <Fields.Input label="Mother Tongue" placeholder="Enter mother tongue" value={formData.mother_tongue} onChange={(e) => setFormData({ ...formData, mother_tongue: e.target.value })} />
       </FormLayout>
     );
   },
 
-  Contact: () => (
-    <FormLayout>
-      <div className="sm:col-span-2">
-        <Fields.Input label="Address" placeholder="Enter full address" />
+  Contact: ({ formData, setFormData }: { formData: NurseFormData, setFormData: React.Dispatch<React.SetStateAction<NurseFormData>> }) => {
+    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(formData.languages);
+    const [isLanguagesDropdownOpen, setIsLanguagesDropdownOpen] = useState(false);
+    const languagesDropdownRef = useRef<HTMLDivElement>(null);
+
+    const toggleLanguage = (language: string) => {
+      const newLanguages = selectedLanguages.includes(language) 
+        ? selectedLanguages.filter((lang) => lang !== language)
+        : [...selectedLanguages, language];
+      setSelectedLanguages(newLanguages);
+      setFormData({ ...formData, languages: newLanguages });
+    };
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (languagesDropdownRef.current && !languagesDropdownRef.current.contains(event.target as Node)) {
+          setIsLanguagesDropdownOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+      <FormLayout>
+        <div className="sm:col-span-2">
+          <Fields.Input label="Address" placeholder="Enter full address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+        </div>
+        <Fields.Input label="City" placeholder="Enter city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
+        <Fields.Input label="Taluk" placeholder="Enter taluk" value={formData.taluk} onChange={(e) => setFormData({ ...formData, taluk: e.target.value })} />
+        <Fields.Input label="State" placeholder="Enter state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
+        <Fields.Input label="PIN Code" placeholder="Enter PIN code" value={formData.pin_code} onChange={(e) => setFormData({ ...formData, pin_code: e.target.value })} />
+        <Fields.Input label="Phone Number" placeholder="Enter phone number" value={formData.phone_number} onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })} />
+        <Fields.Dropdown 
+          label="Known Languages"
+          options={FORM_CONFIG.options.languagesAvailable}
+          selectedOptions={selectedLanguages}
+          toggleOption={toggleLanguage}
+          isOpen={isLanguagesDropdownOpen}
+          setIsOpen={setIsLanguagesDropdownOpen}
+          dropdownRef={languagesDropdownRef as React.RefObject<HTMLDivElement>}
+        />
+      </FormLayout>
+    );
+  },
+
+  Document: ({ setDocuments, nurseData, setNurseData }: { setDocuments: React.Dispatch<React.SetStateAction<{[key: string]: File | null}>>, nurseData: NurseFormData, setNurseData: React.Dispatch<React.SetStateAction<NurseFormData>> }) => {
+    const [nocStatus, setNocStatus] = useState<string>(nurseData.noc_status);
+
+    return (
+      <div className="space-y-6">
+        <Fields.File 
+          label="Aadhar Card" 
+          docType="aadhar" 
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, aadhar: file }))}
+        />
+        <Fields.File 
+          label="Ration Card" 
+          docType="rationCard"
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, rationCard: file }))}
+        />
+        <Fields.File 
+          label="Educational Certificates" 
+          docType="education"
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, education: file }))}
+        />
+        <Fields.File 
+          label="Experience Certificates" 
+          docType="experience"
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, experience: file }))}
+        />
+        <div className="space-y-4">
+          <FormField label="NOC Certificate Status">
+            <select 
+              className={FORM_CONFIG.styles.input}
+              value={nocStatus}
+              onChange={(e) => {
+                setNocStatus(e.target.value);
+                setNurseData({ ...nurseData, noc_status: e.target.value });
+              }}
+            >
+              <option value="">Select NOC status</option>
+              {FORM_CONFIG.options.nocOptions.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </FormField>
+          
+          {nocStatus === 'Yes' && (
+            <Fields.File 
+              label="NOC Certificate" 
+              docType="noc"
+              onFileSelect={(file) => setDocuments(prev => ({ ...prev, noc: file }))}
+            />
+          )}
+        </div>
       </div>
-      <Fields.Input label="City" placeholder="Enter city" />
-      <Fields.Input label="Taluk" placeholder="Enter taluk" />
-      <Fields.Input label="State" placeholder="Enter state" />
-      <Fields.Input label="PIN Code" placeholder="Enter PIN code" />
-      <Fields.Input label="Phone Number" placeholder="Enter phone number" />
-      <Fields.Select label="Known Languages" options={FORM_CONFIG.options.languagesAvailable} />
-    </FormLayout>
-  ),
+    )
+  },
 
-  Document: ({ setDocuments }: { setDocuments: React.Dispatch<React.SetStateAction<{[key: string]: File | null}>> }) => (
-    <div className="space-y-6">
-      <Fields.File 
-        label="Aadhar Card" 
-        docType="aadhar" 
-        onFileSelect={(file) => setDocuments(prev => ({ ...prev, aadhar: file }))}
-      />
-      <Fields.File 
-        label="Ration Card" 
-        docType="rationCard"
-        onFileSelect={(file) => setDocuments(prev => ({ ...prev, rationCard: file }))}
-      />
-      <Fields.File 
-        label="Educational Certificates" 
-        docType="education"
-        onFileSelect={(file) => setDocuments(prev => ({ ...prev, education: file }))}
-      />
-      <Fields.File 
-        label="Experience Certificates" 
-        docType="experience"
-        onFileSelect={(file) => setDocuments(prev => ({ ...prev, experience: file }))}
-      />
-      <Fields.Select label="NOC Certificate Status" options={FORM_CONFIG.options.nocOptions} />
-      <Fields.File 
-        label="NOC Certificate" 
-        docType="noc"
-        onFileSelect={(file) => setDocuments(prev => ({ ...prev, noc: file }))}
-      />
-    </div>
-  ),
-
-  Reference: () => (
+  Reference: ({ data, setData }: { data: NurseReferenceData, setData: React.Dispatch<React.SetStateAction<NurseReferenceData>> }) => (
     <div className="space-y-8">
       {/* Primary Reference */}
       <div className="space-y-4">
@@ -263,15 +320,17 @@ const StepContent = {
         </div>
         
         <div className="grid grid-cols-3 gap-4">
-          <Fields.Input label="Full Name" placeholder="Enter name" />
-          <Fields.Input label="Relation" placeholder="Enter relation" />
-          <Fields.Input label="Phone Number" type="tel" placeholder="Enter phone number" />
+          <Fields.Input label="Full Name" placeholder="Enter name" value={data.reference_name} onChange={(e) => setData({ ...data, reference_name: e.target.value })} />
+          <Fields.Input label="Relation" placeholder="Enter relation" value={data.reference_relation} onChange={(e) => setData({ ...data, reference_relation: e.target.value })} />
+          <Fields.Input label="Phone Number" type="tel" placeholder="Enter phone number" value={data.reference_phone} onChange={(e) => setData({ ...data, reference_phone: e.target.value })} />
         </div>
         
         <Fields.TextArea 
           label="Recommendation Details"
           placeholder="Please provide details about why they recommend this nurse..."
           rows={3}
+          value={data.recommendation_details}
+          onChange={(e) => setData({ ...data, recommendation_details: e.target.value })}
         />
       </div>
 
@@ -281,13 +340,41 @@ const StepContent = {
           <h4 className="text-base font-medium">Family References</h4>
         </div>
 
-        {[1, 2].map(index => (
+        {[0, 1].map(index => (
           <div key={index} className="space-y-2">
-            <p className="text-sm text-gray-500">Reference {index}</p>
+            <p className="text-sm text-gray-500">Reference {index + 1}</p>
             <div className="grid grid-cols-3 gap-4">
-              <Fields.Input label="Full Name" placeholder={`Enter name`} />
-              <Fields.Input label="Relation" placeholder={`Enter relation`} />
-              <Fields.Input label="Phone Number" type="tel" placeholder={`Enter phone number`} />
+              <Fields.Input 
+                label="Full Name" 
+                placeholder="Enter name" 
+                value={data.family_references[index]?.name || ''}
+                onChange={(e) => {
+                  const newRefs = [...data.family_references];
+                  newRefs[index] = { ...newRefs[index] || {}, name: e.target.value };
+                  setData({ ...data, family_references: newRefs });
+                }}
+              />
+              <Fields.Input 
+                label="Relation" 
+                placeholder="Enter relation"
+                value={data.family_references[index]?.relation || ''}
+                onChange={(e) => {
+                  const newRefs = [...data.family_references];
+                  newRefs[index] = { ...newRefs[index] || {}, relation: e.target.value };
+                  setData({ ...data, family_references: newRefs });
+                }}
+              />
+              <Fields.Input 
+                label="Phone Number" 
+                type="tel" 
+                placeholder="Enter phone number"
+                value={data.family_references[index]?.phone || ''}
+                onChange={(e) => {
+                  const newRefs = [...data.family_references];
+                  newRefs[index] = { ...newRefs[index] || {}, phone: e.target.value };
+                  setData({ ...data, family_references: newRefs });
+                }}
+              />
             </div>
           </div>
         ))}
@@ -295,35 +382,27 @@ const StepContent = {
     </div>
   ),
 
-  Work: () => (
+  Work: ({ formData, setFormData }: { formData: NurseFormData, setFormData: React.Dispatch<React.SetStateAction<NurseFormData>> }) => (
     <FormLayout>
-      <Fields.Select label="Type of Service" options={FORM_CONFIG.options.serviceTypes} />
-      <Fields.Select label="Shifting Pattern" options={FORM_CONFIG.options.shiftingPatterns} />
-      <Fields.Select label="Category of Staff" options={FORM_CONFIG.options.staffCategories} />
-      <Fields.Input label="Medical Field Experience" placeholder="Enter years of experience" />
+      <Fields.Select label="Type of Service" options={FORM_CONFIG.options.serviceTypes} value={formData.service_type} onChange={(e) => setFormData({ ...formData, service_type: e.target.value })} />
+      <Fields.Select label="Shifting Pattern" options={FORM_CONFIG.options.shiftingPatterns} value={formData.shift_pattern} onChange={(e) => setFormData({ ...formData, shift_pattern: e.target.value })} />
+      <Fields.Select label="Category of Staff" options={FORM_CONFIG.options.staffCategories} value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} />
+      <Fields.Input label="Medical Field Experience" placeholder="Enter years of experience" value={formData.experience} onChange={(e) => setFormData({ ...formData, experience: e.target.value })} />
     </FormLayout>
   ),
 
-  Health: () => (
+  Health: ({ data, setData }: { data: NurseHealthData, setData: React.Dispatch<React.SetStateAction<NurseHealthData>> }) => (
     <FormLayout>
-      <Fields.TextArea label="Current Health Status" placeholder="Enter current health status" />
-      <Fields.TextArea label="Disability Details" placeholder="Enter disability details if any" />
-      <Fields.Select label="Source of Information" options={FORM_CONFIG.options.sourceOfInformation} />
+      <Fields.TextArea label="Current Health Status" placeholder="Enter current health status" value={data.health_status} onChange={(e) => setData({ ...data, health_status: e.target.value })} />
+      <Fields.TextArea label="Disability Details" placeholder="Enter disability details if any" value={data.disability} onChange={(e) => setData({ ...data, disability: e.target.value })} />
+      <Fields.Select label="Source of Information" options={FORM_CONFIG.options.sourceOfInformation} value={data.source} onChange={(e) => setData({ ...data, source: e.target.value })} />
     </FormLayout>
   )
 };
 
 export function AddNurseOverlay({ onClose, onAdd }: AddNurseProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [dragActive, setDragActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const locationDropdownRef = useRef<HTMLDivElement>(null);
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
-  const [isLanguagesDropdownOpen, setIsLanguagesDropdownOpen] = useState(false);
-  const languagesDropdownRef = useRef<HTMLDivElement>(null);
   const [documents, setDocuments] = useState<{[key: string]: File | null}>({
     aadhar: null,
     rationCard: null,
@@ -332,20 +411,54 @@ export function AddNurseOverlay({ onClose, onAdd }: AddNurseProps) {
     noc: null
   });
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(e.type === "dragenter" || e.type === "dragover");
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSelectedImage(e.dataTransfer.files[0]);
-    }
-  };
+  const [nurseData, setNurseData] = useState<NurseFormData>({
+    first_name: '',
+    last_name: '',
+    gender: '',
+    date_of_birth: '',
+    address: '',
+    city: '',
+    taluk: '',
+    state: '',
+    pin_code: '',
+    phone_number: '',
+    languages: [],
+    noc_status: '', 
+    service_type: '',
+    shift_pattern: '',
+    category: '',
+    experience: '',
+    marital_status: '',
+    religion: '',
+    mother_tongue: '',
+    age: ''
+  });
+  
+  const [referenceData, setReferenceData] = useState<NurseReferenceData>({
+    reference_name: '',
+    reference_phone: '',
+    reference_relation: '',
+    reference_address: '',
+    recommendation_details: '',
+    employer_name: '',
+    employment_duration: '',
+    employer_contact: '',
+    family_references: [{
+      name: '',
+      relation: '',
+      phone: ''
+    }, {
+      name: '',
+      relation: '',
+      phone: ''
+    }] 
+  });
+  
+  const [healthData, setHealthData] = useState<NurseHealthData>({
+    health_status: '',
+    disability: '',
+    source: ''
+  });
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -353,61 +466,31 @@ export function AddNurseOverlay({ onClose, onAdd }: AddNurseProps) {
     }
   };
 
-  const handleRemoveImage = () => {
-    setSelectedImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const toggleLocation = (location: string) => {
-    setSelectedLocations(selectedLocations.includes(location) ? selectedLocations.filter(loc => loc !== location) : [...selectedLocations, location]);
-  };
-
-  const toggleLanguage = (language: string) => {
-    setSelectedLanguages(selectedLanguages.includes(language) ? 
-      selectedLanguages.filter(lang => lang !== language) : 
-      [...selectedLanguages, language]
-    );
-  };
-
-  const getInputValue = (placeholder: string) => (document.querySelector(`input[placeholder="${placeholder}"]`) as HTMLInputElement)?.value;
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node)) {
-        setIsLocationDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleSubmit = () => {
-    const nurseData: BaseNurseFields = {
-      firstName: getInputValue("Enter first name") || '',
-      lastName: getInputValue("Enter last name") || '',
-      email: '', // Add email field to form if required
-      location: `${getInputValue("Enter city") || ''}, ${getInputValue("Enter state") || ''}`,
-      phoneNumber: getInputValue("Enter phone number") || '',
-      gender: (document.querySelector('select') as HTMLSelectElement)?.value || '',
-      dob: (document.querySelector('input[type="date"]') as HTMLInputElement)?.value || '',
-      experience: parseInt(getInputValue("Enter years of experience") || '0', 10),
-      preferredLocations: selectedLocations,
-      image: selectedImage || undefined,  // Convert null to undefined if needed
+    const submitData: BaseNurseFields = {
+      firstName: nurseData.first_name,
+      lastName: nurseData.last_name,
+      email: '',
+      location: `${nurseData.city}, ${nurseData.state}`,
+      phoneNumber: nurseData.phone_number,
+      gender: nurseData.gender,
+      dob: nurseData.date_of_birth,
+      experience: parseInt(nurseData.experience || '0'),
+      preferredLocations: [],
+      image: selectedImage
     };
 
-    onAdd(nurseData);
+    onAdd(submitData);
   };
 
   const renderStep = () => {
     const steps = {
-      0: <StepContent.Personal />,
-      1: <StepContent.Contact />,
-      2: <StepContent.Document setDocuments={setDocuments} />,
-      3: <StepContent.Reference />,
-      4: <StepContent.Work />,
-      5: <StepContent.Health />
+      0: <StepContent.Personal formData={nurseData} setFormData={setNurseData} />,
+      1: <StepContent.Contact formData={nurseData} setFormData={setNurseData} />,
+      2: <StepContent.Reference data={referenceData} setData={setReferenceData} />,
+      3: <StepContent.Work formData={nurseData} setFormData={setNurseData} />,
+      4: <StepContent.Health data={healthData} setData={setHealthData} />,
+      5: <StepContent.Document setDocuments={setDocuments} nurseData={nurseData} setNurseData={setNurseData} />
     };
     return steps[currentStep as keyof typeof steps] || null;
   };
