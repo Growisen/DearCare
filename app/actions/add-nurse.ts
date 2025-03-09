@@ -1,9 +1,7 @@
 'use server'
 
-import { cookies } from 'next/headers'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types'
-import { Database } from '@/lib/database.types'
+import { createSupabaseServerClient } from './auth'
 
 export async function createNurse(
   nurseData: NurseFormData,
@@ -15,7 +13,7 @@ export async function createNurse(
 
   try {
     // 1. Upload nurse profile image if exists
-    const supabase = createServerActionClient<Database>({ cookies });
+    const supabase = await createSupabaseServerClient()
 
     // Verify authentication first
     const { data: { session } } = await supabase.auth.getSession();

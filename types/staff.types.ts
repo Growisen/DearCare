@@ -94,3 +94,7 @@ export interface NurseHealthData {
   disability: string;
   source: string;
 }
+
+export interface StaffAttendanceProps {
+  currentTime: string;
+}

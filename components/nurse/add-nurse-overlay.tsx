@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { AddNurseProps, DropdownProps, BaseNurseFields, NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types';
+import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types';
 import { createNurse } from '@/app/actions/add-nurse';
 import { toast } from 'react-hot-toast';
 const FORM_CONFIG = {
@@ -113,7 +113,7 @@ const Fields = {
     </div>
   ),
 
-  File: ({ label, docType, onFileSelect }: { label: string, docType: string, onFileSelect: (file: File) => void }) => {
+  File: ({ label, onFileSelect }: { label: string, docType: string, onFileSelect: (file: File) => void }) => {
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -401,9 +401,10 @@ const StepContent = {
   )
 };
 
-export function AddNurseOverlay({ onClose, onAdd }: AddNurseProps) {
+export function AddNurseOverlay({ onClose }: AddNurseProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  // const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [documents, setDocuments] = useState<{[key: string]: File | null}>({
     aadhar: null,
     rationCard: null,
@@ -461,19 +462,19 @@ export function AddNurseOverlay({ onClose, onAdd }: AddNurseProps) {
     source: ''
   });
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedImage(e.target.files[0]);
-    }
-  };
+  // const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     setSelectedImage(e.target.files[0]);
+  //   }
+  // };
 
   const handleSubmit = async () => {
     try {
       // Prepare documents object including profile image
-      const documentsWithProfile = {
-        ...documents,
-        profile: selectedImage
-      };
+      // const documentsWithProfile = {
+      //   ...documents,
+      //   profile: selectedImage
+      // };
   
       // Call the server action
       const result = await createNurse(
