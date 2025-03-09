@@ -1,6 +1,9 @@
 "use client";
+
 import "./globals.css";
 import { AuthProvider } from '@/contexts/AuthContext'
+import { Toaster } from 'react-hot-toast';
+
 export default function RootLayout({
   children,
 }: {
@@ -8,9 +11,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body><AuthProvider>
+      <body>
+        <AuthProvider>
           {children}
-        </AuthProvider></body>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#333',
+                color: '#fff',
+              },
+            }} 
+          />
+        </AuthProvider>
+      </body>
     </html>
   );
 }

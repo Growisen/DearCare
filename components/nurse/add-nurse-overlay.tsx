@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { AddNurseProps, DropdownProps, BaseNurseFields, NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types';
-
+import { createNurse } from '@/app/actions/add-nurse';
+import { toast } from 'react-hot-toast';
 const FORM_CONFIG = {
   options: {
     locationsInKerala: ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad", "Kannur", "Kottayam", "Malappuram"] as string[],
@@ -466,21 +467,34 @@ export function AddNurseOverlay({ onClose, onAdd }: AddNurseProps) {
     }
   };
 
-  const handleSubmit = () => {
-    const submitData: BaseNurseFields = {
-      firstName: nurseData.first_name,
-      lastName: nurseData.last_name,
-      email: '',
-      location: `${nurseData.city}, ${nurseData.state}`,
-      phoneNumber: nurseData.phone_number,
-      gender: nurseData.gender,
-      dob: nurseData.date_of_birth,
-      experience: parseInt(nurseData.experience || '0'),
-      preferredLocations: [],
-      image: selectedImage
-    };
-
-    onAdd(submitData);
+  const handleSubmit = async () => {
+    try {
+      // Prepare documents object including profile image
+      const documentsWithProfile = {
+        ...documents,
+        profile: selectedImage
+      };
+  
+      // Call the server action
+      const result = await createNurse(
+        nurseData,
+        referenceData,
+        healthData,
+        
+      );
+  
+      if (result.success) {
+        // Show success message and close overlay
+        toast.success('Nurse added successfully!');
+        onClose();
+      } else {
+        // Show error message
+        toast.error(result.error || 'Failed to add nurse');
+      }
+    } catch (error) {
+      console.error('Error submitting nurse data:', error);
+      toast.error('An error occurred while adding the nurse');
+    }
   };
 
   const renderStep = () => {
