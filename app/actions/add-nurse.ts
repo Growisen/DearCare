@@ -1,5 +1,13 @@
 'use server'
 
+type NurseDocuments = {
+  adhar: File | null
+  educational: File | null
+  experience: File | null
+  profile_image: File | null
+  noc: File | null
+  ration: File | null
+}
 import { NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types'
 import { createSupabaseServerClient } from './auth'
 
@@ -7,11 +15,13 @@ export async function createNurse(
   nurseData: NurseFormData,
   referenceData: NurseReferenceData,
   healthData: NurseHealthData,
+  documents: NurseDocuments
   
 ): Promise<{ success: boolean; nurseId?: number; error?: string }> {
   
 
   try {
+    console.log(documents)
     // 1. Upload nurse profile image if exists
     const supabase = await createSupabaseServerClient()
 
@@ -20,6 +30,8 @@ export async function createNurse(
     if (!session) {
       return { success: false, error: 'Not authenticated' };
     }
+
+
   
 
     // 2. Upload documents
@@ -41,7 +53,7 @@ export async function createNurse(
         phone_number: nurseData.phone_number,
         languages: nurseData.languages, // This is Json type
         service_type: nurseData.service_type,
-        shift_pattern: Number(nurseData.shift_pattern), // Convert to number
+        shift_pattern: nurseData.shift_pattern, // Convert to number
         category: nurseData.category,
         experience: Number(nurseData.experience), // Convert to number
         marital_status: nurseData.marital_status,
@@ -81,6 +93,73 @@ export async function createNurse(
       })
 
     if (healthError) throw healthError
+
+    const uploadPromises = []
+    const nurse_id = nurse.nurse_id.toString()
+try{
+  if (documents.adhar) {
+    uploadPromises.push(
+      supabase.storage
+        .from('DearCare/Nurses/adhar')
+        .upload(`${nurse_id}`, documents.adhar)
+    )
+  }
+}catch(error){
+  console.log("Error in adhar")
+  console.log(error)
+}
+    
+
+    if (documents.educational) {
+      uploadPromises.push(
+        supabase.storage
+          .from('DearCare/Nurses/Educational_Certificates')
+          .upload(`${nurse_id}`, documents.educational)
+      )
+    }
+
+    if (documents.experience) {
+      uploadPromises.push(
+        supabase.storage
+          .from('DearCare/Nurses/Experience_Certificates')
+          .upload(`${nurse_id}`, documents.experience)
+      )
+    }
+
+    if (documents.profile_image) {
+      uploadPromises.push(
+        supabase.storage
+          .from('DearCare/Nurses/image')
+          .upload(`${nurse_id}`, documents.profile_image)
+      )
+    }
+
+    if (documents.noc) {
+      uploadPromises.push(
+        supabase.storage
+          .from('DearCare/Nurses/Noc_Certificate')
+          .upload(`${nurse_id}`, documents.noc)
+      )
+    }
+
+    if (documents.ration) {
+      uploadPromises.push(
+        supabase.storage
+          .from('DearCare/Nurses/ration_card')
+          .upload(`${nurse_id}`, documents.ration)
+      )
+    }
+
+    const uploadResults = await Promise.all(uploadPromises)
+
+
+    const uploadErrors = uploadResults
+      .filter(result => result.error)
+      .map(result => result.error)
+
+    if (uploadErrors.length > 0) {
+      throw new Error(`File upload errors: ${uploadErrors.join(', ')}`)
+    }
 
     return { success: true, nurseId: nurse.nurse_id }
 

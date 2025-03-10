@@ -98,3 +98,12 @@ export interface NurseHealthData {
 export interface StaffAttendanceProps {
   currentTime: string;
 }
+
+export interface NurseDocuments {
+  adhar: File | null
+  educational: File | null
+  experience: File | null
+  profile_image: File | null
+  noc: File | null
+  ration: File | null
+}

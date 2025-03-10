@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types';
+import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments } from '@/types/staff.types';
 import { createNurse } from '@/app/actions/add-nurse';
 import { toast } from 'react-hot-toast';
 const FORM_CONFIG = {
@@ -258,30 +258,39 @@ const StepContent = {
     );
   },
 
-  Document: ({ setDocuments, nurseData, setNurseData }: { setDocuments: React.Dispatch<React.SetStateAction<{[key: string]: File | null}>>, nurseData: NurseFormData, setNurseData: React.Dispatch<React.SetStateAction<NurseFormData>> }) => {
+  Document: ({ setDocuments, nurseData, setNurseData }: { 
+    setDocuments: React.Dispatch<React.SetStateAction<NurseDocuments>>,
+    nurseData: NurseFormData, 
+    setNurseData: React.Dispatch<React.SetStateAction<NurseFormData>> 
+  }) => {
     const [nocStatus, setNocStatus] = useState<string>(nurseData.noc_status);
 
     return (
       <div className="space-y-6">
         <Fields.File 
-          label="Aadhar Card" 
-          docType="aadhar" 
-          onFileSelect={(file) => setDocuments(prev => ({ ...prev, aadhar: file }))}
+          label="Profile Image" 
+          docType="profile_image" 
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, profile_image: file }))}
         />
         <Fields.File 
-          label="Ration Card" 
-          docType="rationCard"
-          onFileSelect={(file) => setDocuments(prev => ({ ...prev, rationCard: file }))}
+          label="Aadhar Card" 
+          docType="adhar" 
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, adhar: file }))}
         />
         <Fields.File 
           label="Educational Certificates" 
-          docType="education"
-          onFileSelect={(file) => setDocuments(prev => ({ ...prev, education: file }))}
+          docType="educational"
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, educational: file }))}
         />
         <Fields.File 
           label="Experience Certificates" 
           docType="experience"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, experience: file }))}
+        />
+        <Fields.File 
+          label="Ration Card" 
+          docType="ration"
+          onFileSelect={(file) => setDocuments(prev => ({ ...prev, ration: file }))}
         />
         <div className="space-y-4">
           <FormField label="NOC Certificate Status">
@@ -405,12 +414,13 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
   const [currentStep, setCurrentStep] = useState(0);
   // const [selectedImage, setSelectedImage] = useState<File | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [documents, setDocuments] = useState<{[key: string]: File | null}>({
-    aadhar: null,
-    rationCard: null,
-    education: null,
+  const [documents, setDocuments] =  useState<NurseDocuments>({
+    adhar: null,
+    educational: null,
     experience: null,
-    noc: null
+    profile_image: null,
+    noc: null,
+    ration: null
   });
 
   const [nurseData, setNurseData] = useState<NurseFormData>({
@@ -481,6 +491,7 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
         nurseData,
         referenceData,
         healthData,
+        documents
         
       );
   
