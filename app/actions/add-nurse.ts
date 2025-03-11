@@ -25,11 +25,24 @@ export async function createNurse(
     // 1. Upload nurse profile image if exists
     const supabase = await createSupabaseServerClient()
 
-    // Verify authentication first
+    // // Verify authentication first
+    // const { data: { session } } = await supabase.auth.getSession();
+    // if (!session) {
+    //   return { success: false, error: 'Not authenticated' };
+    // }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       return { success: false, error: 'Not authenticated' };
     }
+
+    // Add role verification
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log(user?.user_metadata?.role)
+    if (user?.user_metadata?.role !== 'admin') {
+      return { success: false, error: 'Unauthorized: Admin access required' };
+    }
+
 
 
   

@@ -55,6 +55,10 @@ export async function signIn(formData: FormData) {
   if (error) {
     return { error: error.message, success: false }
   }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  console.log(user)
   
   return { error: null, success: true }
 }
@@ -65,9 +69,18 @@ export async function signUp(formData: FormData) {
   
   const supabase = await createSupabaseServerClient()
   
+  // const { error } = await supabase.auth.signUp({
+  //   email,
+  //   password,
+  // })
   const { error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        role: 'admin' // Default role
+      }
+    }
   })
   
   if (error) {
