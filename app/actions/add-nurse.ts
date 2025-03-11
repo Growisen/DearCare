@@ -21,7 +21,7 @@ export async function createNurse(
   
 
   try {
-    console.log(documents)
+    
     // 1. Upload nurse profile image if exists
     const supabase = await createSupabaseServerClient()
 
@@ -96,58 +96,40 @@ export async function createNurse(
 
     const uploadPromises = []
     const nurse_id = nurse.nurse_id.toString()
-try{
-  if (documents.adhar) {
-    uploadPromises.push(
-      supabase.storage
-        .from('DearCare/Nurses/adhar')
-        .upload(`${nurse_id}`, documents.adhar)
-    )
-  }
-}catch(error){
-  console.log("Error in adhar")
-  console.log(error)
-}
+    const uploadFile = async (file: File, folder: string) => {
+      const extension = file.name.split('.').pop()
+      const fileName = `${nurse_id}.${extension}`
+      
+      return supabase.storage
+        .from('DearCare')
+        .upload(`Nurses/${folder}/${fileName}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+    }
+
+    if (documents.adhar) {
+      uploadPromises.push(uploadFile(documents.adhar, 'adhar'))
+    }
     
-
     if (documents.educational) {
-      uploadPromises.push(
-        supabase.storage
-          .from('DearCare/Nurses/Educational_Certificates')
-          .upload(`${nurse_id}`, documents.educational)
-      )
+      uploadPromises.push(uploadFile(documents.educational, 'Educational_Certificates'))
     }
-
+    
     if (documents.experience) {
-      uploadPromises.push(
-        supabase.storage
-          .from('DearCare/Nurses/Experience_Certificates')
-          .upload(`${nurse_id}`, documents.experience)
-      )
+      uploadPromises.push(uploadFile(documents.experience, 'Experience_Certificates'))
     }
-
+    
     if (documents.profile_image) {
-      uploadPromises.push(
-        supabase.storage
-          .from('DearCare/Nurses/image')
-          .upload(`${nurse_id}`, documents.profile_image)
-      )
+      uploadPromises.push(uploadFile(documents.profile_image, 'image'))
     }
-
+    
     if (documents.noc) {
-      uploadPromises.push(
-        supabase.storage
-          .from('DearCare/Nurses/Noc_Certificate')
-          .upload(`${nurse_id}`, documents.noc)
-      )
+      uploadPromises.push(uploadFile(documents.noc, 'Noc_Certificate'))
     }
 
     if (documents.ration) {
-      uploadPromises.push(
-        supabase.storage
-          .from('DearCare/Nurses/ration_card')
-          .upload(`${nurse_id}`, documents.ration)
-      )
+      uploadPromises.push(uploadFile(documents.ration, 'ration_card'))
     }
 
     const uploadResults = await Promise.all(uploadPromises)
