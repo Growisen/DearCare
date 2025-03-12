@@ -245,6 +245,13 @@ const StepContent = {
         <Fields.Input label="State" placeholder="Enter state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
         <Fields.Input label="PIN Code" placeholder="Enter PIN code" value={formData.pin_code} onChange={(e) => setFormData({ ...formData, pin_code: e.target.value })} />
         <Fields.Input label="Phone Number" placeholder="Enter phone number" value={formData.phone_number} onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })} />
+        <Fields.Input 
+        label="Email" 
+        type="email" 
+        placeholder="Enter email address" 
+        value={formData.email} 
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+      />
         <Fields.Dropdown 
           label="Known Languages"
           options={FORM_CONFIG.options.languagesAvailable}
@@ -434,6 +441,7 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     state: '',
     pin_code: '',
     phone_number: '',
+    email:'',
     languages: [],
     noc_status: '', 
     service_type: '',
@@ -452,9 +460,6 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     reference_relation: '',
     reference_address: '',
     recommendation_details: '',
-    employer_name: '',
-    employment_duration: '',
-    employer_contact: '',
     family_references: [{
       name: '',
       relation: '',

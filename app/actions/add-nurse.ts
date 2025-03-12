@@ -55,6 +55,7 @@ export async function createNurse(
       .from('nurses')
       .insert({
         first_name: nurseData.first_name,
+        email:nurseData.email,
         last_name: nurseData.last_name,
         gender: nurseData.gender,
         date_of_birth: nurseData.date_of_birth,
@@ -88,8 +89,9 @@ export async function createNurse(
         referer_name: referenceData.reference_name,
         phone_number: referenceData.reference_phone,
         relation: referenceData.reference_relation,
-        description: referenceData.reference_address,
-        type: 'personal'
+        description: referenceData.recommendation_details,
+        family_references: referenceData.family_references
+        
       })
 
     if (referenceError) throw referenceError
