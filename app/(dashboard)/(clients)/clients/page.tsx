@@ -1,9 +1,10 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Eye, CheckCircle, Clock, AlertCircle } from "lucide-react"
 import { Input } from "../../../../components/ui/input"
 import { ClientDetailsOverlay } from "../../../../components/client-details-overlay"
 import { AddClientOverlay } from "../../../../components/add-client-overlay"
+import { getClients } from "../../../../app/actions/client-actions"
 
 interface Client {
   id: string
@@ -145,6 +146,9 @@ export default function ClientsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [showAddClient, setShowAddClient] = useState(false)
+  const [clients, setClients] = useState<Client[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-700 border border-yellow-200",
@@ -162,12 +166,54 @@ export default function ClientsPage() {
     assigned: CheckCircle
   }
 
-  const filteredClients = mockClients.filter(client => {
-    const matchesStatus = selectedStatus === "all" ? client.status === "approved" : client.status === selectedStatus
-    const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         client.email.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesStatus && matchesSearch
-  })
+   useEffect(() => {
+  async function loadClients() {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const result = await getClients(selectedStatus, searchQuery)
+      
+      if (result.success && result.clients) {
+        // Add type assertion to make sure the status is of the correct type
+        const typedClients = result.clients.map(client => ({
+          ...client,
+          service: client.service || "Not specified",
+          email: client.email || "No email provided",
+          phone: client.phone || "No phone provided",
+          location: client.location || "No location specified",
+          status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
+        }))
+        setClients(typedClients)
+      } else {
+        setError(result.error || "Failed to load clients")
+        // Use mock data as fallback
+        setClients(mockClients.filter(client => {
+          const matchesStatus = selectedStatus === "all" ? client.status === "approved" : client.status === selectedStatus
+          const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              client.email.toLowerCase().includes(searchQuery.toLowerCase())
+          return matchesStatus && matchesSearch
+        }))
+      }
+    } catch (err) {
+      setError("An unexpected error occurred")
+      console.error(err)
+      // Use mock data as fallback
+      setClients(mockClients.filter(client => {
+        const matchesStatus = selectedStatus === "all" ? client.status === "approved" : client.status === selectedStatus
+        const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            client.email.toLowerCase().includes(searchQuery.toLowerCase())
+        return matchesStatus && matchesSearch
+      }))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
+  loadClients()
+}, [selectedStatus, searchQuery])
+
+  const filteredClients = clients
 
   const handleReviewDetails = (client: Client) => {
     setSelectedClient(client)
@@ -181,6 +227,8 @@ export default function ClientsPage() {
 
   return (
     <div>
+      
+      
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Client Requests</h1>
@@ -249,86 +297,100 @@ export default function ClientsPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr className="text-left">
-                  <th className="py-4 px-6 font-semibold text-gray-700">Client Name</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Request Date</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Service</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Status</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Contact</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          ) : error ? (
+            <div className="p-6 text-center">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr className="text-left">
+                      <th className="py-4 px-6 font-semibold text-gray-700">Client Name</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Request Date</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Service</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Status</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Contact</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredClients.map((client) => {
+                      const StatusIcon = statusIcons[client.status]
+                      return (
+                        <tr key={client.id} className="hover:bg-gray-50/50">
+                          <td className="py-4 px-6 text-gray-900 font-medium">{client.name}</td>
+                          <td className="py-4 px-6 text-gray-700">{client.requestDate}</td>
+                          <td className="py-4 px-6 text-gray-700">{client.service}</td>
+                          <td className="py-4 px-6">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
+                              <StatusIcon className="w-3.5 h-3.5" />
+                              {client.status.replace("_", " ").charAt(0).toUpperCase() + client.status.slice(1).replace("_", " ")}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div>
+                              <div className="text-gray-900">{client.email}</div>
+                              <div className="text-gray-600">{client.phone}</div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button 
+                              className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                              onClick={() => handleReviewDetails(client)}
+                            >
+                              Review Details
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile card view */}
+              <div className="sm:hidden divide-y divide-gray-200">
                 {filteredClients.map((client) => {
                   const StatusIcon = statusIcons[client.status]
                   return (
-                    <tr key={client.id} className="hover:bg-gray-50/50">
-                      <td className="py-4 px-6 text-gray-900 font-medium">{client.name}</td>
-                      <td className="py-4 px-6 text-gray-700">{client.requestDate}</td>
-                      <td className="py-4 px-6 text-gray-700">{client.service}</td>
-                      <td className="py-4 px-6">
+                    <div key={client.id} className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-900">{client.name}</h3>
+                          <p className="text-sm text-gray-600">{client.service}</p>
+                        </div>
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
                           <StatusIcon className="w-3.5 h-3.5" />
                           {client.status.replace("_", " ").charAt(0).toUpperCase() + client.status.slice(1).replace("_", " ")}
                         </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div>
-                          <div className="text-gray-900">{client.email}</div>
-                          <div className="text-gray-600">{client.phone}</div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <button 
-                          className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                          onClick={() => handleReviewDetails(client)}
-                        >
-                          Review Details
-                        </button>
-                      </td>
-                    </tr>
+                      </div>
+                      
+                      <div className="text-sm">
+                        <p className="text-gray-600">Request Date: {client.requestDate}</p>
+                        <p className="text-gray-900">{client.email}</p>
+                        <p className="text-gray-600">{client.phone}</p>
+                      </div>
+                      
+                      <button 
+                        className="w-full mt-2 px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                        onClick={() => handleReviewDetails(client)}
+                      >
+                        Review Details
+                      </button>
+                    </div>
                   )
                 })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile card view */}
-          <div className="sm:hidden divide-y divide-gray-200">
-            {filteredClients.map((client) => {
-              const StatusIcon = statusIcons[client.status]
-              return (
-                <div key={client.id} className="p-4 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-900">{client.name}</h3>
-                      <p className="text-sm text-gray-600">{client.service}</p>
-                    </div>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
-                      <StatusIcon className="w-3.5 h-3.5" />
-                      {client.status.replace("_", " ").charAt(0).toUpperCase() + client.status.slice(1).replace("_", " ")}
-                    </span>
-                  </div>
-                  
-                  <div className="text-sm">
-                    <p className="text-gray-600">Request Date: {client.requestDate}</p>
-                    <p className="text-gray-900">{client.email}</p>
-                    <p className="text-gray-600">{client.phone}</p>
-                  </div>
-                  
-                  <button 
-                    className="w-full mt-2 px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                    onClick={() => handleReviewDetails(client)}
-                  >
-                    Review Details
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
