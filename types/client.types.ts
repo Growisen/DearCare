@@ -1,20 +1,20 @@
 export interface Client {
   id: string;
-  name: string
+  name: string;
+  requestDate: string;
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned';
+  service?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
   shift?: string;
   description?: string;
-  location?: string;
   condition?: string;
   assignedNurse?: string;
   medications?: string[];
   specialInstructions?: string;
   nurseLocation?: { lat: number; lng: number };
   clientLocation?: { lat: number; lng: number };
-  requestDate: string
-  service: string
-  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned'
-  email: string
-  phone: string
 }
 
 export interface Review {
@@ -43,25 +43,57 @@ export interface ApprovedContentProps {
   client: Client;
 }
 
-// ...existing code...
+export interface StaffRequirement {
+  staffType: string;
+  count: number;
+  shiftType: string;
+}
+
+export interface BaseFormData {
+  clientType: 'individual' | 'organization' | 'hospital' | 'carehome';
+  clientCategory: 'DearCare' | 'TataLife';
+  generalNotes: string;
+}
+
+export interface IndividualFormData extends BaseFormData {
+  requestorName: string;
+  requestorPhone: string;
+  requestorEmail: string;
+  relationToPatient: string;
+  patientName: string;
+  patientAge: string;
+  patientGender: string;
+  patientPhone: string;
+  completeAddress: string;
+  serviceRequired: string;
+  careDuration: string;
+  startDate: string;
+  preferredCaregiverGender: string;
+}
+
+export interface OrganizationFormData extends BaseFormData {
+  organizationName: string;
+  organizationType: string;
+  contactPersonName: string;
+  contactPersonRole: string;
+  contactPhone: string;
+  contactEmail: string;
+  organizationAddress: string;
+  staffRequirements: StaffRequirement[];
+  duration: string;
+}
+
+export type FormData = IndividualFormData & OrganizationFormData;
 
 export interface AddClientProps {
   onClose: () => void;
-  onAdd: (client: {
-    fullName: string;
-    phoneNumber: string;
-    emailAddress: string;
-    serviceRequired: string;
-    medicalCondition: string;
-    careDescription: string;
-  }) => void;
+  onAdd: (data: Partial<Client>) => void;
 }
 
 export interface ClientDetailsProps {
   client: Client;
   onClose: () => void;
 }
-
 
 export interface ClientInformationProps {
   client: {
