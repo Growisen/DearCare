@@ -105,3 +105,14 @@ export interface NurseDocuments {
   noc: File | null
   ration: File | null
 }
+
+
+export interface NurseBasicInfo {
+  nurse_id: number;
+  first_name: string | null;
+  last_name: string | null;
+  status: string;
+  email: string | null;
+  phone_number: string | null;
+  experience: number | null;
+}

@@ -8,7 +8,7 @@ type NurseDocuments = {
   noc: File | null
   ration: File | null
 }
-import { NurseFormData, NurseReferenceData, NurseHealthData } from '@/types/staff.types'
+import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo } from '@/types/staff.types'
 import { createSupabaseServerClient } from './auth'
 
 export async function createNurse(
@@ -55,7 +55,7 @@ export async function createNurse(
       .from('nurses')
       .insert({
         first_name: nurseData.first_name,
-        email:nurseData.email,
+        email:nurseData.email ? String(nurseData.email) : null,
         last_name: nurseData.last_name,
         gender: nurseData.gender,
         date_of_birth: nurseData.date_of_birth,
@@ -165,6 +165,56 @@ export async function createNurse(
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
+    }
+  }
+}
+
+export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | null, error: string | null }> {
+  try {
+    const supabase = await createSupabaseServerClient()
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return { data: null, error: 'Not authenticated' }
+    }
+
+    const { data, error } = await supabase
+      .from('nurses')
+      .select(`
+        nurse_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        experience,
+        service_type
+      `)
+      .order('first_name')
+
+    if (error) throw error
+
+    // Transform the data to include a default status
+    const transformedData = data.map(nurse => ({
+      nurse_id: nurse.nurse_id,
+      first_name: nurse.first_name,
+      last_name: nurse.last_name,
+      status: 'unassigned', // Default status or derive from service_type
+      email: nurse.email,
+      phone_number: nurse.phone_number,
+      experience: nurse.experience
+    }))
+
+    return { 
+      data: transformedData, 
+      error: null 
+    }
+
+  } catch (error) {
+    console.error('Error fetching nurses:', error)
+    return { 
+      data: null, 
+      error: error instanceof Error ? error.message : 'Failed to fetch nurses' 
     }
   }
 }

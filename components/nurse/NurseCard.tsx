@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, AlertCircle } from "lucide-react"
-import { Nurse } from "@/types/staff.types"
+import { Nurse, NurseBasicInfo } from "@/types/staff.types"
 
 const statusColors = {
   assigned: "bg-green-100 text-green-700 border border-green-200",
@@ -19,26 +19,32 @@ const statusIcons = {
   rejected: AlertCircle
 }
 
-const NurseCard = ({ nurse, onReviewDetails }: { nurse: Nurse, onReviewDetails: (nurse: Nurse) => void }) => {
-  const StatusIcon = statusIcons[nurse.status]
+interface NurseCardProps {
+  nurse: NurseBasicInfo;
+  onReviewDetails: (nurse: NurseBasicInfo) => void;
+}
+
+const NurseCard = ({ nurse, onReviewDetails }: NurseCardProps) => {
+  const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
+  
   return (
-    <div key={nurse._id} className="p-4 space-y-3">
+    <div key={nurse.nurse_id} className="p-4 space-y-3">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-medium text-gray-900">{`${nurse.firstName} ${nurse.lastName}`}</h3>
-          {/* <p className="text-sm text-gray-600">{nurse.location}</p> */}
+          <h3 className="font-medium text-gray-900">
+            {`${nurse.first_name || ''} ${nurse.last_name || ''}`}
+          </h3>
         </div>
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status]}`}>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status as keyof typeof statusColors]}`}>
           <StatusIcon className="w-3.5 h-3.5" />
           {nurse.status.replace("_", " ").charAt(0).toUpperCase() + nurse.status.slice(1).replace("_", " ")}
         </span>
       </div>
       
       <div className="text-sm">
-        <p className="text-gray-600">Experience: {nurse.experience} years</p>
-        <p className="text-gray-600">Rating: {nurse.rating} stars</p>
+        <p className="text-gray-600">Experience: {nurse.experience || 0} years</p>
         <p className="text-gray-900">{nurse.email}</p>
-        <p className="text-gray-600">{nurse.phoneNumber}</p>
+        <p className="text-gray-600">{nurse.phone_number}</p>
       </div>
       
       <button 
@@ -50,5 +56,4 @@ const NurseCard = ({ nurse, onReviewDetails }: { nurse: Nurse, onReviewDetails: 
     </div>
   )
 }
-
 export default NurseCard
