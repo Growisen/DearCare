@@ -331,6 +331,220 @@ export type Database = {
           },
         ]
       }
+      student_academics: {
+        Row: {
+          created_at: string
+          id: number
+          institution: string | null
+          marks: string | null
+          qualification: string | null
+          student_id: number | null
+          year_of_passing: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          institution?: string | null
+          marks?: string | null
+          qualification?: string | null
+          student_id?: number | null
+          year_of_passing?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          institution?: string | null
+          marks?: string | null
+          qualification?: string | null
+          student_id?: number | null
+          year_of_passing?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_academics_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_experience: {
+        Row: {
+          created_at: string
+          duration: number | null
+          id: number
+          org_name: string | null
+          responsibility: string | null
+          role: string | null
+          student_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          id?: number
+          org_name?: string | null
+          responsibility?: string | null
+          role?: string | null
+          student_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          id?: number
+          org_name?: string | null
+          responsibility?: string | null
+          role?: string | null
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_experience_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_guardian: {
+        Row: {
+          aadhaar: string | null
+          address: string | null
+          created_at: string
+          guardian_name: string | null
+          id: number
+          mobile: string | null
+          relation: string | null
+          student_id: number | null
+        }
+        Insert: {
+          aadhaar?: string | null
+          address?: string | null
+          created_at?: string
+          guardian_name?: string | null
+          id?: number
+          mobile?: string | null
+          relation?: string | null
+          student_id?: number | null
+        }
+        Update: {
+          aadhaar?: string | null
+          address?: string | null
+          created_at?: string
+          guardian_name?: string | null
+          id?: number
+          mobile?: string | null
+          relation?: string | null
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_guardian_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_preferences: {
+        Row: {
+          clinical_assist: string | null
+          companionship: string | null
+          created_at: string
+          critical_illness_care: string | null
+          delivery_care: string | null
+          home_care: string | null
+          hospital_care: string | null
+          icu_home_care: string | null
+          id: number
+          old_age_home: string | null
+          senior_citizen_assist: string | null
+          student_id: number | null
+        }
+        Insert: {
+          clinical_assist?: string | null
+          companionship?: string | null
+          created_at?: string
+          critical_illness_care?: string | null
+          delivery_care?: string | null
+          home_care?: string | null
+          hospital_care?: string | null
+          icu_home_care?: string | null
+          id?: number
+          old_age_home?: string | null
+          senior_citizen_assist?: string | null
+          student_id?: number | null
+        }
+        Update: {
+          clinical_assist?: string | null
+          companionship?: string | null
+          created_at?: string
+          critical_illness_care?: string | null
+          delivery_care?: string | null
+          home_care?: string | null
+          hospital_care?: string | null
+          icu_home_care?: string | null
+          id?: number
+          old_age_home?: string | null
+          senior_citizen_assist?: string | null
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_preferences_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_source: {
+        Row: {
+          assigning_agent: string | null
+          category: string | null
+          created_at: string
+          id: number
+          priority: string | null
+          source_of_info: string | null
+          status: string | null
+          student_id: number | null
+          sub_category: string | null
+        }
+        Insert: {
+          assigning_agent?: string | null
+          category?: string | null
+          created_at?: string
+          id?: number
+          priority?: string | null
+          source_of_info?: string | null
+          status?: string | null
+          student_id?: number | null
+          sub_category?: string | null
+        }
+        Update: {
+          assigning_agent?: string | null
+          category?: string | null
+          created_at?: string
+          id?: number
+          priority?: string | null
+          source_of_info?: string | null
+          status?: string | null
+          student_id?: number | null
+          sub_category?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_source_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           age: number | null
