@@ -1,3 +1,11 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export interface Client {
   id: string;
   name: string;
@@ -145,4 +153,72 @@ export interface DetailedClientOrganization {
   };
   staffRequirements?: StaffRequirement[];
   general_notes?: string;
+}
+
+
+export interface EquipmentData {
+  hospitalBed: boolean;
+  wheelChair: boolean;
+  adultDiaper: boolean;
+  disposableUnderpad: boolean;
+  pillows: boolean;
+  bedRidden: boolean;
+  [key: string]: boolean | string | number | null | JSON;
+}
+
+export interface PatientAssessmentData {
+  guardianOccupation: string;
+  maritalStatus: string;
+  height: string;
+  weight: string;
+  pincode: string;
+  district: string;
+  cityTown: string;
+  currentStatus: string;
+  chronicIllness: string;
+  medicalHistory: string;
+  surgicalHistory: string;
+  medicationHistory: string;
+  alertnessLevel: string;
+  physicalBehavior: string;
+  speechPatterns: string;
+  emotionalState: string;
+  drugsUse: string;
+  alcoholUse: string;
+  tobaccoUse: string;
+  otherSocialHistory: string;
+  presentCondition: string;
+  bloodPressure: string;
+  sugarLevel: string;
+  hb: string;
+  rbc: string;
+  esr: string;
+  urine: string;
+  sodium: string;
+  otherLabInvestigations: string;
+  finalDiagnosis: string;
+  foodsToInclude: string;
+  foodsToAvoid: string;
+  patientPosition: string;
+  feedingMethod: string;
+  isClean: boolean;
+  isVentilated: boolean;
+  isDry: boolean;
+  hasNatureView: boolean;
+  hasSocialInteraction: boolean;
+  hasSupportiveEnv: boolean;
+  equipment: Json;
+  environment: Json;
+  lab_investigations: Json;
+}
+
+export interface SavePatientAssessmentParams {
+  clientId: string;
+  assessmentData: PatientAssessmentData;
+}
+
+export interface SavePatientAssessmentResult {
+  success: boolean;
+  id?: string;
+  error?: string;
 }

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { updateClientStatus, savePatientAssessment } from '@/app/actions/client-actions';
+import { toast } from 'react-hot-toast';
 
 interface InputFieldProps {
   label: string;
@@ -8,6 +10,10 @@ interface InputFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   required?: boolean;
+}
+
+interface UnderReviewContentProps {
+  clientId: string;
 }
 
 const InputField = ({ label, type = 'text', placeholder, id, value, onChange, required = false }: InputFieldProps) => (
@@ -39,7 +45,9 @@ const InputField = ({ label, type = 'text', placeholder, id, value, onChange, re
   </div>
 );
 
-export function UnderReviewContent() {
+export function UnderReviewContent({ clientId }: UnderReviewContentProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState({
     guardianOccupation: '',
     maritalStatus: '',
@@ -114,6 +122,58 @@ export function UnderReviewContent() {
         [equipmentId]: checked
       }
     }));
+  };
+
+
+  const handleApprove = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const formattedData = {
+        ...formData,
+        lab_investigations: {
+          hb: formData.hb,
+          rbc: formData.rbc,
+          esr: formData.esr,
+          urine: formData.urine,
+          sodium: formData.sodium,
+          other: formData.otherLabInvestigations
+        },
+        environment: {
+          isClean: formData.isClean,
+          isVentilated: formData.isVentilated,
+          isDry: formData.isDry,
+          hasNatureView: formData.hasNatureView,
+          hasSocialInteraction: formData.hasSocialInteraction,
+          hasSupportiveEnv: formData.hasSupportiveEnv
+        }
+      };
+      
+      // 1. Save the assessment data first
+      const assessmentResult = await savePatientAssessment({
+        clientId,
+        assessmentData: formattedData
+      });
+      
+      if (!assessmentResult.success) {
+        throw new Error(assessmentResult.error || 'Failed to save assessment data');
+      }
+      
+      // 2. Update client status to 'approved'
+      const statusResult = await updateClientStatus(clientId, 'approved');
+      
+      if (!statusResult.success) {
+        throw new Error(statusResult.error || 'Failed to update client status');
+      }
+      
+      toast.success('Client approved successfully!');
+      
+    } catch (error) {
+      console.error('Error approving client:', error);
+      toast.error(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -612,8 +672,12 @@ export function UnderReviewContent() {
       </div>
 
       <div className="flex gap-3">
-        <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-          Approve & Assign
+        <button 
+          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
+          onClick={handleApprove}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Processing...' : 'Approve & Assign'}
         </button>
         <button className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50">
           Reject

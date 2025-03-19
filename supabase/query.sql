@@ -150,3 +150,57 @@ USING ((auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'admin');
 
 -- Similar policies for other tables
 -- ... (add more as needed)
+
+
+-- Create patient assessments table
+CREATE TABLE patient_assessments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    guardian_occupation VARCHAR(100),
+    marital_status VARCHAR(50),
+    height VARCHAR(20),
+    weight VARCHAR(20),
+    pincode VARCHAR(20),
+    district VARCHAR(100),
+    city_town VARCHAR(100),
+    current_status VARCHAR(50),
+    chronic_illness VARCHAR(10),
+    medical_history TEXT,
+    surgical_history TEXT,
+    medication_history TEXT,
+    alertness_level TEXT,
+    physical_behavior TEXT,
+    speech_patterns TEXT,
+    emotional_state TEXT,
+    drugs_use TEXT,
+    alcohol_use TEXT,
+    tobacco_use TEXT,
+    other_social_history TEXT,
+    present_condition TEXT,
+    blood_pressure VARCHAR(50),
+    sugar_level VARCHAR(50),
+    lab_investigations JSONB,
+    final_diagnosis TEXT,
+    foods_to_include TEXT,
+    foods_to_avoid TEXT,
+    patient_position VARCHAR(50),
+    feeding_method VARCHAR(50),
+    environment JSONB,
+    equipment JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Add RLS policies for this table
+CREATE POLICY "Enable select for authenticated users on patient_assessments"
+ON patient_assessments
+FOR SELECT
+TO authenticated
+USING (true);
+
+CREATE POLICY "Enable insert and update for admin users on patient_assessments"
+ON patient_assessments
+FOR ALL
+TO authenticated
+USING ((auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'admin')
+WITH CHECK ((auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'admin');

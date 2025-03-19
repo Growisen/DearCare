@@ -296,6 +296,128 @@ export type Database = {
           },
         ]
       }
+      patient_assessments: {
+        Row: {
+          alcohol_use: string | null
+          alertness_level: string | null
+          blood_pressure: string | null
+          chronic_illness: string | null
+          city_town: string | null
+          client_id: string
+          created_at: string | null
+          current_status: string | null
+          district: string | null
+          drugs_use: string | null
+          emotional_state: string | null
+          environment: Json | null
+          equipment: Json | null
+          feeding_method: string | null
+          final_diagnosis: string | null
+          foods_to_avoid: string | null
+          foods_to_include: string | null
+          guardian_occupation: string | null
+          height: string | null
+          id: string
+          lab_investigations: Json | null
+          marital_status: string | null
+          medical_history: string | null
+          medication_history: string | null
+          other_social_history: string | null
+          patient_position: string | null
+          physical_behavior: string | null
+          pincode: string | null
+          present_condition: string | null
+          speech_patterns: string | null
+          sugar_level: string | null
+          surgical_history: string | null
+          tobacco_use: string | null
+          updated_at: string | null
+          weight: string | null
+        }
+        Insert: {
+          alcohol_use?: string | null
+          alertness_level?: string | null
+          blood_pressure?: string | null
+          chronic_illness?: string | null
+          city_town?: string | null
+          client_id: string
+          created_at?: string | null
+          current_status?: string | null
+          district?: string | null
+          drugs_use?: string | null
+          emotional_state?: string | null
+          environment?: Json | null
+          equipment?: Json | null
+          feeding_method?: string | null
+          final_diagnosis?: string | null
+          foods_to_avoid?: string | null
+          foods_to_include?: string | null
+          guardian_occupation?: string | null
+          height?: string | null
+          id?: string
+          lab_investigations?: Json | null
+          marital_status?: string | null
+          medical_history?: string | null
+          medication_history?: string | null
+          other_social_history?: string | null
+          patient_position?: string | null
+          physical_behavior?: string | null
+          pincode?: string | null
+          present_condition?: string | null
+          speech_patterns?: string | null
+          sugar_level?: string | null
+          surgical_history?: string | null
+          tobacco_use?: string | null
+          updated_at?: string | null
+          weight?: string | null
+        }
+        Update: {
+          alcohol_use?: string | null
+          alertness_level?: string | null
+          blood_pressure?: string | null
+          chronic_illness?: string | null
+          city_town?: string | null
+          client_id?: string
+          created_at?: string | null
+          current_status?: string | null
+          district?: string | null
+          drugs_use?: string | null
+          emotional_state?: string | null
+          environment?: Json | null
+          equipment?: Json | null
+          feeding_method?: string | null
+          final_diagnosis?: string | null
+          foods_to_avoid?: string | null
+          foods_to_include?: string | null
+          guardian_occupation?: string | null
+          height?: string | null
+          id?: string
+          lab_investigations?: Json | null
+          marital_status?: string | null
+          medical_history?: string | null
+          medication_history?: string | null
+          other_social_history?: string | null
+          patient_position?: string | null
+          physical_behavior?: string | null
+          pincode?: string | null
+          present_condition?: string | null
+          speech_patterns?: string | null
+          sugar_level?: string | null
+          surgical_history?: string | null
+          tobacco_use?: string | null
+          updated_at?: string | null
+          weight?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_assessments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_requirements: {
         Row: {
           client_id: string | null

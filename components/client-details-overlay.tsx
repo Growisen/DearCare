@@ -52,7 +52,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
       case "assigned":
         return <ApprovedContent client={client} />;
       case "under_review":
-        return <UnderReviewContent />;
+        return <UnderReviewContent clientId={client.id} />;
       case "pending":
         return <PendingContent client={client} onStatusChange={handleStatusChange} />;
       case "rejected":
