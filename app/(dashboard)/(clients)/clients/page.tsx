@@ -5,144 +5,10 @@ import { Input } from "../../../../components/ui/input"
 import { ClientDetailsOverlay } from "../../../../components/client-details-overlay"
 import { AddClientOverlay } from "../../../../components/add-client-overlay"
 import { getClients } from "../../../../app/actions/client-actions"
-
-interface Client {
-  id: string
-  name: string
-  requestDate: string
-  service: string
-  status: "pending" | "under_review" | "approved" | "rejected"| "assigned"
-  email: string
-  phone: string
-  location: string
-  assignedNurse?: string 
-  nurseContact?: string
-  shift?: string
-  condition?: string
-  description?: string
-  medications?: string[]
-  specialInstructions?: string
-  nurseLocation?: { lat: number; lng: number }
-  clientLocation?: { lat: number; lng: number }
-}
-
-const mockClients: Client[] = [
-  {
-    id: "1",
-    name: "Arun Kumar",
-    requestDate: "2024-01-15",
-    service: "Home Care",
-    status: "pending",
-    email: "arunkumar@gmail.com",
-    phone: "9847123456",
-    location: "Kottayam"
-  },
-  {
-    id: "2",
-    name: "Priya Menon",
-    requestDate: "2024-01-14",
-    service: "Elder Care",
-    status: "under_review",
-    email: "priyamenon@gmail.com",
-    phone: "9745678901",
-    location: "Kochi"
-  },
-  {
-    id: "3",
-    name: "Thomas George",
-    requestDate: "2024-01-13",
-    service: "Post-Surgery Care",
-    status: "assigned",
-    email: "thomasgeorge@gmail.com",
-    phone: "9895234567",
-    assignedNurse: "1", 
-    nurseContact: "9876543210",
-    shift: "Morning (8 AM - 4 PM)",
-    condition: "Post Hip Surgery",
-    description: "Patient requires assistance with mobility and physical therapy exercises",
-    medications: ["Pain medication - 3 times daily", "Blood thinners - morning", "Antibiotics - twice daily"],
-    specialInstructions: "Ensure patient does skip exercises twice daily. Monitor wound site for any signs of infection.",
-    nurseLocation: { lat: 12.9716, lng: 77.5946 },
-    clientLocation: { lat: 12.9352, lng: 77.6245 },
-    location: "Malappuram"
-  },
-  {
-    id: "4",
-    name: "Lakshmi Nair",
-    requestDate: "2024-01-12",
-    service: "Home Care",
-    status: "rejected",
-    email: "lakshmink@gmail.com",
-    phone: "9946789012",
-    location: "Thiruvananthapuram"
-  },
-  {
-    id: "5",
-    name: "Mohammed Rashid",
-    requestDate: "2024-01-15",
-    service: "Elder Care",
-    status: "pending",
-    email: "rashidm@gmail.com",
-    phone: "9847890123",
-    location: "Kozhikode"
-  },
-  {
-    id: "6",
-    name: "Susan Philip",
-    requestDate: "2024-01-11",
-    service: "Physiotherapy",
-    status: "approved",
-    condition: "Post Hip Surgery",
-    description: "Patient requires assistance with mobility and physical therapy exercises",
-    email: "susanphilip@gmail.com",
-    phone: "9947567890",
-    location: "Kollam"
-  },
-  {
-    id: "7",
-    name: "Rajesh Krishnan",
-    requestDate: "2024-01-10",
-    service: "Home Care",
-    status: "under_review",
-    email: "rajeshk@gmail.com",
-    phone: "9847345678",
-    location: "Thrissur"
-  },
-  {
-    id: "8",
-    name: "Anjali Menon",
-    requestDate: "2024-01-14",
-    service: "Post-Surgery Care",
-    status: "pending",
-    email: "anjalim@gmail.com",
-    phone: "9946234567",
-    location: "Alappuzha"
-  },
-  {
-    id: "9",
-    name: "Joseph Mathew",
-    requestDate: "2024-01-13",
-    service: "Elder Care",
-    status: "approved",
-    description: "Patient requires assistance with mobility and physical therapy exercises",
-    email: "josephm@gmail.com",
-    phone: "9895678901",
-    location: "Palakkad"
-  },
-  {
-    id: "10",
-    name: "Fathima Zahra",
-    requestDate: "2024-01-12",
-    service: "Physiotherapy",
-    status: "under_review",
-    email: "fathimaz@gmail.com",
-    phone: "9847456789",
-    location: "Kannur"
-  }
-]
+import { Client } from '../../../../types/client.types'
 
 export default function ClientsPage() {
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
+  const [selectedStatus, setSelectedStatus] = useState<"pending" | "under_review" | "approved" | "rejected" | "assigned" | "all">("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [showAddClient, setShowAddClient] = useState(false)
@@ -166,63 +32,43 @@ export default function ClientsPage() {
     assigned: CheckCircle
   }
 
-   useEffect(() => {
-  async function loadClients() {
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const result = await getClients(selectedStatus, searchQuery)
+  useEffect(() => {
+    async function loadClients() {
+      setIsLoading(true)
+      setError(null)
       
-      if (result.success && result.clients) {
-        // Add type assertion to make sure the status is of the correct type
-        const typedClients = result.clients.map(client => ({
-          ...client,
-          service: client.service || "Not specified",
-          email: client.email || "No email provided",
-          phone: client.phone || "No phone provided",
-          location: client.location || "No location specified",
-          status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
-        }))
-        setClients(typedClients)
-      } else {
-        setError(result.error || "Failed to load clients")
-        // Use mock data as fallback
-        setClients(mockClients.filter(client => {
-          const matchesStatus = selectedStatus === "all" ? client.status === "approved" : client.status === selectedStatus
-          const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              client.email.toLowerCase().includes(searchQuery.toLowerCase())
-          return matchesStatus && matchesSearch
-        }))
+      try {
+        const result = await getClients(selectedStatus, searchQuery)
+        
+        if (result.success && result.clients) {
+          // Add type assertion to make sure the status is of the correct type
+          const typedClients = result.clients.map(client => ({
+            ...client,
+            service: client.service || "Not specified",
+            email: client.email || "No email provided",
+            phone: client.phone || "No phone provided",
+            location: client.location || "No location specified",
+            status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
+          }))
+          setClients(typedClients)
+        } else {
+          setError(result.error || "Failed to load clients")
+        }
+      } catch (err) {
+        setError("An unexpected error occurred")
+        console.error(err)
+      } finally {
+        setIsLoading(false)
       }
-    } catch (err) {
-      setError("An unexpected error occurred")
-      console.error(err)
-      // Use mock data as fallback
-      setClients(mockClients.filter(client => {
-        const matchesStatus = selectedStatus === "all" ? client.status === "approved" : client.status === selectedStatus
-        const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            client.email.toLowerCase().includes(searchQuery.toLowerCase())
-        return matchesStatus && matchesSearch
-      }))
-    } finally {
-      setIsLoading(false)
     }
-  }
   
-  loadClients()
-}, [selectedStatus, searchQuery])
+    loadClients()
+  }, [selectedStatus, searchQuery])
 
   const filteredClients = clients
 
   const handleReviewDetails = (client: Client) => {
     setSelectedClient(client)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  const handleAddClient = (clientData: any) => {
-    // Handle adding new client here
-    setShowAddClient(false)
   }
 
   return (
@@ -261,7 +107,7 @@ export default function ClientsPage() {
               {["approved", "pending", "under_review", "rejected", "assigned"].map((status) => (
                 <button
                   key={status}
-                  onClick={() => setSelectedStatus(status)}
+                  onClick={() => setSelectedStatus(status as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     selectedStatus === status
                       ? "bg-blue-100 text-blue-800"
@@ -277,7 +123,7 @@ export default function ClientsPage() {
           <div className="sm:hidden">
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(e) => setSelectedStatus(e.target.value as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
               className="w-full rounded-lg border border-gray-200 bg-white py-2.5 px-3 text-base text-gray-900 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               style={{ 
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
@@ -398,7 +244,7 @@ export default function ClientsPage() {
       {showAddClient && (
         <AddClientOverlay 
           onClose={() => setShowAddClient(false)}
-          onAdd={handleAddClient}
+          onAdd={() => setShowAddClient(false)}
         />
       )}
 
