@@ -99,11 +99,50 @@ export interface ClientInformationProps {
   client: {
     id: string;
     name: string;
-    email: string;
-    phone: string;
-    service: string;
+    email?: string;
+    phone?: string;
+    service?: string;
     requestDate: string;
     //condition?: string;
     location?: string;
   };
+}
+
+
+
+
+export interface DetailedClientIndividual {
+  client_type: 'individual';
+  details?: {
+    patient_name?: string;
+    patient_age?: string | number;
+    patient_gender?: string;
+    patient_phone?: string;
+    requestor_name?: string;
+    relation_to_patient?: string;
+    requestor_email?: string;
+    requestor_phone?: string;
+    service_required?: string;
+    care_duration?: string;
+    start_date?: string;
+    complete_address?: string;
+    preferred_caregiver_gender?: string;
+  };
+  general_notes?: string;
+}
+
+export interface DetailedClientOrganization {
+  client_type: 'organization' | 'hospital' | 'carehome';
+  details?: {
+    organization_name?: string;
+    organization_type?: string;
+    contact_person_name?: string;
+    contact_person_role?: string;
+    contact_email?: string;
+    contact_phone?: string;
+    organization_address?: string;
+    contract_duration?: string;
+  };
+  staffRequirements?: StaffRequirement[];
+  general_notes?: string;
 }

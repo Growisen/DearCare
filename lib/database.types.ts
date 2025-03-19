@@ -197,6 +197,7 @@ export type Database = {
           service_type: string | null
           shift_pattern: string | null
           state: string | null
+          status: Database["public"]["Enums"]["nurse_status"]
           taluk: string | null
         }
         Insert: {
@@ -221,6 +222,7 @@ export type Database = {
           service_type?: string | null
           shift_pattern?: string | null
           state?: string | null
+          status?: Database["public"]["Enums"]["nurse_status"]
           taluk?: string | null
         }
         Update: {
@@ -245,6 +247,7 @@ export type Database = {
           service_type?: string | null
           shift_pattern?: string | null
           state?: string | null
+          status?: Database["public"]["Enums"]["nurse_status"]
           taluk?: string | null
         }
         Relationships: []
@@ -328,6 +331,87 @@ export type Database = {
           },
         ]
       }
+      students: {
+        Row: {
+          age: number | null
+          category: string | null
+          city: string | null
+          created_at: string
+          cur_address: string | null
+          cur_health_status: string | null
+          cur_pincode: string | null
+          disability_details: string | null
+          dob: string | null
+          email: string | null
+          gender: string | null
+          id: number
+          languages: Json | null
+          marital_status: string | null
+          mobile: string | null
+          mother_tongue: string | null
+          name: string | null
+          nationality: string | null
+          noc_status: string | null
+          perm_address: string | null
+          perm_pincode: string | null
+          religion: string | null
+          state: string | null
+          taluk: string | null
+        }
+        Insert: {
+          age?: number | null
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          cur_address?: string | null
+          cur_health_status?: string | null
+          cur_pincode?: string | null
+          disability_details?: string | null
+          dob?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: number
+          languages?: Json | null
+          marital_status?: string | null
+          mobile?: string | null
+          mother_tongue?: string | null
+          name?: string | null
+          nationality?: string | null
+          noc_status?: string | null
+          perm_address?: string | null
+          perm_pincode?: string | null
+          religion?: string | null
+          state?: string | null
+          taluk?: string | null
+        }
+        Update: {
+          age?: number | null
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          cur_address?: string | null
+          cur_health_status?: string | null
+          cur_pincode?: string | null
+          disability_details?: string | null
+          dob?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: number
+          languages?: Json | null
+          marital_status?: string | null
+          mobile?: string | null
+          mother_tongue?: string | null
+          name?: string | null
+          nationality?: string | null
+          noc_status?: string | null
+          perm_address?: string | null
+          perm_pincode?: string | null
+          religion?: string | null
+          state?: string | null
+          taluk?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -361,6 +445,7 @@ export type Database = {
 }
 
 type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
   PublicTableNameOrOptions extends
     | keyof (PublicSchema["Tables"] & PublicSchema["Views"])

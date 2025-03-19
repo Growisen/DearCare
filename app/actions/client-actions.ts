@@ -136,7 +136,7 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
 }
 
 
-export async function getClients(status?: string, searchQuery?: string) {
+export async function getClients(status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', searchQuery?: string) {
   try {
     const supabase = await createSupabaseServerClient()
     
@@ -192,8 +192,8 @@ export async function getClients(status?: string, searchQuery?: string) {
           ? individualData?.patient_name || "Unknown" 
           : organizationData?.organization_name || "Unknown",
         requestDate: isIndividual
-          ? new Date(individualData?.start_date || record.created_at).toISOString().split('T')[0]
-          : new Date(record.created_at).toISOString().split('T')[0],
+          ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+          : new Date(record.created_at || new Date()).toISOString().split('T')[0],
         service: isIndividual ? individualData?.service_required : "Organization Care",
         status: record.status,
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
@@ -220,6 +220,84 @@ export async function getClients(status?: string, searchQuery?: string) {
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred', 
       clients: [] 
+    }
+  }
+}
+
+
+/**
+ * Fetches detailed information for a specific client by ID
+ */
+export async function getClientDetails(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient()
+    
+    // Get the base client record first to determine the type
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', clientId)
+      .single()
+    
+    if (clientError) {
+      return { success: false, error: clientError.message }
+    }
+    
+    if (!client) {
+      return { success: false, error: 'Client not found' }
+    }
+    
+    // Based on client type, fetch the appropriate details
+    if (client.client_type === 'individual') {
+      const { data: individualClient, error: individualError } = await supabase
+        .from('individual_clients')
+        .select('*')
+        .eq('client_id', clientId)
+        .single()
+        
+      if (individualError) {
+        return { success: false, error: individualError.message }
+      }
+      
+      return { 
+        success: true, 
+        client: {
+          ...client,
+          details: individualClient
+        }
+      }
+    } else {
+      // For organization, hospital, or carehome clients
+      const { data: organizationClient, error: organizationError } = await supabase
+        .from('organization_clients')
+        .select('*')
+        .eq('client_id', clientId)
+        .single()
+        
+      if (organizationError) {
+        return { success: false, error: organizationError.message }
+      }
+      
+      // Fetch staff requirements if any
+      const { data: staffRequirements } = await supabase
+        .from('staff_requirements')
+        .select('*')
+        .eq('client_id', clientId)
+        
+      return { 
+        success: true, 
+        client: {
+          ...client,
+          details: organizationClient,
+          staffRequirements: staffRequirements || []
+        }
+      }
+    }
+  } catch (error: unknown) {
+    console.error('Error fetching client details:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
     }
   }
 }
