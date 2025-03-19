@@ -14,14 +14,17 @@ type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
   const [detailedClient, setDetailedClient] = useState<DetailedClient | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentClientStatus, setCurrentClientStatus] = useState(client.status);
 
   useEffect(() => {
     async function fetchClientDetails() {
       if (client.id) {
         setLoading(true);
         const result = await getClientDetails(client.id);
-        if (result.success) {
-          setDetailedClient(result.client);
+        if (result.success && result.client && result.client.status) {
+          setDetailedClient(result.client as DetailedClient);
+          // Update current status
+          setCurrentClientStatus(result.client.status);
         }
         setLoading(false);
       }
@@ -30,15 +33,28 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
     fetchClientDetails();
   }, [client.id]);
 
+  // Handle status change by refetching client data
+  const handleStatusChange = async () => {
+    if (client.id) {
+      setLoading(true);
+      const result = await getClientDetails(client.id);
+      if (result.success && result.client && result.client.status) {
+        setDetailedClient(result.client as DetailedClient);
+        setCurrentClientStatus(result.client.status);
+      }
+      setLoading(false);
+    }
+  };
+
   const renderStatusSpecificContent = () => {
-    switch (client.status) {
+    switch (currentClientStatus) {
       case "approved":
       case "assigned":
         return <ApprovedContent client={client} />;
       case "under_review":
         return <UnderReviewContent />;
       case "pending":
-        return <PendingContent />;
+        return <PendingContent client={client} onStatusChange={handleStatusChange} />;
       case "rejected":
         return <RejectedContent />;
       default:
@@ -64,7 +80,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
         </h3>
         
         {isIndividual ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-y-4 gap-x-6">
             <DetailItem label="Patient Name" value={detailedClient.details?.patient_name} />
             <DetailItem label="Patient Age" value={detailedClient.details?.patient_age} />
             <DetailItem label="Patient Gender" value={detailedClient.details?.patient_gender} />
@@ -106,9 +122,9 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {detailedClient.staffRequirements.map((req: StaffRequirement, index: number) => (
                       <tr key={index}>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.staff_type}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.staffType}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.count}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.shift_type}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.shiftType}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -130,7 +146,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl w-full max-w-7xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Request Details</h2>

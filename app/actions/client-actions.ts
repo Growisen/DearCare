@@ -301,3 +301,35 @@ export async function getClientDetails(clientId: string) {
     }
   }
 }
+
+
+/**
+ * Updates a client's status
+ */
+export async function updateClientStatus(clientId: string, newStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned') {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('clients')
+      .update({ status: newStatus })
+      .eq('id', clientId)
+      .select()
+      .single();
+    
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    
+    // Revalidate the clients page to reflect the changes
+    revalidatePath('/clients');
+    
+    return { success: true, client: data };
+  } catch (error: unknown) {
+    console.error('Error updating client status:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
