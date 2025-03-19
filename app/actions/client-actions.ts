@@ -2,7 +2,7 @@
 
 import { createSupabaseServerClient } from './auth'
 import { revalidatePath } from 'next/cache';
-import { IndividualFormData, OrganizationFormData } from '@/types/client.types';
+import { IndividualFormData, OrganizationFormData, SavePatientAssessmentParams, SavePatientAssessmentResult  } from '@/types/client.types';
 
 /**
  * Adds a new individual client to the database
@@ -327,6 +327,114 @@ export async function updateClientStatus(clientId: string, newStatus: 'pending' 
     return { success: true, client: data };
   } catch (error: unknown) {
     console.error('Error updating client status:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+
+/**
+ * Saves patient assessment data
+ */
+export async function savePatientAssessment(data: SavePatientAssessmentParams): Promise<SavePatientAssessmentResult> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    // Check if an assessment already exists for this client
+    const { data: existingAssessment } = await supabase
+      .from('patient_assessments')
+      .select('id')
+      .eq('client_id', data.clientId)
+      .single();
+    
+    // Prepare environment JSONB data
+    const environmentData = {
+      is_clean: data.assessmentData.isClean,
+      is_ventilated: data.assessmentData.isVentilated,
+      is_dry: data.assessmentData.isDry,
+      has_nature_view: data.assessmentData.hasNatureView,
+      has_social_interaction: data.assessmentData.hasSocialInteraction,
+      has_supportive_env: data.assessmentData.hasSupportiveEnv
+    };
+    
+    // Prepare lab investigations JSONB data
+    const labInvestigationsData = {
+      hb: data.assessmentData.hb,
+      rbc: data.assessmentData.rbc,
+      esr: data.assessmentData.esr,
+      urine: data.assessmentData.urine,
+      sodium: data.assessmentData.sodium,
+      other: data.assessmentData.otherLabInvestigations
+    };
+    
+    // Common assessment data for both insert and update
+    const assessmentData = {
+      guardian_occupation: data.assessmentData.guardianOccupation,
+      marital_status: data.assessmentData.maritalStatus,
+      height: data.assessmentData.height,
+      weight: data.assessmentData.weight,
+      pincode: data.assessmentData.pincode,
+      district: data.assessmentData.district,
+      city_town: data.assessmentData.cityTown,
+      current_status: data.assessmentData.currentStatus,
+      chronic_illness: data.assessmentData.chronicIllness,
+      medical_history: data.assessmentData.medicalHistory,
+      surgical_history: data.assessmentData.surgicalHistory,
+      medication_history: data.assessmentData.medicationHistory,
+      alertness_level: data.assessmentData.alertnessLevel,
+      physical_behavior: data.assessmentData.physicalBehavior,
+      speech_patterns: data.assessmentData.speechPatterns,
+      emotional_state: data.assessmentData.emotionalState,
+      drugs_use: data.assessmentData.drugsUse,
+      alcohol_use: data.assessmentData.alcoholUse,
+      tobacco_use: data.assessmentData.tobaccoUse,
+      other_social_history: data.assessmentData.otherSocialHistory,
+      present_condition: data.assessmentData.presentCondition,
+      blood_pressure: data.assessmentData.bloodPressure,
+      sugar_level: data.assessmentData.sugarLevel,
+      lab_investigations: labInvestigationsData,
+      final_diagnosis: data.assessmentData.finalDiagnosis,
+      foods_to_include: data.assessmentData.foodsToInclude,
+      foods_to_avoid: data.assessmentData.foodsToAvoid,
+      patient_position: data.assessmentData.patientPosition,
+      feeding_method: data.assessmentData.feedingMethod,
+      environment: environmentData,
+      equipment: data.assessmentData.equipment, 
+      updated_at: new Date().toISOString()
+    };
+    
+    let result;
+    
+    if (existingAssessment) {
+      // Update existing assessment
+      result = await supabase
+        .from('patient_assessments')
+        .update(assessmentData)
+        .eq('id', existingAssessment.id)
+        .select();
+    } else {
+      // Insert new assessment
+      result = await supabase
+        .from('patient_assessments')
+        .insert({
+          client_id: data.clientId,
+          ...assessmentData,
+          created_at: new Date().toISOString()
+        })
+        .select();
+    }
+    
+    if (result.error) {
+      throw new Error(`Failed to save assessment: ${result.error.message}`);
+    }
+    
+    revalidatePath(`/clients/${data.clientId}`);
+    return { success: true, id: result.data?.[0]?.id };
+    
+  } catch (error: unknown) {
+    console.error('Error saving patient assessment:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
