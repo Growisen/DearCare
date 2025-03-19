@@ -31,20 +31,20 @@ export async function addIndividualClient(formData: IndividualFormData) {
     const { error: individualError } = await supabase
       .from('individual_clients')
       .insert({
+        care_duration: formData.careDuration,
         client_id: clientData.id,
-        requestor_name: formData.requestorName,
-        requestor_phone: formData.requestorPhone,
-        requestor_email: formData.requestorEmail,
-        relation_to_patient: formData.relationToPatient,
-        patient_name: formData.patientName,
+        complete_address: formData.completeAddress,
         patient_age: parseInt(formData.patientAge) || null,
         patient_gender: formData.patientGender || null,
+        patient_name: formData.patientName,
         patient_phone: formData.patientPhone || null,
-        complete_address: formData.completeAddress,
+        preferred_caregiver_gender: formData.preferredCaregiverGender || null,
+        relation_to_patient: formData.relationToPatient,
+        requestor_email: formData.requestorEmail,
+        requestor_name: formData.requestorName,
+        requestor_phone: formData.requestorPhone,
         service_required: formData.serviceRequired,
-        care_duration: formData.careDuration,
         start_date: formData.startDate,
-        preferred_caregiver_gender: formData.preferredCaregiverGender || null
       });
     
     if (individualError) {
