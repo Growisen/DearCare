@@ -441,3 +441,36 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
     };
   }
 }
+
+
+/**
+ * Fetches patient assessment data for a specific client
+ */
+export async function getPatientAssessment(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('patient_assessments')
+      .select('*')
+      .eq('client_id', clientId)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Record not found, return success with null data
+        return { success: true, assessment: null };
+      }
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true, assessment: data };
+  } catch (error: unknown) {
+    console.error('Error fetching patient assessment:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      assessment: null
+    };
+  }
+}
