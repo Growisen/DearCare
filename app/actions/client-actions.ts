@@ -39,7 +39,7 @@ export async function addIndividualClient(formData: IndividualFormData) {
         patient_name: formData.patientName,
         patient_phone: formData.patientPhone || null,
         preferred_caregiver_gender: formData.preferredCaregiverGender || null,
-        relation_to_patient: formData.relationToPatient,
+        relation_to_patient: formData.relationToPatient || 'other',
         requestor_email: formData.requestorEmail,
         requestor_name: formData.requestorName,
         requestor_phone: formData.requestorPhone,

@@ -67,10 +67,10 @@ export interface IndividualFormData extends BaseFormData {
   requestorName: string;
   requestorPhone: string;
   requestorEmail: string;
-  relationToPatient: string;
+  relationToPatient: "" | "other" | "self" | "spouse" | "child" | "parent" | "sibling";
   patientName: string;
   patientAge: string;
-  patientGender: string;
+  patientGender: "" | "male" | "female" | "other";
   patientPhone: string;
   completeAddress: string;
   serviceRequired: string;
