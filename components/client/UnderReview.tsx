@@ -23,6 +23,7 @@ interface InputFieldProps {
 interface UnderReviewContentProps {
   clientId: string;
   onClose?: () => void;
+  onStatusChange?: (newStatus?: "pending" | "under_review" | "approved" | "rejected" | "assigned") => void;
 }
 
 export const InputField = ({ label, type = 'text', placeholder, id, value, onChange, required = false }: InputFieldProps) => (
@@ -54,7 +55,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
   </div>
 );
 
-export function UnderReviewContent({ clientId, onClose }: UnderReviewContentProps) {
+export function UnderReviewContent({ clientId, onClose, onStatusChange }: UnderReviewContentProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -176,6 +177,11 @@ export function UnderReviewContent({ clientId, onClose }: UnderReviewContentProp
       }
       
       toast.success('Client approved successfully!');
+
+      // Call the onStatusChange callback to refresh the client list
+      if (onStatusChange) {
+        onStatusChange('approved');
+      }
 
       if (onClose) {
         onClose();

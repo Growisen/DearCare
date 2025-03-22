@@ -8,13 +8,17 @@ import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization } from '../types/client.types';
 import { getClientDetails } from '../app/actions/client-actions';
 
+type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
-
-export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
+export function ClientDetailsOverlay({ 
+  client, 
+  onClose,
+  onStatusChange 
+}: ClientDetailsProps & { onStatusChange?: () => void }) {
   const [detailedClient, setDetailedClient] = useState<DetailedClient | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentClientStatus, setCurrentClientStatus] = useState(client.status);
+  const [currentClientStatus, setCurrentClientStatus] = useState<ClientStatus>(client.status);
 
   useEffect(() => {
     async function fetchClientDetails() {
@@ -34,13 +38,22 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
   }, [client.id]);
 
   // Handle status change by refetching client data
-  const handleStatusChange = async () => {
+  const handleStatusChange = async (newStatus?: ClientStatus) => {
+    if (newStatus) {
+      setCurrentClientStatus(newStatus);
+    }
+  
     if (client.id) {
       setLoading(true);
       const result = await getClientDetails(client.id);
       if (result.success && result.client && result.client.status) {
         setDetailedClient(result.client as DetailedClient);
         setCurrentClientStatus(result.client.status);
+        
+        // Call the callback to refresh the client list
+        if (onStatusChange) {
+          onStatusChange();
+        }
       }
       setLoading(false);
     }
@@ -52,7 +65,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
       case "assigned":
         return <ApprovedContent client={client} />;
       case "under_review":
-        return <UnderReviewContent clientId={client.id} onClose={onClose} />;
+        return <UnderReviewContent clientId={client.id} onClose={onClose} onStatusChange={handleStatusChange} />;
       case "pending":
         return <PendingContent client={client} onStatusChange={handleStatusChange} />;
       case "rejected":

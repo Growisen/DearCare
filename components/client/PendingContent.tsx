@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { updateClientStatus } from '../../app/actions/client-actions';
 import { Client } from '../../types/client.types';
 
+type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
+
 type PendingContentProps = {
   client: Client;
-  onStatusChange?: () => void;
+  onStatusChange?: (newStatus?: ClientStatus) => void;
 };
 
 export function PendingContent({ client, onStatusChange }: PendingContentProps) {
@@ -20,9 +22,9 @@ export function PendingContent({ client, onStatusChange }: PendingContentProps) 
       const result = await updateClientStatus(client.id, 'under_review');
       
       if (result.success) {
-        // Notify parent component to update UI
+        // Pass the new status for optimistic update
         if (onStatusChange) {
-          onStatusChange();
+          onStatusChange('under_review');
         }
       } else {
         setError(result.error || 'Failed to update status');

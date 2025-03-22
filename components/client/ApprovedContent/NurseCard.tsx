@@ -8,19 +8,19 @@ interface NurseCardProps {
   onViewProfile: (nurse: Nurse) => void;
 }
 
-const NurseCard: React.FC<NurseCardProps> = ({ nurse, onAssign, onViewProfile }) => {
+const NurseCard: React.FC<NurseCardProps> = ({ nurse, onAssign }) => {
   return (
     <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300 bg-white mb-5">
       <div className="flex items-start justify-between gap-6">
         <div className="flex items-start space-x-6">
-          <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold overflow-hidden shadow-sm border border-blue-50">
+          {/* <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold overflow-hidden shadow-sm border border-blue-50">
             {nurse.profileImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={nurse.profileImage} alt={`${nurse.firstName} ${nurse.lastName}`} className="w-full h-full object-cover" />
             ) : (
               <span className="text-2xl">{nurse.firstName[0]}{nurse.lastName[0]}</span>
             )}
-          </div>
+          </div> */}
           <div className="pt-2">
             <h3 className="text-xl font-semibold text-gray-900 mb-3">{nurse.firstName} {nurse.lastName}</h3>
             <div className="flex flex-wrap gap-3 mb-4">

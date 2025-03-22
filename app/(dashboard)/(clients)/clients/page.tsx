@@ -130,6 +130,10 @@ export default function ClientsPage() {
     }
   }
 
+  // function to handle client status change
+  const handleClientStatusChange = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const PaginationControls = () => (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 px-6 border-t border-gray-200">
@@ -411,7 +415,8 @@ export default function ClientsPage() {
       {selectedClient && (
         <ClientDetailsOverlay 
           client={selectedClient} 
-          onClose={() => setSelectedClient(null)} 
+          onClose={() => setSelectedClient(null)}
+          onStatusChange={handleClientStatusChange}
         />
       )}
     </div>
