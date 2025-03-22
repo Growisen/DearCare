@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Search, Eye, CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { Search, Eye, CheckCircle, Clock, AlertCircle, X } from "lucide-react"
 import { Input } from "../../../../components/ui/input"
 import { ClientDetailsOverlay } from "../../../../components/client-details-overlay"
 import { AddClientOverlay } from "../../../../components/add-client-overlay"
@@ -20,6 +20,12 @@ export default function ClientsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0) 
   const [isStatusLoaded, setIsStatusLoaded] = useState(false)
 
+  const [currentPage, setCurrentPage] = useState(1)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [pageSize, setPageSize] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-700 border border-yellow-200",
     under_review: "bg-blue-100 text-blue-700 border border-blue-200",
@@ -37,6 +43,7 @@ export default function ClientsPage() {
   }
 
   const handleSearch = () => {
+    setCurrentPage(1) 
     setSearchQuery(searchInput)
   }
 
@@ -48,7 +55,7 @@ export default function ClientsPage() {
       setError(null)
       
       try {
-        const result = await getClients(selectedStatus, searchQuery)
+        const result = await getClients(selectedStatus, searchQuery, currentPage, pageSize)
         
         if (result.success && result.clients) {
           // Add type assertion to make sure the status is of the correct type
@@ -61,6 +68,12 @@ export default function ClientsPage() {
             status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
           }))
           setClients(typedClients)
+          
+          // Set pagination data
+          if (result.pagination) {
+            setTotalPages(result.pagination.totalPages)
+            setTotalCount(result.pagination.totalCount)
+          }
         } else {
           setError(result.error || "Failed to load clients")
         }
@@ -71,9 +84,9 @@ export default function ClientsPage() {
         setIsLoading(false)
       }
     }
-  
+
     loadClients()
-  }, [selectedStatus, searchQuery, refreshTrigger, isStatusLoaded])
+  }, [selectedStatus, searchQuery, refreshTrigger, isStatusLoaded, currentPage, pageSize])
 
   //load status from localStorage after initial render
   useEffect(() => {
@@ -96,9 +109,89 @@ export default function ClientsPage() {
   }
 
   const handleStatusChange = (status: "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all") => {
+    setCurrentPage(1) 
     setSelectedStatus(status);
     localStorage.setItem('clientsPageStatus', status);
   }
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+
+  const PaginationControls = () => (
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 px-6 border-t border-gray-200">
+      <div className="text-sm text-gray-600">
+        Showing {clients.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}-
+        {Math.min(currentPage * pageSize, totalCount)} of {totalCount} clients
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+          className={`rounded-lg border p-2 ${
+            currentPage === 1
+              ? "border-gray-200 text-gray-400 cursor-not-allowed"
+              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          Previous
+        </button>
+        <div className="flex items-center gap-1">
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            // Determine which pages to show
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            
+            return (
+              <button
+                key={i}
+                onClick={() => handlePageChange(pageNum)}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  currentPage === pageNum
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className={`rounded-lg border p-2 ${
+            currentPage === totalPages
+              ? "border-gray-200 text-gray-400 cursor-not-allowed"
+              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div>
@@ -133,13 +226,26 @@ export default function ClientsPage() {
                   }
                 }}
               />
+              {/* Search button */}
+              <button
+                onClick={handleSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
+              >
+                Search
+              </button>
+              {searchInput && (
+                <button 
+                  onClick={() => {
+                    setSearchInput("")
+                    setSearchQuery("")
+                    setCurrentPage(1)
+                  }}
+                  className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <button 
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
           </div>
           {/* Desktop view buttons */}
           <div className="hidden sm:block overflow-x-auto -mx-4 px-4">
@@ -245,6 +351,10 @@ export default function ClientsPage() {
                     })}
                   </tbody>
                 </table>
+
+                {!isLoading && !error && filteredClients.length > 0 && (
+                  <PaginationControls />
+                )}
               </div>
 
               {/* Mobile card view */}
@@ -279,6 +389,10 @@ export default function ClientsPage() {
                     </div>
                   )
                 })}
+
+                {!isLoading && !error && filteredClients.length > 0 && (
+                  <PaginationControls />
+                )}
               </div>
             </>
           )}
