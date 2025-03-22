@@ -95,7 +95,7 @@ export type FormData = IndividualFormData & OrganizationFormData;
 
 export interface AddClientProps {
   onClose: () => void;
-  onAdd: (data: Partial<Client>) => void;
+  onAdd?: () => void;
 }
 
 export interface ClientDetailsProps {

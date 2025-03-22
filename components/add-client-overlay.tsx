@@ -20,7 +20,7 @@ const InputField = ({ label, type = 'text', placeholder, id, value, onChange }: 
   </div>
 );
 
-export function AddClientOverlay({ onClose }: AddClientProps) {
+export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientType, setClientType] = useState<'individual' | 'organization' | 'hospital' | 'carehome'>('individual');
   
@@ -168,7 +168,8 @@ export function AddClientOverlay({ onClose }: AddClientProps) {
       toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client added successfully!`);
       
       // Close the overlay after successful submission
-      onClose();
+      if (onAdd) onAdd();
+      else onClose();
       
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';

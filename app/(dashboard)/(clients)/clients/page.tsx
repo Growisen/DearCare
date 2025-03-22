@@ -6,8 +6,10 @@ import { ClientDetailsOverlay } from "../../../../components/client-details-over
 import { AddClientOverlay } from "../../../../components/add-client-overlay"
 import { getClients } from "../../../../app/actions/client-actions"
 import { Client } from '../../../../types/client.types'
+import Loader from '@/components/loader'
 
 export default function ClientsPage() {
+  const [searchInput, setSearchInput] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<"pending" | "under_review" | "approved" | "rejected" | "assigned" | "all">("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
@@ -15,6 +17,8 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0) 
+  const [isStatusLoaded, setIsStatusLoaded] = useState(false)
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-700 border border-yellow-200",
@@ -32,7 +36,13 @@ export default function ClientsPage() {
     assigned: CheckCircle
   }
 
+  const handleSearch = () => {
+    setSearchQuery(searchInput)
+  }
+
   useEffect(() => {
+    if (!isStatusLoaded) return;
+    
     async function loadClients() {
       setIsLoading(true)
       setError(null)
@@ -63,7 +73,16 @@ export default function ClientsPage() {
     }
   
     loadClients()
-  }, [selectedStatus, searchQuery])
+  }, [selectedStatus, searchQuery, refreshTrigger, isStatusLoaded])
+
+  //load status from localStorage after initial render
+  useEffect(() => {
+    const saved = localStorage.getItem('clientsPageStatus');
+    if (saved && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(saved)) {
+      setSelectedStatus(saved as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all");
+    }
+    setIsStatusLoaded(true); 
+  }, []); 
 
   const filteredClients = clients
 
@@ -71,10 +90,18 @@ export default function ClientsPage() {
     setSelectedClient(client)
   }
 
+  const handleClientAdded = () => {
+    setShowAddClient(false)
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleStatusChange = (status: "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all") => {
+    setSelectedStatus(status);
+    localStorage.setItem('clientsPageStatus', status);
+  }
+
   return (
     <div>
-      
-      
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Client Requests</h1>
@@ -92,14 +119,27 @@ export default function ClientsPage() {
         </div>
 
         <div className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search clients..."
-              className="pl-10 w-full bg-white text-base text-gray-900 placeholder:text-gray-500 border-gray-200"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="relative w-full flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search clients..."
+                className="pl-10 w-full bg-white text-base text-gray-900 placeholder:text-gray-500 border-gray-200"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch()
+                  }
+                }}
+              />
+            </div>
+            <button 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={handleSearch}
+            >
+              Search
+            </button>
           </div>
           {/* Desktop view buttons */}
           <div className="hidden sm:block overflow-x-auto -mx-4 px-4">
@@ -107,7 +147,7 @@ export default function ClientsPage() {
               {["approved", "pending", "under_review", "rejected", "assigned"].map((status) => (
                 <button
                   key={status}
-                  onClick={() => setSelectedStatus(status as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
+                  onClick={() => handleStatusChange(status as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     selectedStatus === status
                       ? "bg-blue-100 text-blue-800"
@@ -123,7 +163,7 @@ export default function ClientsPage() {
           <div className="sm:hidden">
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
+              onChange={(e) => handleStatusChange(e.target.value as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
               className="w-full rounded-lg border border-gray-200 bg-white py-2.5 px-3 text-base text-gray-900 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               style={{ 
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
@@ -144,16 +184,21 @@ export default function ClientsPage() {
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
           {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            </div>
-          ) : error ? (
-            <div className="p-6 text-center">
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-                {error}
+            <Loader />
+            ) : error ? (
+              <div className="p-6 text-center">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                  {error}
+                </div>
               </div>
-            </div>
-          ) : (
+            ) : filteredClients.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="bg-gray-50 border border-gray-200 text-gray-600 px-6 py-5 rounded-lg">
+                  <p className="text-lg font-medium mb-1">No clients found</p>
+                  <p className="text-sm">Try changing your filters or search criteria</p>
+                </div>
+              </div>
+            ) : (
             <>
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
@@ -244,7 +289,7 @@ export default function ClientsPage() {
       {showAddClient && (
         <AddClientOverlay 
           onClose={() => setShowAddClient(false)}
-          onAdd={() => setShowAddClient(false)}
+          onAdd={handleClientAdded}
         />
       )}
 

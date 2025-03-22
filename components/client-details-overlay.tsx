@@ -52,7 +52,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
       case "assigned":
         return <ApprovedContent client={client} />;
       case "under_review":
-        return <UnderReviewContent clientId={client.id} />;
+        return <UnderReviewContent clientId={client.id} onClose={onClose} />;
       case "pending":
         return <PendingContent client={client} onStatusChange={handleStatusChange} />;
       case "rejected":
@@ -68,7 +68,7 @@ export function ClientDetailsOverlay({ client, onClose }: ClientDetailsProps) {
     }
     
     if (!detailedClient) {
-      return <div className="p-4 text-center">Could not load detailed information</div>;
+      return <div className="p-4 text-center text-gray-700">Could not load detailed information. Try sometime later.</div>;
     }
     
     const isIndividual = detailedClient.client_type === 'individual';

@@ -68,6 +68,8 @@ interface AssessmentData {
 }
 
 export default function PatientAssessment({ clientId, isEditing, onSave }: PatientAssessmentProps) {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   // Combined state for all assessment sections
   const [formData, setFormData] = useState({
     // Medical Status
@@ -130,6 +132,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
+        setLoading(true);
         const result = await getPatientAssessment(clientId);
         
         if (result.success && result.assessment) {
@@ -195,11 +198,15 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
             patientPosition: assessmentData.patient_position || '',
             feedingMethod: assessmentData.feeding_method || '',
           });
+
+          setLoading(false);
         } else if (!result.success) {
-          console.error('Error fetching assessment data:', result.error);
+          setError('Failed to fetch patient assessment data');
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching assessment data:', error);
+      } catch {
+        setError('An error occurred while fetching patient assessment data');
+        setLoading(false);
       }
     };
 
@@ -255,20 +262,25 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
     }
   };
 
+  if (loading) {
+    return <div className="p-4 text-gray-700 text-center">Loading client details...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-600 bg-red-50 border border-red-200 rounded-md m-4">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 space-y-6">
+       
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">Patient Assessment</h2>
-            {isEditing && (
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              >
-                Save Assessment
-              </button>
-            )}
           </div>
           
           {/* Display sections using the respective components */}

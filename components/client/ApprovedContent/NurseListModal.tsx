@@ -18,11 +18,27 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
   onViewProfile
 }) => {
   const [activeTab, setActiveTab] = useState('available');
+  const [selectedNurses, setSelectedNurses] = useState<string[]>([]);
+  const [requiredNurses, setRequiredNurses] = useState<number>(1);
 
   if (!isOpen) return null;
 
   const availableNurses = nurses.filter(n => n.status === 'unassigned');
   const assignedNurses = nurses.filter(n => n.status === 'assigned');
+
+  const handleNurseSelection = (nurseId: string) => {
+    setSelectedNurses(prev => 
+      prev.includes(nurseId) 
+        ? prev.filter(id => id !== nurseId) 
+        : [...prev, nurseId]
+    );
+  };
+
+  const handleAssignSelected = () => {
+    selectedNurses.forEach(nurseId => onAssignNurse(nurseId));
+    setSelectedNurses([]);
+  };
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -54,19 +70,58 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
         </div>
 
         {activeTab === 'available' && (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500 mb-2">
-              {availableNurses.length} available nurses
-            </p>
-            {availableNurses.map((nurse) => (
-              <NurseCard 
-                key={nurse._id}
-                nurse={nurse}
-                onAssign={(nurse) => onAssignNurse(nurse._id)}
-                onViewProfile={onViewProfile}
-              />
-            ))}
-          </div>
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <label htmlFor="requiredNurses" className="mr-2 text-sm font-medium text-gray-700">
+                  Required nurses:
+                </label>
+                <input
+                  type="number"
+                  id="requiredNurses"
+                  min="1"
+                  className="w-16 p-1 border rounded"
+                  value={requiredNurses}
+                  onChange={(e) => setRequiredNurses(Math.max(1, parseInt(e.target.value) || 1))}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {selectedNurses.length}/{requiredNurses} selected
+                </span>
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={selectedNurses.length !== requiredNurses}
+                  onClick={handleAssignSelected}
+                >
+                  Assign Selected Nurses
+                </button>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 mb-2">
+                {availableNurses.length} available nurses
+              </p>
+              {availableNurses.map((nurse) => (
+                <div key={nurse._id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`nurse-${nurse._id}`}
+                    checked={selectedNurses.includes(nurse._id)}
+                    onChange={() => handleNurseSelection(nurse._id)}
+                    className="mr-3 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex-grow">
+                    <NurseCard 
+                      nurse={nurse}
+                      onAssign={(nurse) => onAssignNurse(nurse._id)}
+                      onViewProfile={onViewProfile}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {activeTab === 'assigned' && (
