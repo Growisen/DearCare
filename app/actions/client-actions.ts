@@ -136,9 +136,105 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
 }
 
 
-export async function getClients(status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', searchQuery?: string) {
+// export async function getClients(status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', searchQuery?: string) {
+//   try {
+//     const supabase = await createSupabaseServerClient()
+    
+//     // Build the query
+//     let query = supabase
+//       .from('clients')
+//       .select(`
+//         id,
+//         client_type,
+//         status,
+//         created_at,
+//         general_notes,
+//         individual_clients:individual_clients(
+//           requestor_name,
+//           requestor_phone, 
+//           requestor_email,
+//           patient_name,
+//           complete_address,
+//           service_required,
+//           start_date
+//         ),
+//         organization_clients:organization_clients(
+//           organization_name,
+//           contact_person_name,
+//           contact_phone,
+//           contact_email,
+//           organization_address
+//         )
+//       `)
+    
+//     // Apply status filter if provided and not "all"
+//     if (status && status !== "all") {
+//       query = query.eq('status', status)
+//     }
+    
+//     const { data, error } = await query
+    
+//     if (error) {
+//       console.error("Error fetching clients:", error)
+//       return { success: false, error: error.message }
+//     }
+    
+//     // Map database records to Client interface
+//     const clients = data.map(record => {
+//       const isIndividual = record.client_type === 'individual'
+//       // Access the data directly without indexing
+//       const individualData = isIndividual ? record.individual_clients : null
+//       const organizationData = !isIndividual ? record.organization_clients : null
+      
+//       return {
+//         id: record.id,
+//         name: isIndividual 
+//           ? individualData?.patient_name || "Unknown" 
+//           : organizationData?.organization_name || "Unknown",
+//         requestDate: isIndividual
+//           ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+//           : new Date(record.created_at || new Date()).toISOString().split('T')[0],
+//         service: isIndividual ? individualData?.service_required : "Organization Care",
+//         status: record.status,
+//         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
+//         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
+//         location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
+//         // Convert null to undefined to match Client type
+//         description: record.general_notes || undefined
+//       }
+//     })
+    
+//     // Apply search filter in JavaScript if provided
+//     const filteredClients = searchQuery
+//       ? clients.filter(client => 
+//           client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//           client.email?.toLowerCase().includes(searchQuery.toLowerCase())
+//         )
+//       : clients
+      
+//     return { success: true, clients: filteredClients }
+    
+//   } catch (error: unknown) {
+//     console.error('Error fetching clients:', error)
+//     return { 
+//       success: false, 
+//       error: error instanceof Error ? error.message : 'An unknown error occurred', 
+//       clients: [] 
+//     }
+//   }
+// }
+
+export async function getClients(
+  status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
+  searchQuery?: string,
+  page: number = 1,
+  pageSize: number = 10
+) {
   try {
     const supabase = await createSupabaseServerClient()
+    
+    // Calculate offset for pagination
+    const offset = (page - 1) * pageSize
     
     // Build the query
     let query = supabase
@@ -165,14 +261,26 @@ export async function getClients(status?: 'pending' | 'under_review' | 'approved
           contact_email,
           organization_address
         )
-      `)
+      `, { count: 'exact' }) // Get total count for pagination
     
     // Apply status filter if provided and not "all"
     if (status && status !== "all") {
       query = query.eq('status', status)
     }
     
+    // Clone the query to get the total count
+    const countQuery = query
+    const { count, error: countError } = await countQuery
+    
+    if (countError) {
+      console.error("Error counting clients:", countError)
+      return { success: false, error: countError.message }
+    }
+    
+    // Apply pagination to the main query
     const { data, error } = await query
+      .range(offset, offset + pageSize - 1)
+      .order('created_at', { ascending: false })
     
     if (error) {
       console.error("Error fetching clients:", error)
@@ -182,7 +290,6 @@ export async function getClients(status?: 'pending' | 'under_review' | 'approved
     // Map database records to Client interface
     const clients = data.map(record => {
       const isIndividual = record.client_type === 'individual'
-      // Access the data directly without indexing
       const individualData = isIndividual ? record.individual_clients : null
       const organizationData = !isIndividual ? record.organization_clients : null
       
@@ -199,7 +306,6 @@ export async function getClients(status?: 'pending' | 'under_review' | 'approved
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
         location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
-        // Convert null to undefined to match Client type
         description: record.general_notes || undefined
       }
     })
@@ -212,7 +318,16 @@ export async function getClients(status?: 'pending' | 'under_review' | 'approved
         )
       : clients
       
-    return { success: true, clients: filteredClients }
+    return { 
+      success: true, 
+      clients: filteredClients,
+      pagination: {
+        totalCount: count || 0,
+        currentPage: page,
+        pageSize: pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      }
+    }
     
   } catch (error: unknown) {
     console.error('Error fetching clients:', error)

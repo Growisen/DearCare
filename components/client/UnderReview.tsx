@@ -22,6 +22,7 @@ interface InputFieldProps {
 
 interface UnderReviewContentProps {
   clientId: string;
+  onClose?: () => void;
 }
 
 export const InputField = ({ label, type = 'text', placeholder, id, value, onChange, required = false }: InputFieldProps) => (
@@ -53,7 +54,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
   </div>
 );
 
-export function UnderReviewContent({ clientId }: UnderReviewContentProps) {
+export function UnderReviewContent({ clientId, onClose }: UnderReviewContentProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -175,6 +176,10 @@ export function UnderReviewContent({ clientId }: UnderReviewContentProps) {
       }
       
       toast.success('Client approved successfully!');
+
+      if (onClose) {
+        onClose();
+      }
       
     } catch (error) {
       console.error('Error approving client:', error);

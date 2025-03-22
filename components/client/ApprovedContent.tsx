@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ApprovedContentProps } from '../../types/client.types';
 import { Nurse } from '@/types/staff.types';
 
@@ -6,7 +6,6 @@ import CareDetailsHeader from './ApprovedContent/CareDetailsHeader';
 import PatientAssessment from './PatientAssessment';
 import NurseListModal from './ApprovedContent/NurseListModal';
 import ConfirmationModal from './ApprovedContent/ConfirmationModal';
-import NurseProfileModal from './ApprovedContent/NurseProfileModal';
 import LocationTracker from './ApprovedContent/LocationTracker';
 
 export function ApprovedContent({ client }: ApprovedContentProps) {
@@ -14,12 +13,53 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [viewingNurse, setViewingNurse] = useState<Nurse | null>(null);
 
   // Example nurse data (in a real app, this would come from an API)
   const [nurses] = useState([
     {
       _id: "1",
+      firstName: "Anjali",
+      lastName: "Menon",
+      location: "Kochi",
+      status: "unassigned" as const,
+      email: "anjali.menon@example.com",
+      phoneNumber: "123-456-7890",
+      gender: "Female",
+      dob: "1990-01-01",
+      salaryPerHour: 900,
+      salaryCap: 1200, 
+      hiringDate: "2020-01-01",
+      experience: 5,
+      rating: 4.5,
+      reviews: [
+        { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
+        { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
+      ],
+      preferredLocations: ["Kollam", "Palakkad", "Malappuram"]
+    },
+    {
+      _id: "3",
+      firstName: "Anjali",
+      lastName: "Menon",
+      location: "Kochi",
+      status: "unassigned" as const,
+      email: "anjali.menon@example.com",
+      phoneNumber: "123-456-7890",
+      gender: "Female",
+      dob: "1990-01-01",
+      salaryPerHour: 900,
+      salaryCap: 1200, 
+      hiringDate: "2020-01-01",
+      experience: 5,
+      rating: 4.5,
+      reviews: [
+        { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
+        { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
+      ],
+      preferredLocations: ["Kollam", "Palakkad", "Malappuram"]
+    },
+    {
+      _id: "4",
       firstName: "Anjali",
       lastName: "Menon",
       location: "Kochi",
@@ -82,15 +122,15 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
     // Reset any other edited state if needed
   };
 
-  const handleViewProfile = (nurse: Nurse) => {
-    setViewingNurse(nurse);
-  };
-
-  const handleAssignFromProfile = (nurse: Nurse) => {
-    setViewingNurse(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAssignFromNurseList = (nurse: Nurse) => {
     setSelectedNurse(nurse);
     setShowConfirmation(true);
   };
+
+  useEffect(() => {
+    // console.log(client.)
+  })
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
@@ -125,7 +165,7 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
             setShowConfirmation(true);
           }
         }}
-        onViewProfile={handleViewProfile}
+        onViewProfile={() => {}} // This is now handled by the Link in NurseCard
       />
 
       <ConfirmationModal 
@@ -141,13 +181,6 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
         onConfirm={() => selectedNurse && handleAssignNurse(selectedNurse._id)}
         onCancel={() => setShowConfirmation(false)}
         confirmText="Confirm Assignment"
-      />
-
-      <NurseProfileModal 
-        nurse={viewingNurse}
-        onClose={() => setViewingNurse(null)}
-        onAssign={handleAssignFromProfile}
-        onUnassign={handleUnassignNurse}
       />
     </div>
   );
