@@ -373,6 +373,8 @@ export async function getClientDetails(clientId: string) {
       if (individualError) {
         return { success: false, error: individualError.message }
       }
+
+      console.log("client", client)
       
       return { 
         success: true, 
@@ -421,25 +423,51 @@ export async function getClientDetails(clientId: string) {
 /**
  * Updates a client's status
  */
-export async function updateClientStatus(clientId: string, newStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned') {
+export async function updateClientStatus(
+  clientId: string,
+  newStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned',
+  rejectionReason?: string) {
   try {
     const supabase = await createSupabaseServerClient();
-    
-    const { data, error } = await supabase
+
+     if (newStatus === 'rejected' && rejectionReason) {
+      const { data, error } = await supabase
       .from('clients')
-      .update({ status: newStatus })
+      .update({ 
+        status: newStatus,
+        rejection_reason: rejectionReason
+       })
       .eq('id', clientId)
       .select()
       .single();
-    
-    if (error) {
-      return { success: false, error: error.message };
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      // Revalidate the clients page to reflect the changes
+      revalidatePath('/clients');
+      
+      return { success: true, client: data };
+    }
+    else{
+      const { data, error } = await supabase
+      .from('clients')
+      .update({ status: newStatus,})
+      .eq('id', clientId)
+      .select()
+      .single();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      // Revalidate the clients page to reflect the changes
+      revalidatePath('/clients');
+      
+      return { success: true, client: data };
     }
     
-    // Revalidate the clients page to reflect the changes
-    revalidatePath('/clients');
-    
-    return { success: true, client: data };
   } catch (error: unknown) {
     console.error('Error updating client status:', error);
     return { 

@@ -16,6 +16,7 @@ export type Database = {
           created_at: string | null
           general_notes: string | null
           id: string
+          rejection_reason: string | null
           status: Database["public"]["Enums"]["client_status"] | null
           updated_at: string | null
         }
@@ -25,6 +26,7 @@ export type Database = {
           created_at?: string | null
           general_notes?: string | null
           id?: string
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["client_status"] | null
           updated_at?: string | null
         }
@@ -34,6 +36,7 @@ export type Database = {
           created_at?: string | null
           general_notes?: string | null
           id?: string
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["client_status"] | null
           updated_at?: string | null
         }

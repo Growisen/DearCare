@@ -204,3 +204,6 @@ FOR ALL
 TO authenticated
 USING ((auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'admin')
 WITH CHECK ((auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'admin');
+
+ALTER TABLE public.clients 
+ADD COLUMN rejection_reason text;

@@ -19,7 +19,6 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('available');
   const [selectedNurses, setSelectedNurses] = useState<string[]>([]);
-  const [requiredNurses, setRequiredNurses] = useState<number>(1);
 
   if (!isOpen) return null;
 
@@ -34,15 +33,26 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
     );
   };
 
-  const handleAssignSelected = () => {
-    selectedNurses.forEach(nurseId => onAssignNurse(nurseId));
-    setSelectedNurses([]);
-  };
+  // const handleAssignSelected = () => {
+  //   selectedNurses.forEach(nurseId => onAssignNurse(nurseId));
+  //   setSelectedNurses([]);
+  // };
+
+const handleAssignSelected = () => {
+  if (selectedNurses.length > 0) {
+    // Create a URL with the selected nurse IDs as query parameters
+    const queryParams = new URLSearchParams();
+    selectedNurses.forEach(id => queryParams.append('nurseIds', id));
+    
+    // Update path to match your folder structure
+    window.open(`/schedule-shifts?${queryParams.toString()}`, '_blank');
+  }
+};
 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto">
+      <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold text-gray-900">Nurse Assignment</h3>
           <button 
@@ -72,26 +82,10 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
         {activeTab === 'available' && (
           <>
             <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center">
-                <label htmlFor="requiredNurses" className="mr-2 text-sm font-medium text-gray-700">
-                  Required nurses:
-                </label>
-                <input
-                  type="number"
-                  id="requiredNurses"
-                  min="1"
-                  className="w-16 p-1 border rounded"
-                  value={requiredNurses}
-                  onChange={(e) => setRequiredNurses(Math.max(1, parseInt(e.target.value) || 1))}
-                />
-              </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">
-                  {selectedNurses.length}/{requiredNurses} selected
-                </span>
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  disabled={selectedNurses.length !== requiredNurses}
+                  disabled={selectedNurses.length == 0}
                   onClick={handleAssignSelected}
                 >
                   Assign Selected Nurses

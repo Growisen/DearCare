@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ApprovedContentProps } from '../../types/client.types';
 import { Nurse } from '@/types/staff.types';
 
@@ -7,6 +7,7 @@ import PatientAssessment from './PatientAssessment';
 import NurseListModal from './ApprovedContent/NurseListModal';
 import ConfirmationModal from './ApprovedContent/ConfirmationModal';
 import LocationTracker from './ApprovedContent/LocationTracker';
+import { nurses_test_data } from '../../test_data/nurses_data'
 
 export function ApprovedContent({ client }: ApprovedContentProps) {
   const [showNurseList, setShowNurseList] = useState(false);
@@ -15,91 +16,7 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Example nurse data (in a real app, this would come from an API)
-  const [nurses] = useState([
-    {
-      _id: "1",
-      firstName: "Anjali",
-      lastName: "Menon",
-      location: "Kochi",
-      status: "unassigned" as const,
-      email: "anjali.menon@example.com",
-      phoneNumber: "123-456-7890",
-      gender: "Female",
-      dob: "1990-01-01",
-      salaryPerHour: 900,
-      salaryCap: 1200, 
-      hiringDate: "2020-01-01",
-      experience: 5,
-      rating: 4.5,
-      reviews: [
-        { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
-        { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
-      ],
-      preferredLocations: ["Kollam", "Palakkad", "Malappuram"]
-    },
-    {
-      _id: "3",
-      firstName: "Anjali",
-      lastName: "Menon",
-      location: "Kochi",
-      status: "unassigned" as const,
-      email: "anjali.menon@example.com",
-      phoneNumber: "123-456-7890",
-      gender: "Female",
-      dob: "1990-01-01",
-      salaryPerHour: 900,
-      salaryCap: 1200, 
-      hiringDate: "2020-01-01",
-      experience: 5,
-      rating: 4.5,
-      reviews: [
-        { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
-        { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
-      ],
-      preferredLocations: ["Kollam", "Palakkad", "Malappuram"]
-    },
-    {
-      _id: "4",
-      firstName: "Anjali",
-      lastName: "Menon",
-      location: "Kochi",
-      status: "unassigned" as const,
-      email: "anjali.menon@example.com",
-      phoneNumber: "123-456-7890",
-      gender: "Female",
-      dob: "1990-01-01",
-      salaryPerHour: 900,
-      salaryCap: 1200, 
-      hiringDate: "2020-01-01",
-      experience: 5,
-      rating: 4.5,
-      reviews: [
-        { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
-        { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
-      ],
-      preferredLocations: ["Kollam", "Palakkad", "Malappuram"]
-    },
-    {
-      _id: "2",
-      firstName: "Ravi",
-      lastName: "Nair",
-      location: "Thiruvananthapuram",
-      status: "assigned" as const,
-      email: "ravi.nair@example.com",
-      phoneNumber: "987-654-3210",
-      gender: "Male",
-      dob: "1985-05-15",
-      salaryPerHour: 800,
-      salaryCap: 1000, 
-      hiringDate: "2018-05-15",
-      experience: 8,
-      rating: 4,
-      reviews: [
-        { id: "r3", text: "Good service.", date: "2020-03-10", rating: 4, reviewer: "Anjali Menon" }
-      ],
-      preferredLocations: ["Palakkad"]
-    }
-  ]);
+  const [nurses] = useState(nurses_test_data);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAssignNurse = async (nurseId: string) => {
@@ -127,10 +44,6 @@ export function ApprovedContent({ client }: ApprovedContentProps) {
     setSelectedNurse(nurse);
     setShowConfirmation(true);
   };
-
-  useEffect(() => {
-    // console.log(client.)
-  })
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">

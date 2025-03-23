@@ -19,6 +19,7 @@ export function ClientDetailsOverlay({
   const [detailedClient, setDetailedClient] = useState<DetailedClient | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentClientStatus, setCurrentClientStatus] = useState<ClientStatus>(client.status);
+  const [rejectionReason, setRejectionReason] = useState('')
 
   useEffect(() => {
     async function fetchClientDetails() {
@@ -26,6 +27,7 @@ export function ClientDetailsOverlay({
         setLoading(true);
         const result = await getClientDetails(client.id);
         if (result.success && result.client && result.client.status) {
+          setRejectionReason(result.client.rejection_reason)
           setDetailedClient(result.client as DetailedClient);
           // Update current status
           setCurrentClientStatus(result.client.status);
@@ -69,7 +71,7 @@ export function ClientDetailsOverlay({
       case "pending":
         return <PendingContent client={client} onStatusChange={handleStatusChange} />;
       case "rejected":
-        return <RejectedContent />;
+        return <RejectedContent clientId={client.id} rejectionReason={rejectionReason}/>;
       default:
         return null;
     }

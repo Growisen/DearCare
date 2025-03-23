@@ -8,6 +8,7 @@ interface NurseCardProps {
   onViewProfile: (nurse: Nurse) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const NurseCard: React.FC<NurseCardProps> = ({ nurse, onAssign }) => {
   return (
     <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300 bg-white mb-5">
@@ -57,12 +58,12 @@ const NurseCard: React.FC<NurseCardProps> = ({ nurse, onAssign }) => {
           </div>
         </div>
         <div className="flex flex-col space-y-3 min-w-[140px]">
-          <button
+          {/* <button
             onClick={() => onAssign(nurse)}
             className="px-6 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-200 text-sm font-medium shadow-sm"
           >
             Assign
-          </button>
+          </button> */}
           <Link 
             href={`/nurses/${nurse._id}`}
             target="_blank"
