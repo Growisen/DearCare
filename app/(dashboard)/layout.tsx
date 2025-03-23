@@ -17,7 +17,7 @@ export default function DashboardLayout({
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className={`relative lg:pl-48 transition-all duration-300 ${isSidebarOpen ? 'lg:filter-none filter blur-sm' : ''}`}>
         <Navbar onMenuClick={() => setSidebarOpen(!isSidebarOpen)} />
-        <main className="pt-16">
+        <main className="pt-12">
           <div className="p-8 max-w-[1400px] mx-auto">
             {children}
           </div>

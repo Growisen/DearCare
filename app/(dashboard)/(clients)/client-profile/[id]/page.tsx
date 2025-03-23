@@ -233,6 +233,28 @@ const PatientProfilePage = () => {
     // TODO: Reset any edited data to original state
   };
 
+  const dummyAssignments = [
+    {
+      nurseId: '1',
+      startDate: '2025-03-15',
+      status: 'active' as const,
+      shiftType: 'day' as const,
+    },
+    {
+      nurseId: '2',
+      startDate: '2025-02-28',
+      endDate: '2025-03-21',
+      status: 'completed' as const,
+      shiftType: 'night' as const,
+    },
+    {
+      nurseId: '3',
+      startDate: '2025-03-10',
+      status: 'cancelled' as const,
+      shiftType: '24h' as const,
+    }
+  ];
+
   if (loading) {
     return <Loader />;
   }
@@ -380,7 +402,7 @@ const PatientProfilePage = () => {
                 Nurse Assignments
               </h2>
               <NurseAssignmentsList
-                assignments={nurseAssignments}
+                assignments={dummyAssignments}
                 nurses={nurses}
                 onEditAssignment={(assignment) => {
                   console.log('Edit assignment:', assignment);
