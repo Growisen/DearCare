@@ -9,6 +9,8 @@ import CurrentDetails from './UnderReview/CurrentHistory';
 import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import ReviewChecklist from './UnderReview/ReviewChecklist';
+import RejectModal from './RejectModal';
+
 
 interface InputFieldProps {
   label: string;
@@ -57,6 +59,8 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
 
 export function UnderReviewContent({ clientId, onClose, onStatusChange }: UnderReviewContentProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   
   const [formData, setFormData] = useState({
     // All form fields remain unchanged
@@ -195,6 +199,43 @@ export function UnderReviewContent({ clientId, onClose, onStatusChange }: UnderR
     }
   };
 
+
+  const handleReject = async () => {
+    try {
+      if (!rejectionReason.trim()) {
+        toast.error('Please provide a rejection reason');
+        return;
+      }
+      
+      setIsSubmitting(true);
+      
+      // Update client status to 'rejected' with the rejection reason
+       const result = await updateClientStatus(clientId, 'rejected', rejectionReason);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to reject client');
+      }
+      
+      toast.success('Client rejected successfully');
+      
+      // Call the onStatusChange callback to refresh the client list
+      if (onStatusChange) {
+        onStatusChange('rejected');
+      }
+      
+      if (onClose) {
+        onClose();
+      }
+      
+    } catch (error) {
+      console.error('Error rejecting client:', error);
+      toast.error(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
+      setShowRejectModal(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PersonalInfo formData={formData} handleInputChange={handleInputChange} />
@@ -210,18 +251,34 @@ export function UnderReviewContent({ clientId, onClose, onStatusChange }: UnderR
       />
       <ReviewChecklist />
       
-      <div className="flex gap-3">
+      <div className="flex w-full gap-4">
         <button 
-          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
+          className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
           onClick={handleApprove}
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Processing...' : 'Approve & Assign'}
         </button>
-        <button className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50">
+        <button 
+          className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
+          onClick={() => setShowRejectModal(true)}
+          disabled={isSubmitting}
+        >
           Reject
         </button>
       </div>
+
+      <RejectModal 
+        isOpen={showRejectModal}
+        onClose={() => {
+          setShowRejectModal(false);
+          setRejectionReason('');
+        }}
+        onReject={handleReject}
+        rejectionReason={rejectionReason}
+        setRejectionReason={setRejectionReason}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ export interface Client {
   specialInstructions?: string;
   nurseLocation?: { lat: number; lng: number };
   clientLocation?: { lat: number; lng: number };
+  rejection_reason?: string
 }
 
 export interface Review {
@@ -122,6 +123,7 @@ export interface ClientInformationProps {
 export interface DetailedClientIndividual {
   client_type: 'individual';
   details?: {
+    id?: string;
     patient_name?: string;
     patient_age?: string | number;
     patient_gender?: string;
