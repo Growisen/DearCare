@@ -290,8 +290,13 @@ export async function getClients(
     // Map database records to Client interface
     const clients = data.map(record => {
       const isIndividual = record.client_type === 'individual'
-      const individualData = isIndividual ? record.individual_clients : null
-      const organizationData = !isIndividual ? record.organization_clients : null
+      // Extract the first item from the arrays or use null
+      const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
+        ? record.individual_clients[0] 
+        : record.individual_clients) : null
+      const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
+        ? record.organization_clients[0] 
+        : record.organization_clients) : null
       
       return {
         id: record.id,
@@ -309,7 +314,6 @@ export async function getClients(
         description: record.general_notes || undefined
       }
     })
-    
     // Apply search filter in JavaScript if provided
     const filteredClients = searchQuery
       ? clients.filter(client => 
