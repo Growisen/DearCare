@@ -6,13 +6,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Loader from '@/components/loader';
 import {Json, DetailedClientIndividual } from '@/types/client.types';
-import { getClientDetails, getPatientAssessment } from '@/app/actions/client-actions';
+import { getClientDetails, getPatientAssessment, updateClientCategory } from '@/app/actions/client-actions';
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { Nurse } from '@/types/staff.types';
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList';
-import { nurses_test_data } from '@/test_data/nurses_data';
+import { nurses_test_data, dummyAssignments } from '@/test_data/dummy_data';
 import PatientAssessment from '@/components/client/PatientAssessment';
+import CategorySelector from '@/components/client/Profile/CategorySelector';
 
 interface PatientAssessmentDataForApprovedClients {
   guardianOccupation: string;
@@ -67,6 +68,7 @@ interface Patient {
   location: string;
   email: string;
   phoneNumber: string;
+  clientCategory: 'DearCare' | 'TataLife';
   requestor: {  // Add requestor information
     name: string;
     relation: string;
@@ -118,6 +120,7 @@ const PatientProfilePage = () => {
         try {
           // Fetch client details
           const clientResponse = await getClientDetails(id as string) as ClientResponse;
+          console.log(clientResponse)
           const assessmentResponse = await getPatientAssessment(id as string);
 
           if (clientResponse.success && clientResponse.client) {
@@ -126,7 +129,7 @@ const PatientProfilePage = () => {
 
             // Transform the data to match the Patient interface
             const transformedPatient: Patient = {
-               _id: clientData.details?.id,
+                _id: clientData.details?.client_id,
                 firstName: clientData.details?.patient_name?.split(' ')[0] || '',
                 lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
                 age: clientData.details?.patient_age || 0,
@@ -135,6 +138,7 @@ const PatientProfilePage = () => {
                 location: clientData.details?.complete_address || '',
                 email: '', // Patient's email if available
                 phoneNumber: clientData.details?.patient_phone || '',
+                clientCategory: clientData.client_category || 'DearCare',
                 requestor: {
                   name: clientData.details?.requestor_name || '',
                   relation: clientData.details?.relation_to_patient || '',
@@ -233,27 +237,47 @@ const PatientProfilePage = () => {
     // TODO: Reset any edited data to original state
   };
 
-  const dummyAssignments = [
-    {
-      nurseId: '1',
-      startDate: '2025-03-15',
-      status: 'active' as const,
-      shiftType: 'day' as const,
-    },
-    {
-      nurseId: '2',
-      startDate: '2025-02-28',
-      endDate: '2025-03-21',
-      status: 'completed' as const,
-      shiftType: 'night' as const,
-    },
-    {
-      nurseId: '3',
-      startDate: '2025-03-10',
-      status: 'cancelled' as const,
-      shiftType: '24h' as const,
+  const handleCategoryChange = async (newCategory: 'DearCare' | 'TataLife') => {
+    try {
+      
+      setPatient(currentPatient => {
+        if (!currentPatient) return null;
+        return {
+          ...currentPatient,
+          clientCategory: newCategory
+        };
+      });
+      
+      const result = await updateClientCategory(id as string, newCategory);
+      
+      if (!result.success) {
+        setPatient(currentPatient => {
+          if (!currentPatient) return null;
+          return {
+            ...currentPatient,
+            clientCategory: currentPatient.clientCategory 
+          };
+        });
+        
+        console.error('Failed to update category:', result.error);
+      } else {
+        console.log(`Category successfully updated to ${newCategory}`);
+      }
+    } catch (error) {
+      console.error('Failed to update category:', error);
+      
+      setPatient(currentPatient => {
+        if (!currentPatient) return null;
+        return {
+          ...currentPatient,
+          clientCategory: currentPatient.clientCategory
+        };
+      });
     }
-  ];
+  };
+
+
+  
 
   if (loading) {
     return <Loader />;
@@ -326,6 +350,10 @@ const PatientProfilePage = () => {
                     <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
                       ID: {patient._id}
                     </span>
+                    <CategorySelector 
+                      currentCategory={patient.clientCategory}
+                      onCategoryChange={handleCategoryChange}
+                    />
                   </div>
                 </div>
               </div>
@@ -432,23 +460,75 @@ const PatientProfilePage = () => {
                     <p className="text-sm text-gray-700">{patient.emergencyContact.name}</p>
                     <p className="text-xs text-gray-600">{patient.emergencyContact.relation} • {patient.emergencyContact.phone}</p>
                   </div>
+
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Guardian Occupation</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.guardianOccupation || 'Not recorded'}</p>
+                  </div>
                 </div>
               </div>
 
               <div className="bg-white p-4 rounded border border-gray-200">
                 <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
-                  Medical Information
+                  Requestor Information
                 </h2>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500 font-medium">Primary Doctor</p>
-                    <p className="text-sm text-gray-700">{patient.primaryDoctor.name}</p>
-                    <p className="text-xs text-gray-600">{patient.primaryDoctor.specialization}</p>
+                    <p className="text-xs text-gray-500 font-medium">Name</p>
+                    <p className="text-sm text-gray-700">{patient.requestor.name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium">Insurance</p>
-                    <p className="text-sm text-gray-700">{patient.insuranceDetails.provider}</p>
-                    <p className="text-xs text-gray-600">Policy: {patient.insuranceDetails.policyNumber}</p>
+                    <p className="text-xs text-gray-500 font-medium">Relation to Patient</p>
+                    <p className="text-sm text-gray-700">{patient.requestor.relation}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Phone</p>
+                    <p className="text-sm text-gray-700">{patient.requestor.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Email</p>
+                    <p className="text-sm text-gray-700">{patient.requestor.email || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Physical Attributes
+                </h2>
+                <div className='space-y-3'>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Height</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.height || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Weight</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.weight || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Marital Status</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.maritalStatus || 'Not recorded'}</p>
+                  </div>
+                  
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Location Details
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">City/Town</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.cityTown || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">District</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.district || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Pincode</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.pincode || 'Not recorded'}</p>
                   </div>
                 </div>
               </div>
@@ -538,6 +618,71 @@ const PatientProfilePage = () => {
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Foods to Avoid</p>
                     <p className="text-sm text-gray-700">{latestAssessment.foodsToAvoid}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Behavioral Assessment
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Alertness Level</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.alertnessLevel || 'Not assessed'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Physical Behavior</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.physicalBehavior || 'Not assessed'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Speech Patterns</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.speechPatterns || 'Not assessed'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Emotional State</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.emotionalState || 'Not assessed'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Social History
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Alcohol Use</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.alcoholUse || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Tobacco Use</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.tobaccoUse || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Drugs Use</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.drugsUse || 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Other Social History</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.otherSocialHistory || 'Not recorded'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Feeding Information */}
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Feeding Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Feeding Method</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.feedingMethod || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Current Status</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.currentStatus || 'Not recorded'}</p>
                   </div>
                 </div>
               </div>

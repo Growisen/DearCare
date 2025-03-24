@@ -3,7 +3,7 @@
 import { createSupabaseServerClient } from './auth'
 import { revalidatePath } from 'next/cache';
 import { IndividualFormData, OrganizationFormData, SavePatientAssessmentParams, SavePatientAssessmentResult  } from '@/types/client.types';
-
+import { Database } from '@/lib/database.types';
 /**
  * Adds a new individual client to the database
  */
@@ -233,10 +233,7 @@ export async function getClients(
   try {
     const supabase = await createSupabaseServerClient()
     
-    // Calculate offset for pagination
-    const offset = (page - 1) * pageSize
-    
-    // Build the query
+    // Build the base query
     let query = supabase
       .from('clients')
       .select(`
@@ -261,16 +258,63 @@ export async function getClients(
           contact_email,
           organization_address
         )
-      `, { count: 'exact' }) // Get total count for pagination
+      `, { count: 'exact' })
     
     // Apply status filter if provided and not "all"
     if (status && status !== "all") {
       query = query.eq('status', status)
     }
     
-    // Clone the query to get the total count
-    const countQuery = query
-    const { count, error: countError } = await countQuery
+    // Apply search filter at the database level if provided
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      
+      // Create a text search filter using Supabase's textSearch method
+      // First, handle individual_clients search
+      const individualClientsQuery = supabase
+        .from('individual_clients')
+        .select('client_id')
+        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%`);
+      
+      // Then handle organization_clients search
+      const organizationClientsQuery = supabase
+        .from('organization_clients')
+        .select('client_id')
+        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%`);
+        
+      // Execute both queries
+      const [individualResults, organizationResults] = await Promise.all([
+        individualClientsQuery,
+        organizationClientsQuery
+      ]);
+      
+      // Extract client IDs from both queries
+      const individualClientIds = (individualResults.data || []).map(item => item.client_id);
+      const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
+      
+      // Combine all matching client IDs
+      const matchingClientIds = [...individualClientIds, ...organizationClientIds];
+      
+      if (matchingClientIds.length > 0) {
+        // Filter the main query to include only matching client IDs
+        query = query.in('id', matchingClientIds);
+      } else {
+        // If no matches, return empty result
+        return { 
+          success: true, 
+          clients: [],
+          pagination: {
+            totalCount: 0,
+            currentPage: page,
+            pageSize: pageSize,
+            totalPages: 0
+          }
+        };
+      }
+    }
+    
+    // Get total count first
+    const { count, error: countError } = await query
     
     if (countError) {
       console.error("Error counting clients:", countError)
@@ -279,7 +323,7 @@ export async function getClients(
     
     // Apply pagination to the main query
     const { data, error } = await query
-      .range(offset, offset + pageSize - 1)
+      .range((page - 1) * pageSize, (page * pageSize) - 1)
       .order('created_at', { ascending: false })
     
     if (error) {
@@ -314,17 +358,10 @@ export async function getClients(
         description: record.general_notes || undefined
       }
     })
-    // Apply search filter in JavaScript if provided
-    const filteredClients = searchQuery
-      ? clients.filter(client => 
-          client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          client.email?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : clients
       
     return { 
       success: true, 
-      clients: filteredClients,
+      clients,
       pagination: {
         totalCount: count || 0,
         currentPage: page,
@@ -377,8 +414,6 @@ export async function getClientDetails(clientId: string) {
       if (individualError) {
         return { success: false, error: individualError.message }
       }
-
-      console.log("client", client)
       
       return { 
         success: true, 
@@ -618,6 +653,38 @@ export async function getPatientAssessment(clientId: string) {
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
       assessment: null
+    };
+  }
+}
+
+
+export async function updateClientCategory(
+  clientId: string,
+  newCategory: Database["public"]["Enums"]["client_category"]
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('clients')
+      .update({ client_category: newCategory })
+      .eq('id', clientId)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    
+    // Revalidate the clients page to reflect the changes
+    revalidatePath('/clients');
+    
+    return { success: true, client: data };
+  } catch (error: unknown) {
+    console.error('Error updating client category:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
     };
   }
 }
