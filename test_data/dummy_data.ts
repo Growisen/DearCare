@@ -83,3 +83,25 @@ export const nurses_test_data = [
         preferredLocations: ["Palakkad"]
     }
 ];
+
+export const dummyAssignments = [
+    {
+      nurseId: '1',
+      startDate: '2025-03-15',
+      status: 'active' as const,
+      shiftType: 'day' as const,
+    },
+    {
+      nurseId: '2',
+      startDate: '2025-02-28',
+      endDate: '2025-03-21',
+      status: 'completed' as const,
+      shiftType: 'night' as const,
+    },
+    {
+      nurseId: '3',
+      startDate: '2025-03-10',
+      status: 'cancelled' as const,
+      shiftType: '24h' as const,
+    }
+  ];

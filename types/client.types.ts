@@ -122,8 +122,9 @@ export interface ClientInformationProps {
 
 export interface DetailedClientIndividual {
   client_type: 'individual';
+  client_category?: 'DearCare' | 'TataLife';
   details?: {
-    id?: string;
+    client_id?: string;
     patient_name?: string;
     patient_age?: string | number;
     patient_gender?: string;
