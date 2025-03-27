@@ -4,6 +4,8 @@ import { createSupabaseServerClient } from './auth'
 import { revalidatePath } from 'next/cache';
 import { IndividualFormData, OrganizationFormData, SavePatientAssessmentParams, SavePatientAssessmentResult  } from '@/types/client.types';
 import { Database } from '@/lib/database.types';
+import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
+import { sendClientCredentials } from '@/lib/email'
 /**
  * Adds a new individual client to the database
  */
@@ -467,7 +469,7 @@ export async function updateClientStatus(
   newStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned',
   rejectionReason?: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
      if (newStatus === 'rejected' && rejectionReason) {
       const { data, error } = await supabase
@@ -484,9 +486,117 @@ export async function updateClientStatus(
         return { success: false, error: error.message };
       }
       
-      // Revalidate the clients page to reflect the changes
       revalidatePath('/clients');
       
+      return { success: true, client: data };
+    }
+    else if (newStatus === 'approved') {
+      const { data: client, error: clientError } = await supabase
+        .from('clients')
+        .select('client_type')
+        .eq('id', clientId)
+        .single();
+        
+      if (clientError) {
+        return { success: false, error: clientError.message };
+      }
+      
+      let clientEmail = '';
+      let clientName = '';
+      
+      if (client.client_type === 'individual') {
+        const { data: individualData, error: individualError } = await supabase
+          .from('individual_clients')
+          .select('requestor_email, requestor_name')
+          .eq('client_id', clientId)
+          .single();
+          
+        if (individualError) {
+          return { success: false, error: individualError.message };
+        }
+        
+        clientEmail = individualData.requestor_email;
+        clientName = individualData.requestor_name;
+      } else {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organization_clients')
+          .select('contact_email, contact_person_name')
+          .eq('client_id', clientId)
+          .single();
+          
+        if (orgError) {
+          return { success: false, error: orgError.message };
+        }
+        
+        clientEmail = orgData.contact_email;
+        clientName = orgData.contact_person_name;
+      }
+      
+      const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
+      
+      if (userListError) {
+        return { success: false, error: userListError.message };
+      }
+      
+      const existingUser = userList?.users?.find(user => 
+        user.email?.toLowerCase() === clientEmail.toLowerCase()
+      );
+
+      if (!existingUser && clientEmail) {
+        const generateUniquePassword = () => {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+          const timestamp = Date.now().toString(36);
+          let password = timestamp.slice(0, 4);
+          
+          for (let i = 0; i < 8; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          
+          return password;
+        };
+        
+        const password = generateUniquePassword();
+        
+        const { error: createError } = await supabase.auth.admin.createUser({
+          email: clientEmail,
+          password: password,
+          email_confirm: true,
+          user_metadata: {
+            name: clientName,
+            role: 'client',
+            requiresPasswordChange: true
+          }
+        });
+        
+        if (createError) {
+          console.error('Error creating user account:', createError);
+        } else {
+          const emailResult = await sendClientCredentials(clientEmail, {
+            name: clientName,
+            password: password,
+            appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download'
+          });
+          if (emailResult.error) {
+            console.error('Error sending welcome email:', emailResult.error);
+          } else {
+            console.log(`Welcome email sent to ${clientEmail}`);
+          }
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('clients')
+        .update({ status: newStatus })
+        .eq('id', clientId)
+        .select()
+        .single();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      revalidatePath('/clients');
+
       return { success: true, client: data };
     }
     else{
@@ -501,7 +611,6 @@ export async function updateClientStatus(
         return { success: false, error: error.message };
       }
       
-      // Revalidate the clients page to reflect the changes
       revalidatePath('/clients');
       
       return { success: true, client: data };
