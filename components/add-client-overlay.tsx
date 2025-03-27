@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { FormData, AddClientProps, StaffRequirement } from '@/types/client.types';
-import { StaffRequirements } from './StaffRequirements';
+import { StaffRequirements } from './open-form/StaffRequirements';
 import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 
@@ -62,7 +62,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
       count: 1,
       shiftType: ''
     }],
-    duration: '',
+    staffReqStartDate: '',
   });
 
    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -156,7 +156,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
           contactEmail: formData.contactEmail,
           organizationAddress: formData.organizationAddress,
           staffRequirements: formData.staffRequirements,
-          duration: formData.duration || '',
+          staffReqStartDate: formData.staffReqStartDate || '',
         });
       }
 
@@ -473,7 +473,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
                 clientType={clientType}
                 formData={{
                   staffRequirements: formData.staffRequirements,
-                  duration: formData.duration
+                  staffReqStartDate: formData.staffReqStartDate
                 }}
                 onChange={handleStaffRequirementsChange}
               />

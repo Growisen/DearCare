@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormData, StaffRequirement } from '@/types/client.types';
-import { StaffRequirements } from '@/components/StaffRequirements';
+import { StaffRequirements } from '@/components/open-form/StaffRequirements';
 import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import InputField from '@/components/open-form/InputField';
+
 
 export default function ClientFormPage() {
   const router = useRouter();
@@ -51,21 +53,22 @@ export default function ClientFormPage() {
       count: 1,
       shiftType: ''
     }],
-    duration: '',
+    staffReqStartDate: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id as keyof FormData]: value
-    }));
-  };
+const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const { id, value } = e.target;
+  setFormData(prev => ({
+    ...prev,
+    [id as keyof FormData]: value
+  }));
+}, []);
 
-  const handleStaffRequirementsChange = (staffRequirements: StaffRequirement[]) => {
+  const handleStaffRequirementsChange = (staffRequirements: StaffRequirement[], startDate?: string) => {
     setFormData(prev => ({
       ...prev,
-      staffRequirements
+      staffRequirements,
+      staffReqStartDate: startDate !== undefined ? startDate : prev.staffReqStartDate
     }));
   };
 
@@ -146,7 +149,7 @@ export default function ClientFormPage() {
           contactEmail: formData.contactEmail,
           organizationAddress: formData.organizationAddress,
           staffRequirements: formData.staffRequirements,
-          duration: formData.duration || '',
+          staffReqStartDate: formData.staffReqStartDate || '',
         });
       }
 
@@ -169,31 +172,6 @@ export default function ClientFormPage() {
       setIsSubmitting(false);
     }
   };
-
-  const InputField = ({ label, type = 'text', placeholder, id, value, onChange, required = false }: { 
-    label: string, 
-    type?: string, 
-    placeholder: string, 
-    id: string, 
-    value: string, 
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void,
-    required?: boolean
-  }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={id}>
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type={type}
-        id={id}
-        className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        required={required}
-      />
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-slate-200">
@@ -569,7 +547,7 @@ export default function ClientFormPage() {
                   clientType={clientType}
                   formData={{
                     staffRequirements: formData.staffRequirements,
-                    duration: formData.duration
+                    staffReqStartDate: formData.staffReqStartDate
                   }}
                   onChange={handleStaffRequirementsChange}
                 />
@@ -583,7 +561,7 @@ export default function ClientFormPage() {
                   id="generalNotes" 
                   value={formData.generalNotes} 
                   onChange={handleInputChange} 
-                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
                   placeholder={
                     clientType === 'individual' 
                       ? "Any special care instructions or requirements"

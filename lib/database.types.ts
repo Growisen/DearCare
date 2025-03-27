@@ -262,10 +262,10 @@ export type Database = {
           contact_person_name: string
           contact_person_role: string | null
           contact_phone: string
-          contract_duration: string | null
           organization_address: string
           organization_name: string
           organization_type: string | null
+          start_date: string | null
         }
         Insert: {
           client_id: string
@@ -273,10 +273,10 @@ export type Database = {
           contact_person_name: string
           contact_person_role?: string | null
           contact_phone: string
-          contract_duration?: string | null
           organization_address: string
           organization_name: string
           organization_type?: string | null
+          start_date?: string | null
         }
         Update: {
           client_id?: string
@@ -284,10 +284,10 @@ export type Database = {
           contact_person_name?: string
           contact_person_role?: string | null
           contact_phone?: string
-          contract_duration?: string | null
           organization_address?: string
           organization_name?: string
           organization_type?: string | null
+          start_date?: string | null
         }
         Relationships: [
           {
