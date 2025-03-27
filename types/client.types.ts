@@ -89,7 +89,7 @@ export interface OrganizationFormData extends BaseFormData {
   contactEmail: string;
   organizationAddress: string;
   staffRequirements: StaffRequirement[];
-  duration: string;
+  staffReqStartDate: string
 }
 
 export type FormData = IndividualFormData & OrganizationFormData;

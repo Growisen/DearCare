@@ -4,9 +4,9 @@ interface StaffRequirementsProps {
   clientType: 'organization' | 'hospital' | 'carehome';
   formData: {
     staffRequirements: StaffRequirement[];
-    duration: string;
+    staffReqStartDate: string;
   };
-  onChange: (staffRequirements: StaffRequirement[]) => void;
+  onChange: (staffRequirements: StaffRequirement[], startDate?: string) => void;
 }
 
 
@@ -57,6 +57,10 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
     onChange(updatedRequirements);
   };
 
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(formData.staffRequirements, e.target.value);
+  };
+
   return (
     <div className="space-y-4">
       {formData.staffRequirements.map((requirement, index) => (
@@ -94,7 +98,7 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
                     <input
                     type="number"
                     min="1"
-                    value={requirement.count}
+                    value={requirement.count.toString()}
                     onChange={(e) => handleStaffRequirementChange(index, 'count', parseInt(e.target.value))}
                     className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter number of staff"
@@ -128,18 +132,13 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
       </button>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Contract Duration</label>
-        <select 
-          value={formData.duration}
-          onChange={() => onChange([...formData.staffRequirements])} // Trigger parent update
-          className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium"
-        >
-          <option value="">Select duration...</option>
-          <option value="permanent">Permanent</option>
-          <option value="contract_3">3 Months Contract</option>
-          <option value="contract_6">6 Months Contract</option>
-          <option value="contract_12">12 Months Contract</option>
-        </select>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Service Start Date</label>
+        <input
+          type="date"
+          value={formData.staffReqStartDate || ''}
+          onChange={handleStartDateChange}
+          className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
     </div>
   );

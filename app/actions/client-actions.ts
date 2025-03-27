@@ -91,13 +91,13 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
       .insert({
         client_id: clientData.id,
         organization_name: formData.organizationName,
-        organization_type: formData.organizationType || '',
+        organization_type: formData.clientType || '',
         contact_person_name: formData.contactPersonName,
         contact_person_role: formData.contactPersonRole || '',
         contact_phone: formData.contactPhone,
         contact_email: formData.contactEmail,
         organization_address: formData.organizationAddress,
-        contract_duration: formData.duration || null
+        start_date: formData.staffReqStartDate || null
       });
     
     if (organizationError) {
