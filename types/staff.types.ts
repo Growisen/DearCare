@@ -106,7 +106,6 @@ export interface NurseDocuments {
   ration: File | null
 }
 
-
 export interface NurseBasicInfo {
   nurse_id: number;
   first_name: string | null;
@@ -115,4 +114,30 @@ export interface NurseBasicInfo {
   email: string | null;
   phone_number: string | null;
   experience: number | null;
+  rating?: number;
+  reviews?: Array<{
+    id: string;
+    text: string;
+    date: string;
+    rating: number;
+    reviewer: string;
+  }>;
+  hiringDate?: string;
+  photo?: string;
+  regNumber?: string;
+  registrationDate?: string;
+  address?: string;
+  city?: string;
+  gender?: 'MALE' | 'FEMALE';
+  serviceType?: 'HOME NURSE' | 'DELIVERY CARE' | 'BABY CARE' | 'HM';
+  shiftPattern?: '24HOUR' | '12HOUR' | '8HOUR' | 'HOURLY';
+  hourlyDetails?: string;
+  category?: 'PERMANENT' | 'TRAINEE' | 'TEMPORARY';
+  assignedClients?: Array<{
+    id: string;
+    name: string;
+    address: string;
+    startDate: string;
+    status: string;
+  }>;
 }

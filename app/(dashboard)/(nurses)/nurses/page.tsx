@@ -8,6 +8,7 @@ import NurseTable from "../../../../components/nurse/NurseTable"
 import NurseCard from "../../../../components/nurse/NurseCard"
 import { Nurse, NurseBasicInfo } from "@/types/staff.types"
 import { fetchNurseDetails } from "@/app/actions/add-nurse"
+import Loader from "@/components/loader"
 
 
 const mockNurses: Nurse[] = [
@@ -284,14 +285,22 @@ export default function NursesPage() {
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
           <div className="hidden sm:block overflow-x-auto">
-            <NurseTable nurses={filteredNurses} onReviewDetails={handleReviewDetails} />
+            <NurseTable 
+              nurses={filteredNurses} 
+              onReviewDetails={handleReviewDetails} 
+              isLoading={isLoading}
+            />
           </div>
-
+          
           {/* Mobile card view */}
           <div className="sm:hidden divide-y divide-gray-200">
-            {filteredNurses.map((nurses) => (
-              <NurseCard key={nurses.nurse_id} nurse={nurses} onReviewDetails={handleReviewDetails} />
-            ))}
+            {isLoading ? (
+              <Loader />
+            ) : (
+              filteredNurses.map((nurses) => (
+                <NurseCard key={nurses.nurse_id} nurse={nurses} onReviewDetails={handleReviewDetails} />
+              ))
+            )}
           </div>
         </div>
       </div>

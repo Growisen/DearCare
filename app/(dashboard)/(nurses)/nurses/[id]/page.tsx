@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Loader from '@/components/loader'
@@ -45,6 +45,12 @@ interface Skill {
   proficiency: 'Expert' | 'Advanced' | 'Intermediate';
 }
 
+interface Reference {
+  name: string;
+  relation: string;
+  phoneNumber: string;
+}
+
 interface Nurse {
   _id: string;
   firstName: string;
@@ -70,15 +76,40 @@ interface Nurse {
   availability?: Availability;
   skills?: Skill[];
   profileImage?: string;
+  address: string;
+  city: string;
+  taluk: string;
+  pinCode: string;
+  maritalStatus: 'Single' | 'Married' | 'Widow' | 'Separated';
+  religion: 'Hindu' | 'Christian' | 'Muslim';
+  state: string;
+  motherTongue: string;
+  nocCertificate: 'Yes' | 'No' | 'Applied' | 'Going To Apply';
+  documents?: {
+    aadhar?: { path: string; name: string };
+    rationCard?: { path: string; name: string };
+    educationalQualification?: { path: string; name: string }[];
+    workExperience?: { path: string; name: string }[];
+    nocCertificate?: { path: string; name: string };
+  };
+  serviceType: 'Home Nurse' | 'Delivery Care' | 'Baby Care' | 'HM';
+  shiftingPattern: '24 Hour' | '12 Hour' | '8 Hour' | 'Hourly';
+  hoursIfHourly?: number;
+  staffCategory: 'Permanent' | 'Trainee' | 'Temporary';
+  primaryReference: Reference;
+  familyReferences: Reference[];
+  healthStatus: string;
+  disabilityDetails: string;
+  sourceOfInformation: string;
 }
-
 
 const NurseProfilePage: React.FC = () => {
   const params = useParams();
-  const id = params.id
+  const searchParams = useSearchParams();
+  const fromNurseList = searchParams.get('fromNurseList') === 'true';
+  const id = params.id;
   const [nurse, setNurse] = useState<Nurse | null>(null);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -145,7 +176,60 @@ const NurseProfilePage: React.FC = () => {
             { name: "Diabetes Management", proficiency: "Advanced" },
             { name: "Elderly Care", proficiency: "Advanced" },
             { name: "Patient Education", proficiency: "Intermediate" }
-          ]
+          ],
+          address: "123 Medical Avenue",
+          city: "Kochi",
+          taluk: "Ernakulam",
+          pinCode: "682001",
+          maritalStatus: "Single",
+          religion: "Hindu",
+          state: "Kerala",
+          motherTongue: "Malayalam",
+          nocCertificate: "Yes",
+          documents: {
+            aadhar: {
+              path: "/documents/aadhar.pdf",
+              name: "Aadhar_Card_2023.pdf"
+            },
+            rationCard: {
+              path: "/documents/ration.pdf",
+              name: "Ration_Card_2023.pdf"
+            },
+            educationalQualification: [
+              { path: "/documents/degree.pdf", name: "BSc_Nursing_Degree.pdf" },
+              { path: "/documents/certificate.pdf", name: "Critical_Care_Certificate.pdf" }
+            ],
+            workExperience: [
+              { path: "/documents/experience1.pdf", name: "Kerala_Medical_Experience.pdf" }
+            ],
+            nocCertificate: {
+              path: "/documents/noc.pdf",
+              name: "NOC_Certificate_2023.pdf"
+            }
+          },
+          serviceType: 'Home Nurse',
+          shiftingPattern: '12 Hour',
+          staffCategory: 'Permanent',
+          primaryReference: {
+            name: "John Thomas",
+            relation: "Uncle",
+            phoneNumber: "9876543210"
+          },
+          familyReferences: [
+            {
+              name: "Mary Joseph",
+              relation: "Sister",
+              phoneNumber: "9876543211"
+            },
+            {
+              name: "George Philip",
+              relation: "Brother",
+              phoneNumber: "9876543212"
+            }
+          ],
+          healthStatus: "Good physical and mental health. No chronic conditions.",
+          disabilityDetails: "None",
+          sourceOfInformation: "Direct Interview and Family Members"
         };
         
         setNurse(mockNurse);
@@ -176,248 +260,441 @@ const NurseProfilePage: React.FC = () => {
     );
   }
 
-
-// ...existing code...
-
-return (
-  <div className="min-h-screen bg-gray-50">
-    <div className="max-w-[95%] mx-auto py-4">
-      {/* Profile Header */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
-        <div className="bg-gray-100 border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="flex-shrink-0 order-1 md:order-none">
-                <div className="relative h-32 w-32 rounded-full overflow-hidden border-2 border-white shadow-md">
-                  {nurse.profileImage ? (
-                    <Image 
-                      src={nurse.profileImage}
-                      alt={`${nurse.firstName} ${nurse.lastName}`}
-                      fill
-                      className="object-cover"
-                      priority
-                      sizes="(max-width: 768px) 96px, 128px"
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                      <div className="text-center text-gray-600 font-medium text-xl">
-                        <div>{nurse.firstName[0]}</div>
-                        <div>{nurse.lastName[0]}</div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[95%] mx-auto py-4">
+        {/* Profile Header */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+          <div className="bg-gradient-to-r from-blue-50 to-white border-b border-gray-200 px-6 py-4">
+            <div className="flex justify-between items-start mb-4">
+              <h1 className="text-xl font-semibold text-gray-800">Nurse Profile</h1>
+              {fromNurseList && (
+                <Link 
+                  href={`/nurses/${nurse._id}/edit`}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit Profile
+                </Link>
+              )}
+            </div>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
+                <div className="flex-shrink-0 order-1 md:order-none">
+                  <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                    {nurse.profileImage ? (
+                      <Image 
+                        src={nurse.profileImage}
+                        alt={`${nurse.firstName} ${nurse.lastName}`}
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="(max-width: 768px) 96px, 128px"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+                        <div className="text-center text-blue-600 font-semibold text-2xl">
+                          {nurse.firstName[0]}{nurse.lastName[0]}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-              
-              <div className="text-center md:text-left">
-                <h1 className="text-2xl font-semibold text-gray-800">{nurse.firstName} {nurse.lastName}</h1>
-                <p className="text-sm text-gray-600 mt-1">Registered Nurse • {nurse.experience} years experience</p>
                 
-                <div className="flex flex-wrap items-center justify-center md:justify-start mt-3 gap-2">
-                  <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
-                    <svg className="mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <span className="font-medium">{nurse.rating}/5</span>
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
-                    <svg className="mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    {nurse.location}
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
-                    <svg className="mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v6m0 12V12m0 0l8.5-8.5M12 12l-8.5 8.5"></path></svg>
-                    <span className="font-medium">₹{nurse.salaryPerHour}</span>/hr
-                  </span>
+                <div className="text-center md:text-left">
+                  <h1 className="text-2xl font-bold text-gray-900">{nurse.firstName} {nurse.lastName}</h1>
+                  <p className="text-sm text-gray-600 mt-1">Registered Nurse • {nurse.experience} years experience</p>
+                  
+                  <div className="flex flex-wrap items-center justify-center md:justify-start mt-3 gap-2">
+                    <span className="inline-flex items-center px-3 py-1 bg-white text-sm rounded-full text-gray-700 border border-gray-200 shadow-sm">
+                      <svg className="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span className="font-semibold">{nurse.rating}</span>
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 bg-white text-sm rounded-full text-gray-700 border border-gray-200 shadow-sm">
+                      <svg className="w-4 h-4 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {nurse.location}
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 bg-white text-sm rounded-full text-gray-700 border border-gray-200 shadow-sm">
+                      <svg className="w-4 h-4 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-semibold">₹{nurse.salaryPerHour}</span>/hr
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="p-6">
-          {/* Top grid with info sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-            <div className="lg:col-span-3">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded border border-gray-200">
-                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Personal Information</h2>
+          {/* Main Content */}
+          <div className="p-6">
+            {/* Top grid with info sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+              <div className="bg-white p-4 rounded border border-gray-200 lg:col-span-3">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Personal Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Basic Info */}
                   <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Name</p>
+                      <p className="text-sm text-gray-700">{nurse.firstName} {nurse.lastName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Address</p>
+                      <p className="text-sm text-gray-700">{nurse.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Phone Number</p>
+                      <p className="text-sm text-gray-700">{nurse.phoneNumber}</p>
+                    </div>
                     <div>
                       <p className="text-xs text-gray-500 font-medium">Email</p>
                       <p className="text-sm text-gray-700">{nurse.email}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Phone</p>
-                      <p className="text-sm text-gray-700">{nurse.phoneNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 font-medium">Address</p>
-                      <p className="text-sm text-gray-700">123 Medical Avenue, {nurse.location} - 682001</p>
-                    </div>
-                    <div>
                       <p className="text-xs text-gray-500 font-medium">Gender</p>
                       <p className="text-sm text-gray-700">{nurse.gender}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 font-medium">Age</p>
-                      <p className="text-sm text-gray-700">{nurse.dob ? Math.floor((new Date().getTime() - new Date(nurse.dob).getTime()) / 3.15576e+10) : 'Not specified'}</p>
-                    </div>
                   </div>
-                </div>
 
-                <div className="bg-white p-4 rounded border border-gray-200">
-                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Availability</h2>
+                  {/* Location Info */}
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Languages</p>
-                      <p className="text-sm text-gray-700">{nurse.languages ? nurse.languages.join(', ') : 'Not specified'}</p>
+                      <p className="text-xs text-gray-500 font-medium">City</p>
+                      <p className="text-sm text-gray-700">{nurse.city}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Available Days</p>
-                      <p className="text-sm text-gray-700">{nurse.availability?.days.join(', ') || 'Not specified'}</p>
+                      <p className="text-xs text-gray-500 font-medium">Taluk</p>
+                      <p className="text-sm text-gray-700">{nurse.taluk}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Preferred Shifts</p>
-                      <p className="text-sm text-gray-700">{nurse.availability?.shifts.join(', ') || 'Not specified'}</p>
+                      <p className="text-xs text-gray-500 font-medium">PIN Code</p>
+                      <p className="text-sm text-gray-700">{nurse.pinCode}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">State</p>
+                      <p className="text-sm text-gray-700">{nurse.state}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Religion</p>
+                      <p className="text-sm text-gray-700">{nurse.religion}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 font-medium">Preferred Locations</p>
-                      <p className="text-sm text-gray-700">{nurse.preferredLocations.join(', ')}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {nurse.preferredLocations.map((location, index) => (
+                          <span 
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 bg-blue-50 text-xs text-blue-700 rounded-md"
+                          >
+                            {location}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white p-4 rounded border border-gray-200">
-                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Compensation</h2>
+                  {/* Additional Info */}
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Hourly Rate</p>
-                      <p className="text-base font-medium text-gray-700">₹{nurse.salaryPerHour}/hour</p>
+                      <p className="text-xs text-gray-500 font-medium">Mother Tongue</p>
+                      <p className="text-sm text-gray-700">{nurse.motherTongue}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Maximum Rate</p>
-                      <p className="text-sm text-gray-700">₹{nurse.salaryCap}/hour</p>
+                      <p className="text-xs text-gray-500 font-medium">Known Languages</p>
+                      <p className="text-sm text-gray-700">{nurse.languages?.join(', ')}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Date of Birth</p>
+                      <p className="text-sm text-gray-700">{new Date(nurse.dob).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Age</p>
+                      <p className="text-sm text-gray-700">{Math.floor((new Date().getTime() - new Date(nurse.dob).getTime()) / 3.15576e+10)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Hiring Date</p>
+                      <p className="text-sm text-gray-700">{new Date(nurse.hiringDate).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Staff Category</p>
+                      <p className="text-sm text-gray-700">{nurse.staffCategory}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Shifting Pattern</p>
+                      <p className="text-sm text-gray-700">{nurse.shiftingPattern}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">NOC Certificate</p>
+                      <p className="text-sm text-gray-700">{nurse.nocCertificate}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded border border-gray-200 lg:col-span-3">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Documents</h2>
+                <div className="space-y-6">
+                  {/* Identification Documents */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-gray-700 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Identification Documents
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {nurse.documents?.aadhar && (
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-red-50 rounded-lg">
+                              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">Aadhar Card</p>
+                              <p className="text-xs text-gray-500">{nurse.documents.aadhar.name}</p>
+                            </div>
+                          </div>
+                          <button className="text-xs px-3 py-1.5 bg-white text-blue-600 rounded-full border border-blue-100 hover:bg-blue-50 transition-colors">
+                            Preview
+                          </button>
+                        </div>
+                      )}
+
+                      {nurse.documents?.rationCard && (
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-green-50 rounded-lg">
+                              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">Ration Card</p>
+                              <p className="text-xs text-gray-500">{nurse.documents.rationCard.name}</p>
+                            </div>
+                          </div>
+                          <button className="text-xs px-3 py-1.5 bg-white text-blue-600 rounded-full border border-blue-100 hover:bg-blue-50 transition-colors">
+                            Preview
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Professional Documents */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-gray-700 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      Professional Documents
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {nurse.documents?.educationalQualification?.map((doc, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">Educational Qualification</p>
+                              <p className="text-xs text-gray-500">{doc.name}</p>
+                            </div>
+                          </div>
+                          <button className="text-xs px-3 py-1.5 bg-white text-blue-600 rounded-full border border-blue-100 hover:bg-blue-50 transition-colors">
+                            Preview
+                          </button>
+                        </div>
+                      ))}
+
+                      {nurse.documents?.workExperience?.map((doc, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">Work Experience</p>
+                              <p className="text-xs text-gray-500">{doc.name}</p>
+                            </div>
+                          </div>
+                          <button className="text-xs px-3 py-1.5 bg-white text-blue-600 rounded-full border border-blue-100 hover:bg-blue-50 transition-colors">
+                            Preview
+                          </button>
+                        </div>
+                      ))}
+
+                      {nurse.nocCertificate === 'Yes' && nurse.documents?.nocCertificate && (
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">NOC Certificate</p>
+                              <p className="text-xs text-gray-500">{nurse.documents.nocCertificate.name}</p>
+                            </div>
+                          </div>
+                          <button className="text-xs px-3 py-1.5 bg-white text-blue-600 rounded-full border border-blue-100 hover:bg-blue-50 transition-colors">
+                            Preview
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Additional sections */}
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded border border-gray-200">
-              <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Skills & Specializations</h2>
-              <div className="mb-4">
-                <h3 className="text-sm font-medium mb-2 text-gray-700">Specializations</h3>
-                <div className="flex flex-wrap gap-2">
-                  {nurse.specializations?.map((spec, index) => (
-                    <span key={index} className="px-3 py-1 bg-gray-100 rounded text-gray-700 text-xs border border-gray-200">
-                      {spec}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium mb-2 text-gray-700">Skills</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {nurse.skills?.map((skill, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 border border-gray-200 rounded bg-gray-50">
-                      <span className='text-xs font-medium text-gray-700'>{skill.name}</span>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        skill.proficiency === 'Expert' ? 'bg-gray-100 text-gray-700' :
-                        skill.proficiency === 'Advanced' ? 'bg-gray-100 text-gray-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {skill.proficiency}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded border border-gray-200">
-              <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Education & Certifications</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-medium mb-2 text-gray-700">Education</h3>
-                  <div className="space-y-3">
-                    {nurse.education?.map((edu, index) => (
-                      <div key={index} className="p-3 border-l-2 border-gray-300 bg-gray-50 rounded-r">
-                        <p className="text-sm font-medium text-gray-700">{edu.degree}</p>
-                        <p className="text-xs text-gray-600 mt-1">{edu.institution} • {edu.year}</p>
+            
+            {/* Additional sections */}
+            <div className="space-y-4">
+              {/* References Section */}
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">References</h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-gray-700 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Primary Reference
+                    </h3>
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Name:</span> {nurse.primaryReference.name}
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Relation:</span> {nurse.primaryReference.relation}
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Phone:</span> {nurse.primaryReference.phoneNumber}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium mb-2 text-gray-700">Certifications</h3>
-                  <div className="space-y-3">
-                    {nurse.certifications?.map((cert, index) => (
-                      <div key={index} className="p-3 border-l-2 border-gray-300 bg-gray-50 rounded-r">
-                        <p className="text-sm font-medium text-gray-700">{cert.name}</p>
-                        <p className="text-xs text-gray-600 mt-1">{cert.issuedBy} • {cert.year} to {cert.expiryYear}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded border border-gray-200">
-              <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Work Experience</h2>
-              <div className="space-y-4">
-                {nurse.workHistory?.map((work, index) => (
-                  <div key={index} className="border-l-2 border-gray-300 pl-3 py-1">
-                    <p className="font-medium text-sm text-gray-700">{work.position}</p>
-                    <p className="text-sm text-gray-700">{work.organization}</p>
-                    <p className="text-xs text-gray-600 mt-1 mb-2">
-                      {new Date(work.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })} - 
-                      {work.endDate ? new Date(work.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'Present'}
-                    </p>
-                    <p className="text-xs text-gray-600">{work.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded border border-gray-200">
-              <div className="flex justify-between items-center pb-2 border-b border-gray-200 mb-3">
-                <h2 className="text-base font-semibold text-gray-800">Reviews & Ratings</h2>
-                <div className="flex items-center">
-                  <span className="text-base font-medium text-gray-700">{nurse.rating}</span>
-                  <span className="text-sm text-gray-500 ml-1">★</span>
-                  <span className="text-gray-500 ml-1 text-xs">({nurse.reviews?.length || 0} reviews)</span>
-                </div>
-              </div>
-              <div className="space-y-4">
-                {nurse.reviews?.map((review) => (
-                  <div key={review.id} className="border-b border-gray-200 pb-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-sm text-gray-700">{review.reviewer}</span>
-                      <span className="text-xs text-gray-500">
-                        {new Date(review.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                      </span>
                     </div>
-                    <div className="flex text-gray-500 mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-sm">
-                          {i < review.rating ? '★' : '☆'}
-                        </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-gray-700 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Family References
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {nurse.familyReferences.map((ref, index) => (
+                        <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">Name:</span> {ref.name}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">Relation:</span> {ref.relation}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">Phone:</span> {ref.phoneNumber}
+                            </p>
+                          </div>
+                        </div>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-600">{review.text}</p>
                   </div>
-                ))}
+                </div>
+              </div>
+
+              {/* Health Information Section */}
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">Health Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      <h3 className="text-sm font-medium text-gray-700">Current Health Status</h3>
+                    </div>
+                    <p className="text-sm text-gray-600">{nurse.healthStatus}</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <h3 className="text-sm font-medium text-gray-700">Disability Details</h3>
+                    </div>
+                    <p className="text-sm text-gray-600">{nurse.disabilityDetails}</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <h3 className="text-sm font-medium text-gray-700">Source of Information</h3>
+                    </div>
+                    <p className="text-sm text-gray-600">{nurse.sourceOfInformation}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded border border-gray-200">
+                <div className="flex justify-between items-center pb-2 border-b border-gray-200 mb-3">
+                  <h2 className="text-base font-semibold text-gray-800">Reviews & Ratings</h2>
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-blue-50 px-3 py-1 rounded-full">
+                      <span className="text-lg font-semibold text-blue-600">{nurse.rating}</span>
+                      <span className="text-sm text-blue-400">/5</span>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {nurse.reviews?.length || 0} reviews
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {nurse.reviews?.map((review) => (
+                    <div key={review.id} className="bg-gray-50 p-4 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-medium">{review.reviewer[0]}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">{review.reviewer}</p>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium text-blue-600">{review.rating}/5</span>
+                              <span className="text-sm text-gray-500">
+                                {new Date(review.date).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2">{review.text}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
-
+  );
 };
 
 export default NurseProfilePage;
