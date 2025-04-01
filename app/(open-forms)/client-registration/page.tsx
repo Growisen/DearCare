@@ -178,31 +178,31 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
         <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
-        <div className="flex items-center">
-          <div className="flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 border-dCblue">
-            <div className="relative w-12 h-12">
-              <Image
-                src="/DearCare.png"
-                alt="DearCare Logo"
-                fill
-                className="object-contain"
-              />
+          <div className="flex items-center">
+            <div className="flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 border-dCblue">
+              <div className="relative w-12 h-12">
+                <Image
+                  src="/DearCare.png"
+                  alt="DearCare Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                <div className="flex items-center whitespace-nowrap">
+                  <span className='text-dCblue'>Dear</span><span className='text-amber-500'>C</span><span className='text-dCblue'>are</span>
+                </div>
+              </h1>
+              <p className="text-sm text-gray-500">Healthcare & Caregiving Services</p>
             </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">
-              <div className="flex items-center whitespace-nowrap">
-                <span className='text-dCblue'>Dear</span><span className='text-amber-500'>C</span><span className='text-dCblue'>are</span>
-              </div>
-            </h1>
-            <p className="text-sm text-gray-500">Healthcare & Caregiving Services</p>
+          <div className="hidden sm:block">
+            <p className="text-sm text-gray-600 font-medium">Client Support: <span className="text-blue-600">+1 (800) 123-4567</span></p>
+            <p className="text-sm text-gray-600 mt-1">care@dearcare.com</p>
           </div>
         </div>
-        <div className="hidden sm:block">
-          <p className="text-sm text-gray-600 font-medium">Client Support: <span className="text-blue-600">+1 (800) 123-4567</span></p>
-          <p className="text-sm text-gray-600 mt-1">care@dearcare.com</p>
-        </div>
-      </div>
 
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">

@@ -73,7 +73,7 @@ export function ClientDetailsOverlay({
       case "assigned":
         return <ApprovedContent />;
       case "under_review":
-        return <UnderReviewContent clientId={client.id} onClose={onClose} onStatusChange={handleStatusChange} />;
+        return <UnderReviewContent clientId={client.id} clientType={detailedClient?.client_type} onClose={onClose} onStatusChange={handleStatusChange} />;
       case "pending":
         return <PendingContent client={client} onStatusChange={handleStatusChange} />;
       case "rejected":
@@ -143,9 +143,9 @@ export function ClientDetailsOverlay({
                   <tbody className="bg-white divide-y divide-gray-200">
                     {detailedClient.staffRequirements.map((req: StaffRequirement, index: number) => (
                       <tr key={index}>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.staffType}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req['staff_type'] || req.staffType}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.count}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.shiftType}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req['shift_type'] || req.shiftType}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -218,7 +218,11 @@ export function ClientDetailsOverlay({
         <div className="px-6 py-4 space-y-6 overflow-y-auto">
           <ClientInformation client={client} />
           {renderDetailedInformation()}
-          {renderStatusSpecificContent()}
+          {loading ? (
+            <div className="p-4 text-gray-700 text-center">Loading status content...</div>
+          ) : (
+            renderStatusSpecificContent()
+          )}
         </div>
       </div>
     </div>

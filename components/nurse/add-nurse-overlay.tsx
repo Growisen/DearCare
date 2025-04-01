@@ -542,12 +542,12 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
           <div className="flex justify-between mb-4">
             {FORM_CONFIG.steps.map((step, index) => (
               <div key={index} className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-gray-700 ${
                   index <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200'
                 }`}>
                   {index + 1}
                 </div>
-                <span className="text-xs mt-1">{step}</span>
+                <span className="text-xs mt-1 text-gray-700">{step}</span>
               </div>
             ))}
           </div>

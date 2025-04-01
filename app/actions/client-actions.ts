@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { IndividualFormData, OrganizationFormData, SavePatientAssessmentParams, SavePatientAssessmentResult  } from '@/types/client.types';
 import { Database } from '@/lib/database.types';
 import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
-import { sendClientCredentials } from '@/lib/email'
+import { sendClientCredentials, sendClientFormLink, sendClientRejectionNotification } from '@/lib/email'
 /**
  * Adds a new individual client to the database
  */
@@ -472,18 +472,77 @@ export async function updateClientStatus(
     const supabase = await createSupabaseAdminClient();
 
      if (newStatus === 'rejected' && rejectionReason) {
+      const { data: client, error: clientError } = await supabase
+        .from('clients')
+        .select('client_type')
+        .eq('id', clientId)
+        .single();
+        
+      if (clientError) {
+        return { success: false, error: clientError.message };
+      }
+      
+      let clientEmail = '';
+      let clientName = '';
+      
+      // Get client email and name based on client type
+      if (client.client_type === 'individual') {
+        const { data: individualData, error: individualError } = await supabase
+          .from('individual_clients')
+          .select('requestor_email, requestor_name, patient_name')
+          .eq('client_id', clientId)
+          .single();
+          
+        if (individualError) {
+          return { success: false, error: individualError.message };
+        }
+        
+        clientEmail = individualData.requestor_email;
+        clientName = individualData.requestor_name || individualData.patient_name;
+      } else {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organization_clients')
+          .select('contact_email, contact_person_name, organization_name')
+          .eq('client_id', clientId)
+          .single();
+          
+        if (orgError) {
+          return { success: false, error: orgError.message };
+        }
+        
+        clientEmail = orgData.contact_email;
+        clientName = orgData.contact_person_name || orgData.organization_name;
+      }
+
+      // Update client status in database
       const { data, error } = await supabase
-      .from('clients')
-      .update({ 
-        status: newStatus,
-        rejection_reason: rejectionReason
-       })
-      .eq('id', clientId)
-      .select()
-      .single();
+        .from('clients')
+        .update({ 
+          status: newStatus,
+          rejection_reason: rejectionReason
+        })
+        .eq('id', clientId)
+        .select()
+        .single();
 
       if (error) {
         return { success: false, error: error.message };
+      }
+      
+      // Send rejection email if email is available
+      if (clientEmail && clientName) {
+        try {
+          await sendClientRejectionNotification(clientEmail, {
+            name: clientName,
+            rejectionReason: rejectionReason
+          });
+          console.log(`Rejection notification sent to ${clientEmail}`);
+        } catch (emailError) {
+          console.error('Error sending rejection email:', emailError);
+          // Continue even if email fails - don't block the client rejection process
+        }
+      } else {
+        console.warn('Unable to send rejection email: Missing client email or name');
       }
       
       revalidatePath('/clients');
@@ -794,6 +853,95 @@ export async function updateClientCategory(
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+export async function sendClientAssessmentFormLink(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    // First get the client type to determine where to look for contact info
+    const { error: clientError } = await supabase
+      .from('clients')
+      .select('client_type')
+      .eq('id', clientId)
+      .single();
+    
+    if (clientError) {
+      return { success: false, error: `Client not found: ${clientError.message}` };
+    }
+    
+    let clientEmail = '';
+    let clientName = '';
+    
+      const { data: individualData, error: individualError } = await supabase
+        .from('individual_clients')
+        .select('requestor_email, requestor_name, patient_name')
+        .eq('client_id', clientId)
+        .single();
+        
+      if (individualError) {
+        return { success: false, error: `Client details not found: ${individualError.message}` };
+      }
+      
+      clientEmail = individualData.requestor_email;
+      clientName = individualData.requestor_name || individualData.patient_name;
+    
+    if (!clientEmail) {
+      return { success: false, error: 'Client email not found' };
+    }
+
+    // Generate form link with client ID
+    const formBaseUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://dearcare.com';
+    const formLink = `${formBaseUrl}/patient-assessment/${clientId}`;
+
+    // Send email
+    const emailResult = await sendClientFormLink(clientEmail, {
+      name: clientName,
+      clientId: clientId,
+      formLink: formLink
+    });
+
+    if (!emailResult.success) {
+      throw new Error('Failed to send email');
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending client assessment form:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An error occurred' 
+    };
+  }
+}
+
+
+export async function getClientAssessmentFormStatus(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('patient_assessments')
+      .select('id')
+      .eq('client_id', clientId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+    
+    return {
+      success: true,
+      isFormFilled: !!data
+    };
+  } catch (error) {
+    console.error('Error checking form status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to check form status',
+      isFormFilled: false
     };
   }
 }
