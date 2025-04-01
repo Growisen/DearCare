@@ -56,6 +56,8 @@ export interface StaffRequirement {
   staffType: string;
   count: number;
   shiftType: string;
+  shift_type?: string;
+  staff_type?:string
 }
 
 export interface BaseFormData {

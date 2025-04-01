@@ -143,9 +143,9 @@ export function ClientDetailsOverlay({
                   <tbody className="bg-white divide-y divide-gray-200">
                     {detailedClient.staffRequirements.map((req: StaffRequirement, index: number) => (
                       <tr key={index}>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.staff_type}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req['staff_type'] || req.staffType}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.count}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req.shift_type}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{req['shift_type'] || req.shiftType}</td>
                       </tr>
                     ))}
                   </tbody>

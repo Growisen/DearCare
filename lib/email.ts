@@ -178,3 +178,85 @@ export async function sendClientFormLink(email: string, data: {
     return { success: false, error };
   }
 }
+
+
+export async function sendClientRejectionNotification(email: string, data: { 
+  name: string;
+  rejectionReason: string;
+}) {
+  const transporter = createTransport({
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
+
+  const currentYear = new Date().getFullYear();
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"DearCare Health Services" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "DearCare Application Status Update",
+      html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>DearCare Application Status</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333333; background-color: #f7f7f7;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <!-- Header -->
+            <tr>
+              <td style="background-color: #0056b3; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-weight: 600;">DearCare Health Services</h1>
+              </td>
+            </tr>
+            
+            <!-- Main Content -->
+            <tr>
+              <td style="padding: 30px 25px;">
+                <p style="margin-top: 0; font-size: 16px; line-height: 1.5;">Dear ${data.name},</p>
+                
+                <p style="font-size: 16px; line-height: 1.5;">Thank you for your interest in DearCare Health Services. We have carefully reviewed your application for our services.</p>
+                
+                <div style="background-color: #f8f9fa; border-left: 4px solid #e74c3c; padding: 15px; margin: 25px 0;">
+                  <h3 style="margin-top: 0; color: #e74c3c; font-size: 18px;">Application Status: Not Approved</h3>
+                  <p style="margin-bottom: 5px; font-size: 16px;">We regret to inform you that we are unable to proceed with your application at this time due to the following reason:</p>
+                  <p style="font-style: italic; margin-bottom: 0; font-size: 16px;">${data.rejectionReason}</p>
+                </div>
+                
+                <p style="font-size: 16px; line-height: 1.5;">If you believe there has been an error or if you would like to discuss this decision further, please contact our Support Team at <a href="mailto:support@dearcare.com" style="color: #0056b3; text-decoration: underline;">support@dearcare.com</a> or call us at (555) 123-4567.</p>
+                
+                <p style="font-size: 16px; line-height: 1.5;">We appreciate your understanding and wish you the best with your healthcare journey.</p>
+                
+                <p style="font-size: 16px; line-height: 1.5;">Sincerely,</p>
+                <p style="font-size: 16px; line-height: 1.5; margin-bottom: 0;"><strong>The DearCare Team</strong></p>
+              </td>
+            </tr>
+            
+            <!-- Footer -->
+            <tr>
+              <td style="background-color: #f2f2f2; padding: 20px 25px; border-top: 1px solid #dddddd;">
+                <p style="font-size: 12px; color: #666666; margin-top: 0; margin-bottom: 10px;">This is a confidential communication with information intended only for the named recipient. If you have received this communication in error, please notify the sender immediately.</p>
+                <p style="font-size: 12px; color: #666666; margin-bottom: 0;">&copy; ${currentYear} DearCare Health Services. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    console.log("Rejection email sent: %s", info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Error sending rejection email:", error);
+    return { success: false, error };
+  }
+}
