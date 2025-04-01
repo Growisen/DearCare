@@ -30,25 +30,39 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    // IMPORTANT: Do not add code between client creation and getUser()
+    // IMPORTANT: Do not add code between client creation and session management
     let user = null
     try {
-      const { data } = await Promise.race([
-        supabase.auth.getUser(),
-        new Promise<{data: {user: null}}>((_, reject) => 
-          setTimeout(() => reject(new Error('Auth request timed out')), 10000)
-        )
-      ]);
-      user = data?.user
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session) {
+        const { data } = await Promise.race([
+          supabase.auth.getUser(),
+          new Promise<{data: {user: null}}>((_, reject) => 
+            setTimeout(() => reject(new Error('Auth request timed out')), 5000)
+          )
+        ]);
+        user = data?.user
+      } else if (request.cookies.has('sb-refresh-token')) {
+        try {
+          const { data: refreshData } = await supabase.auth.refreshSession()
+          user = refreshData.user
+        } catch (refreshError) {
+          console.error('Session refresh failed:', refreshError)
+          supabaseResponse.cookies.delete('sb-access-token')
+          supabaseResponse.cookies.delete('sb-refresh-token')
+        }
+      }
     } catch (error) {
       console.error('Auth error in middleware:', error)
     }
-
+    
     // Define public routes that don't require authentication
     const pathname = request.nextUrl.pathname
     const publicRoutes = ['/signin', '/register', '/', '/about', '/client-registration']
     const isPublicRoute = publicRoutes.includes(pathname) || 
                           pathname.startsWith('/api/') || 
+                          pathname.startsWith('/patient-assessment/') ||
                           pathname.includes('.')
 
     // Check auth status and redirect if needed
