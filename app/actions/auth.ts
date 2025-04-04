@@ -48,7 +48,16 @@ export async function signIn(formData: FormData) {
   }
 
   const { data: { user } } = await supabase.auth.getUser();
-
+  
+  if (!user) {
+    return { error: "User not found", success: false }
+  }
+  
+  if (!user.user_metadata?.role || user.user_metadata.role !== 'admin') {
+    await supabase.auth.signOut()
+    return { error: "Access denied: Admin privileges required", success: false }
+  }
+  
   console.log(user)
   
   return { error: null, success: true }
