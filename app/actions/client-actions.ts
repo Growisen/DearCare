@@ -945,3 +945,70 @@ export async function getClientAssessmentFormStatus(clientId: string) {
     };
   }
 }
+
+
+/**
+ * Fetches detailed information for a specific organization client by ID
+ */
+export async function getOrganizationClientDetails(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient()
+    
+    // Get the base client record first to verify it's an organization client
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', clientId)
+      .single()
+    
+    if (clientError) {
+      return { success: false, error: clientError.message }
+    }
+    
+    if (!client) {
+      return { success: false, error: 'Client not found' }
+    }
+    
+    // Verify the client type is organization (or related types)
+    if (client.client_type !== 'organization' && client.client_type !== 'hospital' && client.client_type !== 'carehome') {
+      return { success: false, error: 'Not an organization client' }
+    }
+    
+    // Fetch organization details
+    const { data: organizationDetails, error: organizationError } = await supabase
+      .from('organization_clients')
+      .select('*')
+      .eq('client_id', clientId)
+      .single()
+      
+    if (organizationError) {
+      return { success: false, error: organizationError.message }
+    }
+    
+    // Fetch staff requirements if any
+    const { data: staffRequirements, error: staffError } = await supabase
+      .from('staff_requirements')
+      .select('*')
+      .eq('client_id', clientId)
+      
+    if (staffError) {
+      console.error('Error fetching staff requirements:', staffError)
+      // Continue without staff requirements rather than failing completely
+    }
+    
+    return { 
+      success: true, 
+      client: {
+        ...client,
+        details: organizationDetails,
+        staffRequirements: staffRequirements || []
+      }
+    }
+  } catch (error: unknown) {
+    console.error('Error fetching organization client details:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    }
+  }
+}
