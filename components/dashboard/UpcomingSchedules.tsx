@@ -61,9 +61,56 @@ export default function TodoScheduler() {
   const [newDate, setNewDate] = useState("");
   const [newLocation, setNewLocation] = useState("");
   const [newUrgent, setNewUrgent] = useState(false);
+  const [dateError, setDateError] = useState(false);
+  const [timeError, setTimeError] = useState(false);
+
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const currentHours = now.getHours().toString().padStart(2, '0');
+  const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+  const currentTime = `${currentHours}:${currentMinutes}`;
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDate = e.target.value;
+    
+    setNewDate(selectedDate);
+    
+    if (selectedDate < today) {
+      setDateError(true);
+    } else {
+      setDateError(false);
+      validateTimeWithDate(selectedDate, newTime);
+    }
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedTime = e.target.value;
+    
+    setNewTime(selectedTime);
+    
+    validateTimeWithDate(newDate, selectedTime);
+  };
+
+  const validateTimeWithDate = (date: string, time: string) => {
+    if (!time || !date) {
+      setTimeError(false);
+      return;
+    }
+
+    if (date === today) {
+      if (time < currentTime) {
+        setTimeError(true);
+      } else {
+        setTimeError(false);
+      }
+    } else {
+      setTimeError(false);
+    }
+  };
 
   const addTodo = () => {
     if (newTodo.trim() === "") return;
+    if (dateError || timeError) return;
     
     const todo: Todo = {
       id: Date.now().toString(),
@@ -95,27 +142,33 @@ export default function TodoScheduler() {
     setNewDate("");
     setNewLocation("");
     setNewUrgent(false);
+    setDateError(false);
+    setTimeError(false);
     setShowForm(false);
   };
 
-  return (
+return (
     <Card className="p-4 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl h-[400px]">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-emerald-100">
             <CheckCircle className="w-5 h-5 text-emerald-600" />
           </div>
-          <h3 className="text-md font-semibold text-gray-800">Todo List</h3>
+          <h3 className="text-md font-semibold text-gray-800">Todo Scheduler</h3>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="p-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 transition-colors"
         >
-          <Plus className="w-4 h-4 text-emerald-600" />
+          {showForm ? (
+            <X className="w-4 h-4 text-emerald-600" />
+          ) : (
+            <Plus className="w-4 h-4 text-emerald-600" />
+          )}
         </button>
       </div>
 
-      {showForm && (
+      {showForm ? (
         <div className="mb-4 p-3 border border-emerald-100 rounded-lg bg-emerald-50/30">
           <div className="flex flex-col gap-2">
             <input
@@ -131,8 +184,8 @@ export default function TodoScheduler() {
                 <input
                   type="time"
                   value={newTime}
-                  onChange={(e) => setNewTime(e.target.value)}
-                  className="text-xs text-gray-800 border-none outline-none"
+                  onChange={handleTimeChange}
+                  className={`text-xs text-gray-800 border-none outline-none ${timeError ? 'ring-2 ring-red-400' : ''}`}
                 />
               </div>
               <div className="flex items-center gap-1.5 bg-white p-1.5 rounded border border-gray-100">
@@ -140,8 +193,9 @@ export default function TodoScheduler() {
                 <input
                   type="date"
                   value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
-                  className="text-xs text-gray-800 border-none outline-none"
+                  onChange={handleDateChange}
+                  min={today}
+                  className={`text-xs text-gray-800 border-none outline-none ${dateError ? 'ring-2 ring-red-400' : ''}`}
                 />
               </div>
               <div className="flex items-center gap-1.5 bg-white p-1.5 rounded border border-gray-100 flex-grow">
@@ -155,6 +209,12 @@ export default function TodoScheduler() {
                 />
               </div>
             </div>
+            {dateError && (
+              <p className="text-xs text-red-500">Please select today or a future date</p>
+            )}
+            {timeError && (
+              <p className="text-xs text-red-500">Please select a future time for today&apos;s tasks</p>
+            )}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-1.5 text-xs text-gray-800">
                 <input
@@ -174,7 +234,10 @@ export default function TodoScheduler() {
                 </button>
                 <button
                   onClick={addTodo}
-                  className="px-3 py-1 text-xs rounded bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+                  disabled={dateError || timeError || newTodo.trim() === ""}
+                  className={`px-3 py-1 text-xs rounded ${dateError || timeError || newTodo.trim() === "" 
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                    : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"}`}
                 >
                   Add Task
                 </button>
@@ -182,67 +245,67 @@ export default function TodoScheduler() {
             </div>
           </div>
         </div>
-      )}
-
-      <div className="space-y-3 overflow-y-auto custom-scrollbar" style={{ height: showForm ? "calc(100% - 180px)" : "calc(100% - 60px)" }}>
-        {todos.map((todo) => (
-          <div 
-            key={todo.id} 
-            className={`p-3 rounded-xl transition-colors border relative group
-              ${todo.completed 
-                ? "bg-gray-50/50 border-gray-100/20" 
-                : "bg-blue-50/30 hover:bg-blue-50/50 border-blue-100/20"}`}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <button 
-                onClick={() => toggleComplete(todo.id)}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
-                  ${todo.completed 
-                    ? "bg-emerald-100/50 text-emerald-600" 
-                    : "bg-blue-100/50 text-blue-600 hover:bg-blue-100"}`}
-              >
-                {todo.completed ? (
-                  <CheckCircle className="w-4 h-4" />
-                ) : (
-                  <Circle className="w-4 h-4" />
-                )}
-              </button>
-              <div className="flex-1">
-                <p className={`text-gray-800 text-sm font-medium flex items-center gap-2
-                  ${todo.completed ? "line-through text-gray-500" : ""}`}>
-                  {todo.text}
-                  {todo.urgent && !todo.completed && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-rose-100/50 text-rose-600 text-xs">
-                      Urgent
-                    </span>
+      ) : (
+        <div className="space-y-3 overflow-y-auto custom-scrollbar" style={{ height: "calc(100% - 60px)" }}>
+          {todos.map((todo) => (
+            <div 
+              key={todo.id} 
+              className={`p-3 rounded-xl transition-colors border relative group
+                ${todo.completed 
+                  ? "bg-gray-50/50 border-gray-100/20" 
+                  : "bg-blue-50/30 hover:bg-blue-50/50 border-blue-100/20"}`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <button 
+                  onClick={() => toggleComplete(todo.id)}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                    ${todo.completed 
+                      ? "bg-emerald-100/50 text-emerald-600" 
+                      : "bg-blue-100/50 text-blue-600 hover:bg-blue-100"}`}
+                >
+                  {todo.completed ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <Circle className="w-4 h-4" />
                   )}
-                </p>
+                </button>
+                <div className="flex-1">
+                  <p className={`text-gray-800 text-sm font-medium flex items-center gap-2
+                    ${todo.completed ? "line-through text-gray-500" : ""}`}>
+                    {todo.text}
+                    {todo.urgent && !todo.completed && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-rose-100/50 text-rose-600 text-xs">
+                        Urgent
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => deleteTodo(todo.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-100"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
               </div>
-              <button 
-                onClick={() => deleteTodo(todo.id)}
-                className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-100"
-              >
-                <X className="w-4 h-4 text-gray-400" />
-              </button>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 ml-11">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>{todo.time}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  <span>{todo.date}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>•</span>
+                  <MapPin className="w-3 h-3" />
+                  <span>{todo.location}</span>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 ml-11">
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                <span>{todo.time}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                <span>{todo.date}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span>•</span>
-                <MapPin className="w-3 h-3" />
-                <span>{todo.location}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </Card>
   )
 }

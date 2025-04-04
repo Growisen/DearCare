@@ -223,7 +223,11 @@ export default function RecentClients() {
         )}
       </div>
       <div className="text-center mt-4">
-        <Link href="/clients" className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+        <Link 
+          href="/clients" 
+          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+          onClick={() => localStorage.setItem('clientsPageStatus', 'pending')}
+        >
           View All Client Requests
         </Link>
       </div>
