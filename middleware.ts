@@ -73,6 +73,19 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
+    // Check admin role for all authenticated routes
+    if (user && !isPublicRoute && (!user.user_metadata?.role || user.user_metadata.role !== 'admin')) {
+      // Sign out users without admin privileges
+      await supabase.auth.signOut()
+      supabaseResponse.cookies.delete('sb-access-token')
+      supabaseResponse.cookies.delete('sb-refresh-token')
+      
+      // Redirect to signin page with access denied message
+      const redirectUrl = new URL('/signin', request.url)
+      redirectUrl.searchParams.set('error', 'Access denied: Admin privileges required')
+      return NextResponse.redirect(redirectUrl)
+    }
+
     return supabaseResponse
   } catch (error) {
     console.error('Middleware error:', error)

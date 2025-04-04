@@ -1,15 +1,9 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Users, Search, Download, MoreVertical, Mail, Phone } from "lucide-react"
+import { Users, Search, Download, Mail, Phone, Eye, Clock } from "lucide-react"
 import { Client } from "../../types/client.types"
-
-const recentClients: Client[] = [
-  { id: "1", name: "Anoop Kumar", requestDate: "2024-01-15", service: "Home Care", status: "pending", email: "anoop@example.com", phone: "944-756-7890" },
-  { id: "2", name: "Priya Thomas", requestDate: "2024-01-14", service: "Elder Care", status: "under_review", email: "priya@example.com", phone: "855-654-3210" },
-  { id: "3", name: "Mohammed Rashid", requestDate: "2024-01-13", service: "Post-Surgery Care", status: "approved", email: "rashid@example.com", phone: "944-789-0123" },
-  { id: "4", name: "Lakshmi Menon", requestDate: "2024-01-12", service: "Home Care", status: "rejected", email: "lakshmi@example.com", phone: "934-123-4560" },
-  { id: "5", name: "Rajesh Nair", requestDate: "2024-01-11", service: "Physiotherapy", status: "approved", email: "rajesh@example.com", phone: "944-654-0987" },
-];
+import { getClients } from "../../app/actions/client-actions"
+import Link from "next/link"
 
 const getStatusStyles = (status: Client['status']) => {
   const styles = {
@@ -22,12 +16,57 @@ const getStatusStyles = (status: Client['status']) => {
   return styles[status] || 'bg-gray-100 text-gray-700'
 }
 
+const statusIcons = {
+  pending: Clock,
+  under_review: Eye,
+  approved: Clock,
+  rejected: Clock,
+  assigned: Clock
+}
+
 const formatStatus = (status: string) => status.replace("_", " ").charAt(0).toUpperCase() + status.slice(1).replace("_", " ")
 
 export default function RecentClients() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [clients, setClients] = useState<Client[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filteredClients = recentClients.filter(client =>
+  // Fetch recent pending clients
+  useEffect(() => {
+    async function loadRecentClients() {
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        // Get first page of pending clients, limit to 5
+        const result = await getClients("pending", "", 1, 5)
+        
+        if (result.success && result.clients) {
+          const typedClients = result.clients.map(client => ({
+            ...client,
+            service: client.service || "Not specified",
+            email: client.email || "No email provided",
+            phone: client.phone || "No phone provided",
+            location: client.location || "No location specified",
+            status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
+          }))
+          setClients(typedClients)
+        } else {
+          setError(result.error || "Failed to load clients")
+        }
+      } catch (err) {
+        setError("An unexpected error occurred")
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadRecentClients()
+  }, [])
+
+  const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 5)
 
@@ -55,7 +94,7 @@ export default function RecentClients() {
           <div className="p-2 rounded-lg bg-emerald-100">
             <Users className="w-5 h-5 text-emerald-600" />
           </div>
-          <h3 className="text-md font-semibold text-gray-800">Recent Clients</h3>
+          <h3 className="text-md font-semibold text-gray-800">Recent Client Requests</h3>
         </div>
         <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
           <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
@@ -63,7 +102,7 @@ export default function RecentClients() {
             <input 
               type="text" 
               placeholder="Search clients..." 
-              className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 w-full" 
+              className="pl-10 pr-4 py-2 rounded-lg border text-gray-800 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 w-full" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -80,87 +119,113 @@ export default function RecentClients() {
 
       {/* Desktop Table */}
       <div className="overflow-x-auto">
-        <table className="hidden sm:table w-full">
-          <thead>
-            <tr className="text-left border-b border-gray-200">
-              {['Client Name', 'Request Date', 'Service', 'Status', 'Contact', ''].map((header) => (
-                <th key={header} className="py-3 px-4 text-sm font-semibold text-gray-600">{header}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredClients.map((client) => (
-              <tr key={client.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-gray-800">{client.name}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-4 text-sm text-gray-600">{client.requestDate}</td>
-                <td className="py-3 px-4 text-sm text-gray-600">{client.service}</td>
-                <td className="py-3 px-4">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusStyles(client.status)}`}>
-                    {formatStatus(client.status)}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="text-sm">
-                    <div className="text-gray-900">{client.email}</div>
-                    <div className="text-gray-600">{client.phone}</div>
-                  </div>
-                </td>
-                <td className="py-3 px-4">
-                  <button className="p-1.5 rounded-lg hover:bg-gray-100">
-                    <MoreVertical className="w-4 h-4 text-gray-400" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Mobile Cards */}
-        <div className="sm:hidden space-y-4">
-          {filteredClients.map((client) => (
-            <div key={client.id} className="p-4 rounded-lg border border-gray-200 bg-white">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <h4 className="text-sm font-medium text-gray-800">{client.name}</h4>
-                    <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusStyles(client.status)}`}>
-                      {formatStatus(client.status)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{client.service}</p>
-                </div>
-                <button className="p-1.5 rounded-lg hover:bg-gray-100 ml-2">
-                  <MoreVertical className="w-4 h-4 text-gray-400" />
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="col-span-2">
-                  <div className="text-gray-600 mb-1">Request Date</div>
-                  <div className="font-medium">{client.requestDate}</div>
-                </div>
-                <div className="col-span-2 border-t border-gray-100 pt-3 mt-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Mail className="w-4 h-4" />
-                      <span className="text-gray-900">{client.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Phone className="w-4 h-4" />
-                      <span>{client.phone}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {isLoading ? (
+          <div className="py-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            <p className="text-sm text-gray-600 mt-2">Loading clients...</p>
+          </div>
+        ) : error ? (
+          <div className="p-6 text-center">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+              {error}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : filteredClients.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="bg-gray-50 border border-gray-200 text-gray-600 px-6 py-5 rounded-lg">
+              <p className="text-lg font-medium mb-1">No pending requests</p>
+              <p className="text-sm">All client requests have been processed</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <table className="hidden sm:table w-full">
+              <thead>
+                <tr className="text-left border-b border-gray-200">
+                  <th className="py-3 px-4 text-sm font-semibold text-gray-600">Client Name</th>
+                  <th className="py-3 px-4 text-sm font-semibold text-gray-600">Request Date</th>
+                  <th className="py-3 px-4 text-sm font-semibold text-gray-600">Service</th>
+                  <th className="py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
+                  <th className="py-3 px-4 text-sm font-semibold text-gray-600">Contact</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredClients.map((client) => {
+                  const StatusIcon = statusIcons[client.status]
+                  return (
+                    <tr key={client.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-gray-800">{client.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{client.requestDate}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{client.service}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyles(client.status)}`}>
+                          <StatusIcon className="w-3.5 h-3.5" />
+                          {formatStatus(client.status)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="text-sm">
+                          <div className="text-gray-900">{client.email}</div>
+                          <div className="text-gray-600">{client.phone}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+
+            {/* Mobile Cards */}
+            <div className="sm:hidden space-y-4">
+              {filteredClients.map((client) => {
+                const StatusIcon = statusIcons[client.status]
+                return (
+                  <div key={client.id} className="p-4 rounded-lg border border-gray-200 bg-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <h4 className="text-sm font-medium text-gray-800">{client.name}</h4>
+                          <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusStyles(client.status)}`}>
+                            <StatusIcon className="inline w-3.5 h-3.5 mr-1" />
+                            {formatStatus(client.status)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{client.service}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="col-span-2">
+                        <div className="text-gray-600 mb-1">Request Date</div>
+                        <div className="font-medium">{client.requestDate}</div>
+                      </div>
+                      <div className="col-span-2 border-t border-gray-100 pt-3 mt-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Mail className="w-4 h-4" />
+                            <span className="text-gray-900">{client.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Phone className="w-4 h-4" />
+                            <span>{client.phone}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
       </div>
       <div className="text-center mt-4">
-        <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">View More</button>
+        <Link href="/clients" className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+          View All Client Requests
+        </Link>
       </div>
     </Card>
   )
