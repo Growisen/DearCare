@@ -8,6 +8,7 @@ interface InputFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   required?: boolean;
+  min?: string;
 }
 
 const InputField = memo(({ 
@@ -17,7 +18,8 @@ const InputField = memo(({
   id, 
   value, 
   onChange, 
-  required = false 
+  required = false,
+  min
 }: InputFieldProps) => (
   <div className="mb-4">
     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={id}>
@@ -33,6 +35,7 @@ const InputField = memo(({
       onChange={onChange}
       required={required}
       autoComplete="off"
+      min={min}
     />
   </div>
 ));
