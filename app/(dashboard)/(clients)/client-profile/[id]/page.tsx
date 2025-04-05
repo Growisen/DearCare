@@ -110,6 +110,7 @@ const PatientProfilePage = () => {
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [nurses] = useState(nurses_test_data);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -544,19 +545,19 @@ const PatientProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Chronic Illness</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.chronicIllness}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.chronicIllness || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Medical History</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.medicalHistory}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.medicalHistory || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Surgical History</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.surgicalHistory}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.surgicalHistory || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Medication History</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.medicationHistory}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.medicationHistory || 'Not recorded'}</p>
                   </div>
                 </div>
               </div>
@@ -569,15 +570,15 @@ const PatientProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Present Condition</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.presentCondition}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.presentCondition || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Blood Pressure</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.bloodPressure}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.bloodPressure || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Sugar Level</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.sugarLevel}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.sugarLevel || 'Not recorded'}</p>
                   </div>
                 </div>
               </div>
@@ -588,7 +589,7 @@ const PatientProfilePage = () => {
                   Lab Investigations
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.entries(latestAssessment.lab_investigations || {}).map(([key, value]) => (
+                  {Object.entries(latestAssessment?.lab_investigations || {}).map(([key, value]) => (
                     <div key={key}>
                       <p className="text-xs text-gray-500 font-medium">{key.toUpperCase()}</p>
                       <p className="text-sm text-gray-700">{value}</p>
@@ -605,19 +606,19 @@ const PatientProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Final Diagnosis</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.finalDiagnosis}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.finalDiagnosis|| 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Patient Position</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.patientPosition}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.patientPosition || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Foods to Include</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.foodsToInclude}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.foodsToInclude || 'Not recorded'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-medium">Foods to Avoid</p>
-                    <p className="text-sm text-gray-700">{latestAssessment.foodsToAvoid}</p>
+                    <p className="text-sm text-gray-700">{latestAssessment?.foodsToAvoid || 'Not recorded'}</p>
                   </div>
                 </div>
               </div>
@@ -696,7 +697,7 @@ const PatientProfilePage = () => {
                   <div>
                     <h3 className="text-sm font-medium mb-2 text-gray-800">Environment Checklist</h3>
                     <div className="space-y-2">
-                      {Object.entries(latestAssessment.environment || {}).map(([key, value]) => (
+                      {Object.entries(latestAssessment?.environment || {}).map(([key, value]) => (
                         <div key={key} className="flex items-center">
                           <input
                             type="checkbox"
@@ -714,7 +715,7 @@ const PatientProfilePage = () => {
                   <div>
                     <h3 className="text-sm font-medium mb-2 text-gray-800">Equipment Needed</h3>
                     <div className="space-y-2">
-                      {Object.entries(latestAssessment.equipment || {}).map(([key, value]) => (
+                      {Object.entries(latestAssessment?.equipment || {}).map(([key, value]) => (
                         <div key={key} className="flex items-center">
                           <input
                             type="checkbox"

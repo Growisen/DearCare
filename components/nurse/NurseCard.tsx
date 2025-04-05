@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, AlertCircle } from "lucide-react"
-import { Nurse, NurseBasicInfo } from "@/types/staff.types"
+import { NurseBasicInfo } from "@/types/staff.types"
 
 const statusColors = {
   assigned: "bg-green-100 text-green-700 border border-green-200",

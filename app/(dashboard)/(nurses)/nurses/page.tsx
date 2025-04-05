@@ -11,6 +11,7 @@ import { fetchNurseDetails } from "@/app/actions/add-nurse"
 import Loader from "@/components/loader"
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockNurses: Nurse[] = [
   {
     _id: "1",

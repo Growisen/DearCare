@@ -1,6 +1,5 @@
-import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Star } from "lucide-react"
-import { Nurse, NurseBasicInfo } from "@/types/staff.types"
-import Link from 'next/link';
+import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
+import { NurseBasicInfo } from "@/types/staff.types"
 import { useState } from 'react';
 import Loader from '@/components/loader'
 
