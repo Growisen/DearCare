@@ -1,27 +1,54 @@
 import { Card } from "../ui/card"
 import { CountUp } from "use-count-up"
-import { Users, Calendar, Building2, Activity, TrendingUp } from "lucide-react"
-
-interface Stat {
-  title: string;
-  value: number;
-  icon: LucideIcon;
-  trend: string;
-  trendUp: boolean;
-  bgColor: string;
-  iconColor: string;
-}
-
-import { LucideIcon } from "lucide-react";
-
-const stats: Stat[] = [
-    { title: "Active Nurses", value: 125, icon: Users, trend: "+8%", trendUp: true, bgColor: "bg-blue-100/30", iconColor: "text-blue-500" },
-    { title: "Current Assignments", value: 98, icon: Calendar, trend: "+5%", trendUp: true, bgColor: "bg-emerald-100/30", iconColor: "text-emerald-500" },
-    { title: "Open Requests", value: 15, icon: Activity, trend: "-3%", trendUp: false, bgColor: "bg-amber-100/30", iconColor: "text-amber-500" },
-    { title: "Active Clients", value: 42, icon: Building2, trend: "+4%", trendUp: true, bgColor: "bg-purple-100/30", iconColor: "text-purple-500" },
-]
+import { Users, Calendar, Building2, Activity } from "lucide-react"
+import { Stat } from "@/types/dashboard.types"
+import { useEffect, useState } from "react"
+import { fetchDashboardStats } from "@/app/actions/dashboard-actions"
 
 export default function Stats() {
+  const [stats, setStats] = useState<Stat[]>([
+    { title: "Active Nurses", value: 0, icon: Users, trend: "0%", trendUp: true, bgColor: "bg-blue-100/30", iconColor: "text-blue-500" },
+    { title: "Current Assignments", value: 0, icon: Calendar, trend: "0%", trendUp: true, bgColor: "bg-emerald-100/30", iconColor: "text-emerald-500" },
+    { title: "Open Requests", value: 0, icon: Activity, trend: "0%", trendUp: true, bgColor: "bg-amber-100/30", iconColor: "text-amber-500" },
+    { title: "Approved Clients", value: 0, icon: Building2, trend: "0%", trendUp: true, bgColor: "bg-purple-100/30", iconColor: "text-purple-500" },
+  ]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const getStats = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetchDashboardStats();
+        
+        if (response.success && response.data) {
+          const data = response.data; // Create a non-nullable reference
+          
+          // Update stats with data from the database
+          setStats(prevStats => prevStats.map(stat => {
+            if (stat.title === "Active Nurses") {
+              return { ...stat, value: data.activeNurses.count, trend: data.activeNurses.trend, trendUp: data.activeNurses.trendUp };
+            } else if (stat.title === "Current Assignments") {
+              return { ...stat, value: data.currentAssignments.count, trend: data.currentAssignments.trend, trendUp: data.currentAssignments.trendUp };
+            } else if (stat.title === "Open Requests") {
+              return { ...stat, value: data.openRequests.count, trend: data.openRequests.trend, trendUp: data.openRequests.trendUp };
+            } else if (stat.title === "Approved Clients") {
+              return { ...stat, value: data.approvedClients.count, trend: data.approvedClients.trend, trendUp: data.approvedClients.trendUp };
+            }
+            return stat;
+          }));
+        } else {
+          console.error("Failed to fetch dashboard stats:", response.error);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getStats();
+  }, []);
+
   return (
     <>
       {stats.map((stat) => (
@@ -34,12 +61,16 @@ export default function Stats() {
               <h3 className="text-xs font-medium text-gray-600">{stat.title}</h3>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-bold text-gray-900">
-                  <CountUp isCounting end={stat.value} duration={2} />
+                  {isLoading ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    <CountUp isCounting end={stat.value} duration={2} />
+                  )}
                 </span>
-                <span className={`text-xs flex items-center gap-0.5 ${stat.trendUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {/* <span className={`text-xs flex items-center gap-0.5 ${stat.trendUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                   <TrendingUp className={`w-3 h-3 ${!stat.trendUp && 'rotate-180'}`} />
                   {stat.trend}
-                </span>
+                </span> */}
               </div>
             </div>
           </div>

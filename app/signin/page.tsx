@@ -1,19 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { signIn } from "@/app/actions/auth"; // Import the server action directly
 
 const LoginPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSignIn = (e: React.FormEvent) => {
-    console.log("helloo");
+  const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push('/dashboard');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      // Use the server action directly
+      const { error, success } = await signIn(formData);
+      
+      if (error) {
+        if (error.includes('Invalid login credentials')) {
+          setError('Invalid email or password');
+        } else if (error.includes('Email not confirmed')) {
+          setError('Please verify your email address before signing in');
+        } else {
+          setError(error || 'Invalid credentials');
+        }
+        return;
+      }
+      
+      if (success) {
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+        router.push(redirectTo);
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Login failed", error);
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -37,14 +69,16 @@ const LoginPage = () => {
           </motion.div>
 
           <form onSubmit={handleSignIn} className="space-y-5">
-            {[{ Icon: Mail, type: "email", placeholder: "Email Address" },
-              { Icon: Lock, type: showPassword ? "text" : "password", placeholder: "Password" },
-            ].map(({ Icon, type, placeholder }, i) => (
+            {[
+              { Icon: Mail, type: "email", placeholder: "Email Address", name: "email" },
+              { Icon: Lock, type: showPassword ? "text" : "password", placeholder: "Password", name: "password" },
+            ].map(({ Icon, type, placeholder, name }, i) => (
               <motion.div key={i} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.1, type: "spring" }}>
                 <div className="relative group">
                   <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-dCblue/70 group-focus-within:text-dCorange transition-colors" />
                   <input
                     type={type}
+                    name={name}
                     required
                     placeholder={placeholder}
                     className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
@@ -61,13 +95,25 @@ const LoginPage = () => {
                 </div>
               </motion.div>
             ))}
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
+              disabled={isLoading}
               className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
             >
-              Sign In
+              {isLoading ? "Signing In..." : "Sign In"}
               <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </form>

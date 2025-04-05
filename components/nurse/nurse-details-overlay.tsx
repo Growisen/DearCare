@@ -1,72 +1,267 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import { NurseInformation } from './nurseInformation';
-import { ApprovedContent } from './ApprovedContent';
-import { UnderReviewContent } from './UnderReview';
-import { PendingContent } from './PendingContent';
-import { RejectedContent } from './RejectedContent';
+import React, { useState } from 'react';
+import { X, Trash2, User, Star } from 'lucide-react';
+import Link from 'next/link';
+import { NurseBasicInfo } from "../../types/staff.types";
 
 interface NurseDetailsProps {
-  nurse: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    location: string;
-    phoneNumber: string;
-    gender: string;
-    dob: string;
-    salaryCap: number;
-    hiringDate?: string;
-    status: string;
-    rating?: number;
-    experience?: number;
-    reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
-    image?: File;
-    preferredLocations: string[];
-  };
+  nurse: NurseBasicInfo;
   onClose: () => void;
+  onDelete?: (nurseId: number) => void;
 }
 
-export function NurseDetailsOverlay({ nurse, onClose }: NurseDetailsProps) {
-  const renderStatusSpecificContent = () => {
-    switch (nurse.status) {
-      case "assigned":
-      case "leave":
-      case "unassigned":
-        return <ApprovedContent nurse={nurse} />;
-      case "under_review":
-        return <UnderReviewContent />;
-      case "pending":
-        return <PendingContent />;
-      case "rejected":
-        return <RejectedContent />;
-      default:
-        return null;
-    }
+export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
   };
+
+  const confirmDelete = () => {
+    if (onDelete) {
+      onDelete(nurse.nurse_id);
+    }
+    setShowDeleteConfirm(false);
+  };
+
+  const renderStars = (rating?: number) => {
+    if (!rating) return null;
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= (rating || 0)
+                ? 'text-yellow-400 fill-yellow-400'
+                : 'text-gray-300'
+            }`}
+          />
+        ))}
+        <span className="ml-2 text-sm text-gray-600">{rating.toFixed(1)}</span>
+      </div>
+    );
+  };
+
+  // Updated dummy data with schedule information
+  const dummyClients = [
+    {
+      id: "1",
+      name: "John Doe",
+      address: "123 Main St, Kochi",
+      startDate: "2023-01-15",
+      status: "active",
+      schedule: {
+        type: "24HOUR",
+        startTime: "08:00 AM",
+        endTime: "08:00 AM",
+        days: "Monday to Sunday"
+      }
+    },
+    { id: "2", name: "Jane Smith", address: "456 Park Ave, Kochi", startDate: "2023-02-20", status: "active", schedule: { type: "Day Shift", startTime: "09:00 AM", endTime: "05:00 PM", days: "Monday to Friday" } },
+    { id: "3", name: "Alice Johnson", address: "789 Lake View, Kochi", startDate: "2023-03-10", status: "completed", schedule: { type: "Night Shift", startTime: "08:00 PM", endTime: "06:00 AM", days: "Monday to Sunday" } }
+  ];
+
+  // Add dummy rating if none exists
+  const dummyRating = nurse.rating || 4.2;
+  
+  // Add dummy reviews if none exist
+  const displayReviews = nurse.reviews?.length ? nurse.reviews : [
+    {
+      id: "r1",
+      text: "Very professional and caring nurse. Always punctual and attentive to patient needs.",
+      date: "2023-12-15",
+      rating: 4.5,
+      reviewer: "Thomas Kumar"
+    },
+    {
+      id: "r2",
+      text: "Excellent service and great communication skills. Highly recommended.",
+      date: "2023-11-20",
+      rating: 5,
+      reviewer: "Mary Jacob"
+    },
+    {
+      id: "r3",
+      text: "Good experience overall. Could improve on documentation.",
+      date: "2023-10-05",
+      rating: 4,
+      reviewer: "Sarah Philip"
+    }
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full max-w-7xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Nurse Detials</h2>
-            <p className="text-sm text-gray-500">ID: {nurse._id}</p>
+          <h2 className="text-xl font-semibold text-gray-900">Nurse Profile</h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDelete}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
         </div>
         
         <div className="px-6 py-4 space-y-6">
-          <NurseInformation nurse={nurse} />
-          {renderStatusSpecificContent()}
+          {/* Personal Details Section */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Personal Details</h3>
+              <Link 
+                href={`/nurses/${nurse.nurse_id}?fromNurseList=true`}
+                target='_blank'
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                View Full Profile
+              </Link>
+            </div>
+            
+            <div className="flex gap-20">
+              {/* Profile Image Column */}
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200">
+                  {nurse.photo ? (
+                    <img src={nurse.photo} alt="Nurse" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <User className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                  {nurse.regNumber?.includes('TATA') ? 'Tata Home Nursing' : 'DearCare'}
+                </span>
+              </div>
+
+              {/* Details Grid */}
+              <div className="flex-1 grid grid-cols-3 gap-2">
+                {[
+                  { label: "Name", value: `${nurse.first_name} ${nurse.last_name}` },
+                  { label: "Phone Number", value: nurse.phone_number },
+                  { label: "Email", value: nurse.email },
+                  { label: "Gender", value: nurse.gender },
+                  { label: "Address", value: nurse.address },
+                  { label: "Service Type", value: nurse.serviceType },
+                  { label: "City", value: nurse.city },
+                  { label: "Category", value: nurse.category },
+                  { label: "Reg No", value: nurse.regNumber || 'Not assigned' },
+                ].map((field, index) => (
+                  <div key={index} className="space-y-1">
+                    <span className="text-sm font-medium text-gray-600">{field.label}</span>
+                    <p className="text-sm text-gray-900">{field.value || 'Not provided'}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Assigned Clients Section */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Assigned Clients</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {dummyClients.map((client) => (
+                <div key={client.id} className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="text-base font-medium text-gray-900">{client.name}</h4>
+                      <p className="text-sm text-gray-600">{client.address}</p>
+                    </div>
+                    <Link 
+                      href={`/client-profile/${client.id}`}
+                      target='_blank'
+                      className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                    >
+                      View Profile
+                    </Link>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="bg-white p-2 rounded-md">
+                      <span className="text-xs text-gray-500 block">Schedule Type</span>
+                      <span className="text-sm font-medium">{client.schedule.type}</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-md">
+                      <span className="text-xs text-gray-500 block">Working Days</span>
+                      <span className="text-sm font-medium">{client.schedule.days}</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-md">
+                      <span className="text-xs text-gray-500 block">Timing</span>
+                      <span className="text-sm font-medium">
+                        {client.schedule.startTime} - {client.schedule.endTime}
+                      </span>
+                    </div>
+                    <div className="bg-white p-2 rounded-md">
+                      <span className="text-xs text-gray-500 block">Status</span>
+                      <span className={`text-sm font-medium ${
+                        client.status === 'active' ? 'text-green-600' : 'text-gray-600'
+                      }`}>
+                        {client.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ratings and Reviews Section */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ratings & Reviews</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl font-semibold text-gray-900">{dummyRating.toFixed(1)}</div>
+                {renderStars(dummyRating)}
+              </div>
+              
+              <div className="space-y-4">
+                {displayReviews.map((review) => (
+                  <div key={review.id} className="border-t border-gray-100 pt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-900">{review.reviewer}</span>
+                      <span className="text-xs text-gray-500">{review.date}</span>
+                    </div>
+                    {renderStars(review.rating)}
+                    <p className="mt-2 text-sm text-gray-600">{review.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-60 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to delete this nurse? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+

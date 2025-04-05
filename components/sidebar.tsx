@@ -3,12 +3,13 @@ import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { signOut } from "next-auth/react"
 import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
+  const { signOut } = useAuth()
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const sidebar = document.getElementById('sidebar')
@@ -16,6 +17,10 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
       onClose()
     }
   }, [onClose])
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -51,11 +56,13 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               { icon: Users, label: "Nurses", href: "/nurses" },
               { icon: Users, label: "Clients", href: "/clients" },
               { icon: Briefcase, label: "Assignments", href: "/assignments" },
+              { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
+              { icon: ClipboardList, label: "Staff Attendance", href: "/staff-attendance" },
               { icon: MapPin, label: "Locations", href: "/locations" },
               { icon: Calendar, label: "Schedule", href: "/schedule" },
               { icon: ClipboardList, label: "Reports", href: "/reports" },
               { icon: Settings, label: "Settings", href: "/settings" },
-              { icon: LogOut, label: "Logout", href: "#", onClick: () => signOut() },
+              { icon: LogOut, label: "Logout", href: "#", onClick: () => handleSignOut() },
             ].map((item) => {
               const isActive = pathname === item.href
               return (

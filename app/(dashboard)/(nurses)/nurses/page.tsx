@@ -1,31 +1,17 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "../../../../components/ui/input"
 import { NurseDetailsOverlay } from "../../../../components/nurse/nurse-details-overlay"
 import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "../../../../components/nurse/NurseTable"
 import NurseCard from "../../../../components/nurse/NurseCard"
+import { Nurse, NurseBasicInfo } from "@/types/staff.types"
+import { fetchNurseDetails } from "@/app/actions/add-nurse"
+import Loader from "@/components/loader"
 
-interface Nurse {
-  _id: string
-  firstName: string
-  lastName: string
-  email: string
-  location: string
-  phoneNumber: string
-  gender: string
-  dob: string
-  salaryCap: number
-  hiringDate?: string
-  status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected"
-  rating ?: number
-  experience: number
-  reviews?: { id: string; text: string; date: string; rating: number; reviewer: string; }[];
-  image?: File;
-  preferredLocations: string[];
-}
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockNurses: Nurse[] = [
   {
     _id: "1",
@@ -45,7 +31,8 @@ const mockNurses: Nurse[] = [
       { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
       { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
     ],
-    preferredLocations: ["Kochi", "Thiruvananthapuram"]
+    preferredLocations: ["Kochi", "Thiruvananthapuram"],
+    salaryPerHour: 25, // Add this field
   },
   {
     _id: "2",
@@ -64,7 +51,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r3", text: "Good service.", date: "2020-03-10", rating: 4, reviewer: "Anjali Menon" }
     ],
-    preferredLocations: ["Thiruvananthapuram"]
+    preferredLocations: ["Thiruvananthapuram"],
+    salaryPerHour: 30, // Add this field
   },
   {
     _id: "3",
@@ -83,7 +71,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r4", text: "Very caring.", date: "2021-11-20", rating: 5, reviewer: "Ravi Nair" }
     ],
-    preferredLocations: ["Kozhikode"]
+    preferredLocations: ["Kozhikode"],
+    salaryPerHour: 28, // Add this field
   },
   {
     _id: "4",
@@ -102,7 +91,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r5", text: "Average performance.", date: "2019-08-05", rating: 3, reviewer: "Lakshmi Pillai" }
     ],
-    preferredLocations: ["Thrissur"]
+    preferredLocations: ["Thrissur"],
+    salaryPerHour: 35, // Add this field
   },
   {
     _id: "5",
@@ -121,7 +111,8 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r6", text: "Excellent nurse!", date: "2020-12-12", rating: 5, reviewer: "Manu Varma" }
     ],
-    preferredLocations: ["Kannur"]
+    preferredLocations: ["Kannur"],
+    salaryPerHour: 32, // Add this field
   },
   {
     _id: "6",
@@ -140,32 +131,12 @@ const mockNurses: Nurse[] = [
     reviews: [
       { id: "r7", text: "Needs improvement.", date: "2021-05-18", rating: 2, reviewer: "Meera Das" }
     ],
-    preferredLocations: ["Kochi"]
+    preferredLocations: ["Kochi"],
+    salaryPerHour: 27, // Add this field
   }
 ]
 
 const filterOptions = [
-  {
-    value: "selectedLocation",
-    setValue: "setSelectedLocation",
-    options: [
-      { value: "all", label: "All Locations" },
-      { value: "Thiruvananthapuram", label: "Thiruvananthapuram" },
-      { value: "Kollam", label: "Kollam" },
-      { value: "Pathanamthitta", label: "Pathanamthitta" },
-      { value: "Alappuzha", label: "Alappuzha" },
-      { value: "Kottayam", label: "Kottayam" },
-      { value: "Idukki", label: "Idukki" },
-      { value: "Ernakulam", label: "Ernakulam" },
-      { value: "Thrissur", label: "Thrissur" },
-      { value: "Palakkad", label: "Palakkad" },
-      { value: "Malappuram", label: "Malappuram" },
-      { value: "Kozhikode", label: "Kozhikode" },
-      { value: "Wayanad", label: "Wayanad" },
-      { value: "Kannur", label: "Kannur" },
-      { value: "Kasaragod", label: "Kasaragod" }
-    ]
-  },
   {
     value: "selectedStatus",
     setValue: "setSelectedStatus",
@@ -173,10 +144,7 @@ const filterOptions = [
       { value: "all", label: "All Status" },
       { value: "assigned", label: "Assigned" },
       { value: "leave", label: "Leave" },
-      { value: "unassigned", label: "Unassigned" },
-      { value: "pending", label: "Pending" },
-      { value: "under_review", label: "Under Review" },
-      { value: "rejected", label: "Rejected" }
+      { value: "unassigned", label: "Unassigned" }
     ]
   },
   {
@@ -188,18 +156,6 @@ const filterOptions = [
       { value: "less_than_5", label: "< 5 years" },
       { value: "less_than_10", label: "< 10 years" },
       { value: "greater_than_15", label: ">= 10 years" }
-    ]
-  },
-  {
-    value: "selectedRating",
-    setValue: "setSelectedRating",
-    options: [
-      { value: "all", label: "All Ratings" },
-      { value: "1", label: "1 star or less" },
-      { value: "2", label: "2 stars or less" },
-      { value: "3", label: "3 stars or less" },
-      { value: "4", label: "4 stars or less" },
-      { value: "5", label: "5 stars or less" }
     ]
   }
 ]
@@ -219,36 +175,51 @@ const FilterSelect = ({ value, onChange, options, className }: { value: string, 
 export default function NursesPage() {
   // These state setters are used in FilterSelect component through eval
   /* eslint-disable @typescript-eslint/no-unused-vars */
+  const [nurses, setNurses] = useState<NurseBasicInfo[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<string>("all")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [selectedExperience, setSelectedExperience] = useState<string>("all")
   const [selectedRating, setSelectedRating] = useState<string>("all")
   /* eslint-enable @typescript-eslint/no-unused-vars */
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null)
+  const [selectedNurse, setSelectedNurse] = useState<NurseBasicInfo | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)
 
-  const filteredNurses = mockNurses.filter(nurse => {
-    const matchesLocation = selectedLocation === "all" || nurse.preferredLocations.includes(selectedLocation)
+  useEffect(() => {
+    async function loadNurses() {
+      setIsLoading(true)
+      const { data, error } = await fetchNurseDetails()
+      
+      if (error) {
+        setError(error)
+      } else if (data) {
+        setNurses(data)
+      }
+      
+      setIsLoading(false)
+    }
+    
+    loadNurses()
+  }, [])
+
+  
+
+  const filteredNurses = nurses.filter(nurse => {
     const matchesStatus = selectedStatus === "all" || nurse.status === selectedStatus
     const matchesExperience = selectedExperience === "all" || 
       (selectedExperience === "less_than_1" && (nurse.experience ?? 0) < 1) ||
       (selectedExperience === "less_than_5" && (nurse.experience ?? 0) < 5) ||
       (selectedExperience === "less_than_10" && (nurse.experience ?? 0) < 10) ||
       (selectedExperience === "greater_than_15" && (nurse.experience ?? 0) >= 10)
-    const matchesRating = selectedRating === "all" || 
-      (selectedRating === "1" && (nurse.rating ?? 0) <= 1) ||
-      (selectedRating === "2" && (nurse.rating ?? 0) <= 2) ||
-      (selectedRating === "3" && (nurse.rating ?? 0) <= 3) ||
-      (selectedRating === "4" && (nurse.rating ?? 0) <= 4) ||
-      (selectedRating === "5" && (nurse.rating ?? 0) <= 5)
-    const matchesSearch = nurse.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         nurse.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         nurse.email.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesLocation && matchesStatus && matchesExperience && matchesRating && matchesSearch
+    const matchesSearch = (nurse.first_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+                         (nurse.last_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+                         (nurse.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    return matchesStatus && matchesExperience && matchesSearch
   })
 
-  const handleReviewDetails = (nurse: Nurse) => {
+  const handleReviewDetails = (nurse: NurseBasicInfo) => {
     setSelectedNurse(nurse)
   }
 
@@ -315,14 +286,22 @@ export default function NursesPage() {
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
           <div className="hidden sm:block overflow-x-auto">
-            <NurseTable nurses={filteredNurses} onReviewDetails={handleReviewDetails} />
+            <NurseTable 
+              nurses={filteredNurses} 
+              onReviewDetails={handleReviewDetails} 
+              isLoading={isLoading}
+            />
           </div>
-
+          
           {/* Mobile card view */}
           <div className="sm:hidden divide-y divide-gray-200">
-            {filteredNurses.map((nurse) => (
-              <NurseCard key={nurse._id} nurse={nurse} onReviewDetails={handleReviewDetails} />
-            ))}
+            {isLoading ? (
+              <Loader />
+            ) : (
+              filteredNurses.map((nurses) => (
+                <NurseCard key={nurses.nurse_id} nurse={nurses} onReviewDetails={handleReviewDetails} />
+              ))
+            )}
           </div>
         </div>
       </div>

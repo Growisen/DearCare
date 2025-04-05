@@ -1,18 +1,7 @@
 import React from 'react';
 import { Mail, Phone, Briefcase, Calendar, MapPin, User } from 'lucide-react';
+import { ClientInformationProps } from "../types/client.types"
 
-interface ClientInformationProps {
-  client: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    service: string;
-    requestDate: string;
-    //condition?: string;
-    location: string;
-  };
-}
 
 export function ClientInformation({ client }: ClientInformationProps) {
   return (

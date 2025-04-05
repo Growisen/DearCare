@@ -1,150 +1,30 @@
 "use client"
-import { useState } from "react"
-import { Search, Eye, CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Search, Eye, CheckCircle, Clock, AlertCircle, X } from "lucide-react"
 import { Input } from "../../../../components/ui/input"
 import { ClientDetailsOverlay } from "../../../../components/client-details-overlay"
 import { AddClientOverlay } from "../../../../components/add-client-overlay"
-
-interface Client {
-  id: string
-  name: string
-  requestDate: string
-  service: string
-  status: "pending" | "under_review" | "approved" | "rejected"| "assigned"
-  email: string
-  phone: string
-  location: string
-  assignedNurse?: string 
-  nurseContact?: string
-  shift?: string
-  condition?: string
-  description?: string
-  medications?: string[]
-  specialInstructions?: string
-  nurseLocation?: { lat: number; lng: number }
-  clientLocation?: { lat: number; lng: number }
-}
-
-const mockClients: Client[] = [
-  {
-    id: "1",
-    name: "Arun Kumar",
-    requestDate: "2024-01-15",
-    service: "Home Care",
-    status: "pending",
-    email: "arunkumar@gmail.com",
-    phone: "9847123456",
-    location: "Kottayam"
-  },
-  {
-    id: "2",
-    name: "Priya Menon",
-    requestDate: "2024-01-14",
-    service: "Elder Care",
-    status: "under_review",
-    email: "priyamenon@gmail.com",
-    phone: "9745678901",
-    location: "Kochi"
-  },
-  {
-    id: "3",
-    name: "Thomas George",
-    requestDate: "2024-01-13",
-    service: "Post-Surgery Care",
-    status: "assigned",
-    email: "thomasgeorge@gmail.com",
-    phone: "9895234567",
-    assignedNurse: "1", 
-    nurseContact: "9876543210",
-    shift: "Morning (8 AM - 4 PM)",
-    condition: "Post Hip Surgery",
-    description: "Patient requires assistance with mobility and physical therapy exercises",
-    medications: ["Pain medication - 3 times daily", "Blood thinners - morning", "Antibiotics - twice daily"],
-    specialInstructions: "Ensure patient does skip exercises twice daily. Monitor wound site for any signs of infection.",
-    nurseLocation: { lat: 12.9716, lng: 77.5946 },
-    clientLocation: { lat: 12.9352, lng: 77.6245 },
-    location: "Malappuram"
-  },
-  {
-    id: "4",
-    name: "Lakshmi Nair",
-    requestDate: "2024-01-12",
-    service: "Home Care",
-    status: "rejected",
-    email: "lakshmink@gmail.com",
-    phone: "9946789012",
-    location: "Thiruvananthapuram"
-  },
-  {
-    id: "5",
-    name: "Mohammed Rashid",
-    requestDate: "2024-01-15",
-    service: "Elder Care",
-    status: "pending",
-    email: "rashidm@gmail.com",
-    phone: "9847890123",
-    location: "Kozhikode"
-  },
-  {
-    id: "6",
-    name: "Susan Philip",
-    requestDate: "2024-01-11",
-    service: "Physiotherapy",
-    status: "approved",
-    condition: "Post Hip Surgery",
-    description: "Patient requires assistance with mobility and physical therapy exercises",
-    email: "susanphilip@gmail.com",
-    phone: "9947567890",
-    location: "Kollam"
-  },
-  {
-    id: "7",
-    name: "Rajesh Krishnan",
-    requestDate: "2024-01-10",
-    service: "Home Care",
-    status: "under_review",
-    email: "rajeshk@gmail.com",
-    phone: "9847345678",
-    location: "Thrissur"
-  },
-  {
-    id: "8",
-    name: "Anjali Menon",
-    requestDate: "2024-01-14",
-    service: "Post-Surgery Care",
-    status: "pending",
-    email: "anjalim@gmail.com",
-    phone: "9946234567",
-    location: "Alappuzha"
-  },
-  {
-    id: "9",
-    name: "Joseph Mathew",
-    requestDate: "2024-01-13",
-    service: "Elder Care",
-    status: "approved",
-    description: "Patient requires assistance with mobility and physical therapy exercises",
-    email: "josephm@gmail.com",
-    phone: "9895678901",
-    location: "Palakkad"
-  },
-  {
-    id: "10",
-    name: "Fathima Zahra",
-    requestDate: "2024-01-12",
-    service: "Physiotherapy",
-    status: "under_review",
-    email: "fathimaz@gmail.com",
-    phone: "9847456789",
-    location: "Kannur"
-  }
-]
+import { getClients } from "../../../../app/actions/client-actions"
+import { Client } from '../../../../types/client.types'
+import Loader from '@/components/loader'
 
 export default function ClientsPage() {
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
+  const [searchInput, setSearchInput] = useState("")
+  const [selectedStatus, setSelectedStatus] = useState<"pending" | "under_review" | "approved" | "rejected" | "assigned" | "all">("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [showAddClient, setShowAddClient] = useState(false)
+  const [clients, setClients] = useState<Client[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0) 
+  const [isStatusLoaded, setIsStatusLoaded] = useState(false)
+
+  const [currentPage, setCurrentPage] = useState(1)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [pageSize, setPageSize] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-700 border border-yellow-200",
@@ -162,22 +42,160 @@ export default function ClientsPage() {
     assigned: CheckCircle
   }
 
-  const filteredClients = mockClients.filter(client => {
-    const matchesStatus = selectedStatus === "all" ? client.status === "approved" : client.status === selectedStatus
-    const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         client.email.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesStatus && matchesSearch
-  })
+  const handleSearch = () => {
+    setCurrentPage(1) 
+    setSearchQuery(searchInput)
+  }
+
+  useEffect(() => {
+    if (!isStatusLoaded) return;
+    
+    async function loadClients() {
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        const result = await getClients(selectedStatus, searchQuery, currentPage, pageSize)
+        
+        if (result.success && result.clients) {
+          // Add type assertion to make sure the status is of the correct type
+          const typedClients = result.clients.map(client => ({
+            ...client,
+            service: client.service || "Not specified",
+            email: client.email || "No email provided",
+            phone: client.phone || "No phone provided",
+            location: client.location || "No location specified",
+            status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
+          }))
+          setClients(typedClients)
+          
+          // Set pagination data
+          if (result.pagination) {
+            setTotalPages(result.pagination.totalPages)
+            setTotalCount(result.pagination.totalCount)
+          }
+        } else {
+          setError(result.error || "Failed to load clients")
+        }
+      } catch (err) {
+        setError("An unexpected error occurred")
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadClients()
+  }, [selectedStatus, searchQuery, refreshTrigger, isStatusLoaded, currentPage, pageSize])
+
+  //load status from localStorage after initial render
+  useEffect(() => {
+    const saved = localStorage.getItem('clientsPageStatus');
+    if (saved && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(saved)) {
+      setSelectedStatus(saved as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all");
+    }
+    setIsStatusLoaded(true); 
+  }, []); 
+
+  const filteredClients = clients
 
   const handleReviewDetails = (client: Client) => {
     setSelectedClient(client)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  const handleAddClient = (clientData: any) => {
-    // Handle adding new client here
+  const handleClientAdded = () => {
     setShowAddClient(false)
+    setRefreshTrigger(prev => prev + 1)
   }
+
+  const handleStatusChange = (status: "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all") => {
+    setCurrentPage(1) 
+    setSelectedStatus(status);
+    localStorage.setItem('clientsPageStatus', status);
+  }
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  // function to handle client status change
+  const handleClientStatusChange = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const PaginationControls = () => (
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 px-6 border-t border-gray-200">
+      <div className="text-sm text-gray-600">
+        Showing {clients.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}-
+        {Math.min(currentPage * pageSize, totalCount)} of {totalCount} clients
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+          className={`rounded-lg border p-2 ${
+            currentPage === 1
+              ? "border-gray-200 text-gray-400 cursor-not-allowed"
+              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          Previous
+        </button>
+        <div className="flex items-center gap-1">
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            // Determine which pages to show
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            
+            return (
+              <button
+                key={i}
+                onClick={() => handlePageChange(pageNum)}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  currentPage === pageNum
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className={`rounded-lg border p-2 ${
+            currentPage === totalPages
+              ? "border-gray-200 text-gray-400 cursor-not-allowed"
+              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div>
@@ -198,14 +216,40 @@ export default function ClientsPage() {
         </div>
 
         <div className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search clients..."
-              className="pl-10 w-full bg-white text-base text-gray-900 placeholder:text-gray-500 border-gray-200"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="relative w-full flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search clients..."
+                className="pl-10 w-full bg-white text-base text-gray-900 placeholder:text-gray-500 border-gray-200"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch()
+                  }
+                }}
+              />
+              {/* Search button */}
+              <button
+                onClick={handleSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
+              >
+                Search
+              </button>
+              {searchInput && (
+                <button 
+                  onClick={() => {
+                    setSearchInput("")
+                    setSearchQuery("")
+                    setCurrentPage(1)
+                  }}
+                  className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
           {/* Desktop view buttons */}
           <div className="hidden sm:block overflow-x-auto -mx-4 px-4">
@@ -213,7 +257,7 @@ export default function ClientsPage() {
               {["approved", "pending", "under_review", "rejected", "assigned"].map((status) => (
                 <button
                   key={status}
-                  onClick={() => setSelectedStatus(status)}
+                  onClick={() => handleStatusChange(status as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     selectedStatus === status
                       ? "bg-blue-100 text-blue-800"
@@ -229,7 +273,7 @@ export default function ClientsPage() {
           <div className="sm:hidden">
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}
               className="w-full rounded-lg border border-gray-200 bg-white py-2.5 px-3 text-base text-gray-900 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               style={{ 
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
@@ -249,86 +293,113 @@ export default function ClientsPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr className="text-left">
-                  <th className="py-4 px-6 font-semibold text-gray-700">Client Name</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Request Date</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Service</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Status</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Contact</th>
-                  <th className="py-4 px-6 font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
+          {isLoading ? (
+            <Loader />
+            ) : error ? (
+              <div className="p-6 text-center">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                  {error}
+                </div>
+              </div>
+            ) : filteredClients.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="bg-gray-50 border border-gray-200 text-gray-600 px-6 py-5 rounded-lg">
+                  <p className="text-lg font-medium mb-1">No clients found</p>
+                  <p className="text-sm">Try changing your filters or search criteria</p>
+                </div>
+              </div>
+            ) : (
+            <>
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr className="text-left">
+                      <th className="py-4 px-6 font-semibold text-gray-700">Client Name</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Request Date</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Service</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Status</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Contact</th>
+                      <th className="py-4 px-6 font-semibold text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredClients.map((client) => {
+                      const StatusIcon = statusIcons[client.status]
+                      return (
+                        <tr key={client.id} className="hover:bg-gray-50/50">
+                          <td className="py-4 px-6 text-gray-900 font-medium">{client.name}</td>
+                          <td className="py-4 px-6 text-gray-700">{client.requestDate}</td>
+                          <td className="py-4 px-6 text-gray-700">{client.service}</td>
+                          <td className="py-4 px-6">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
+                              <StatusIcon className="w-3.5 h-3.5" />
+                              {client.status.replace("_", " ").charAt(0).toUpperCase() + client.status.slice(1).replace("_", " ")}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div>
+                              <div className="text-gray-900">{client.email}</div>
+                              <div className="text-gray-600">{client.phone}</div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button 
+                              className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                              onClick={() => handleReviewDetails(client)}
+                            >
+                              Review Details
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+
+                {!isLoading && !error && filteredClients.length > 0 && (
+                  <PaginationControls />
+                )}
+              </div>
+
+              {/* Mobile card view */}
+              <div className="sm:hidden divide-y divide-gray-200">
                 {filteredClients.map((client) => {
                   const StatusIcon = statusIcons[client.status]
                   return (
-                    <tr key={client.id} className="hover:bg-gray-50/50">
-                      <td className="py-4 px-6 text-gray-900 font-medium">{client.name}</td>
-                      <td className="py-4 px-6 text-gray-700">{client.requestDate}</td>
-                      <td className="py-4 px-6 text-gray-700">{client.service}</td>
-                      <td className="py-4 px-6">
+                    <div key={client.id} className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-900">{client.name}</h3>
+                          <p className="text-sm text-gray-600">{client.service}</p>
+                        </div>
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
                           <StatusIcon className="w-3.5 h-3.5" />
                           {client.status.replace("_", " ").charAt(0).toUpperCase() + client.status.slice(1).replace("_", " ")}
                         </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div>
-                          <div className="text-gray-900">{client.email}</div>
-                          <div className="text-gray-600">{client.phone}</div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <button 
-                          className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                          onClick={() => handleReviewDetails(client)}
-                        >
-                          Review Details
-                        </button>
-                      </td>
-                    </tr>
+                      </div>
+                      
+                      <div className="text-sm">
+                        <p className="text-gray-600">Request Date: {client.requestDate}</p>
+                        <p className="text-gray-900">{client.email}</p>
+                        <p className="text-gray-600">{client.phone}</p>
+                      </div>
+                      
+                      <button 
+                        className="w-full mt-2 px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                        onClick={() => handleReviewDetails(client)}
+                      >
+                        Review Details
+                      </button>
+                    </div>
                   )
                 })}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Mobile card view */}
-          <div className="sm:hidden divide-y divide-gray-200">
-            {filteredClients.map((client) => {
-              const StatusIcon = statusIcons[client.status]
-              return (
-                <div key={client.id} className="p-4 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-900">{client.name}</h3>
-                      <p className="text-sm text-gray-600">{client.service}</p>
-                    </div>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
-                      <StatusIcon className="w-3.5 h-3.5" />
-                      {client.status.replace("_", " ").charAt(0).toUpperCase() + client.status.slice(1).replace("_", " ")}
-                    </span>
-                  </div>
-                  
-                  <div className="text-sm">
-                    <p className="text-gray-600">Request Date: {client.requestDate}</p>
-                    <p className="text-gray-900">{client.email}</p>
-                    <p className="text-gray-600">{client.phone}</p>
-                  </div>
-                  
-                  <button 
-                    className="w-full mt-2 px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                    onClick={() => handleReviewDetails(client)}
-                  >
-                    Review Details
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+                {!isLoading && !error && filteredClients.length > 0 && (
+                  <PaginationControls />
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -336,7 +407,7 @@ export default function ClientsPage() {
       {showAddClient && (
         <AddClientOverlay 
           onClose={() => setShowAddClient(false)}
-          onAdd={handleAddClient}
+          onAdd={handleClientAdded}
         />
       )}
 
@@ -344,7 +415,8 @@ export default function ClientsPage() {
       {selectedClient && (
         <ClientDetailsOverlay 
           client={selectedClient} 
-          onClose={() => setSelectedClient(null)} 
+          onClose={() => setSelectedClient(null)}
+          onStatusChange={handleClientStatusChange}
         />
       )}
     </div>
