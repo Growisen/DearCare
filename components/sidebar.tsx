@@ -56,6 +56,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               { icon: Users, label: "Nurses", href: "/nurses" },
               { icon: Users, label: "Clients", href: "/clients" },
               { icon: Briefcase, label: "Assignments", href: "/assignments" },
+              { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
+              { icon: ClipboardList, label: "Staff Attendance", href: "/staff-attendance" },
               { icon: MapPin, label: "Locations", href: "/locations" },
               { icon: Calendar, label: "Schedule", href: "/schedule" },
               { icon: ClipboardList, label: "Reports", href: "/reports" },
