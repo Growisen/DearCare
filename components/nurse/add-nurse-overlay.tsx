@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments } from '@/types/staff.types';
+import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments, BaseNurseFields,stp1BaseNurseFields } from '@/types/staff.types';
 import { createNurse } from '@/app/actions/add-nurse';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 const FORM_CONFIG = {
   options: {
     locationsInKerala: ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad", "Kannur", "Kottayam", "Malappuram"] as string[],
@@ -120,15 +121,29 @@ const Fields = {
     </div>
   ),
 
-  File: ({ label, docType, onFileSelect, required = true }: { 
-    label: string, 
-    docType: string, 
+  File: ({ label, docType, onFileSelect, required = true }: {
+    label: string,
+    docType: string,
     onFileSelect: (file: File) => void,
-    required?: boolean 
+    required?: boolean
   }) => {
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-  
+    
+    // Map docType to accepted file extensions
+    const getAcceptedFileTypes = (type: string) => {
+      const typeMap: Record<string, string> = {
+        'ration': '.pdf,.jpg,.jpeg,.png',
+        'aadhar': '.pdf,.jpg,.jpeg,.png',
+        'pan': '.pdf,.jpg,.jpeg,.png',
+        'passport': '.pdf,.jpg,.jpeg,.png',
+        // Add more document types as needed
+        'default': '.pdf,.jpg,.jpeg,.png'
+      };
+      
+      return typeMap[type] || typeMap.default;
+    };
+    
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
@@ -147,34 +162,43 @@ const Fields = {
 
     return (
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <div className="mt-1 space-y-2">
-          <div className="flex items-center">
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileSelect}
-              accept=".pdf,.jpg,.jpeg,.png"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Choose File
-            </button>
-            <span className="ml-3 text-sm text-gray-500">
-              {fileInputRef.current?.files?.[0]?.name || "No file chosen"}
-            </span>
-          </div>
-          {preview && (
-            <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
-              <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-            </div>
-          )}
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label} {docType && <span className="text-xs text-gray-500">({docType})</span>}
+      </label>
+      <div className="mt-1 space-y-2">
+        <div className="flex items-center">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileSelect}
+            accept={getAcceptedFileTypes(docType)}
+            required={required}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Choose File
+          </button>
+          <span className="ml-3 text-sm text-gray-500">
+            {fileInputRef.current?.files?.[0]?.name || "No file chosen"}
+          </span>
         </div>
+        {preview && (
+  <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+    <Image
+      src={preview}
+      alt="File preview"
+      fill
+      className="object-cover"
+      sizes="128px"
+    />
+  </div>
+)}
       </div>
+    </div>
     );
   }
 };
@@ -435,67 +459,67 @@ const StepContent = {
   )
 };
 
-
-const validateStep = (step: number, data: any): boolean => {
+type StepData = NurseFormData|stp1BaseNurseFields |BaseNurseFields| NurseReferenceData | NurseHealthData | (NurseDocuments & { noc_status?: string });
+const validateStep = (step: number, data: StepData): boolean => {
   switch (step) {
     case 0: // Personal Details
       return !!(
-        data.first_name &&
-        data.last_name &&
-        data.gender &&
-        data.date_of_birth &&
-        data.marital_status &&
-        data.religion &&
-        data.mother_tongue
+       (data as NurseFormData).first_name &&
+        (data as NurseFormData).last_name &&
+        (data as NurseFormData).gender &&
+        (data as NurseFormData).date_of_birth &&
+        (data as NurseFormData).marital_status &&
+        (data as NurseFormData).religion &&
+        (data as NurseFormData).mother_tongue
       );
     
     case 1: // Contact Information
       return !!(
-        data.address &&
-        data.city &&
-        data.taluk &&
-        data.state &&
-        data.pin_code &&
-        data.phone_number &&
-        data.email &&
-        data.languages.length > 0
+        (data as NurseFormData).address &&
+        (data as NurseFormData).city &&
+        (data as NurseFormData).taluk &&
+        (data as NurseFormData).state &&
+        (data as NurseFormData).pin_code &&
+        (data as NurseFormData).phone_number &&
+        (data as NurseFormData).email &&
+        (data as NurseFormData).languages.length > 0
       );
     
     case 2: // References
       return !!(
-        data.reference_name &&
-        data.reference_phone &&
-        data.reference_relation &&
-        data.recommendation_details &&
-        data.family_references[0].name &&
-        data.family_references[0].phone &&
-        data.family_references[0].relation
+        (data as NurseReferenceData).reference_name &&
+        (data as NurseReferenceData).reference_phone &&
+        (data as NurseReferenceData).reference_relation &&
+        (data as NurseReferenceData).recommendation_details &&
+        (data as NurseReferenceData).family_references[0].name &&
+        (data as NurseReferenceData).family_references[0].phone &&
+        (data as NurseReferenceData).family_references[0].relation
       );
     
     case 3: // Work Details
       return !!(
-        data.service_type &&
-        data.shift_pattern &&
-        data.category &&
-        data.experience
+        (data as NurseFormData).service_type &&
+        (data as NurseFormData).shift_pattern &&
+        (data as NurseFormData).category &&
+        (data as NurseFormData).experience
       );
     
     case 4: // Health & Additional Info
       return !!(
-        data.health_status &&
-        data.source
+        (data as NurseHealthData).health_status &&
+        (data as NurseHealthData).source
       );
     
     case 5: // Document Upload
     return !!(
-      data.profile_image && 
-      data.adhar && 
-      data.educational && 
-      data.experience && 
-      data.ration && 
-      data.noc_status && 
+      (data as NurseDocuments).profile_image && 
+      (data as NurseDocuments).adhar && 
+      (data as NurseDocuments).educational && 
+      (data as NurseDocuments).experience && 
+      (data as NurseDocuments).ration && 
+      (data as NurseFormData).noc_status && 
       // If NOC status is Yes, require the NOC file
-      (data.noc_status !== 'Yes' || data.noc)
+      ((data as NurseFormData).noc_status !== 'Yes' || (data as NurseDocuments).noc)
     );
     
     default:

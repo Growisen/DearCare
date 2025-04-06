@@ -12,6 +12,16 @@ export type BaseNurseFields = {
     image?: File | null;
 }
 
+export interface stp1BaseNurseFields {
+  first_name: string;
+  last_name: string;
+  gender: string;
+  date_of_birth: string;
+  marital_status: string;
+  religion: string;
+  mother_tongue: string;
+}
+
 // Full Nurse type extending base fields
 export interface Nurse extends BaseNurseFields {
     _id: string;

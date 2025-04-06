@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/loader'
+import Image from 'next/image';
 
 interface Review {
   id: string;
@@ -649,13 +650,18 @@ const EditNurseProfilePage: React.FC = () => {
                 Profile Image
               </h2>
               <div className="flex items-center gap-4">
-                {formData.profileImage?.url && (
-                  <img
-                    src={formData.profileImage.url}
-                    alt="Profile"
-                    className="w-16 h-16 rounded-full border border-gray-200 object-cover"
-                  />
-                )}
+              {formData.profileImage?.url && (
+            <div className="relative w-16 h-16">
+    <Image
+      src={formData.profileImage.url}
+      alt="Profile"
+      fill
+      className="rounded-full border border-gray-200 object-cover"
+      sizes="64px"
+      priority
+    />
+  </div>
+)}
                 <div className="flex-1 space-y-1">
                   <input
                     type="file"
