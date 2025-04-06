@@ -386,6 +386,7 @@ const OrganizationClientProfile = () => {
       <NurseListModal 
         isOpen={showNurseList}
         nurses={nurses}
+        clientId={client.id}
         onClose={() => setShowNurseList(false)}
         onAssignNurse={(nurseId) => {
           const nurse = nurses.find(n => n._id === nurseId);

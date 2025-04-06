@@ -5,6 +5,7 @@ import NurseCard from './NurseCard';
 interface NurseListModalProps {
   isOpen: boolean;
   nurses: Nurse[];
+  clientId: string;
   onClose: () => void;
   onAssignNurse: (nurseId: string) => void;
   onViewProfile: (nurse: Nurse) => void;
@@ -13,6 +14,7 @@ interface NurseListModalProps {
 const NurseListModal: React.FC<NurseListModalProps> = ({
   isOpen,
   nurses,
+  clientId,
   onClose,
   onAssignNurse,
   onViewProfile
@@ -40,11 +42,12 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
 
 const handleAssignSelected = () => {
   if (selectedNurses.length > 0) {
-    // Create a URL with the selected nurse IDs as query parameters
+
     const queryParams = new URLSearchParams();
     selectedNurses.forEach(id => queryParams.append('nurseIds', id));
+
+    queryParams.append('clientId', clientId);
     
-    // Update path to match your folder structure
     window.open(`/schedule-shifts?${queryParams.toString()}`, '_blank');
   }
 };

@@ -11,10 +11,10 @@ import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { Nurse } from '@/types/staff.types';
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList';
-import { nurses_test_data, dummyAssignments } from '@/test_data/dummy_data';
 import PatientAssessment from '@/components/client/PatientAssessment';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
 import { listNurses } from '@/app/actions/add-nurse';
+import { getNurseAssignments } from '@/app/actions/shift-schedule-actions';
 import toast from 'react-hot-toast';
 
 interface PatientAssessmentDataForApprovedClients {
@@ -52,11 +52,14 @@ interface PatientAssessmentDataForApprovedClients {
 }
 
 interface NurseAssignment {
-  nurseId: string;
+  id?: number;
+  nurseId: number | string;
   startDate: string;
   endDate?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
-  shiftType: 'day' | 'night' | '24h';
+  shiftType?: 'day' | 'night' | '24h';
 }
 
 
@@ -111,18 +114,16 @@ const PatientProfilePage = () => {
   const [showNurseList, setShowNurseList] = useState(false);
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [nurses, setNurses] = useState<Nurse[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
 
   useEffect(() => {
 
     const loadData = async () => {
       await fetchNurses();
-      // ... rest of your data fetching
     };
 
     async function fetchPatientData() {
@@ -133,6 +134,24 @@ const PatientProfilePage = () => {
           const clientResponse = await getClientDetails(id as string) as ClientResponse;
           console.log(clientResponse)
           const assessmentResponse = await getPatientAssessment(id as string);
+
+          const assignmentsResponse = await getNurseAssignments(id as string);
+
+          if (assignmentsResponse.success && assignmentsResponse.data) {
+            // Transform the assignment data to match our interface
+            const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({
+              id: assignment.id,
+              nurseId: assignment.nurse_id,
+              startDate: assignment.start_date,
+              endDate: assignment.end_date,
+              shiftStart: assignment.shift_start_time,
+              shiftEnd: assignment.shift_end_time,
+              status: assignment.status || 'active',
+              shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time)
+            }));
+            
+            setNurseAssignments(transformedAssignments);
+          }
 
           if (clientResponse.success && clientResponse.client) {
             const clientData = clientResponse.client;
@@ -221,11 +240,26 @@ const PatientProfilePage = () => {
     fetchPatientData();
   }, [id]);
 
+  const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {
+    if (!startTime || !endTime) return 'day';
+    
+    const startHour = parseInt(startTime.split(':')[0]);
+    const endHour = parseInt(endTime.split(':')[0]);
+    
+    if (endHour - startHour >= 12 || (startHour > endHour && startHour - endHour <= 12)) {
+      return '24h';
+    } else if (startHour >= 6 && startHour < 18) {
+      return 'day';
+    } else {
+      return 'night';
+    }
+  };
+
 
   const fetchNurses = async () => {
     setIsLoadingNurses(true);
     try {
-      const response = await listNurses(); // This calls the imported function
+      const response = await listNurses();
       if (response.data) {
         setNurses(response.data);
       } else {
@@ -461,7 +495,7 @@ const PatientProfilePage = () => {
                 Nurse Assignments
               </h2>
               <NurseAssignmentsList
-                assignments={dummyAssignments}
+                assignments={nurseAssignments}
                 nurses={nurses}
                 onEditAssignment={(assignment) => {
                   console.log('Edit assignment:', assignment);
@@ -771,6 +805,7 @@ const PatientProfilePage = () => {
       <NurseListModal 
         isOpen={showNurseList}
         nurses={nurses}
+        clientId={id as string}
         onClose={() => setShowNurseList(false)}
         onAssignNurse={(nurseId) => {
           const nurse = nurses.find(n => n._id === nurseId);
