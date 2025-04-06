@@ -3,16 +3,17 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { listNurses } from '@/app/actions/add-nurse';
+import { scheduleNurseShifts } from '@/app/actions/shift-schedule-actions';
 
-// Define nurse type locally to avoid dependency on external types
 interface Nurse {
   _id: string;
   firstName: string;
   lastName: string;
-  specialty: string;
   experience: number;
-  rating: number;
+  rating?: number;
   profileImage?: string;
+  specialty?: string;
 }
 
 interface ShiftData {
@@ -22,35 +23,6 @@ interface ShiftData {
   shiftStart: string;
   shiftEnd: string;
 }
-
-// Dummy data for testing
-const DUMMY_NURSES: Nurse[] = [
-  {
-    _id: "1",
-    firstName: "Jane",
-    lastName: "Doe",
-    specialty: "ICU",
-    experience: 5,
-    rating: 4.8
-  },
-  {
-    _id: "2",
-    firstName: "John",
-    lastName: "Smith",
-    specialty: "Pediatrics",
-    experience: 8,
-    rating: 4.6
-  },
-  {
-    _id: "3",
-    firstName: "Emily",
-    lastName: "Johnson",
-    specialty: "Emergency",
-    experience: 7,
-    rating: 4.9,
-    profileImage: ""
-  }
-];
 
 // Create a separate component that uses useSearchParams
 const ScheduleShiftsContent = () => {
@@ -62,74 +34,105 @@ const ScheduleShiftsContent = () => {
     return searchParams.getAll('nurseIds');
   }, [searchParams]);
   
+  const clientId = useMemo(() => {
+    return searchParams.get('clientId');
+  }, [searchParams]);
+  
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [shifts, setShifts] = useState<ShiftData[]>([]);
-  const [initialized, setInitialized] = useState(false);
   
-  // Load data only once on component mount or when nurseIds change
   useEffect(() => {
-    if (!nurseIds.length) {
-      setLoading(false);
-      return;
-    }
+  if (!nurseIds.length) {
+    setLoading(false);
+    return;
+  }
+  
+  const fetchNurses = async () => {
+    setLoading(true);
+    setError(null);
     
-    if (!initialized) {
-      console.log('Loading nurse data', nurseIds);
-      setLoading(true);
+    try {
+      const { data: allNurses, error: nurseError } = await listNurses();
       
-      // Simulate API call with setTimeout
-      const timer = setTimeout(() => {
-        const nursesToShow = DUMMY_NURSES.filter(nurse => nurseIds.includes(nurse._id));
-        
-        // Initialize shift data for each nurse
-        const initialShifts = nursesToShow.map(nurse => ({
-          nurseId: nurse._id,
-          startDate: '',
-          endDate: '',
-          shiftStart: '09:00',
-          shiftEnd: '17:00',
-        }));
-        
-        setNurses(nursesToShow);
-        setShifts(initialShifts);
-        setLoading(false);
-        setInitialized(true);
-      }, 800);
+      if (nurseError) {
+        throw new Error(`Error: ${nurseError}`);
+      }
       
-      return () => clearTimeout(timer);
+      if (!allNurses) {
+        throw new Error('Failed to load nurse data');
+      }
+      
+      const nursesData = allNurses.filter(nurse => 
+        nurseIds.includes(nurse._id)
+      );
+      
+      const initialShifts = nursesData.map((nurse) => ({
+        nurseId: nurse._id,
+        startDate: '',
+        endDate: '',
+        shiftStart: '09:00',
+        shiftEnd: '17:00',
+      }));
+            
+      setNurses(nursesData);
+      setShifts(initialShifts);
+    } catch (err) {
+      console.error('Error fetching nurses:', err);
+      setError('Failed to load nurse data. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-  }, [nurseIds, initialized]);
+  };
+  
+  fetchNurses();
+}, [nurseIds]);
   
   // Memoize handleShiftChange to prevent recreating on every render
   const handleShiftChange = useCallback((nurseId: string, field: keyof ShiftData, value: string) => {
-    setShifts(prev => 
-      prev.map(shift => 
-        shift.nurseId === nurseId ? { ...shift, [field]: value } : shift
-      )
-    );
-  }, []);
-  
-  // Memoize handleSubmit to prevent recreating on every render
-  const handleSubmit = useCallback(async () => {
-    try {
-      // Validate all shifts have complete data
-      const isValid = shifts.every(shift => 
-        shift.startDate && shift.endDate && shift.shiftStart && shift.shiftEnd
+      setShifts(prev => 
+        prev.map(shift => 
+          shift.nurseId === nurseId ? { ...shift, [field]: value } : shift
+        )
       );
-      
-      if (!isValid) {
-        alert('Please complete all shift information for all nurses');
-        return;
+    }, []);
+    
+    // Memoize handleSubmit to prevent recreating on every render
+    const handleSubmit = useCallback(async () => {
+      try {
+        const isValid = shifts.every(shift => 
+          shift.startDate && shift.endDate && shift.shiftStart && shift.shiftEnd
+        );
+        
+        if (!isValid) {
+          alert('Please complete all shift information for all nurses');
+          return;
+        }
+        
+        if (!clientId) {
+          alert('Missing client information');
+          return;
+        }
+        
+        setLoading(true);
+        
+        // Call server action to schedule shifts with clientId
+        const result = await scheduleNurseShifts(shifts, clientId);
+        
+        if (result.success) {
+          alert('Shifts scheduled successfully!');
+          // window.close();
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        console.error('Error assigning nurses:', error);
+        alert(`Failed to assign nurses: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } finally {
+        setLoading(false);
       }
-      
-      // For demo: just show the data that would be sent to backend
-      console.log('Shifts to be saved:', shifts);
-    } catch (error) {
-      console.error('Error assigning nurses:', error);
-      alert('Failed to assign nurses. Please try again.');
-    }
-  }, [shifts]);
+    }, [shifts, clientId]);
   
   // Memoize today's date to avoid recalculating it on every render
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -139,6 +142,24 @@ const ScheduleShiftsContent = () => {
       <div className="p-8 flex justify-center items-center min-h-[60vh]">
         <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
         <span className="ml-3 text-gray-600">Loading nurse data...</span>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h2 className="text-xl font-semibold text-gray-700 mb-2">Error Loading Data</h2>
+        <p className="text-gray-500">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb' // Increased limit for file uploads
+      bodySizeLimit: '10mb'
     }
   },
   images: {

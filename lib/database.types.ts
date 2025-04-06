@@ -9,6 +9,190 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      academy_courses: {
+        Row: {
+          course_fees: number | null
+          course_name: string
+          created_at: string
+          id: number
+          reg_fees: number | null
+        }
+        Insert: {
+          course_fees?: number | null
+          course_name: string
+          created_at?: string
+          id?: number
+          reg_fees?: number | null
+        }
+        Update: {
+          course_fees?: number | null
+          course_name?: string
+          created_at?: string
+          id?: number
+          reg_fees?: number | null
+        }
+        Relationships: []
+      }
+      academy_enquiries: {
+        Row: {
+          course: string | null
+          created_at: string
+          email: string | null
+          hide: boolean | null
+          id: number
+          name: string | null
+          phone_no: string | null
+        }
+        Insert: {
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          hide?: boolean | null
+          id?: number
+          name?: string | null
+          phone_no?: string | null
+        }
+        Update: {
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          hide?: boolean | null
+          id?: number
+          name?: string | null
+          phone_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_enquiries_course_fkey"
+            columns: ["course"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["course_name"]
+          },
+        ]
+      }
+      academy_faculties: {
+        Row: {
+          created_at: string
+          department: string | null
+          email: string | null
+          id: number
+          join_date: string | null
+          name: string | null
+          phone_no: string | null
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Relationships: []
+      }
+      academy_roles: {
+        Row: {
+          created_at: string
+          id: number
+          role: string | null
+          uid: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          role?: string | null
+          uid?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          role?: string | null
+          uid?: string | null
+        }
+        Relationships: []
+      }
+      academy_supervisors: {
+        Row: {
+          created_at: string
+          department: string | null
+          email: string | null
+          id: number
+          join_date: string | null
+          name: string | null
+          phone_no: string | null
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Relationships: []
+      }
+      attendence_individual: {
+        Row: {
+          assigned_id: number
+          created_at: string
+          date: string
+          end_time: string | null
+          id: number
+          location: string | null
+          start_time: string | null
+          total_hours: string | null
+        }
+        Insert: {
+          assigned_id: number
+          created_at?: string
+          date: string
+          end_time?: string | null
+          id?: number
+          location?: string | null
+          start_time?: string | null
+          total_hours?: string | null
+        }
+        Update: {
+          assigned_id?: number
+          created_at?: string
+          date?: string
+          end_time?: string | null
+          id?: number
+          location?: string | null
+          start_time?: string | null
+          total_hours?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendence_individual_assigned_id_fkey"
+            columns: ["assigned_id"]
+            isOneToOne: false
+            referencedRelation: "nurse_client"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           client_category: Database["public"]["Enums"]["client_category"]
@@ -41,6 +225,42 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      faculty_assignment: {
+        Row: {
+          created_at: string
+          faculty_id: number | null
+          id: number
+          student_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          faculty_id?: number | null
+          id?: number
+          student_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          faculty_id?: number | null
+          id?: number
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_assignment_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "academy_faculties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faculty_assignment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       individual_clients: {
         Row: {
@@ -98,6 +318,60 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "clients"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      nurse_client: {
+        Row: {
+          assigned_type: Database["public"]["Enums"]["assigned_type"]
+          client_id: string
+          created_at: string
+          end_date: string | null
+          id: number
+          nurse_id: number
+          salary_hour: number | null
+          shift_end_time: string | null
+          shift_start_time: string | null
+          start_date: string
+        }
+        Insert: {
+          assigned_type: Database["public"]["Enums"]["assigned_type"]
+          client_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          nurse_id: number
+          salary_hour?: number | null
+          shift_end_time?: string | null
+          shift_start_time?: string | null
+          start_date: string
+        }
+        Update: {
+          assigned_type?: Database["public"]["Enums"]["assigned_type"]
+          client_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          nurse_id?: number
+          salary_hour?: number | null
+          shift_end_time?: string | null
+          shift_start_time?: string | null
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_client_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nurse_client_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "nurses"
+            referencedColumns: ["nurse_id"]
           },
         ]
       }
@@ -673,8 +947,10 @@ export type Database = {
       students: {
         Row: {
           age: number | null
+          auth_uid: string | null
           category: string | null
           city: string | null
+          course: string | null
           created_at: string
           cur_address: string | null
           cur_health_status: string | null
@@ -691,6 +967,7 @@ export type Database = {
           name: string | null
           nationality: string | null
           noc_status: string | null
+          payment_receipt: boolean | null
           perm_address: string | null
           perm_pincode: string | null
           religion: string | null
@@ -699,8 +976,10 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          auth_uid?: string | null
           category?: string | null
           city?: string | null
+          course?: string | null
           created_at?: string
           cur_address?: string | null
           cur_health_status?: string | null
@@ -717,6 +996,7 @@ export type Database = {
           name?: string | null
           nationality?: string | null
           noc_status?: string | null
+          payment_receipt?: boolean | null
           perm_address?: string | null
           perm_pincode?: string | null
           religion?: string | null
@@ -725,8 +1005,10 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          auth_uid?: string | null
           category?: string | null
           city?: string | null
+          course?: string | null
           created_at?: string
           cur_address?: string | null
           cur_health_status?: string | null
@@ -743,13 +1025,58 @@ export type Database = {
           name?: string | null
           nationality?: string | null
           noc_status?: string | null
+          payment_receipt?: boolean | null
           perm_address?: string | null
           perm_pincode?: string | null
           religion?: string | null
           state?: string | null
           taluk?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_course_fkey"
+            columns: ["course"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["course_name"]
+          },
+        ]
+      }
+      supervisor_assignment: {
+        Row: {
+          created_at: string
+          id: number
+          student_id: number | null
+          supervisor_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          student_id?: number | null
+          supervisor_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          student_id?: number | null
+          supervisor_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supervisor_assignment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supervisor_assignment_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "academy_supervisors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -759,6 +1086,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      assigned_type: "individual" | "organization"
       client_category: "DearCare" | "TataLife"
       client_status:
         | "pending"
