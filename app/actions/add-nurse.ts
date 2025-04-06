@@ -8,7 +8,7 @@ type NurseDocuments = {
   noc: File | null
   ration: File | null
 }
-import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo } from '@/types/staff.types'
+import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo, Nurse } from '@/types/staff.types'
 import { createSupabaseServerClient } from './auth'
 
 export async function createNurse(
@@ -203,6 +203,96 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
       email: nurse.email,
       phone_number: nurse.phone_number,
       experience: nurse.experience
+    }))
+
+    return { 
+      data: transformedData, 
+      error: null 
+    }
+
+  } catch (error) {
+    console.error('Error fetching nurses:', error)
+    return { 
+      data: null, 
+      error: error instanceof Error ? error.message : 'Failed to fetch nurses' 
+    }
+  }
+}
+
+
+export async function listNurses(): Promise<{ data: Nurse[] | null, error: string | null }> {
+  try {
+    const supabase = await createSupabaseServerClient()
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return { data: null, error: 'Not authenticated' }
+    }
+
+    const { data, error } = await supabase
+      .from('nurses')
+      .select(`
+        nurse_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        experience,
+        service_type,
+        created_at,
+        status,
+        gender,
+        date_of_birth,
+        address,
+        city,
+        taluk,
+        state,
+        pin_code,
+        languages,
+        shift_pattern,
+        category,
+        marital_status,
+        religion,
+        mother_tongue
+      `)
+      .order('first_name')
+
+    if (error) throw error
+
+    // Transform the data to match the Nurse interface
+    const transformedData: Nurse[] = data.map(nurse => ({
+      _id: nurse.nurse_id.toString(),
+      firstName: nurse.first_name || '',
+      lastName: nurse.last_name || '',
+      email: nurse.email || '',
+      phoneNumber: nurse.phone_number || '',
+      gender: nurse.gender || '',
+      dateOfBirth: nurse.date_of_birth || '',
+      address: nurse.address || '',
+      city: nurse.city || '',
+      state: nurse.state || '',
+      pinCode: nurse.pin_code?.toString() || '',
+      languages: nurse.languages || [],
+      experience: nurse.experience || 0,
+      salaryCap:  0,
+      salaryPerHour:   0,
+      status: (nurse.status as Nurse['status']) || 'pending',
+      // Add missing required fields
+      location: nurse.city || '', // or construct from address fields
+      dob: nurse.date_of_birth || '', // use existing dateOfBirth field
+      preferredLocations:[], // Add to database query if not present
+      // Optional fields
+      hiringDate: nurse.created_at,
+      rating: 3,
+      reviews:[],
+      serviceType: nurse.service_type || '',
+      shiftPattern: nurse.shift_pattern || '',
+      category: nurse.category || '',
+      maritalStatus: nurse.marital_status || '',
+      religion: nurse.religion || '',
+      motherTongue: nurse.mother_tongue || '',
+      taluk: nurse.taluk || ''
     }))
 
     return { 

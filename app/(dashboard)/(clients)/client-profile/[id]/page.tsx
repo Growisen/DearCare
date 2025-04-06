@@ -14,6 +14,8 @@ import NurseAssignmentsList from '@/components/client/NurseAssignmentsList';
 import { nurses_test_data, dummyAssignments } from '@/test_data/dummy_data';
 import PatientAssessment from '@/components/client/PatientAssessment';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
+import { listNurses } from '@/app/actions/add-nurse';
+import toast from 'react-hot-toast';
 
 interface PatientAssessmentDataForApprovedClients {
   guardianOccupation: string;
@@ -109,12 +111,20 @@ const PatientProfilePage = () => {
   const [showNurseList, setShowNurseList] = useState(false);
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [nurses] = useState(nurses_test_data);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [nurses, setNurses] = useState<Nurse[]>([]);
+  const [isLoadingNurses, setIsLoadingNurses] = useState(false);
 
   useEffect(() => {
+
+    const loadData = async () => {
+      await fetchNurses();
+      // ... rest of your data fetching
+    };
+
     async function fetchPatientData() {
       if (id) {
         setLoading(true);
@@ -206,8 +216,28 @@ const PatientProfilePage = () => {
       }
     }
 
+    loadData();
+
     fetchPatientData();
   }, [id]);
+
+
+  const fetchNurses = async () => {
+    setIsLoadingNurses(true);
+    try {
+      const response = await listNurses(); // This calls the imported function
+      if (response.data) {
+        setNurses(response.data);
+      } else {
+        toast.error(response.error || 'Failed to fetch nurses');
+      }
+    } catch (error) {
+      console.error('Error fetching nurses:', error);
+      toast.error('Error loading nurses');
+    } finally {
+      setIsLoadingNurses(false);
+    }
+  };
 
   const handleAssignNurse = async (nurseId: string) => {
     setShowNurseList(false);
