@@ -36,9 +36,9 @@ const FORM_CONFIG = {
 } as const;
 
 // Utility components
-const FormField = ({ label, children }: { label: string, children: React.ReactNode }) => (
+const FormField = ({ label,required = true, children }: { label: string, required?: boolean, children: React.ReactNode }) => (
   <div>
-    <label className={FORM_CONFIG.styles.label}>{label}</label>
+    <label className={FORM_CONFIG.styles.label}>{label}{required && ' *'}</label>
     {children}
   </div>
 );
@@ -49,15 +49,22 @@ const FormLayout = ({ children, className = "" }: { children: React.ReactNode, c
 
 // Form field components consolidated into a single object
 const Fields = {
-  Input: ({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
-    <FormField label={label}>
-      <input {...props} className={FORM_CONFIG.styles.input} />
+  Input: ({ label, required = true, ...props }: { 
+    label: string, 
+    required?: boolean 
+  } & React.InputHTMLAttributes<HTMLInputElement>) => (
+    <FormField label={label} required={required}>
+      <input 
+        {...props} 
+        required={required}
+        className={FORM_CONFIG.styles.input} 
+      />
     </FormField>
   ),
 
-  Select: ({ label, options, value, onChange }: { label: string, options: string[], value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
-    <FormField label={label}>
-      <select className={FORM_CONFIG.styles.input} value={value} onChange={onChange}>
+  Select: ({ label, options, value, onChange, required = true }: { label: string, options: string[], value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void ,required?: boolean }) => (
+    <FormField label={label}  required={required}>
+      <select className={FORM_CONFIG.styles.input} value={value} onChange={onChange} required={required}>
         <option value="">Select {label.toLowerCase()}</option>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
@@ -113,10 +120,15 @@ const Fields = {
     </div>
   ),
 
-  File: ({ label, onFileSelect }: { label: string, docType: string, onFileSelect: (file: File) => void }) => {
+  File: ({ label, docType, onFileSelect, required = true }: { 
+    label: string, 
+    docType: string, 
+    onFileSelect: (file: File) => void,
+    required?: boolean 
+  }) => {
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
@@ -278,26 +290,31 @@ const StepContent = {
           label="Profile Image" 
           docType="profile_image" 
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, profile_image: file }))}
+          required={true}
         />
         <Fields.File 
           label="Aadhar Card" 
           docType="adhar" 
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, adhar: file }))}
+          required={true}
         />
         <Fields.File 
           label="Educational Certificates" 
           docType="educational"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, educational: file }))}
+          required={true}
         />
         <Fields.File 
           label="Experience Certificates" 
           docType="experience"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, experience: file }))}
+          required={true}
         />
         <Fields.File 
           label="Ration Card" 
           docType="ration"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, ration: file }))}
+          required={true}
         />
         <div className="space-y-4">
           <FormField label="NOC Certificate Status">
@@ -317,12 +334,13 @@ const StepContent = {
           </FormField>
           
           {nocStatus === 'Yes' && (
-            <Fields.File 
-              label="NOC Certificate" 
-              docType="noc"
-              onFileSelect={(file) => setDocuments(prev => ({ ...prev, noc: file }))}
-            />
-          )}
+          <Fields.File 
+            label="NOC Certificate" 
+            docType="noc"
+            onFileSelect={(file) => setDocuments(prev => ({ ...prev, noc: file }))}
+            required={false}
+          />
+        )}
         </div>
       </div>
     )
@@ -417,6 +435,75 @@ const StepContent = {
   )
 };
 
+
+const validateStep = (step: number, data: any): boolean => {
+  switch (step) {
+    case 0: // Personal Details
+      return !!(
+        data.first_name &&
+        data.last_name &&
+        data.gender &&
+        data.date_of_birth &&
+        data.marital_status &&
+        data.religion &&
+        data.mother_tongue
+      );
+    
+    case 1: // Contact Information
+      return !!(
+        data.address &&
+        data.city &&
+        data.taluk &&
+        data.state &&
+        data.pin_code &&
+        data.phone_number &&
+        data.email &&
+        data.languages.length > 0
+      );
+    
+    case 2: // References
+      return !!(
+        data.reference_name &&
+        data.reference_phone &&
+        data.reference_relation &&
+        data.recommendation_details &&
+        data.family_references[0].name &&
+        data.family_references[0].phone &&
+        data.family_references[0].relation
+      );
+    
+    case 3: // Work Details
+      return !!(
+        data.service_type &&
+        data.shift_pattern &&
+        data.category &&
+        data.experience
+      );
+    
+    case 4: // Health & Additional Info
+      return !!(
+        data.health_status &&
+        data.source
+      );
+    
+    case 5: // Document Upload
+    return !!(
+      data.profile_image && 
+      data.adhar && 
+      data.educational && 
+      data.experience && 
+      data.ration && 
+      data.noc_status && 
+      // If NOC status is Yes, require the NOC file
+      (data.noc_status !== 'Yes' || data.noc)
+    );
+    
+    default:
+      return false;
+  }
+};
+
+
 export function AddNurseOverlay({ onClose }: AddNurseProps) {
   const [currentStep, setCurrentStep] = useState(0);
   // const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -483,36 +570,7 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
   //   }
   // };
 
-  const handleSubmit = async () => {
-    try {
-      // Prepare documents object including profile image
-      // const documentsWithProfile = {
-      //   ...documents,
-      //   profile: selectedImage
-      // };
   
-      // Call the server action
-      const result = await createNurse(
-        nurseData,
-        referenceData,
-        healthData,
-        documents
-        
-      );
-  
-      if (result.success) {
-        // Show success message and close overlay
-        toast.success('Nurse added successfully!');
-        onClose();
-      } else {
-        // Show error message
-        toast.error(result.error || 'Failed to add nurse');
-      }
-    } catch (error) {
-      console.error('Error submitting nurse data:', error);
-      toast.error('An error occurred while adding the nurse');
-    }
-  };
 
   const renderStep = () => {
     const steps = {
@@ -524,6 +582,63 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
       5: <StepContent.Document setDocuments={setDocuments} nurseData={nurseData} setNurseData={setNurseData} />
     };
     return steps[currentStep as keyof typeof steps] || null;
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0:
+        return validateStep(0, nurseData);
+      case 1:
+        return validateStep(1, nurseData);
+      case 2:
+        return validateStep(2, referenceData);
+      case 3:
+        return validateStep(3, nurseData);
+      case 4:
+        return validateStep(4, healthData);
+        case 5:
+          return validateStep(5, {
+            ...documents,
+            noc_status: nurseData.noc_status
+          });
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (canProceed()) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      toast.error('Please fill in all required fields before proceeding');
+    }
+  };
+
+
+  const handleSubmit = async () => {
+    if (!canProceed()) {
+      toast.error('Please fill in all required fields before submitting');
+      return;
+    }
+  
+    try {
+      const result = await createNurse(
+        nurseData,
+        referenceData,
+        healthData,
+        documents
+      );
+  
+      if (result.success) {
+        toast.success('Nurse added successfully!');
+        onClose();
+      } else {
+        toast.error(result.error || 'Failed to add nurse');
+      }
+    } catch (error) {
+      console.error('Error submitting nurse data:', error);
+      toast.error('An error occurred while adding the nurse');
+    }
   };
 
   return (
@@ -569,13 +684,16 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
           </button>
           <span className="text-sm text-gray-500">Step {currentStep + 1} of {FORM_CONFIG.steps.length}</span>
           <button
-            onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : setCurrentStep(currentStep + 1)}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
-          >
-            {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
-          </button>
+  onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
+  disabled={!canProceed()}
+  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg disabled:opacity-50"
+>
+  {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
+</button>
         </div>
       </div>
     </div>
   );
+  
+
 }
