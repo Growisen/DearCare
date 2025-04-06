@@ -13,36 +13,36 @@ interface Review {
   reviewer: string;
 }
 
-interface Education {
-  degree: string;
-  institution: string;
-  year: string;
-}
+// interface Education {
+//   degree: string;
+//   institution: string;
+//   year: string;
+// }
 
-interface Certification {
-  name: string;
-  issuedBy: string;
-  year: string;
-  expiryYear: string;
-}
+// interface Certification {
+//   name: string;
+//   issuedBy: string;
+//   year: string;
+//   expiryYear: string;
+// }
 
-interface WorkHistory {
-  organization: string;
-  position: string;
-  startDate: string;
-  endDate?: string;
-  description: string;
-}
+// interface WorkHistory {
+//   organization: string;
+//   position: string;
+//   startDate: string;
+//   endDate?: string;
+//   description: string;
+// }
 
-interface Availability {
-  days: string[];
-  shifts: string[];
-}
+// interface Availability {
+//   days: string[];
+//   shifts: string[];
+// }
 
-interface Skill {
-  name: string;
-  proficiency: 'Expert' | 'Advanced' | 'Intermediate';
-}
+// interface Skill {
+//   name: string;
+//   proficiency: 'Expert' | 'Advanced' | 'Intermediate';
+// }
 
 interface Reference {
   name: string;
@@ -236,13 +236,13 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
   </div>
 );
 
-const getDocumentValue = (
-  documents: Nurse['documents'] | undefined,
-  type: DocumentField
-): DocumentType | DocumentType[] | undefined => {
-  if (!documents) return undefined;
-  return documents[type];
-};
+// const getDocumentValue = (
+//   documents: Nurse['documents'] | undefined,
+//   type: DocumentField
+// ): DocumentType | DocumentType[] | undefined => {
+//   if (!documents) return undefined;
+//   return documents[type];
+// };
 
 const EditNurseProfilePage: React.FC = () => {
   const params = useParams();
@@ -253,7 +253,7 @@ const EditNurseProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Nurse>>({});
   const [saving, setSaving] = useState(false);
-  const [documents, setDocuments] = useState<Nurse['documents']>({});
+  // const [documents, setDocuments] = useState<Nurse['documents']>({});
   const [tempFiles, setTempFiles] = useState<Record<string, TempFile[]>>({});
 
   useEffect(() => {
@@ -574,6 +574,7 @@ const EditNurseProfilePage: React.FC = () => {
                       { value: "Trivandrum", label: "Trivandrum" },
                       { value: "Kozhikode", label: "Kozhikode" },
                       { value: "Thrissur", label: "Thrissur" }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     ]} name={''} onChange={function (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void {
                       throw new Error('Function not implemented.');
                     } }                  />

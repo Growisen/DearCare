@@ -623,6 +623,7 @@ export async function updateClientStatus(
           user_metadata: {
             name: clientName,
             role: 'client',
+            client_id: clientId,
             requiresPasswordChange: true
           }
         });

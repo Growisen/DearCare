@@ -1,7 +1,6 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Calendar, Briefcase, User, CheckCircle } from 'lucide-react';
-import Image from 'next/image';
-import { Nurse, NurseBasicInfo } from '@/types/staff.types';
+import { Mail, Phone, Briefcase, User } from 'lucide-react';
+import { NurseBasicInfo } from '@/types/staff.types';
 interface NurseInformationProps {
   nurse: NurseBasicInfo;
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+
 // Define nurse type locally to avoid dependency on external types
 interface Nurse {
   _id: string;
@@ -51,8 +52,9 @@ const DUMMY_NURSES: Nurse[] = [
   }
 ];
 
-const ScheduleShiftsPage = () => {
-  console.log('ScheduleShiftsPage rendering'); // Debug render cycles
+// Create a separate component that uses useSearchParams
+const ScheduleShiftsContent = () => {
+  console.log('ScheduleShiftsPage rendering');
   
   const searchParams = useSearchParams();
   const nurseIds = useMemo(() => {
@@ -63,7 +65,7 @@ const ScheduleShiftsPage = () => {
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [loading, setLoading] = useState(true);
   const [shifts, setShifts] = useState<ShiftData[]>([]);
-  const [initialized, setInitialized] = useState(false); // Track if initial data load is done
+  const [initialized, setInitialized] = useState(false);
   
   // Load data only once on component mount or when nurseIds change
   useEffect(() => {
@@ -92,7 +94,7 @@ const ScheduleShiftsPage = () => {
         setNurses(nursesToShow);
         setShifts(initialShifts);
         setLoading(false);
-        setInitialized(true); // Mark as initialized
+        setInitialized(true);
       }, 800);
       
       return () => clearTimeout(timer);
@@ -123,10 +125,6 @@ const ScheduleShiftsPage = () => {
       
       // For demo: just show the data that would be sent to backend
       console.log('Shifts to be saved:', shifts);
-    //   alert('Demo: Nurses would be assigned with the following shift data:\n\n' + 
-    //     JSON.stringify(shifts, null, 2));
-      
-      
     } catch (error) {
       console.error('Error assigning nurses:', error);
       alert('Failed to assign nurses. Please try again.');
@@ -289,4 +287,23 @@ const ScheduleShiftsPage = () => {
   );
 };
 
-export default React.memo(ScheduleShiftsPage); // Wrap with React.memo to prevent unnecessary renders
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="p-8 flex justify-center items-center min-h-[60vh]">
+      <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+      <span className="ml-3 text-gray-600">Loading...</span>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+const ScheduleShiftsPage = () => {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ScheduleShiftsContent />
+    </Suspense>
+  );
+};
+
+export default ScheduleShiftsPage;

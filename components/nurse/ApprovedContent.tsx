@@ -1,9 +1,9 @@
 import React from 'react';
 import { Star, Calendar, MessageCircle } from 'lucide-react';
 
-import { ApprovedContentProps } from "../../types/staff.types"
+import { NurseDetailsProps } from "../../types/staff.types"
 
-export function ApprovedContent({ nurse }: ApprovedContentProps) {
+export function ApprovedContent({ nurse }: NurseDetailsProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not available';
     const date = new Date(dateString);

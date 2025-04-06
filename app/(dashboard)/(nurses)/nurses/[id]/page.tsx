@@ -110,6 +110,7 @@ const NurseProfilePage: React.FC = () => {
   const id = params.id;
   const [nurse, setNurse] = useState<Nurse | null>(null);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

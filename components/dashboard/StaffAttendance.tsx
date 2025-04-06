@@ -1,8 +1,14 @@
 import { Card } from "../ui/card"
 import { Users, UserCheck, UserX, Calendar } from "lucide-react"
 import { StaffAttendanceProps } from "@/types/staff.types"; 
+import { useRouter } from "next/navigation"
 
 export default function StaffAttendance({ currentTime }: StaffAttendanceProps) {
+  const router = useRouter()
+  
+  const handleDetailsClick = () => {
+    router.push('/staff-attendance') 
+  }
   return (
     <Card className="p-4 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl h-[290px] col-span-2">
       <div className="flex items-start justify-between mb-4">
@@ -15,7 +21,12 @@ export default function StaffAttendance({ currentTime }: StaffAttendanceProps) {
             <p className="text-xs text-gray-500 mt-1">{currentTime}</p>
           </div>
         </div>
-        <button className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1 mr-1">Details</button>
+        <button 
+          className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1 mr-1"
+          onClick={handleDetailsClick}
+        >
+          Details
+        </button>
       </div>
       
       <div className="flex items-center gap-6">
