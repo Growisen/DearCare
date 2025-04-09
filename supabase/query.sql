@@ -207,3 +207,48 @@ WITH CHECK ((auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'admin');
 
 ALTER TABLE public.clients 
 ADD COLUMN rejection_reason text;
+
+---nurse leave requests table-----
+
+CREATE TYPE leave_status AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE leave_mode AS ENUM ('full_day', 'half_day_morning', 'half_day_afternoon');
+CREATE TYPE leave_type AS ENUM ('sick', 'annual', 'personal', 'casual', 'maternity', 'paternity', 'unpaid');
+
+CREATE TABLE nurse_leave_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nurse_id BIGINT NOT NULL,
+    leave_type leave_type NOT NULL,
+    leave_mode leave_mode DEFAULT 'full_day',
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    days NUMERIC(5,1) NOT NULL,
+    reason TEXT,
+    status leave_status DEFAULT 'pending',
+    rejection_reason TEXT,
+    applied_on TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    FOREIGN KEY (nurse_id) REFERENCES nurses(nurse_id)
+);
+
+CREATE POLICY "Admin users have full access to leave requests"
+ON nurse_leave_requests
+USING (auth.jwt() -> 'user_metadata' ->> 'role' = 'admin')
+WITH CHECK (auth.jwt() -> 'user_metadata' ->> 'role' = 'admin');
+
+-- Allow nurses to insert their own leave requests
+CREATE POLICY "Nurses can insert their own leave requests"
+ON nurse_leave_requests
+FOR INSERT
+WITH CHECK (
+  auth.jwt() -> 'user_metadata' ->> 'role' = 'nurse' AND
+  nurse_id = (auth.jwt() -> 'sub')::uuid
+);
+
+-- Allow nurses to view only their own leave requests
+CREATE POLICY "Nurses can view their own leave requests"
+ON nurse_leave_requests
+FOR SELECT
+USING (
+  auth.jwt() -> 'user_metadata' ->> 'role' = 'nurse' AND
+  nurse_id = (auth.jwt() -> 'sub')::uuid
+);
