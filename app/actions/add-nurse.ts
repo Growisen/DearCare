@@ -194,16 +194,40 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
 
     if (error) throw error
 
+
+    const getNurseImageUrl = async (nurseId: number): Promise<string | null> => {
+      const { data: files } = await supabase
+        .storage
+        .from('DearCare')
+        .list(`Nurses/image`, {
+          limit: 1,
+          search: nurseId.toString(),
+        })
+
+      if (files && files.length > 0) {
+        const { data: imageUrl } = supabase
+          .storage
+          .from('DearCare')
+          .getPublicUrl(`Nurses/image/${files[0].name}`)
+
+        return imageUrl.publicUrl
+      }
+      return null
+    }
+
     // Transform the data to include a default status
-    const transformedData = data.map(nurse => ({
+    const transformedData = await Promise.all(data.map(async nurse => ({
       nurse_id: nurse.nurse_id,
       first_name: nurse.first_name,
       last_name: nurse.last_name,
-      status: 'unassigned', // Default status or derive from service_type
+      status: 'unassigned',
       email: nurse.email,
       phone_number: nurse.phone_number,
-      experience: nurse.experience
-    }))
+      experience: nurse.experience,
+      photo: await getNurseImageUrl(nurse.nurse_id)  // This now matches the interface
+    } as NurseBasicInfo)))
+
+    
 
     return { 
       data: transformedData, 

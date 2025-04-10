@@ -116,6 +116,10 @@ export interface NurseDocuments {
   ration: File | null
 }
 
+
+
+
+
 export interface NurseBasicInfo {
   nurse_id: number;
   first_name: string | null;
