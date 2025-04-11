@@ -1,6 +1,5 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
 import { NurseBasicDetails, NurseBasicInfo } from "@/types/staff.types"
-import { useState } from 'react';
 import Loader from '@/components/loader'
 import { useRouter } from 'next/navigation'
 
@@ -28,15 +27,12 @@ interface NurseTableProps {
   isLoading?: boolean;
 }
 
-const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTableProps) => {
+const NurseTable = ({ 
+  nurses, 
+  onReviewDetails, 
+  isLoading = false
+}: NurseTableProps) => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  const indexOfLastNurse = currentPage * itemsPerPage;
-  const indexOfFirstNurse = indexOfLastNurse - itemsPerPage;
-  const currentNurses = nurses.slice(indexOfFirstNurse, indexOfLastNurse);
-  const totalPages = Math.ceil(nurses.length / itemsPerPage);
 
   if (isLoading) {
     return <Loader />;
@@ -60,7 +56,7 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {currentNurses.map((nurse) => {
+          {nurses.map((nurse) => {
             const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
             return (
               <tr key={nurse.nurse_id} className="hover:bg-gray-50/50">
@@ -103,42 +99,6 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
           })}
         </tbody>
       </table>
-
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
-        <div className="text-sm text-gray-700">
-          Showing {indexOfFirstNurse + 1} to {Math.min(indexOfLastNurse, nurses.length)} of {nurses.length} nurses
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Previous
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-            <button
-              key={pageNum}
-              onClick={() => setCurrentPage(pageNum)}
-              className={`px-3 py-1 text-sm font-medium rounded-md ${
-                currentPage === pageNum
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {pageNum}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Next
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

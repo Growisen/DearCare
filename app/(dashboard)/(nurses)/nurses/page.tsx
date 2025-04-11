@@ -11,8 +11,84 @@ import { fetchBasicDetails, fetchNurseDetails } from "@/app/actions/add-nurse"
 import Loader from "@/components/loader"
 
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-
+// Pagination Controls Component
+const PaginationControls = ({ 
+  currentPage, 
+  totalPages, 
+  totalCount, 
+  itemsPerPage, 
+  onPageChange, 
+  isMobile = false 
+}: {
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  itemsPerPage: number
+  onPageChange: (page: number) => void
+  isMobile?: boolean
+}) => {
+  const indexOfFirstItem = (currentPage - 1) * itemsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * itemsPerPage, totalCount);
+  
+  return (
+    <div className={`${isMobile ? "flex flex-col" : "flex items-center justify-between"} px-6 py-4 bg-white border-t border-gray-200`}>
+      <div className="text-sm text-gray-700 mb-2">
+        Showing {indexOfFirstItem} to {indexOfLastItem} of {totalCount} nurses
+      </div>
+      <div className="flex gap-2 justify-center">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Previous
+        </button>
+        
+        {!isMobile && Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(pageNum => 
+            pageNum === 1 || 
+            pageNum === totalPages || 
+            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+          )
+          .map((pageNum, index, array) => {
+            // Add ellipsis
+            if (index > 0 && pageNum - array[index - 1] > 1) {
+              return (
+                <span key={`ellipsis-${pageNum}`} className="px-3 py-1">...</span>
+              );
+            }
+            return (
+              <button
+                key={pageNum}
+                onClick={() => onPageChange(pageNum)}
+                className={`px-3 py-1 text-sm font-medium rounded-md ${
+                  currentPage === pageNum
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+          
+        {isMobile && (
+          <span className="px-3 py-1 text-sm font-medium bg-blue-600 text-white rounded-md">
+            {currentPage}
+          </span>
+        )}
+        
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const filterOptions = [
   {
@@ -51,8 +127,6 @@ const FilterSelect = ({ value, onChange, options, className }: { value: string, 
 )
 
 export default function NursesPage() {
-  // These state setters are used in FilterSelect component through eval
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -60,13 +134,12 @@ export default function NursesPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [selectedExperience, setSelectedExperience] = useState<string>("all")
   const [selectedRating, setSelectedRating] = useState<string>("all")
-  /* eslint-enable @typescript-eslint/no-unused-vars */
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedNurse, setSelectedNurse] = useState<NurseBasicInfo | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-const [totalCount, setTotalCount] = useState(0)
-const limit = 10
+  const [totalCount, setTotalCount] = useState(0)
+  const limit = 1
 
   useEffect(() => {
     async function loadNurses() {
@@ -94,7 +167,8 @@ const limit = 10
     setCurrentPage(pageNumber)
   }
 
-  
+  // Calculate total pages based on the totalCount and limit
+  const totalPages = Math.ceil(totalCount / limit)
 
   const filteredNurses = nurses.filter(nurse => {
     const matchesStatus = selectedStatus === "all" || nurse.status === selectedStatus
@@ -184,6 +258,16 @@ const limit = 10
               onReviewDetails={handleReviewDetails} 
               isLoading={isLoading}
             />
+            
+            {!isLoading && filteredNurses.length > 0 && (
+              <PaginationControls 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                itemsPerPage={limit}
+                onPageChange={handlePageChange}
+              />
+            )}
           </div>
           
           {/* Mobile card view */}
@@ -191,13 +275,32 @@ const limit = 10
             {isLoading ? (
               <Loader />
             ) : (
-              filteredNurses.map((nurses) => (
-                <NurseCard key={nurses.nurse_id} nurse={nurses}  />
-              ))
+              <>
+                {filteredNurses.map((nurse) => (
+                  <NurseCard 
+                    key={nurse.nurse_id} 
+                    nurse={nurse} 
+                    onReviewDetails={handleReviewDetails} 
+                  />
+                ))}
+                
+                {/* Mobile pagination controls */}
+                {filteredNurses.length > 0 && (
+                  <PaginationControls 
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    itemsPerPage={limit}
+                    onPageChange={handlePageChange}
+                    isMobile={true}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
+      
       {/* Add Nurse Overlay */}
       {showAddNurse && (
         <AddNurseOverlay 
