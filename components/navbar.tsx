@@ -5,22 +5,19 @@ import { Input } from "./ui/input"
 
 export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
-    <div className="h-16 border-b border-gray-100 fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md backdrop-filter z-10 shadow-sm">
+    <div className="h-16 border-b border-gray-100 fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md backdrop-filter z-10 shadow-sm lg:pl-56">
       <div className="flex items-center h-full px-4">
         <div className="flex items-center gap-2">
           <button onClick={onMenuClick} className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden">
             <Menu className="w-5 h-5 text-gray-500" />
           </button>
-          <div className="h-16 border-b border-white/10 flex items-center pr-6">
+          <div className="h-16 border-b border-white/10 flex items-center pr-6 lg:hidden">
             <Image src="/dcTransparent.png" alt="Logo" width={120} height={40} className="my-2 object-contain" />
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-3 ml-8">
-          {[
-            { label: "Analytics", icon: BarChart2 },
-            { label: "Support", icon: HelpCircle },
-          ].map((item) => (
+        <div className="hidden md:flex items-center gap-3 ">
+          {[{ label: "Analytics", icon: BarChart2 }, { label: "Support", icon: HelpCircle }].map((item) => (
             <button
               key={item.label}
               className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors flex items-center gap-1.5"
