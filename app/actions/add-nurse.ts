@@ -329,13 +329,13 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       ration: await getDocumentUrl('ration_card')
     }
 
-    console.log('Documents:', documents)
+    // console.log('Documents:', documents)
 
-    console.log('Basic Data:', basicData)
+    // console.log('Basic Data:', basicData)
 
-    console.log('Health Data:', healthData)
+    // console.log('Health Data:', healthData)
 
-    console.log('Reference Data:', referenceData)
+    // console.log('Reference Data:', referenceData)
 
     return {
       data: {
@@ -448,30 +448,32 @@ export async function fetchNurseAssignments(
     );
     
     // Add these console logs
-    console.log('=== Nurse Assignments Summary ===');
-    console.log('Total Assignments:', validAssignments.length);
+    // console.log('=== Nurse Assignments Summary ===');
+    // console.log('Total Assignments:', validAssignments.length);
     validAssignments.forEach((assignment, index) => {
-      console.log(`\nAssignment ${index + 1}:`);
-      console.log('Basic Info:', {
-        id: assignment.assignment.id,
-        dates: {
-          start: assignment.assignment.start_date,
-          end: assignment.assignment.end_date
-        },
-        shift: {
-          start: assignment.assignment.shift_start_time,
-          end: assignment.assignment.shift_end_time
-        },
-        salary: assignment.assignment.salary_hour
-      });
-      console.log('Client Type:', assignment.client.type);
-      console.log('Client Details:', 
-        assignment.client.type === 'individual' 
-          ? assignment.client.details.individual
-          : assignment.client.details.organization
-      );
+      // console.log(`\nAssignment ${index + 1}:`);
+      // console.log('Basic Info:', {
+      //   id: assignment.assignment.id,
+      //   dates: {
+      //     start: assignment.assignment.start_date,
+      //     end: assignment.assignment.end_date
+      //   },
+      //   shift: {
+      //     start: assignment.assignment.shift_start_time,
+      //     end: assignment.assignment.shift_end_time
+      //   },
+      //   salary: assignment.assignment.salary_hour
+      // });
+      
+
+      // console.log('Client Type:', assignment.client.type);
+      // console.log('Client Details:', 
+      //   assignment.client.type === 'individual' 
+      //     ? assignment.client.details.individual
+      //     : assignment.client.details.organization
+      // );
     });
-    console.log('=== End of Assignments ===');
+    // console.log('=== End of Assignments ===');
 
     return { data: validAssignments, error: null };
   } catch (error) {
@@ -610,7 +612,7 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
         return null
       }
     
-      console.log('Nurse 47 Assignments:', data)
+      // console.log('Nurse 47 Assignments:', data)
       return data
     }
     
