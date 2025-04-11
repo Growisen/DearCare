@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Loader from '@/components/loader'
-import { fetchNurseDetailsmain, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
+import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
 
 interface Review {
   id: string;
@@ -107,33 +107,41 @@ interface Nurse {
 const NurseProfilePage: React.FC = () => {
   const params = useParams()
   const [nurse, setNurse] = useState<SimplifiedNurseDetails | null>(null)
+  const [assignments, setAssignments] = useState<NurseAssignmentWithClient[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadNurseDetails() {
+    async function loadData() {
       if (!params.id) return
 
       setLoading(true)
       try {
-        const { data, error } = await fetchNurseDetailsmain(Number(params.id))
+        // Fetch nurse details and assignments in parallel
+        const [nurseResponse, assignmentsResponse] = await Promise.all([
+          fetchNurseDetailsmain(Number(params.id)),
+          fetchNurseAssignments(Number(params.id))
+        ])
         
-        if (error) {
-          setError(error)
+        if (nurseResponse.error) {
+          setError(nurseResponse.error)
           return
         }
 
-        if (data) {
-          setNurse(data)
+        if (assignmentsResponse.error) {
+          console.error('Error fetching assignments:', assignmentsResponse.error)
         }
+
+        setNurse(nurseResponse.data)
+        setAssignments(assignmentsResponse.data)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch nurse details')
+        setError(err instanceof Error ? err.message : 'Failed to fetch data')
       } finally {
         setLoading(false)
       }
     }
 
-    loadNurseDetails()
+    loadData()
   }, [params.id])
 
   if (loading) return <Loader />

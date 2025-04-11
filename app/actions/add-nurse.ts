@@ -14,58 +14,19 @@ interface PaginationParams {
   limit: number;
 }
 
-interface NurseFullDetails {
-  basic: {
-    nurse_id: number;
-    first_name: string | null;
-    last_name: string | null;
-    email: string | null;
-    phone_number: string | null;
-    gender: string | null;
-    date_of_birth: string | null;
-    address: string | null;
-    city: string | null;
-    state: string | null;
-    pin_code: number | null;
-    languages: any | null;
-    experience: number | null;
-    service_type: string | null;
-    shift_pattern: string | null;
-    category: string | null;
-    status: string;
-    marital_status: string | null;
-    religion: string | null;
-    mother_tongue: string | null;
-  };
-  health?: {
-    health_status: string | null;
-    disability: string | null;
-    source: string | null;
-  };
-  references?: {
-    referer_name: string | null;
-    phone_number: string | null;
-    relation: string | null;
-    description: string | null;
-    family_references: any | null;
-  };
-  documents?: {
-    profile_image: string | null;
-    adhar: string | null;
-    educational: string | null;
-    experience: string | null;
-    noc: string | null;
-    ration: string | null;
-  };
-  assignments?: Array<{
+
+export interface NurseAssignmentWithClient {
+  assignment: {
     id: number;
     start_date: string;
     end_date: string | null;
     shift_start_time: string | null;
     shift_end_time: string | null;
     salary_hour: number | null;
-    client_details: {
-      type: 'individual' | 'hospital' | 'carehome';
+  };
+  client: {
+    type: 'individual' | 'hospital' | 'carehome' | 'organization';
+    details: {
       individual?: {
         patient_name: string;
         patient_age: number | null;
@@ -74,16 +35,26 @@ interface NurseFullDetails {
         service_required: string;
         requestor_name: string;
         requestor_phone: string;
+        requestor_email: string;
+        relation_to_patient: string;
+        care_duration: string;
+        start_date: string;
       };
       organization?: {
         organization_name: string;
+        organization_type: string | null;
         organization_address: string;
         contact_person_name: string;
+        contact_person_role: string | null;
         contact_phone: string;
+        contact_email: string;
+        start_date: string | null;
       };
     };
-  }>;
+  };
 }
+
+
 
 
 export interface SimplifiedNurseDetails {
@@ -384,6 +355,131 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
     }
   }
 }
+
+
+
+interface AssignmentResponse {
+  id: number;
+  start_date: string;
+  end_date: string | null;
+  shift_start_time: string | null;
+  shift_end_time: string | null;
+  salary_hour: number | null;
+  client_id: string;
+  clients: {
+    client_type: 'individual' | 'hospital' | 'carehome' | 'organization';
+  };
+}
+
+export async function fetchNurseAssignments(
+  nurseId: number
+): Promise<{
+  data: NurseAssignmentWithClient[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return { data: null, error: 'Not authenticated' };
+    }
+
+    // First fetch assignments with client type
+    const { data: assignments, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select<string, AssignmentResponse>(`
+        id,
+        start_date,
+        end_date,
+        shift_start_time,
+        shift_end_time,
+        salary_hour,
+        client_id,
+        clients!inner (
+          client_type
+        )
+      `)
+      .eq('nurse_id', nurseId);
+
+    if (assignmentError) throw assignmentError;
+    if (!assignments) return { data: null, error: 'No assignments found' };
+
+    // Fetch detailed client information for each assignment
+    const assignmentsWithDetails = await Promise.all(
+      assignments.map(async (assignment) => {
+        const isIndividual = assignment.clients.client_type === 'individual';
+
+        // Fetch client details based on type
+        const { data: clientDetails, error: clientError } = await supabase
+          .from(isIndividual ? 'individual_clients' : 'organization_clients')
+          .select('*')
+          .eq('client_id', assignment.client_id)
+          .single();
+
+        if (clientError) {
+          console.error(`Error fetching client details: ${clientError.message}`);
+          return null;
+        }
+
+        return {
+          assignment: {
+            id: assignment.id,
+            start_date: assignment.start_date,
+            end_date: assignment.end_date,
+            shift_start_time: assignment.shift_start_time,
+            shift_end_time: assignment.shift_end_time,
+            salary_hour: assignment.salary_hour,
+          },
+          client: {
+            type: assignment.clients.client_type,
+            details: isIndividual
+              ? { individual: clientDetails, organization: undefined }
+              : { organization: clientDetails, individual: undefined }
+          }
+        } as NurseAssignmentWithClient;
+      })
+    );
+
+    // Filter out any null values from failed client detail fetches
+    const validAssignments = assignmentsWithDetails.filter(
+      (assignment): assignment is NurseAssignmentWithClient => assignment !== null
+    );
+    
+    // Add these console logs
+    console.log('=== Nurse Assignments Summary ===');
+    console.log('Total Assignments:', validAssignments.length);
+    validAssignments.forEach((assignment, index) => {
+      console.log(`\nAssignment ${index + 1}:`);
+      console.log('Basic Info:', {
+        id: assignment.assignment.id,
+        dates: {
+          start: assignment.assignment.start_date,
+          end: assignment.assignment.end_date
+        },
+        shift: {
+          start: assignment.assignment.shift_start_time,
+          end: assignment.assignment.shift_end_time
+        },
+        salary: assignment.assignment.salary_hour
+      });
+      console.log('Client Type:', assignment.client.type);
+      console.log('Client Details:', 
+        assignment.client.type === 'individual' 
+          ? assignment.client.details.individual
+          : assignment.client.details.organization
+      );
+    });
+    console.log('=== End of Assignments ===');
+
+    return { data: validAssignments, error: null };
+  } catch (error) {
+    console.error('Error fetching nurse assignments:', error);
+    return { data: null, error: 'Failed to fetch assignments' };
+  }
+}
+
 
 
 export async function fetchBasicDetails(
