@@ -117,7 +117,20 @@ export interface NurseDocuments {
 }
 
 
-
+ export interface NurseBasicDetails {
+  nurse_id: number;
+  name: {
+    first: string;
+    last: string;
+  };
+  status: 'assigned' | 'unassigned' | 'leave';
+  experience: number | null;
+  rating: number;
+  contact: {
+    email: string | null;
+    phone: string | null;
+  };
+}
 
 
 export interface NurseBasicInfo {

@@ -6,135 +6,13 @@ import { NurseDetailsOverlay } from "../../../../components/nurse/nurse-details-
 import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "../../../../components/nurse/NurseTable"
 import NurseCard from "../../../../components/nurse/NurseCard"
-import { Nurse, NurseBasicInfo } from "@/types/staff.types"
-import { fetchNurseDetails } from "@/app/actions/add-nurse"
+import { Nurse, NurseBasicInfo,NurseBasicDetails } from "@/types/staff.types"
+import { fetchBasicDetails, fetchNurseDetails } from "@/app/actions/add-nurse"
 import Loader from "@/components/loader"
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const mockNurses: Nurse[] = [
-  {
-    _id: "1",
-    firstName: "Anjali",
-    lastName: "Menon",
-    location: "Kochi",
-    status: "unassigned",
-    email: "anjali.menon@example.com",
-    phoneNumber: "123-456-7890",
-    gender: "Female",
-    dob: "1990-01-01",
-    salaryCap: 50000,
-    hiringDate: "2020-01-01",
-    experience: 5,
-    rating: 4.5,
-    reviews: [
-      { id: "r1", text: "Great nurse!", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
-      { id: "r2", text: "Very professional.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" }
-    ],
-    preferredLocations: ["Kochi", "Thiruvananthapuram"],
-    salaryPerHour: 25, // Add this field
-  },
-  {
-    _id: "2",
-    firstName: "Ravi",
-    lastName: "Nair",
-    location: "Thiruvananthapuram",
-    status: "assigned",
-    email: "ravi.nair@example.com",
-    phoneNumber: "987-654-3210",
-    gender: "Male",
-    dob: "1985-05-15",
-    salaryCap: 60000,
-    hiringDate: "2018-05-15",
-    experience: 8,
-    rating: 4,
-    reviews: [
-      { id: "r3", text: "Good service.", date: "2020-03-10", rating: 4, reviewer: "Anjali Menon" }
-    ],
-    preferredLocations: ["Thiruvananthapuram"],
-    salaryPerHour: 30, // Add this field
-  },
-  {
-    _id: "3",
-    firstName: "Lakshmi",
-    lastName: "Pillai",
-    location: "Kozhikode",
-    status: "leave",
-    email: "lakshmi.pillai@example.com",
-    phoneNumber: "456-789-0123",
-    gender: "Female",
-    dob: "1992-03-10",
-    salaryCap: 55000,
-    hiringDate: "2019-03-10",
-    experience: 3,
-    rating: 4.2,
-    reviews: [
-      { id: "r4", text: "Very caring.", date: "2021-11-20", rating: 5, reviewer: "Ravi Nair" }
-    ],
-    preferredLocations: ["Kozhikode"],
-    salaryPerHour: 28, // Add this field
-  },
-  {
-    _id: "4",
-    firstName: "Manu",
-    lastName: "Varma",
-    location: "Thrissur",
-    status: "pending",
-    email: "manu.varma@example.com",
-    phoneNumber: "321-654-0987",
-    gender: "Male",
-    dob: "1980-07-20",
-    salaryCap: 70000,
-    hiringDate: "2010-07-20",
-    experience: 10,
-    rating: 3,
-    reviews: [
-      { id: "r5", text: "Average performance.", date: "2019-08-05", rating: 3, reviewer: "Lakshmi Pillai" }
-    ],
-    preferredLocations: ["Thrissur"],
-    salaryPerHour: 35, // Add this field
-  },
-  {
-    _id: "5",
-    firstName: "Meera",
-    lastName: "Das",
-    location: "Kannur",
-    status: "rejected",
-    email: "meera.das@example.com",
-    phoneNumber: "654-321-9876",
-    gender: "Female",
-    dob: "1988-11-30",
-    salaryCap: 65000,
-    hiringDate: "2015-11-30",
-    experience: 7,
-    rating: 4.6,
-    reviews: [
-      { id: "r6", text: "Excellent nurse!", date: "2020-12-12", rating: 5, reviewer: "Manu Varma" }
-    ],
-    preferredLocations: ["Kannur"],
-    salaryPerHour: 32, // Add this field
-  },
-  {
-    _id: "6",
-    firstName: "Suresh",
-    lastName: "Kumar",
-    location: "Kochi",
-    status: "under_review",
-    email: "suresh.kumar@gmail.com",
-    phoneNumber: "654-321-9876",
-    gender: "Male",
-    dob: "1988-11-30",
-    salaryCap: 65000,
-    hiringDate: "2015-11-30",
-    experience: 7,
-    rating: 2.6,
-    reviews: [
-      { id: "r7", text: "Needs improvement.", date: "2021-05-18", rating: 2, reviewer: "Meera Das" }
-    ],
-    preferredLocations: ["Kochi"],
-    salaryPerHour: 27, // Add this field
-  }
-]
+
 
 const filterOptions = [
   {
@@ -175,7 +53,7 @@ const FilterSelect = ({ value, onChange, options, className }: { value: string, 
 export default function NursesPage() {
   // These state setters are used in FilterSelect component through eval
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  const [nurses, setNurses] = useState<NurseBasicInfo[]>([])
+  const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<string>("all")
@@ -186,23 +64,35 @@ export default function NursesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedNurse, setSelectedNurse] = useState<NurseBasicInfo | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+const [totalCount, setTotalCount] = useState(0)
+const limit = 10
 
   useEffect(() => {
     async function loadNurses() {
       setIsLoading(true)
-      const { data, error } = await fetchNurseDetails()
+      const { data, count, error } = await fetchBasicDetails({
+        page: currentPage,
+        limit
+      })
       
       if (error) {
         setError(error)
       } else if (data) {
         setNurses(data)
+        setTotalCount(count || 0)
       }
       
       setIsLoading(false)
     }
     
     loadNurses()
-  }, [])
+  }, [currentPage]) // Add currentPage to dependency array
+  
+  // Add a function to handle page changes
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+  }
 
   
 
@@ -213,11 +103,14 @@ export default function NursesPage() {
       (selectedExperience === "less_than_5" && (nurse.experience ?? 0) < 5) ||
       (selectedExperience === "less_than_10" && (nurse.experience ?? 0) < 10) ||
       (selectedExperience === "greater_than_15" && (nurse.experience ?? 0) >= 10)
-    const matchesSearch = (nurse.first_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-                         (nurse.last_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-                         (nurse.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    const matchesSearch = 
+      nurse.name.first.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nurse.name.last.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (nurse.contact.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    
     return matchesStatus && matchesExperience && matchesSearch
   })
+  
 
   const handleReviewDetails = (nurse: NurseBasicInfo) => {
     setSelectedNurse(nurse)
@@ -299,7 +192,7 @@ export default function NursesPage() {
               <Loader />
             ) : (
               filteredNurses.map((nurses) => (
-                <NurseCard key={nurses.nurse_id} nurse={nurses} onReviewDetails={handleReviewDetails} />
+                <NurseCard key={nurses.nurse_id} nurse={nurses}  />
               ))
             )}
           </div>

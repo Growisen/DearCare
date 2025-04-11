@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, AlertCircle } from "lucide-react"
-import { NurseBasicInfo } from "@/types/staff.types"
+import { NurseBasicDetails, NurseBasicInfo } from "@/types/staff.types"
 
 const statusColors = {
   assigned: "bg-green-100 text-green-700 border border-green-200",
@@ -20,11 +20,11 @@ const statusIcons = {
 }
 
 interface NurseCardProps {
-  nurse: NurseBasicInfo;
-  onReviewDetails: (nurse: NurseBasicInfo) => void;
+  nurse: NurseBasicDetails;
+ 
 }
 
-const NurseCard = ({ nurse, onReviewDetails }: NurseCardProps) => {
+const NurseCard = ({ nurse }: NurseCardProps) => {
   const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
   
   return (
@@ -32,7 +32,7 @@ const NurseCard = ({ nurse, onReviewDetails }: NurseCardProps) => {
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-medium text-gray-900">
-            {`${nurse.first_name || ''} ${nurse.last_name || ''}`}
+            {`${nurse.name.first || ''} ${nurse.name.last || ''}`}
           </h3>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[nurse.status as keyof typeof statusColors]}`}>
@@ -43,16 +43,11 @@ const NurseCard = ({ nurse, onReviewDetails }: NurseCardProps) => {
       
       <div className="text-sm">
         <p className="text-gray-600">Experience: {nurse.experience || 0} years</p>
-        <p className="text-gray-900">{nurse.email}</p>
-        <p className="text-gray-600">{nurse.phone_number}</p>
+        <p className="text-gray-900">{nurse.contact.email}</p>
+        <p className="text-gray-600">{nurse.contact.phone}</p>
       </div>
       
-      <button 
-        className="w-full mt-2 px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-        onClick={() => onReviewDetails(nurse)}
-      >
-        Review Details
-      </button>
+      
     </div>
   )
 }

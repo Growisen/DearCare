@@ -1,7 +1,8 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
-import { NurseBasicInfo } from "@/types/staff.types"
+import { NurseBasicDetails, NurseBasicInfo } from "@/types/staff.types"
 import { useState } from 'react';
 import Loader from '@/components/loader'
+import { useRouter } from 'next/navigation'
 
 const statusColors = {
   assigned: "bg-green-200 text-green-800 border border-green-300",
@@ -22,12 +23,13 @@ const statusIcons = {
 }
 
 interface NurseTableProps {
-  nurses: NurseBasicInfo[];
+  nurses: NurseBasicDetails[];
   onReviewDetails: (nurse: NurseBasicInfo) => void;
   isLoading?: boolean;
 }
 
 const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTableProps) => {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   
@@ -39,6 +41,10 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
   if (isLoading) {
     return <Loader />;
   }
+
+  const handleReviewDetails = (nurse: NurseBasicDetails) => {
+    router.push(`/nurses/${nurse.nurse_id}`);
+  };
 
   return (
     <div>
@@ -59,7 +65,7 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
             return (
               <tr key={nurse.nurse_id} className="hover:bg-gray-50/50">
                 <td className="py-4 px-6 text-gray-900 font-medium">
-                  {`${nurse.first_name || ""} ${nurse.last_name || ""}`}
+                  {`${nurse.name.first || ""} ${nurse.name.last || ""}`}
                 </td>
                 <td className="py-4 px-6">
                   <span
@@ -80,17 +86,17 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
                 </td>
                 <td className="py-4 px-6">
                   <div>
-                    <div className="text-gray-900">{nurse.email}</div>
-                    <div className="text-gray-600">{nurse.phone_number}</div>
+                    <div className="text-gray-900">{nurse.contact.email}</div>
+                    <div className="text-gray-600">{nurse.contact.phone}</div>
                   </div>
                 </td>
                 <td className="py-4 px-6">
-                  <button 
-                    className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                    onClick={() => onReviewDetails(nurse)}
-                  >
-                    Review Details
-                  </button>
+                <button 
+                className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                onClick={() => handleReviewDetails(nurse)}
+              >
+                Review Details
+              </button>
                 </td>
               </tr>
             );

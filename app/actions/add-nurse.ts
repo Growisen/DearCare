@@ -8,8 +8,15 @@ type NurseDocuments = {
   noc: File | null
   ration: File | null
 }
-import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo, Nurse } from '@/types/staff.types'
+
+interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
+import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo, Nurse, NurseBasicDetails } from '@/types/staff.types'
 import { createSupabaseServerClient } from './auth'
+
 
 export async function createNurse(
   nurseData: NurseFormData,
@@ -169,6 +176,83 @@ export async function createNurse(
   }
 }
 
+export async function fetchBasicDetails(
+  pagination?: PaginationParams
+): Promise<{ 
+  data: NurseBasicDetails[] | null;
+  count: number | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { page = 1, limit = 10 } = pagination || {}
+    const start = (page - 1) * limit
+    const end = start + limit - 1
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return { data: null, count: null, error: 'Not authenticated' }
+    }
+
+    // Get total count first
+    const { count, error: countError } = await supabase
+      .from('nurses')
+      .select('*', { count: 'exact', head: true })
+
+    if (countError) throw countError
+
+    // Fetch paginated nurse information
+    const { data, error } = await supabase
+      .from('nurses')
+      .select(`
+        nurse_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        experience,
+        status
+      `)
+      .order('first_name')
+      .range(start, end)
+
+    if (error) throw error
+
+    // Transform the data
+    const transformedData: NurseBasicDetails[] = data.map(nurse => ({
+      nurse_id: nurse.nurse_id,
+      name: {
+        first: nurse.first_name || '',
+        last: nurse.last_name || ''
+      },
+      status: nurse.status || 'unassigned',
+      experience: nurse.experience,
+      rating: 0,
+      contact: {
+        email: nurse.email,
+        phone: nurse.phone_number
+      }
+    }))
+
+    return {
+      data: transformedData,
+      count,
+      error: null
+    }
+
+  } catch (error) {
+    console.error('Error fetching basic nurse details:', error)
+    return {
+      data: null,
+      count: null,
+      error: error instanceof Error ? error.message : 'Failed to fetch nurse details'
+    }
+  }
+}
+
+
+
 export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | null, error: string | null }> {
   try {
     const supabase = await createSupabaseServerClient()
@@ -194,6 +278,39 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
 
     if (error) throw error
 
+
+    const get47 = async (nurseId:Number) => {
+      const { data, error } = await supabase
+        .from('nurse_client')
+        .select(`
+          id,
+          nurse_id,
+          client_id,
+          assigned_type,
+          start_date,
+          end_date,
+          shift_start_time,
+          shift_end_time,
+          salary_hour,
+          created_at
+        `)
+        .eq('nurse_id', nurseId)  // Add this line to filter by nurse_id
+    
+      if (error) {
+        console.error('Error fetching nurse_client:', error)
+        return null
+      }
+    
+      console.log('Nurse 47 Assignments:', data)
+      return data
+    }
+    
+    // Call the function to test
+    
+
+
+   
+    
 
     const getNurseImageUrl = async (nurseId: number): Promise<string | null> => {
       const { data: files } = await supabase
@@ -227,7 +344,7 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
       photo: await getNurseImageUrl(nurse.nurse_id)  // This now matches the interface
     } as NurseBasicInfo)))
 
-    
+    await get47(transformedData[0].nurse_id) // Example call to get47 with the first nurse's ID
 
     return { 
       data: transformedData, 
@@ -242,6 +359,8 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
     }
   }
 }
+
+
 
 
 export async function listNurses(): Promise<{ data: Nurse[] | null, error: string | null }> {
