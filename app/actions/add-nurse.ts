@@ -14,6 +14,123 @@ interface PaginationParams {
   limit: number;
 }
 
+interface NurseFullDetails {
+  basic: {
+    nurse_id: number;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    phone_number: string | null;
+    gender: string | null;
+    date_of_birth: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    pin_code: number | null;
+    languages: any | null;
+    experience: number | null;
+    service_type: string | null;
+    shift_pattern: string | null;
+    category: string | null;
+    status: string;
+    marital_status: string | null;
+    religion: string | null;
+    mother_tongue: string | null;
+  };
+  health?: {
+    health_status: string | null;
+    disability: string | null;
+    source: string | null;
+  };
+  references?: {
+    referer_name: string | null;
+    phone_number: string | null;
+    relation: string | null;
+    description: string | null;
+    family_references: any | null;
+  };
+  documents?: {
+    profile_image: string | null;
+    adhar: string | null;
+    educational: string | null;
+    experience: string | null;
+    noc: string | null;
+    ration: string | null;
+  };
+  assignments?: Array<{
+    id: number;
+    start_date: string;
+    end_date: string | null;
+    shift_start_time: string | null;
+    shift_end_time: string | null;
+    salary_hour: number | null;
+    client_details: {
+      type: 'individual' | 'hospital' | 'carehome';
+      individual?: {
+        patient_name: string;
+        patient_age: number | null;
+        patient_gender: string | null;
+        complete_address: string;
+        service_required: string;
+        requestor_name: string;
+        requestor_phone: string;
+      };
+      organization?: {
+        organization_name: string;
+        organization_address: string;
+        contact_person_name: string;
+        contact_phone: string;
+      };
+    };
+  }>;
+}
+
+
+export interface SimplifiedNurseDetails {
+  basic: {
+    nurse_id: number;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    phone_number: string | null;
+    gender: string | null;
+    date_of_birth: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    pin_code: number | null;
+    languages: any | null;
+    experience: number | null;
+    service_type: string | null;
+    shift_pattern: string | null;
+    category: string | null;
+    status: string;
+    marital_status: string | null;
+    religion: string | null;
+    mother_tongue: string | null;
+  };
+  health: {
+    health_status: string | null;
+    disability: string | null;
+    source: string | null;
+  } | null;
+  references: {
+    referer_name: string | null;
+    phone_number: string | null;
+    relation: string | null;
+    description: string | null;
+    family_references: any | null;
+  } | null;
+  documents: {
+    profile_image: string | null;
+    adhar: string | null;
+    educational?: string | null;
+    experience?: string | null;
+    noc?: string | null;
+    ration: string | null;
+  };
+}
+
 import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo, Nurse, NurseBasicDetails } from '@/types/staff.types'
 import { createSupabaseServerClient } from './auth'
 
@@ -176,6 +293,99 @@ export async function createNurse(
   }
 }
 
+export async function fetchNurseDetailsmain(nurseId: number): Promise<{
+  data: SimplifiedNurseDetails | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient()
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return { data: null, error: 'Not authenticated' }
+    }
+
+    // Fetch basic nurse information
+    const { data: basicData, error: basicError } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('nurse_id', nurseId)
+      .single()
+
+    if (basicError) throw basicError
+
+    // Fetch health information
+    const { data: healthData } = await supabase
+      .from('nurse_health')
+      .select('health_status, disability, source')
+      .eq('nurse_id', nurseId)
+      .single()
+
+    // Fetch reference information
+    const { data: referenceData } = await supabase
+      .from('nurse_references')
+      .select('referer_name, phone_number, relation, description, family_references')
+      .eq('nurse_id', nurseId)
+      .single()
+
+    // Fetch document URLs
+    const getDocumentUrl = async (folder: string): Promise<string | null> => {
+      const { data: files } = await supabase
+        .storage
+        .from('DearCare')
+        .list(`Nurses/${folder}`, {
+          limit: 1,
+          search: nurseId.toString(),
+        })
+
+      if (files && files.length > 0) {
+        const { data: url } = supabase
+          .storage
+          .from('DearCare')
+          .getPublicUrl(`Nurses/${folder}/${files[0].name}`)
+        return url.publicUrl
+      }
+      return null
+    }
+
+    const documents = {
+      profile_image: await getDocumentUrl('image'),
+      adhar: await getDocumentUrl('adhar'),
+      educational: await getDocumentUrl('Educational_Certificates'),
+      experience: await getDocumentUrl('Experience_Certificates'),
+      noc: await getDocumentUrl('Noc_Certificate'),
+      ration: await getDocumentUrl('ration_card')
+    }
+
+    console.log('Documents:', documents)
+
+    console.log('Basic Data:', basicData)
+
+    console.log('Health Data:', healthData)
+
+    console.log('Reference Data:', referenceData)
+
+    return {
+      data: {
+        basic: basicData,
+        health: healthData,
+        references: referenceData,
+        documents
+      },
+      error: null
+    }
+
+  } catch (error) {
+    console.error('Error fetching nurse details:', error)
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Failed to fetch nurse details'
+    }
+  }
+}
+
+
 export async function fetchBasicDetails(
   pagination?: PaginationParams
 ): Promise<{ 
@@ -250,6 +460,9 @@ export async function fetchBasicDetails(
     }
   }
 }
+
+
+
 
 
 

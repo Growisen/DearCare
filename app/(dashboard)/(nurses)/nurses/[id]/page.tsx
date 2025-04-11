@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Loader from '@/components/loader'
+import { fetchNurseDetailsmain, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
 
 interface Review {
   id: string;
@@ -104,162 +105,40 @@ interface Nurse {
 }
 
 const NurseProfilePage: React.FC = () => {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const fromNurseList = searchParams.get('fromNurseList') === 'true';
-  const id = params.id;
-  const [nurse, setNurse] = useState<Nurse | null>(null);
-  const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [error, setError] = useState<string | null>(null);
+  const params = useParams()
+  const [nurse, setNurse] = useState<SimplifiedNurseDetails | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      setTimeout(() => {
-        const mockNurse: Nurse = {
-          _id: id as string,
-          firstName: "Anjali",
-          lastName: "Menon",
-          location: "Kochi",
-          status: "unassigned",
-          email: "anjali.menon@example.com",
-          phoneNumber: "123-456-7890",
-          gender: "Female",
-          dob: "1990-01-01",
-          salaryPerHour: 900,
-          salaryCap: 1200,
-          hiringDate: "2020-01-01",
-          experience: 5,
-          rating: 4.5,
-          reviews: [
-            { id: "r1", text: "Great nurse! Was very attentive and professional during my recovery. Helped me with my daily exercises and made sure I was taking my medication correctly.", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
-            { id: "r2", text: "Very professional and knowledgeable. Made me feel comfortable during a difficult time.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" },
-            { id: "r3", text: "Excellent caregiver. Always punctual and thorough in their work.", date: "2022-03-22", rating: 5, reviewer: "Raj Kumar" }
-          ],
-          preferredLocations: ["Kollam", "Palakkad", "Malappuram"],
-          education: [
-            { degree: "BSc Nursing", institution: "Kerala University of Health Sciences", year: "2015" },
-            { degree: "Critical Care Certification", institution: "Indian Nursing Council", year: "2017" }
-          ],
-          specializations: ["Geriatric Care", "Post-Surgical Care", "Diabetes Management"],
-          languages: ["Malayalam", "English", "Hindi", "Tamil"],
-          certifications: [
-            { name: "Basic Life Support (BLS)", issuedBy: "American Heart Association", year: "2019", expiryYear: "2022" },
-            { name: "Advanced Cardiac Life Support", issuedBy: "Indian Resuscitation Council", year: "2020", expiryYear: "2023" }
-          ],
-          workHistory: [
-            { 
-              organization: "Kerala Medical Center", 
-              position: "Staff Nurse", 
-              startDate: "2015-06-01", 
-              endDate: "2018-05-30",
-              description: "Worked in general medicine ward handling patient care and medication administration."
-            },
-            { 
-              organization: "Lakeshore Hospital", 
-              position: "Senior Nurse", 
-              startDate: "2018-06-15", 
-              endDate: "2020-01-15",
-              description: "Specialized in post-operative care and patient recovery monitoring."
-            }
-          ],
-          availability: {
-            days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-            shifts: ["Morning", "Evening"]
-          },
-          skills: [
-            { name: "Wound Dressing", proficiency: "Expert" },
-            { name: "IV Management", proficiency: "Expert" },
-            { name: "Medication Administration", proficiency: "Expert" },
-            { name: "Vital Signs Monitoring", proficiency: "Expert" },
-            { name: "Patient Assessment", proficiency: "Advanced" },
-            { name: "Diabetes Management", proficiency: "Advanced" },
-            { name: "Elderly Care", proficiency: "Advanced" },
-            { name: "Patient Education", proficiency: "Intermediate" }
-          ],
-          address: "123 Medical Avenue",
-          city: "Kochi",
-          taluk: "Ernakulam",
-          pinCode: "682001",
-          maritalStatus: "Single",
-          religion: "Hindu",
-          state: "Kerala",
-          motherTongue: "Malayalam",
-          nocCertificate: "Yes",
-          documents: {
-            aadhar: {
-              path: "/documents/aadhar.pdf",
-              name: "Aadhar_Card_2023.pdf"
-            },
-            rationCard: {
-              path: "/documents/ration.pdf",
-              name: "Ration_Card_2023.pdf"
-            },
-            educationalQualification: [
-              { path: "/documents/degree.pdf", name: "BSc_Nursing_Degree.pdf" },
-              { path: "/documents/certificate.pdf", name: "Critical_Care_Certificate.pdf" }
-            ],
-            workExperience: [
-              { path: "/documents/experience1.pdf", name: "Kerala_Medical_Experience.pdf" }
-            ],
-            nocCertificate: {
-              path: "/documents/noc.pdf",
-              name: "NOC_Certificate_2023.pdf"
-            }
-          },
-          serviceType: 'Home Nurse',
-          shiftingPattern: '12 Hour',
-          staffCategory: 'Permanent',
-          primaryReference: {
-            name: "John Thomas",
-            relation: "Uncle",
-            phoneNumber: "9876543210"
-          },
-          familyReferences: [
-            {
-              name: "Mary Joseph",
-              relation: "Sister",
-              phoneNumber: "9876543211"
-            },
-            {
-              name: "George Philip",
-              relation: "Brother",
-              phoneNumber: "9876543212"
-            }
-          ],
-          healthStatus: "Good physical and mental health. No chronic conditions.",
-          disabilityDetails: "None",
-          sourceOfInformation: "Direct Interview and Family Members"
-        };
+    async function loadNurseDetails() {
+      if (!params.id) return
+
+      setLoading(true)
+      try {
+        const { data, error } = await fetchNurseDetailsmain(Number(params.id))
         
-        setNurse(mockNurse);
-        setLoading(false);
-      }, 1000);
+        if (error) {
+          setError(error)
+          return
+        }
+
+        if (data) {
+          setNurse(data)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch nurse details')
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [id]);
 
-  if (loading) {
-    return (
-      <Loader />
-    );
-  }
+    loadNurseDetails()
+  }, [params.id])
 
-  if (error || !nurse) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-6xl mx-auto bg-white p-8 rounded-md shadow">
-          <div className="text-center">
-            <h1 className="text-2xl font-semibold text-red-700">Error Loading Profile</h1>
-            <p className="mt-2 text-gray-600">{error || "Nurse profile not found"}</p>
-            <Link href="/" className="mt-4 inline-block text-indigo-600 hover:underline">
-              Return to Dashboard
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Loader />
+  if (error) return <div>Error: {error}</div>
+  if (!nurse) return <div>No nurse found</div>
 
   return (
     <div className="min-h-screen bg-gray-50">
