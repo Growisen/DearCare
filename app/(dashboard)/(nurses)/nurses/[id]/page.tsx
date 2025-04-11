@@ -81,7 +81,7 @@ const NurseProfilePage: React.FC = () => {
           <div className="bg-gradient-to-r from-blue-50 to-white border-b border-gray-200 px-6 py-4">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-xl font-semibold text-gray-800">Nurse Profile</h1>
-              <Link 
+              {/* <Link 
                 href={`/nurses/${basicInfo.nurse_id}/edit`}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
               >
@@ -89,7 +89,7 @@ const NurseProfilePage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
                 Edit Profile
-              </Link>
+              </Link> */}
             </div>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-col md:flex-row items-center gap-4">

@@ -6,8 +6,8 @@ import { NurseDetailsOverlay } from "../../../../components/nurse/nurse-details-
 import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "../../../../components/nurse/NurseTable"
 import NurseCard from "../../../../components/nurse/NurseCard"
-import { Nurse, NurseBasicInfo,NurseBasicDetails } from "@/types/staff.types"
-import { fetchBasicDetails, fetchNurseDetails } from "@/app/actions/add-nurse"
+import {  NurseBasicInfo,NurseBasicDetails } from "@/types/staff.types"
+import { fetchBasicDetails } from "@/app/actions/add-nurse"
 import Loader from "@/components/loader"
 
 
@@ -130,16 +130,16 @@ export default function NursesPage() {
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedLocation, setSelectedLocation] = useState<string>("all")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [selectedExperience, setSelectedExperience] = useState<string>("all")
-  const [selectedRating, setSelectedRating] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedNurse, setSelectedNurse] = useState<NurseBasicInfo | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
-  const limit = 1
+  const limit = 10
+
+  
 
   useEffect(() => {
     async function loadNurses() {
@@ -148,7 +148,9 @@ export default function NursesPage() {
         page: currentPage,
         limit
       })
-      
+      setSelectedStatus('all')
+      setSelectedExperience('all')
+
       if (error) {
         setError(error)
       } else if (data) {
@@ -193,6 +195,9 @@ export default function NursesPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   const handleAddNurse = (nurseData: any) => {
     // Handle adding new nurse here
+    if (error) {
+      console.log(error)
+    }
     setShowAddNurse(false)
   }
 
@@ -255,7 +260,7 @@ export default function NursesPage() {
           <div className="hidden sm:block overflow-x-auto">
             <NurseTable 
               nurses={filteredNurses} 
-              onReviewDetails={handleReviewDetails} 
+    
               isLoading={isLoading}
             />
             

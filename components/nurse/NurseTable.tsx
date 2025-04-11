@@ -1,5 +1,5 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
-import { NurseBasicDetails, NurseBasicInfo } from "@/types/staff.types"
+import { NurseBasicDetails } from "@/types/staff.types"
 import Loader from '@/components/loader'
 import { useRouter } from 'next/navigation'
 
@@ -23,13 +23,12 @@ const statusIcons = {
 
 interface NurseTableProps {
   nurses: NurseBasicDetails[];
-  onReviewDetails: (nurse: NurseBasicInfo) => void;
+  
   isLoading?: boolean;
 }
 
 const NurseTable = ({ 
-  nurses, 
-  onReviewDetails, 
+  nurses,  
   isLoading = false
 }: NurseTableProps) => {
   const router = useRouter();

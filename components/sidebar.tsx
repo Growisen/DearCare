@@ -3,7 +3,7 @@ import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
+import { Users, Briefcase, Calendar, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
 import { useAuth } from '@/contexts/AuthContext'
 
