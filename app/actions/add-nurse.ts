@@ -14,6 +14,11 @@ interface PaginationParams {
   limit: number;
 }
 
+interface FamilyReference {
+  name: string;
+  phone: string;
+  relation: string;
+}
 
 export interface NurseAssignmentWithClient {
   assignment: {
@@ -70,7 +75,7 @@ export interface SimplifiedNurseDetails {
     city: string | null;
     state: string | null;
     pin_code: number | null;
-    languages: any | null;
+    languages: string[] | null;
     experience: number | null;
     service_type: string | null;
     shift_pattern: string | null;
@@ -90,7 +95,7 @@ export interface SimplifiedNurseDetails {
     phone_number: string | null;
     relation: string | null;
     description: string | null;
-    family_references: any | null;
+    family_references: FamilyReference[] | null; 
   } | null;
   documents: {
     profile_image: string | null;
@@ -329,13 +334,13 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       ration: await getDocumentUrl('ration_card')
     }
 
-    // console.log('Documents:', documents)
+    console.log('Documents:', documents)
 
-    // console.log('Basic Data:', basicData)
+    console.log('Basic Data:', basicData)
 
-    // console.log('Health Data:', healthData)
+    console.log('Health Data:', healthData)
 
-    // console.log('Reference Data:', referenceData)
+    console.log('Reference Data:', referenceData)
 
     return {
       data: {
@@ -447,33 +452,6 @@ export async function fetchNurseAssignments(
       (assignment): assignment is NurseAssignmentWithClient => assignment !== null
     );
     
-    // Add these console logs
-    // console.log('=== Nurse Assignments Summary ===');
-    // console.log('Total Assignments:', validAssignments.length);
-    validAssignments.forEach((assignment, index) => {
-      // console.log(`\nAssignment ${index + 1}:`);
-      // console.log('Basic Info:', {
-      //   id: assignment.assignment.id,
-      //   dates: {
-      //     start: assignment.assignment.start_date,
-      //     end: assignment.assignment.end_date
-      //   },
-      //   shift: {
-      //     start: assignment.assignment.shift_start_time,
-      //     end: assignment.assignment.shift_end_time
-      //   },
-      //   salary: assignment.assignment.salary_hour
-      // });
-      
-
-      // console.log('Client Type:', assignment.client.type);
-      // console.log('Client Details:', 
-      //   assignment.client.type === 'individual' 
-      //     ? assignment.client.details.individual
-      //     : assignment.client.details.organization
-      // );
-    });
-    // console.log('=== End of Assignments ===');
 
     return { data: validAssignments, error: null };
   } catch (error) {
@@ -590,7 +568,7 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
     if (error) throw error
 
 
-    const get47 = async (nurseId:Number) => {
+    const get47 = async (nurseId:number) => {
       const { data, error } = await supabase
         .from('nurse_client')
         .select(`
@@ -612,7 +590,7 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
         return null
       }
     
-      // console.log('Nurse 47 Assignments:', data)
+      console.log('Nurse 47 Assignments:', data)
       return data
     }
     

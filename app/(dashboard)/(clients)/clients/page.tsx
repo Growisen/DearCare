@@ -254,7 +254,7 @@ export default function ClientsPage() {
           {/* Desktop view buttons */}
           <div className="hidden sm:block overflow-x-auto -mx-4 px-4">
             <div className="flex gap-2 min-w-max">
-              {["approved", "pending", "under_review", "rejected", "assigned"].map((status) => (
+              {["approved", "pending", "under_review", "rejected"].map((status) => (
                 <button
                   key={status}
                   onClick={() => handleStatusChange(status as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all")}

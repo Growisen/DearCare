@@ -7,10 +7,12 @@ import NurseListModal from '@/components/client/ApprovedContent/NurseListModal'
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal'
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList'
 import { Nurse } from '@/types/staff.types'
-import { nurses_test_data, dummyAssignments } from '@/test_data/dummy_data'
 import Link from 'next/link'
 import CategorySelector from '@/components/client/Profile/CategorySelector'
-import { updateClientCategory, getOrganizationClientDetails } from '@/app/actions/client-actions'
+import { updateClientCategory, getOrganizationClientDetails, getClientStatus } from '@/app/actions/client-actions'
+import { listNurses } from '@/app/actions/add-nurse'
+import { getNurseAssignments } from '@/app/actions/shift-schedule-actions'
+import toast from 'react-hot-toast'
 
 // Updated interface to match the Supabase data structure
 interface OrganizationClientData {
@@ -40,6 +42,17 @@ interface OrganizationClientData {
   }>
 }
 
+interface NurseAssignment {
+  id?: number;
+  nurseId: number | string;
+  startDate: string;
+  endDate?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  shiftType?: 'day' | 'night' | '24h';
+}
+
 const OrganizationClientProfile = () => {
   const params = useParams()
   const id = params.id as string
@@ -49,9 +62,12 @@ const OrganizationClientProfile = () => {
   const [showNurseList, setShowNurseList] = useState(false)
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
-  const [nurses] = useState(nurses_test_data)
-  const [nurseAssignments] = useState(dummyAssignments)
+  const [nurses, setNurses] = useState<Nurse[]>([])
+  const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([])
   const [isEditing, setIsEditing] = useState(false)
+  const [status, setStatus] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLoadingNurses, setIsLoadingNurses] = useState(false)
 
   // Utility function to handle undefined/null values
   const formatValue = (value: string | undefined | null, defaultText = 'Not specified'): string => {
@@ -61,6 +77,10 @@ const OrganizationClientProfile = () => {
   useEffect(() => {
     const fetchClientData = async () => {
       try {
+        const statusResult = await getClientStatus(id as string);
+        if (statusResult.success) {
+          setStatus(statusResult.status);
+        }
         setLoading(true)
         const result = await getOrganizationClientDetails(id)
         
@@ -80,20 +100,86 @@ const OrganizationClientProfile = () => {
 
     if (id) {
       fetchClientData()
+      fetchNurses()
+      fetchNurseAssignments()
     }
   }, [id])
 
-  const handleAssignNurse = async (nurseId: string) => {
-    setShowNurseList(false)
-    setShowConfirmation(false)
+  const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {
+    if (!startTime || !endTime) return 'day';
     
+    const startHour = parseInt(startTime.split(':')[0]);
+    const endHour = parseInt(endTime.split(':')[0]);
+    
+    if (endHour - startHour >= 12 || (startHour > endHour && startHour - endHour <= 12)) {
+      return '24h';
+    } else if (startHour >= 6 && startHour < 18) {
+      return 'day';
+    } else {
+      return 'night';
+    }
+  };
+
+  const fetchNurses = async () => {
+    setIsLoadingNurses(true);
+    try {
+      const response = await listNurses();
+      if (response.data) {
+        setNurses(response.data);
+      } else {
+        toast.error(response.error || 'Failed to fetch nurses');
+      }
+    } catch (error) {
+      console.error('Error fetching nurses:', error);
+      toast.error('Error loading nurses');
+    } finally {
+      setIsLoadingNurses(false);
+    }
+  };
+
+  const fetchNurseAssignments = async () => {
+    try {
+      const assignmentsResponse = await getNurseAssignments(id);
+
+      if (assignmentsResponse.success && assignmentsResponse.data) {
+        // Transform the assignment data to match our interface
+        const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({
+          id: assignment.id,
+          nurseId: assignment.nurse_id,
+          startDate: assignment.start_date,
+          endDate: assignment.end_date,
+          shiftStart: assignment.shift_start_time,
+          shiftEnd: assignment.shift_end_time,
+          status: assignment.status || 'active',
+          shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time)
+        }));
+        
+        setNurseAssignments(transformedAssignments);
+      }
+    } catch (error) {
+      console.error('Error fetching nurse assignments:', error);
+    }
+  };
+
+  const handleAssignNurse = async (nurseId: string) => {
+    setShowNurseList(false);
+    setShowConfirmation(false);
+    
+    const newAssignment: NurseAssignment = {
+      nurseId,
+      startDate: new Date().toISOString(),
+      shiftType: 'day',
+      status: 'active'
+    };
+    
+    setNurseAssignments(prev => [...prev, newAssignment]);
     // TODO: Make API call to save assignment
-    console.log(`Nurse ${nurseId} assigned to organization ${id}`)
+    console.log(`Nurse ${nurseId} assigned to organization ${id}`);
   }
 
-  const handleEdit = () => {
-    setIsEditing(true)
-  }
+  // const handleEdit = () => {
+  //   setIsEditing(true)
+  // }
 
   const handleSave = async () => {
     // TODO: Add API call to save organization data
@@ -164,7 +250,7 @@ const OrganizationClientProfile = () => {
   // Calculate staff requirements summary
   const staffSummary = {
     total: client.staffRequirements.reduce((sum, staff) => sum + staff.count, 0),
-    assigned: nurseAssignments.length // This would ideally come from real data
+    assigned: nurseAssignments.length // Using actual assignment count
   }
 
   return (
@@ -235,22 +321,23 @@ const OrganizationClientProfile = () => {
                       Cancel
                     </button>
                   </>
-                ) : (
-                  <>
+                ) : null}
+                  {status === 'approved' && (
+                    <>
                     <button 
                       onClick={() => setShowNurseList(true)}
                       className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
                     >
                       Assign Staff
                     </button>
-                    <button 
+                    {/* <button 
                       onClick={handleEdit}
                       className="px-4 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-sm font-medium"
                     >
                       Edit Details
-                    </button>
+                    </button> */}
                   </>
-                )}
+                  )}
               </div>
             </div>
           </div>

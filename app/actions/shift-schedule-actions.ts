@@ -201,3 +201,37 @@ export async function getNurseAssignments(clientId: string): Promise<{
     };
   }
 }
+
+
+export async function getAllNurseAssignments(): Promise<{
+  success: boolean;
+  data?: NurseAssignmentData[];
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('nurse_client')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching all nurse assignments:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+    
+    return {
+      success: true,
+      data: data as NurseAssignmentData[]
+    };
+  } catch (error) {
+    console.error('Unexpected error fetching all nurse assignments:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch nurse assignments'
+    };
+  }
+}
