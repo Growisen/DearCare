@@ -3,7 +3,8 @@ import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Users, Briefcase, Calendar, MapPin, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
+import { Users, Calendar, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
+//import { Users, Briefcase, Calendar, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -34,11 +35,11 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
   }, [isOpen, handleClickOutside])
 
   return (
-    <div id="sidebar" className={`w-48 h-screen bg-dCblue fixed left-0 top-0 shadow-[1px_0_3px_0_rgb(0,0,0,0.2)] z-50 rounded-r-2xl flex flex-col justify-between transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+    <div id="sidebar" className={`w-56 h-screen bg-dCblue fixed left-0 top-0 shadow-[1px_0_3px_0_rgb(0,0,0,0.2)] z-50 rounded-r-2xl flex flex-col justify-between transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
       <div>
         <div className="h-16 border-b border-white/10 flex items-center gap-2 px-3">
           <div className="flex-1 min-w-0">
-            <Image src="/logo.png" alt="Logo" width={140} height={60} className="object-contain" />
+            <Image src="/logo.png" alt="Logo" width={120} height={60} className="object-contain" />
           </div>
           <button 
             onClick={onClose}
@@ -55,13 +56,13 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               { icon: Home, label: "Dashboard", href: "/dashboard" },
               { icon: Users, label: "Nurses", href: "/nurses" },
               { icon: Users, label: "Clients", href: "/clients" },
-              { icon: Briefcase, label: "Assignments", href: "/assignments" },
+             // { icon: Briefcase, label: "Assignments", href: "/assignments" },
               { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
               { icon: ClipboardList, label: "Staff Attendance", href: "/staff-attendance" },
-              { icon: MapPin, label: "Locations", href: "/locations" },
-              { icon: Calendar, label: "Schedule", href: "/schedule" },
-              { icon: ClipboardList, label: "Reports", href: "/reports" },
-              { icon: Settings, label: "Settings", href: "/settings" },
+              // { icon: MapPin, label: "Locations", href: "/locations" },
+              //{ icon: Calendar, label: "Schedule", href: "/schedule" },
+              //{ icon: ClipboardList, label: "Reports", href: "/reports" },
+              //{ icon: Settings, label: "Settings", href: "/settings" },
               { icon: LogOut, label: "Logout", href: "#", onClick: () => handleSignOut() },
             ].map((item) => {
               const isActive = pathname === item.href
@@ -70,7 +71,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
                   key={item.href}
                   href={item.href}
                   onClick={item.onClick}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative
+                  className={`flex items-center gap-3 px-1 py-2 rounded-xl transition-all duration-200 group relative
                     ${isActive 
                       ? 'bg-white/15 text-white' 
                       : 'text-white/70 hover:bg-white/10 hover:text-white'

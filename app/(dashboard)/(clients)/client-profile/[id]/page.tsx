@@ -6,14 +6,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Loader from '@/components/loader';
 import {Json, DetailedClientIndividual } from '@/types/client.types';
-import { getClientDetails, getPatientAssessment, updateClientCategory } from '@/app/actions/client-actions';
+import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus } from '@/app/actions/client-actions';
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { Nurse } from '@/types/staff.types';
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList';
-import { nurses_test_data, dummyAssignments } from '@/test_data/dummy_data';
 import PatientAssessment from '@/components/client/PatientAssessment';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
+import { listNurses } from '@/app/actions/add-nurse';
+import { getNurseAssignments } from '@/app/actions/shift-schedule-actions';
+import toast from 'react-hot-toast';
 
 interface PatientAssessmentDataForApprovedClients {
   guardianOccupation: string;
@@ -50,11 +52,14 @@ interface PatientAssessmentDataForApprovedClients {
 }
 
 interface NurseAssignment {
-  nurseId: string;
+  id?: number;
+  nurseId: number | string;
   startDate: string;
   endDate?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
-  shiftType: 'day' | 'night' | '24h';
+  shiftType?: 'day' | 'night' | '24h';
 }
 
 
@@ -109,20 +114,49 @@ const PatientProfilePage = () => {
   const [showNurseList, setShowNurseList] = useState(false);
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [nurses] = useState(nurses_test_data);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [nurses, setNurses] = useState<Nurse[]>([]);
+  const [status, setStatus] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLoadingNurses, setIsLoadingNurses] = useState(false);
 
   useEffect(() => {
+
+    const loadData = async () => {
+      await fetchNurses();
+    };
+
     async function fetchPatientData() {
       if (id) {
         setLoading(true);
         try {
-          // Fetch client details
+          const statusResult = await getClientStatus(id as string);
+          console.log("status", statusResult)
+          if (statusResult.success) {
+            setStatus(statusResult.status);
+          }
           const clientResponse = await getClientDetails(id as string) as ClientResponse;
           console.log(clientResponse)
           const assessmentResponse = await getPatientAssessment(id as string);
+
+          const assignmentsResponse = await getNurseAssignments(id as string);
+
+          if (assignmentsResponse.success && assignmentsResponse.data) {
+            // Transform the assignment data to match our interface
+            const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({
+              id: assignment.id,
+              nurseId: assignment.nurse_id,
+              startDate: assignment.start_date,
+              endDate: assignment.end_date,
+              shiftStart: assignment.shift_start_time,
+              shiftEnd: assignment.shift_end_time,
+              status: assignment.status || 'active',
+              shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time)
+            }));
+            
+            setNurseAssignments(transformedAssignments);
+          }
 
           if (clientResponse.success && clientResponse.client) {
             const clientData = clientResponse.client;
@@ -206,8 +240,43 @@ const PatientProfilePage = () => {
       }
     }
 
+    loadData();
+
     fetchPatientData();
   }, [id]);
+
+  const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {
+    if (!startTime || !endTime) return 'day';
+    
+    const startHour = parseInt(startTime.split(':')[0]);
+    const endHour = parseInt(endTime.split(':')[0]);
+    
+    if (endHour - startHour >= 12 || (startHour > endHour && startHour - endHour <= 12)) {
+      return '24h';
+    } else if (startHour >= 6 && startHour < 18) {
+      return 'day';
+    } else {
+      return 'night';
+    }
+  };
+
+
+  const fetchNurses = async () => {
+    setIsLoadingNurses(true);
+    try {
+      const response = await listNurses();
+      if (response.data) {
+        setNurses(response.data);
+      } else {
+        toast.error(response.error || 'Failed to fetch nurses');
+      }
+    } catch (error) {
+      console.error('Error fetching nurses:', error);
+      toast.error('Error loading nurses');
+    } finally {
+      setIsLoadingNurses(false);
+    }
+  };
 
   const handleAssignNurse = async (nurseId: string) => {
     setShowNurseList(false);
@@ -377,12 +446,14 @@ const PatientProfilePage = () => {
                   </>
                 ) : (
                   <>
-                    <button 
-                      onClick={() => setShowNurseList(true)}
-                      className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-                    >
-                      Assign Nurse
-                    </button>
+                    {status === 'approved' && (
+                        <button 
+                          onClick={() => setShowNurseList(true)}
+                          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          Assign Nurse
+                        </button>
+                      )}
                     <button 
                       onClick={handleEdit}
                       className="px-4 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-sm font-medium"
@@ -426,21 +497,22 @@ const PatientProfilePage = () => {
                 </div>
               </div>
             ) : null}
-            <div className="bg-white p-4 rounded border border-gray-200 mt-4 mb-4">
-              <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
-                Nurse Assignments
-              </h2>
-              <NurseAssignmentsList
-                assignments={dummyAssignments}
-                nurses={nurses}
-                onEditAssignment={(assignment) => {
-                  console.log('Edit assignment:', assignment);
-                }}
-                onEndAssignment={(assignmentId) => {
-                  console.log('End assignment:', assignmentId);
-                }}
-              />
-            </div>
+            {status === 'approved' && (
+              <div className="bg-white p-4 rounded border border-gray-200 mt-4 mb-4">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Nurse Assignments
+                </h2>
+                <NurseAssignmentsList
+                  assignments={nurseAssignments}
+                  nurses={nurses}
+                  onEditAssignment={(assignment) => {
+                    console.log('Edit assignment:', assignment);
+                  }}
+                  onEndAssignment={(assignmentId) => {
+                    console.log('End assignment:', assignmentId);
+                  }}
+                />
+              </div>)}
             {/* Personal Information */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-white p-4 rounded border border-gray-200">
@@ -741,6 +813,7 @@ const PatientProfilePage = () => {
       <NurseListModal 
         isOpen={showNurseList}
         nurses={nurses}
+        clientId={id as string}
         onClose={() => setShowNurseList(false)}
         onAssignNurse={(nurseId) => {
           const nurse = nurses.find(n => n._id === nurseId);

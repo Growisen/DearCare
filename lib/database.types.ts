@@ -9,6 +9,190 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      academy_courses: {
+        Row: {
+          course_fees: number | null
+          course_name: string
+          created_at: string
+          id: number
+          reg_fees: number | null
+        }
+        Insert: {
+          course_fees?: number | null
+          course_name: string
+          created_at?: string
+          id?: number
+          reg_fees?: number | null
+        }
+        Update: {
+          course_fees?: number | null
+          course_name?: string
+          created_at?: string
+          id?: number
+          reg_fees?: number | null
+        }
+        Relationships: []
+      }
+      academy_enquiries: {
+        Row: {
+          course: string | null
+          created_at: string
+          email: string | null
+          hide: boolean | null
+          id: number
+          name: string | null
+          phone_no: string | null
+        }
+        Insert: {
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          hide?: boolean | null
+          id?: number
+          name?: string | null
+          phone_no?: string | null
+        }
+        Update: {
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          hide?: boolean | null
+          id?: number
+          name?: string | null
+          phone_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_enquiries_course_fkey"
+            columns: ["course"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["course_name"]
+          },
+        ]
+      }
+      academy_faculties: {
+        Row: {
+          created_at: string
+          department: string | null
+          email: string | null
+          id: number
+          join_date: string | null
+          name: string | null
+          phone_no: string | null
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Relationships: []
+      }
+      academy_roles: {
+        Row: {
+          created_at: string
+          id: number
+          role: string | null
+          uid: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          role?: string | null
+          uid?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          role?: string | null
+          uid?: string | null
+        }
+        Relationships: []
+      }
+      academy_supervisors: {
+        Row: {
+          created_at: string
+          department: string | null
+          email: string | null
+          id: number
+          join_date: string | null
+          name: string | null
+          phone_no: string | null
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: number
+          join_date?: string | null
+          name?: string | null
+          phone_no?: string | null
+        }
+        Relationships: []
+      }
+      attendence_individual: {
+        Row: {
+          assigned_id: number
+          created_at: string
+          date: string
+          end_time: string | null
+          id: number
+          location: string | null
+          start_time: string | null
+          total_hours: string | null
+        }
+        Insert: {
+          assigned_id: number
+          created_at?: string
+          date: string
+          end_time?: string | null
+          id?: number
+          location?: string | null
+          start_time?: string | null
+          total_hours?: string | null
+        }
+        Update: {
+          assigned_id?: number
+          created_at?: string
+          date?: string
+          end_time?: string | null
+          id?: number
+          location?: string | null
+          start_time?: string | null
+          total_hours?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendence_individual_assigned_id_fkey"
+            columns: ["assigned_id"]
+            isOneToOne: false
+            referencedRelation: "nurse_client"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           client_category: Database["public"]["Enums"]["client_category"]
@@ -41,6 +225,42 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      faculty_assignment: {
+        Row: {
+          created_at: string
+          faculty_id: number | null
+          id: number
+          student_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          faculty_id?: number | null
+          id?: number
+          student_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          faculty_id?: number | null
+          id?: number
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_assignment_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "academy_faculties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faculty_assignment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       individual_clients: {
         Row: {
@@ -101,6 +321,60 @@ export type Database = {
           },
         ]
       }
+      nurse_client: {
+        Row: {
+          assigned_type: Database["public"]["Enums"]["assigned_type"]
+          client_id: string
+          created_at: string
+          end_date: string | null
+          id: number
+          nurse_id: number
+          salary_hour: number | null
+          shift_end_time: string | null
+          shift_start_time: string | null
+          start_date: string
+        }
+        Insert: {
+          assigned_type: Database["public"]["Enums"]["assigned_type"]
+          client_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          nurse_id: number
+          salary_hour?: number | null
+          shift_end_time?: string | null
+          shift_start_time?: string | null
+          start_date: string
+        }
+        Update: {
+          assigned_type?: Database["public"]["Enums"]["assigned_type"]
+          client_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          nurse_id?: number
+          salary_hour?: number | null
+          shift_end_time?: string | null
+          shift_start_time?: string | null
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_client_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nurse_client_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "nurses"
+            referencedColumns: ["nurse_id"]
+          },
+        ]
+      }
       nurse_health: {
         Row: {
           created_at: string
@@ -129,6 +403,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "nurse_health_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "nurses"
+            referencedColumns: ["nurse_id"]
+          },
+        ]
+      }
+      nurse_leave_requests: {
+        Row: {
+          applied_on: string | null
+          days: number
+          end_date: string
+          id: string
+          leave_mode: Database["public"]["Enums"]["leave_mode"] | null
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          nurse_id: number
+          reason: string | null
+          rejection_reason: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["leave_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          applied_on?: string | null
+          days: number
+          end_date: string
+          id?: string
+          leave_mode?: Database["public"]["Enums"]["leave_mode"] | null
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          nurse_id: number
+          reason?: string | null
+          rejection_reason?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["leave_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          applied_on?: string | null
+          days?: number
+          end_date?: string
+          id?: string
+          leave_mode?: Database["public"]["Enums"]["leave_mode"] | null
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          nurse_id?: number
+          reason?: string | null
+          rejection_reason?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["leave_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_leave_requests_nurse_id_fkey"
             columns: ["nurse_id"]
             isOneToOne: false
             referencedRelation: "nurses"
@@ -673,8 +1000,10 @@ export type Database = {
       students: {
         Row: {
           age: number | null
+          auth_uid: string | null
           category: string | null
           city: string | null
+          course: string | null
           created_at: string
           cur_address: string | null
           cur_health_status: string | null
@@ -691,6 +1020,7 @@ export type Database = {
           name: string | null
           nationality: string | null
           noc_status: string | null
+          payment_receipt: boolean | null
           perm_address: string | null
           perm_pincode: string | null
           religion: string | null
@@ -699,8 +1029,10 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          auth_uid?: string | null
           category?: string | null
           city?: string | null
+          course?: string | null
           created_at?: string
           cur_address?: string | null
           cur_health_status?: string | null
@@ -717,6 +1049,7 @@ export type Database = {
           name?: string | null
           nationality?: string | null
           noc_status?: string | null
+          payment_receipt?: boolean | null
           perm_address?: string | null
           perm_pincode?: string | null
           religion?: string | null
@@ -725,8 +1058,10 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          auth_uid?: string | null
           category?: string | null
           city?: string | null
+          course?: string | null
           created_at?: string
           cur_address?: string | null
           cur_health_status?: string | null
@@ -743,13 +1078,58 @@ export type Database = {
           name?: string | null
           nationality?: string | null
           noc_status?: string | null
+          payment_receipt?: boolean | null
           perm_address?: string | null
           perm_pincode?: string | null
           religion?: string | null
           state?: string | null
           taluk?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_course_fkey"
+            columns: ["course"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["course_name"]
+          },
+        ]
+      }
+      supervisor_assignment: {
+        Row: {
+          created_at: string
+          id: number
+          student_id: number | null
+          supervisor_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          student_id?: number | null
+          supervisor_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          student_id?: number | null
+          supervisor_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supervisor_assignment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supervisor_assignment_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "academy_supervisors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -759,6 +1139,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      assigned_type: "individual" | "organization"
       client_category: "DearCare" | "TataLife"
       client_status:
         | "pending"
@@ -768,6 +1149,16 @@ export type Database = {
         | "assigned"
       client_type: "individual" | "organization" | "hospital" | "carehome"
       gender_type: "male" | "female" | "other"
+      leave_mode: "full_day" | "half_day_morning" | "half_day_afternoon"
+      leave_status: "pending" | "approved" | "rejected"
+      leave_type:
+        | "sick"
+        | "annual"
+        | "personal"
+        | "casual"
+        | "maternity"
+        | "paternity"
+        | "unpaid"
       nurse_status: "unassigned" | "assigned" | "leave"
       relation_type:
         | "self"
@@ -783,27 +1174,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -811,20 +1204,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -832,20 +1227,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -853,21 +1250,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -876,6 +1275,37 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      assigned_type: ["individual", "organization"],
+      client_category: ["DearCare", "TataLife"],
+      client_status: [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "assigned",
+      ],
+      client_type: ["individual", "organization", "hospital", "carehome"],
+      gender_type: ["male", "female", "other"],
+      leave_mode: ["full_day", "half_day_morning", "half_day_afternoon"],
+      leave_status: ["pending", "approved", "rejected"],
+      leave_type: [
+        "sick",
+        "annual",
+        "personal",
+        "casual",
+        "maternity",
+        "paternity",
+        "unpaid",
+      ],
+      nurse_status: ["unassigned", "assigned", "leave"],
+      relation_type: ["self", "spouse", "child", "parent", "sibling", "other"],
+    },
+  },
+} as const

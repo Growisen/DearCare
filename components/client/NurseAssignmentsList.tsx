@@ -2,11 +2,14 @@ import React from 'react';
 import { Nurse } from '@/types/staff.types';
 
 interface NurseAssignment {
-  nurseId: string;
+  id?: number;
+  nurseId: number | string; 
   startDate: string;
   endDate?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
-  shiftType: 'day' | 'night' | '24h';
+  shiftType?: 'day' | 'night' | '24h';
 }
 
 interface NurseAssignmentsListProps {
@@ -22,10 +25,14 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   onEditAssignment,
   onEndAssignment,
 }) => {
+  console.log(nurses)
+
+  console.log("assignment", assignments)
+
   return (
     <div className="space-y-4">
       {assignments.map((assignment) => {
-        const nurse = nurses.find((n) => n._id === assignment.nurseId);
+        const nurse = nurses.find((n) => n._id === assignment.nurseId || n._id === assignment.nurseId.toString());
         if (!nurse) return null;
 
         return (
@@ -67,7 +74,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                       Edit
                     </button>
                     <button
-                      onClick={() => onEndAssignment(assignment.nurseId)}
+                      onClick={() => onEndAssignment(assignment.nurseId.toString())}
                       className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >
                       End Assignment

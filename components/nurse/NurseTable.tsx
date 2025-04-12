@@ -1,7 +1,7 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
-import { NurseBasicInfo } from "@/types/staff.types"
-import { useState } from 'react';
+import { NurseBasicDetails } from "@/types/staff.types"
 import Loader from '@/components/loader'
+import { useRouter } from 'next/navigation'
 
 const statusColors = {
   assigned: "bg-green-200 text-green-800 border border-green-300",
@@ -22,23 +22,24 @@ const statusIcons = {
 }
 
 interface NurseTableProps {
-  nurses: NurseBasicInfo[];
-  onReviewDetails: (nurse: NurseBasicInfo) => void;
+  nurses: NurseBasicDetails[];
+  
   isLoading?: boolean;
 }
 
-const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  const indexOfLastNurse = currentPage * itemsPerPage;
-  const indexOfFirstNurse = indexOfLastNurse - itemsPerPage;
-  const currentNurses = nurses.slice(indexOfFirstNurse, indexOfLastNurse);
-  const totalPages = Math.ceil(nurses.length / itemsPerPage);
+const NurseTable = ({ 
+  nurses,  
+  isLoading = false
+}: NurseTableProps) => {
+  const router = useRouter();
 
   if (isLoading) {
     return <Loader />;
   }
+
+  const handleReviewDetails = (nurse: NurseBasicDetails) => {
+    router.push(`/nurses/${nurse.nurse_id}`);
+  };
 
   return (
     <div>
@@ -54,12 +55,12 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {currentNurses.map((nurse) => {
+          {nurses.map((nurse) => {
             const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
             return (
               <tr key={nurse.nurse_id} className="hover:bg-gray-50/50">
                 <td className="py-4 px-6 text-gray-900 font-medium">
-                  {`${nurse.first_name || ""} ${nurse.last_name || ""}`}
+                  {`${nurse.name.first || ""} ${nurse.name.last || ""}`}
                 </td>
                 <td className="py-4 px-6">
                   <span
@@ -80,59 +81,23 @@ const NurseTable = ({ nurses, onReviewDetails, isLoading = false }: NurseTablePr
                 </td>
                 <td className="py-4 px-6">
                   <div>
-                    <div className="text-gray-900">{nurse.email}</div>
-                    <div className="text-gray-600">{nurse.phone_number}</div>
+                    <div className="text-gray-900">{nurse.contact.email}</div>
+                    <div className="text-gray-600">{nurse.contact.phone}</div>
                   </div>
                 </td>
                 <td className="py-4 px-6">
-                  <button 
-                    className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                    onClick={() => onReviewDetails(nurse)}
-                  >
-                    Review Details
-                  </button>
+                <button 
+                className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                onClick={() => handleReviewDetails(nurse)}
+              >
+                Review Details
+              </button>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
-        <div className="text-sm text-gray-700">
-          Showing {indexOfFirstNurse + 1} to {Math.min(indexOfLastNurse, nurses.length)} of {nurses.length} nurses
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Previous
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-            <button
-              key={pageNum}
-              onClick={() => setCurrentPage(pageNum)}
-              className={`px-3 py-1 text-sm font-medium rounded-md ${
-                currentPage === pageNum
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {pageNum}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Next
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

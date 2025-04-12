@@ -1,124 +1,119 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, ChevronDown} from 'lucide-react'
-import { format } from 'date-fns'
+import { Search, Filter, ChevronDown } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
 import StatusBadge from '@/components/leaveManagement/StatusBadge'
-// Mock data - replace with actual API call
-const mockLeaveRequests = [
-  {
-    id: '1',
-    employeeName: 'John Doe',
-    employeeId: 'EMP001',
-    department: 'Engineering',
-    leaveType: 'Sick Leave',
-    startDate: new Date('2025-04-10'),
-    endDate: new Date('2025-04-12'),
-    days: 3,
-    leaveMode: 'Full Day',
-    reason: 'Medical appointment',
-    status: 'Approved',
-    appliedOn: new Date('2025-04-01'),
-  },
-  {
-    id: '2',
-    employeeName: 'Jane Smith',
-    employeeId: 'EMP002',
-    department: 'Marketing',
-    leaveType: 'Annual Leave',
-    startDate: new Date('2025-04-15'),
-    endDate: new Date('2025-04-20'),
-    days: 6,
-    leaveMode: 'Full Day',
-    reason: 'Family vacation',
-    status: 'Pending',
-    appliedOn: new Date('2025-04-02'),
-  },
-  {
-    id: '3',
-    employeeName: 'Mike Johnson',
-    employeeId: 'EMP003',
-    department: 'Finance',
-    leaveType: 'Personal Leave',
-    startDate: new Date('2025-04-08'),
-    endDate: new Date('2025-04-09'),
-    days: 2,
-    leaveMode: 'Half Day (Morning)',
-    reason: 'Personal matters',
-    status: 'Rejected',
-    appliedOn: new Date('2025-03-28'),
-  },
-  {
-    id: '4',
-    employeeName: 'Sarah Williams',
-    employeeId: 'EMP004',
-    department: 'HR',
-    leaveType: 'Casual Leave',
-    startDate: new Date('2025-04-05'),
-    endDate: new Date('2025-04-05'),
-    days: 0.5,
-    leaveMode: 'Half Day (Afternoon)',
-    reason: 'Doctor appointment',
-    status: 'Approved',
-    appliedOn: new Date('2025-03-30'),
-  },
-]
-
+import { getLeaveRequests, updateLeaveRequestStatus } from '@/app/actions/leave-management'
+import { toast } from 'react-hot-toast'
+import { LeaveRequest, LeaveRequestStatus } from '@/types/leave.types'
 
 export default function LeaveRequestsPage() {
-  const [leaveRequests, setLeaveRequests] = useState(mockLeaveRequests)
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<typeof mockLeaveRequests[0] | null>(null)
+  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null)
   
   // Status options for filter
   const statuses = ['All', 'Approved', 'Pending', 'Rejected']
 
   // Handle view leave request
-  const handleViewLeaveRequest = (id: string) => {
-    const leaveRequest = leaveRequests.find(req => req.id === id)
-    setSelectedLeaveRequest(leaveRequest || null)
+  const handleViewLeaveRequest = (request: LeaveRequest) => {
+    setSelectedLeaveRequest(request)
     setIsModalOpen(true)
   }
 
   // Handle approve leave request
-  const handleApproveLeaveRequest = (id: string) => {
-    setLeaveRequests(prev => 
-      prev.map(req => 
-        req.id === id ? {...req, status: 'Approved'} : req
-      )
-    )
+  const handleApproveLeaveRequest = async (id: string) => {
+    console.log("hhjhj")
+    try {
+      const result = await updateLeaveRequestStatus(id, 'approved')
+      if (result.success) {
+        toast.success('Leave request approved')
+        // Update the local state
+        setLeaveRequests(prev => 
+          prev.map(req => req.id === id ? {...req, status: 'approved'} : req)
+        )
+        if (selectedLeaveRequest?.id === id) {
+          setSelectedLeaveRequest({...selectedLeaveRequest, status: 'approved'})
+        }
+      } else {
+        toast.error(result.error || 'Failed to approve leave request')
+      }
+    } catch {
+      toast.error('An error occurred while approving the request')
+    }
   }
 
   // Handle reject leave request
-  const handleRejectLeaveRequest = (id: string) => {
-    setLeaveRequests(prev => 
-      prev.map(req => 
-        req.id === id ? {...req, status: 'Rejected'} : req
-      )
-    )
+  const handleRejectLeaveRequest = async (id: string, rejectionReason?: string) => {
+    try {
+      // Only proceed with rejection if there's a reason
+      if (!rejectionReason?.trim()) {
+        toast.error('Please provide a reason for rejection');
+        return;
+      }
+      
+      const result = await updateLeaveRequestStatus(id, 'rejected', rejectionReason)
+      if (result.success) {
+        toast.success('Leave request rejected')
+        // Update the local state
+        setLeaveRequests(prev => 
+          prev.map(req => req.id === id ? 
+            {...req, status: 'rejected', rejectionReason} : req)
+        )
+        if (selectedLeaveRequest?.id === id) {
+          setSelectedLeaveRequest({
+            ...selectedLeaveRequest, 
+            status: 'rejected', 
+            rejectionReason
+          })
+        }
+      } else {
+        toast.error(result.error || 'Failed to reject leave request')
+      }
+    } catch {
+      toast.error('An error occurred while rejecting the request')
+    }
   }
 
-  // Filtered data
-  const filteredData = leaveRequests.filter(request => {
-    const matchesSearch = 
-      request.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      request.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.leaveType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.leaveMode.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === null || statusFilter === 'All' || request.status === statusFilter
-    
-    return matchesSearch && matchesStatus
-  })
+  // Fetch leave requests
+  const fetchLeaveRequests = async () => {
+    setIsLoading(true)
+    try {
+      let status: LeaveRequestStatus | null = null;
+      
+      if (statusFilter && statusFilter !== 'All') {
+        const lowercaseStatus = statusFilter.toLowerCase() as LeaveRequestStatus;
+        if (lowercaseStatus === 'pending' || lowercaseStatus === 'approved' || lowercaseStatus === 'rejected') {
+          status = lowercaseStatus;
+        }
+      }
+        
+      const result = await getLeaveRequests(status, searchTerm)
 
-  // In a real app, fetch data here
+      console.log(result)
+      if (result.success) {
+        setLeaveRequests(result.leaveRequests || [])
+      } else {
+        toast.error(result.error || 'Failed to fetch leave requests')
+        setLeaveRequests([])
+      }
+    } catch (error) {
+      console.error('Error fetching leave requests:', error)
+      toast.error('An error occurred while fetching leave requests')
+      setLeaveRequests([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // Replace with actual API call
-    // Example: fetchLeaveRequests().then(data => setLeaveRequests(data))
-  }, [])
+    fetchLeaveRequests()
+  }, [statusFilter, searchTerm])
 
   return (
     <div className="space-y-6">
@@ -135,7 +130,7 @@ export default function LeaveRequestsPage() {
             <input
               type="text"
               placeholder="Search by name, ID, leave type..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -145,7 +140,7 @@ export default function LeaveRequestsPage() {
             <div className="relative inline-block">
               <Filter className="absolute w-4 h-4 left-3 top-2.5 text-gray-500" />
               <select
-                className="appearance-none pl-9 pr-8 py-2 border border-gray-300 bg-white rounded-md text-sm"
+                className="appearance-none pl-9 pr-8 py-2 border border-gray-300 bg-white rounded-md text-sm text-gray-900"
                 value={statusFilter || 'All'}
                 onChange={(e) => setStatusFilter(e.target.value === 'All' ? null : e.target.value)}
               >
@@ -193,70 +188,82 @@ export default function LeaveRequestsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((request) => (
-                <tr key={request.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{request.employeeName}</div>
-                        <div className="text-sm text-gray-500">{request.employeeId}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{request.leaveType}</div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{request.leaveMode}</div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {format(request.startDate, 'MMM dd, yyyy')} 
-                      {request.startDate.getTime() !== request.endDate.getTime() && 
-                        ` - ${format(request.endDate, 'MMM dd, yyyy')}`}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{request.days}</div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{format(request.appliedOn, 'MMM dd, yyyy')}</div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <StatusBadge status={request.status} />
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
-                      onClick={() => handleViewLeaveRequest(request.id)}
-                    >
-                      View
-                    </button>
-                    {request.status === 'Pending' && (
-                      <>
-                        <button 
-                          className="text-green-600 hover:text-green-900 mr-3"
-                          onClick={() => handleApproveLeaveRequest(request.id)}
-                        >
-                          Approve
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-900"
-                          onClick={() => handleRejectLeaveRequest(request.id)}
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-gray-500">
+                    Loading leave requests...
                   </td>
                 </tr>
-              ))}
-              {filteredData.length === 0 && (
+              ) : leaveRequests.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-sm text-gray-500">
                     No leave requests found matching your search criteria.
                   </td>
                 </tr>
+              ) : (
+                leaveRequests.map((request) => (
+                  <tr key={request.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{request.nurseName}</div>
+                          <div className="text-sm text-gray-500">{request.nurseId}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{request.leaveType}</div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{request.leaveMode}</div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {format(parseISO(request.startDate), 'MMM dd, yyyy')} 
+                        {request.startDate !== request.endDate && 
+                          ` - ${format(parseISO(request.endDate), 'MMM dd, yyyy')}`}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{request.days}</div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {format(parseISO(request.appliedOn), 'MMM dd, yyyy')}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <StatusBadge status={request.status} />
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        onClick={() => handleViewLeaveRequest(request)}
+                      >
+                        View
+                      </button>
+                      {request.status === 'pending' && (
+                        <>
+                          <button 
+                            className="text-green-600 hover:text-green-900 mr-3"
+                            onClick={() => handleApproveLeaveRequest(request.id)}
+                          >
+                            Approve
+                          </button>
+                          <button 
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => {
+                              setSelectedLeaveRequest(request);
+                              setIsModalOpen(true);
+                            }}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -264,19 +271,21 @@ export default function LeaveRequestsPage() {
         
         <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 text-right sm:px-6">
           <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{filteredData.length}</span> results
+            Showing <span className="font-medium">{leaveRequests.length}</span> results
           </div>
         </div>
       </div>
 
       {/* Leave Request Modal */}
-      <LeaveRequestModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        leaveRequest={selectedLeaveRequest}
-        onApprove={handleApproveLeaveRequest}
-        onReject={handleRejectLeaveRequest}
-      />
+      {selectedLeaveRequest && (
+        <LeaveRequestModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          leaveRequest={selectedLeaveRequest}
+          onApprove={handleApproveLeaveRequest}
+          onReject={handleRejectLeaveRequest}
+        />
+      )}
     </div>
   )
 }

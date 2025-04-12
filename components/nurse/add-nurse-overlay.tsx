@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments } from '@/types/staff.types';
+import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments, BaseNurseFields,stp1BaseNurseFields } from '@/types/staff.types';
 import { createNurse } from '@/app/actions/add-nurse';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 const FORM_CONFIG = {
   options: {
     locationsInKerala: ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad", "Kannur", "Kottayam", "Malappuram"] as string[],
@@ -36,9 +37,9 @@ const FORM_CONFIG = {
 } as const;
 
 // Utility components
-const FormField = ({ label, children }: { label: string, children: React.ReactNode }) => (
+const FormField = ({ label,required = true, children }: { label: string, required?: boolean, children: React.ReactNode }) => (
   <div>
-    <label className={FORM_CONFIG.styles.label}>{label}</label>
+    <label className={FORM_CONFIG.styles.label}>{label}{required && ' *'}</label>
     {children}
   </div>
 );
@@ -49,15 +50,22 @@ const FormLayout = ({ children, className = "" }: { children: React.ReactNode, c
 
 // Form field components consolidated into a single object
 const Fields = {
-  Input: ({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
-    <FormField label={label}>
-      <input {...props} className={FORM_CONFIG.styles.input} />
+  Input: ({ label, required = true, ...props }: { 
+    label: string, 
+    required?: boolean 
+  } & React.InputHTMLAttributes<HTMLInputElement>) => (
+    <FormField label={label} required={required}>
+      <input 
+        {...props} 
+        required={required}
+        className={FORM_CONFIG.styles.input} 
+      />
     </FormField>
   ),
 
-  Select: ({ label, options, value, onChange }: { label: string, options: string[], value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
-    <FormField label={label}>
-      <select className={FORM_CONFIG.styles.input} value={value} onChange={onChange}>
+  Select: ({ label, options, value, onChange, required = true }: { label: string, options: string[], value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void ,required?: boolean }) => (
+    <FormField label={label}  required={required}>
+      <select className={FORM_CONFIG.styles.input} value={value} onChange={onChange} required={required}>
         <option value="">Select {label.toLowerCase()}</option>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
@@ -113,10 +121,29 @@ const Fields = {
     </div>
   ),
 
-  File: ({ label, onFileSelect }: { label: string, docType: string, onFileSelect: (file: File) => void }) => {
+  File: ({ label, docType, onFileSelect, required = true }: {
+    label: string,
+    docType: string,
+    onFileSelect: (file: File) => void,
+    required?: boolean
+  }) => {
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
+    
+    // Map docType to accepted file extensions
+    const getAcceptedFileTypes = (type: string) => {
+      const typeMap: Record<string, string> = {
+        'ration': '.pdf,.jpg,.jpeg,.png',
+        'aadhar': '.pdf,.jpg,.jpeg,.png',
+        'pan': '.pdf,.jpg,.jpeg,.png',
+        'passport': '.pdf,.jpg,.jpeg,.png',
+        // Add more document types as needed
+        'default': '.pdf,.jpg,.jpeg,.png'
+      };
+      
+      return typeMap[type] || typeMap.default;
+    };
+    
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
@@ -135,34 +162,43 @@ const Fields = {
 
     return (
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <div className="mt-1 space-y-2">
-          <div className="flex items-center">
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileSelect}
-              accept=".pdf,.jpg,.jpeg,.png"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Choose File
-            </button>
-            <span className="ml-3 text-sm text-gray-500">
-              {fileInputRef.current?.files?.[0]?.name || "No file chosen"}
-            </span>
-          </div>
-          {preview && (
-            <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
-              <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-            </div>
-          )}
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label} {docType && <span className="text-xs text-gray-500">({docType})</span>}
+      </label>
+      <div className="mt-1 space-y-2">
+        <div className="flex items-center">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileSelect}
+            accept={getAcceptedFileTypes(docType)}
+            required={required}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Choose File
+          </button>
+          <span className="ml-3 text-sm text-gray-500">
+            {fileInputRef.current?.files?.[0]?.name || "No file chosen"}
+          </span>
         </div>
+        {preview && (
+  <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+    <Image
+      src={preview}
+      alt="File preview"
+      fill
+      className="object-cover"
+      sizes="128px"
+    />
+  </div>
+)}
       </div>
+    </div>
     );
   }
 };
@@ -278,26 +314,31 @@ const StepContent = {
           label="Profile Image" 
           docType="profile_image" 
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, profile_image: file }))}
+          required={true}
         />
         <Fields.File 
           label="Aadhar Card" 
           docType="adhar" 
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, adhar: file }))}
+          required={true}
         />
         <Fields.File 
           label="Educational Certificates" 
           docType="educational"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, educational: file }))}
+          required={true}
         />
         <Fields.File 
           label="Experience Certificates" 
           docType="experience"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, experience: file }))}
+          required={true}
         />
         <Fields.File 
           label="Ration Card" 
           docType="ration"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, ration: file }))}
+          required={true}
         />
         <div className="space-y-4">
           <FormField label="NOC Certificate Status">
@@ -317,12 +358,13 @@ const StepContent = {
           </FormField>
           
           {nocStatus === 'Yes' && (
-            <Fields.File 
-              label="NOC Certificate" 
-              docType="noc"
-              onFileSelect={(file) => setDocuments(prev => ({ ...prev, noc: file }))}
-            />
-          )}
+          <Fields.File 
+            label="NOC Certificate" 
+            docType="noc"
+            onFileSelect={(file) => setDocuments(prev => ({ ...prev, noc: file }))}
+            required={false}
+          />
+        )}
         </div>
       </div>
     )
@@ -417,6 +459,75 @@ const StepContent = {
   )
 };
 
+type StepData = NurseFormData|stp1BaseNurseFields |BaseNurseFields| NurseReferenceData | NurseHealthData | (NurseDocuments & { noc_status?: string });
+const validateStep = (step: number, data: StepData): boolean => {
+  switch (step) {
+    case 0: // Personal Details
+      return !!(
+       (data as NurseFormData).first_name &&
+        (data as NurseFormData).last_name &&
+        (data as NurseFormData).gender &&
+        (data as NurseFormData).date_of_birth &&
+        (data as NurseFormData).marital_status &&
+        (data as NurseFormData).religion &&
+        (data as NurseFormData).mother_tongue
+      );
+    
+    case 1: // Contact Information
+      return !!(
+        (data as NurseFormData).address &&
+        (data as NurseFormData).city &&
+        (data as NurseFormData).taluk &&
+        (data as NurseFormData).state &&
+        (data as NurseFormData).pin_code &&
+        (data as NurseFormData).phone_number &&
+        (data as NurseFormData).email &&
+        (data as NurseFormData).languages.length > 0
+      );
+    
+    case 2: // References
+      return !!(
+        (data as NurseReferenceData).reference_name &&
+        (data as NurseReferenceData).reference_phone &&
+        (data as NurseReferenceData).reference_relation &&
+        (data as NurseReferenceData).recommendation_details &&
+        (data as NurseReferenceData).family_references[0].name &&
+        (data as NurseReferenceData).family_references[0].phone &&
+        (data as NurseReferenceData).family_references[0].relation
+      );
+    
+    case 3: // Work Details
+      return !!(
+        (data as NurseFormData).service_type &&
+        (data as NurseFormData).shift_pattern &&
+        (data as NurseFormData).category &&
+        (data as NurseFormData).experience
+      );
+    
+    case 4: // Health & Additional Info
+      return !!(
+        (data as NurseHealthData).health_status &&
+        (data as NurseHealthData).source
+      );
+    
+    case 5: // Document Upload
+    return !!(
+      (data as NurseDocuments).profile_image && 
+      (data as NurseDocuments).adhar && 
+      (data as NurseDocuments).educational && 
+      (data as NurseDocuments).experience && 
+      (data as NurseDocuments).ration && 
+      (data as NurseFormData).noc_status && 
+      // If NOC status is Yes, require the NOC file
+      ((data as NurseFormData).noc_status !== 'Yes' || (data as NurseDocuments).noc)
+    );
+    
+    default:
+      return false;
+  }
+};
+
+
 export function AddNurseOverlay({ onClose }: AddNurseProps) {
   const [currentStep, setCurrentStep] = useState(0);
   // const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -483,36 +594,7 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
   //   }
   // };
 
-  const handleSubmit = async () => {
-    try {
-      // Prepare documents object including profile image
-      // const documentsWithProfile = {
-      //   ...documents,
-      //   profile: selectedImage
-      // };
   
-      // Call the server action
-      const result = await createNurse(
-        nurseData,
-        referenceData,
-        healthData,
-        documents
-        
-      );
-  
-      if (result.success) {
-        // Show success message and close overlay
-        toast.success('Nurse added successfully!');
-        onClose();
-      } else {
-        // Show error message
-        toast.error(result.error || 'Failed to add nurse');
-      }
-    } catch (error) {
-      console.error('Error submitting nurse data:', error);
-      toast.error('An error occurred while adding the nurse');
-    }
-  };
 
   const renderStep = () => {
     const steps = {
@@ -524,6 +606,63 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
       5: <StepContent.Document setDocuments={setDocuments} nurseData={nurseData} setNurseData={setNurseData} />
     };
     return steps[currentStep as keyof typeof steps] || null;
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0:
+        return validateStep(0, nurseData);
+      case 1:
+        return validateStep(1, nurseData);
+      case 2:
+        return validateStep(2, referenceData);
+      case 3:
+        return validateStep(3, nurseData);
+      case 4:
+        return validateStep(4, healthData);
+        case 5:
+          return validateStep(5, {
+            ...documents,
+            noc_status: nurseData.noc_status
+          });
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (canProceed()) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      toast.error('Please fill in all required fields before proceeding');
+    }
+  };
+
+
+  const handleSubmit = async () => {
+    if (!canProceed()) {
+      toast.error('Please fill in all required fields before submitting');
+      return;
+    }
+  
+    try {
+      const result = await createNurse(
+        nurseData,
+        referenceData,
+        healthData,
+        documents
+      );
+  
+      if (result.success) {
+        toast.success('Nurse added successfully!');
+        onClose();
+      } else {
+        toast.error(result.error || 'Failed to add nurse');
+      }
+    } catch (error) {
+      console.error('Error submitting nurse data:', error);
+      toast.error('An error occurred while adding the nurse');
+    }
   };
 
   return (
@@ -569,13 +708,16 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
           </button>
           <span className="text-sm text-gray-500">Step {currentStep + 1} of {FORM_CONFIG.steps.length}</span>
           <button
-            onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : setCurrentStep(currentStep + 1)}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
-          >
-            {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
-          </button>
+  onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
+  disabled={!canProceed()}
+  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg disabled:opacity-50"
+>
+  {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
+</button>
         </div>
       </div>
     </div>
   );
+  
+
 }

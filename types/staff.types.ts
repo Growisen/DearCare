@@ -12,6 +12,16 @@ export type BaseNurseFields = {
     image?: File | null;
 }
 
+export interface stp1BaseNurseFields {
+  first_name: string;
+  last_name: string;
+  gender: string;
+  date_of_birth: string;
+  marital_status: string;
+  religion: string;
+  mother_tongue: string;
+}
+
 // Full Nurse type extending base fields
 export interface Nurse extends BaseNurseFields {
     _id: string;
@@ -105,6 +115,23 @@ export interface NurseDocuments {
   noc: File | null
   ration: File | null
 }
+
+
+ export interface NurseBasicDetails {
+  nurse_id: number;
+  name: {
+    first: string;
+    last: string;
+  };
+  status: 'assigned' | 'unassigned' | 'leave';
+  experience: number | null;
+  rating: number;
+  contact: {
+    email: string | null;
+    phone: string | null;
+  };
+}
+
 
 export interface NurseBasicInfo {
   nurse_id: number;

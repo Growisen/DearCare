@@ -18,14 +18,14 @@ BEGIN
     aud,                    -- Audience (required)
     role,                   -- Role in auth system
     raw_app_meta_data,      -- App metadata including providers
-    raw_user_meta_data,     -- User metadata including custom role
+    raw_user_meta_data,     -- User metadata including custom role and nurse_id
     is_super_admin,         -- Not a super admin
     created_at,             -- Current timestamp
     updated_at,             -- Current timestamp
     confirmation_token,     -- Not needed since email is confirmed
     recovery_token,         -- Not needed initially
     email_change_token_new, -- Not needed initially
-    email_change            -- Not needed initially
+    email_change           -- Not needed initially
   ) VALUES (
     uid,                    -- Generated UUID
     default_instance_id,    -- Use default UUID
@@ -35,7 +35,10 @@ BEGIN
     'authenticated',        -- Standard audience for authenticated users
     'authenticated',        -- Standard role
     '{"provider":"email","providers":["email"]}',
-    '{"role":"nurse"}',     -- Custom role as nurse
+    jsonb_build_object(     -- Build JSON object with role and nurse_id
+      'role', 'nurse',
+      'nurse_id', NEW.nurse_id
+    ),
     FALSE,                  -- Not a super admin
     NOW(),                  -- Current timestamp
     NOW(),                  -- Current timestamp
