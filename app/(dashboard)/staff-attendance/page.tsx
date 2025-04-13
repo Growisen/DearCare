@@ -26,13 +26,12 @@ export default function StaffAttendancePage() {
   const [resolvedLocations, setResolvedLocations] = useState<Record<number, string>>({})
   
   // Fetch data when selectedDate changes
-  useEffect(() => {
+   useEffect(() => {
     const loadAttendanceData = async () => {
       setLoading(true);
       try {
-        // Format the date as YYYY-DD-MM before sending to server
         const date = new Date(selectedDate);
-        const formattedDate = `${date.getFullYear()}-${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         const result = await fetchStaffAttendance(formattedDate);
         console.log("result", result)
         if (result.success) {

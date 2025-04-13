@@ -60,10 +60,14 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
       
-      const [startHour, startMin] = shift.shiftStart.split(':').map(Number);
-      const [endHour, endMin] = shift.shiftEnd.split(':').map(Number);
+      const [startTimeStr, startSecs = '00'] = shift.shiftStart.split(':');
+      const [endTimeStr, endSecs = '00'] = shift.shiftEnd.split(':');
+      const [startHour, startMin] = startTimeStr.split(':').map(Number);
+      const [endHour, endMin] = endTimeStr.split(':').map(Number);
       
-      if (startHour > endHour || (startHour === endHour && startMin >= endMin)) {
+      if (startHour > endHour || 
+          (startHour === endHour && startMin > endMin) || 
+          (startHour === endHour && startMin === endMin && startSecs >= endSecs)) {
         return {
           success: false,
           message: 'Shift end time must be after shift start time'

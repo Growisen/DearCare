@@ -72,8 +72,8 @@ const ScheduleShiftsContent = () => {
         nurseId: nurse._id,
         startDate: '',
         endDate: '',
-        shiftStart: '09:00',
-        shiftEnd: '17:00',
+        shiftStart: '09:00:00',
+        shiftEnd: '17:00:00',
       }));
             
       setNurses(nursesData);
@@ -91,12 +91,25 @@ const ScheduleShiftsContent = () => {
   
   // Memoize handleShiftChange to prevent recreating on every render
   const handleShiftChange = useCallback((nurseId: string, field: keyof ShiftData, value: string) => {
+    if (field === 'shiftStart' || field === 'shiftEnd') {
+      // Ensure time is in proper format (add :00 seconds if needed)
+      const formattedTime = value.includes(':') && value.split(':').length === 2 
+        ? `${value}:00` 
+        : value;
+      
+      setShifts(prev => 
+        prev.map(shift => 
+          shift.nurseId === nurseId ? { ...shift, [field]: formattedTime } : shift
+        )
+      );
+    } else {
       setShifts(prev => 
         prev.map(shift => 
           shift.nurseId === nurseId ? { ...shift, [field]: value } : shift
         )
       );
-    }, []);
+    }
+  }, []);
     
     // Memoize handleSubmit to prevent recreating on every render
     const handleSubmit = useCallback(async () => {
@@ -265,7 +278,7 @@ const ScheduleShiftsContent = () => {
                     </label>
                     <input
                       type="time"
-                      value={nurseShift.shiftStart}
+                      value={nurseShift.shiftStart.substring(0, 5)} // Display only HH:MM part
                       onChange={(e) => handleShiftChange(nurse._id, 'shiftStart', e.target.value)}
                       className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
                       required
@@ -277,7 +290,7 @@ const ScheduleShiftsContent = () => {
                     </label>
                     <input
                       type="time"
-                      value={nurseShift.shiftEnd}
+                      value={nurseShift.shiftEnd.substring(0, 5)} // Display only HH:MM part
                       onChange={(e) => handleShiftChange(nurse._id, 'shiftEnd', e.target.value)}
                       className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
                       required
