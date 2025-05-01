@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Loader from '@/components/loader';
 import {Json, DetailedClientIndividual } from '@/types/client.types';
-import { getClientDetails, getPatientAssessment, updateClientCategory } from '@/app/actions/client-actions';
+import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus } from '@/app/actions/client-actions';
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { Nurse } from '@/types/staff.types';
@@ -117,6 +117,7 @@ const PatientProfilePage = () => {
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [nurses, setNurses] = useState<Nurse[]>([]);
+  const [status, setStatus] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
 
@@ -130,7 +131,11 @@ const PatientProfilePage = () => {
       if (id) {
         setLoading(true);
         try {
-          // Fetch client details
+          const statusResult = await getClientStatus(id as string);
+          console.log("status", statusResult)
+          if (statusResult.success) {
+            setStatus(statusResult.status);
+          }
           const clientResponse = await getClientDetails(id as string) as ClientResponse;
           console.log(clientResponse)
           const assessmentResponse = await getPatientAssessment(id as string);
@@ -441,12 +446,14 @@ const PatientProfilePage = () => {
                   </>
                 ) : (
                   <>
-                    <button 
-                      onClick={() => setShowNurseList(true)}
-                      className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-                    >
-                      Assign Nurse
-                    </button>
+                    {status === 'approved' && (
+                        <button 
+                          onClick={() => setShowNurseList(true)}
+                          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          Assign Nurse
+                        </button>
+                      )}
                     <button 
                       onClick={handleEdit}
                       className="px-4 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-sm font-medium"
@@ -490,21 +497,22 @@ const PatientProfilePage = () => {
                 </div>
               </div>
             ) : null}
-            <div className="bg-white p-4 rounded border border-gray-200 mt-4 mb-4">
-              <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
-                Nurse Assignments
-              </h2>
-              <NurseAssignmentsList
-                assignments={nurseAssignments}
-                nurses={nurses}
-                onEditAssignment={(assignment) => {
-                  console.log('Edit assignment:', assignment);
-                }}
-                onEndAssignment={(assignmentId) => {
-                  console.log('End assignment:', assignmentId);
-                }}
-              />
-            </div>
+            {status === 'approved' && (
+              <div className="bg-white p-4 rounded border border-gray-200 mt-4 mb-4">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Nurse Assignments
+                </h2>
+                <NurseAssignmentsList
+                  assignments={nurseAssignments}
+                  nurses={nurses}
+                  onEditAssignment={(assignment) => {
+                    console.log('Edit assignment:', assignment);
+                  }}
+                  onEndAssignment={(assignmentId) => {
+                    console.log('End assignment:', assignmentId);
+                  }}
+                />
+              </div>)}
             {/* Personal Information */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-white p-4 rounded border border-gray-200">

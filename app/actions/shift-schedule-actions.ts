@@ -60,10 +60,14 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
       
-      const [startHour, startMin] = shift.shiftStart.split(':').map(Number);
-      const [endHour, endMin] = shift.shiftEnd.split(':').map(Number);
+      const [startTimeStr, startSecs = '00'] = shift.shiftStart.split(':');
+      const [endTimeStr, endSecs = '00'] = shift.shiftEnd.split(':');
+      const [startHour, startMin] = startTimeStr.split(':').map(Number);
+      const [endHour, endMin] = endTimeStr.split(':').map(Number);
       
-      if (startHour > endHour || (startHour === endHour && startMin >= endMin)) {
+      if (startHour > endHour || 
+          (startHour === endHour && startMin > endMin) || 
+          (startHour === endHour && startMin === endMin && startSecs >= endSecs)) {
         return {
           success: false,
           message: 'Shift end time must be after shift start time'
@@ -195,6 +199,40 @@ export async function getNurseAssignments(clientId: string): Promise<{
     };
   } catch (error) {
     console.error('Unexpected error fetching nurse assignments:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch nurse assignments'
+    };
+  }
+}
+
+
+export async function getAllNurseAssignments(): Promise<{
+  success: boolean;
+  data?: NurseAssignmentData[];
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('nurse_client')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching all nurse assignments:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+    
+    return {
+      success: true,
+      data: data as NurseAssignmentData[]
+    };
+  } catch (error) {
+    console.error('Unexpected error fetching all nurse assignments:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch nurse assignments'

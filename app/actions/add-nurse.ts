@@ -16,7 +16,7 @@ interface PaginationParams {
 
 interface FamilyReference {
   name: string;
-  phone_number: string;
+  phone: string;
   relation: string;
 }
 

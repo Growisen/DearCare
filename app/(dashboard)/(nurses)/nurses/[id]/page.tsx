@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import Loader from '@/components/loader'
 import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
 
@@ -444,7 +443,7 @@ const NurseProfilePage: React.FC = () => {
                                     <span className="font-medium">Relation:</span> {ref.relation}
                                   </p>
                                   <p className="text-sm text-gray-700">
-                                    <span className="font-medium">Phone:</span> {ref.phone_number}
+                                    <span className="font-medium">Phone:</span> {ref.phone}
                                   </p>
                                 </div>
                               </div>

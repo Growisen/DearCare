@@ -1013,3 +1013,43 @@ export async function getOrganizationClientDetails(clientId: string) {
     }
   }
 }
+
+
+export async function getClientStatus(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('clients')
+      .select('status')
+      .eq('id', clientId)
+      .single();
+    
+    if (error) {
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
+    
+    if (!data) {
+      return { 
+        success: false, 
+        error: 'Client not found' 
+      };
+    }
+
+    console.log("status", data.status)
+    
+    return { 
+      success: true, 
+      status: data.status
+    };
+  } catch (error: unknown) {
+    console.error('Error fetching client status:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
+  }
+}
