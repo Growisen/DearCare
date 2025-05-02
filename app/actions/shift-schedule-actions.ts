@@ -1,6 +1,7 @@
 'use server'
 
 import { createSupabaseServerClient } from './auth';
+import { updateNurseStatus } from './add-nurse';
 
 export interface ShiftAssignment {
   nurseId: string;
@@ -138,9 +139,26 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         console.warn('No data returned after insert - possible silent failure');
       }
 
+      // Update status for all nurses involved in the shift assignment
+      const uniqueNurseIds = [...new Set(processedShifts.map(shift => shift.nurseId))];
+      
+      const statusUpdates = await Promise.all(
+        uniqueNurseIds.map(nurseId => 
+          updateNurseStatus(nurseId, 'assigned')
+        )
+      );
+      
+      const statusUpdateErrors = statusUpdates
+        .filter(update => !update.success)
+        .map(update => update.error);
+        
+      if (statusUpdateErrors.length > 0) {
+        console.warn('Some nurse status updates failed:', statusUpdateErrors);
+      }
+
       return {
         success: true,
-        message: 'Shifts scheduled successfully',
+        message: 'Shifts scheduled successfully and nurse status updated to assigned',
       };
     } catch (insertError) {
       console.error('Unexpected error during database operations:', insertError);
