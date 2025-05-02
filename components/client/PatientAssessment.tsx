@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import PersonalDetails from './UnderReview/PersonalDetails';
 import CurrentDetails from './UnderReview/CurrentHistory';
 import MedicalStatus from './UnderReview/MedicalStatus';
 import PsychologicalAssessment from './UnderReview/PsychologicalAssessment';
 import SocialHistory from './UnderReview/SocialHistory';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
-import { getPatientAssessment } from '../../app/actions/client-actions'
+import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions'
 
 interface PatientAssessmentProps {
   clientId: string;
   isEditing: boolean;
   onSave: () => void;
+  showSaveButton?: boolean;
+  formRef?: React.RefObject<HTMLFormElement>;
 }
 
 interface LabInvestigations {
@@ -41,6 +44,13 @@ interface Equipment {
 }
 
 interface AssessmentData {
+  guardian_occupation?: string;
+  marital_status?: string;
+  height?: string;
+  weight?: string;
+  pincode?: string;
+  district?: string;
+  city_town?: string;
   current_status?: string;
   chronic_illness?: string;
   medical_history?: string;
@@ -67,12 +77,21 @@ interface AssessmentData {
   equipment?: Equipment;
 }
 
-export default function PatientAssessment({ clientId, isEditing, onSave }: PatientAssessmentProps) {
+export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   // Combined state for all assessment sections
   const [formData, setFormData] = useState({
-    // Medical Status
+    // Personal Details (new section)
+    guardianOccupation: '',
+    maritalStatus: '',
+    height: '',
+    weight: '',
+    pincode: '',
+    district: '',
+    cityTown: '',
+    
+    // Existing fields
     currentStatus: '',
     chronicIllness: '',
     medicalHistory: '',
@@ -142,7 +161,16 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
           const labInvestigations = assessmentData.lab_investigations || {};
           
           setFormData({
-            // Medical Status
+            // Personal Details
+            guardianOccupation: assessmentData.guardian_occupation || '',
+            maritalStatus: assessmentData.marital_status || '',
+            height: assessmentData.height || '',
+            weight: assessmentData.weight || '',
+            pincode: assessmentData.pincode || '',
+            district: assessmentData.district || '',
+            cityTown: assessmentData.city_town || '',
+            
+            // Existing fields
             currentStatus: assessmentData.current_status || '',
             chronicIllness: assessmentData.chronic_illness || '',
             medicalHistory: assessmentData.medical_history || '',
@@ -249,16 +277,99 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      // In a real app, this would be an API call to save the data
-      console.log('Saving assessment data:', formData);
+  e.preventDefault();
+  
+  try {
+    const response = await savePatientAssessment({
+      clientId,
+      assessmentData: {
+        // Personal Details
+        guardianOccupation: formData.guardianOccupation,
+        maritalStatus: formData.maritalStatus,
+        height: formData.height,
+        weight: formData.weight,
+        pincode: formData.pincode,
+        district: formData.district,
+        cityTown: formData.cityTown,
+        
+        // Medical Status
+        currentStatus: formData.currentStatus,
+        chronicIllness: formData.chronicIllness,
+        medicalHistory: formData.medicalHistory,
+        surgicalHistory: formData.surgicalHistory,
+        medicationHistory: formData.medicationHistory,
+        
+        // Current Details
+        presentCondition: formData.presentCondition,
+        bloodPressure: formData.bloodPressure,
+        sugarLevel: formData.sugarLevel,
+
+        hb: formData.hb,
+        rbc: formData.rbc,
+        esr: formData.esr,
+        urine: formData.urine,
+        sodium: formData.sodium,
+        otherLabInvestigations: formData.otherLabInvestigations,
+        
+        // Lab investigations as a nested object
+        lab_investigations: {
+          hb: formData.hb,
+          rbc: formData.rbc,
+          esr: formData.esr,
+          urine: formData.urine,
+          sodium: formData.sodium,
+          other: formData.otherLabInvestigations
+        },
+        
+        // Psychological Assessment
+        alertnessLevel: formData.alertnessLevel,
+        physicalBehavior: formData.physicalBehavior,
+        speechPatterns: formData.speechPatterns,
+        emotionalState: formData.emotionalState,
+        
+        // Social History
+        drugsUse: formData.drugsUse,
+        alcoholUse: formData.alcoholUse,
+        tobaccoUse: formData.tobaccoUse,
+        otherSocialHistory: formData.otherSocialHistory,
+        isClean: formData.isClean,
+        isVentilated: formData.isVentilated,
+        isDry: formData.isDry,
+        hasNatureView: formData.hasNatureView,
+        hasSocialInteraction: formData.hasSocialInteraction,
+        hasSupportiveEnv: formData.hasSupportiveEnv,
+        
+        // Environment as a nested object
+        environment: {
+          is_clean: formData.isClean,
+          is_ventilated: formData.isVentilated,
+          is_dry: formData.isDry,
+          has_nature_view: formData.hasNatureView,
+          has_social_interaction: formData.hasSocialInteraction,
+          has_supportive_env: formData.hasSupportiveEnv
+        },
+        
+        // Equipment
+        equipment: formData.equipment,
+        
+        // Diagnosis and Care Plan
+        finalDiagnosis: formData.finalDiagnosis,
+        foodsToInclude: formData.foodsToInclude,
+        foodsToAvoid: formData.foodsToAvoid,
+        patientPosition: formData.patientPosition,
+        feedingMethod: formData.feedingMethod,
+      }
+    });
       
-      // Call the onSave callback provided by the parent component
-      onSave();
+      if (response.success) {
+        // Call the onSave callback provided by the parent component
+        onSave();
+      } else {
+        setError(response.error || 'Failed to save assessment data');
+      }
     } catch (error) {
       console.error('Error saving assessment data:', error);
+      setError('An unexpected error occurred');
     }
   };
 
@@ -276,8 +387,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
 
   return (
     <div className="mt-6 space-y-6">
-       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} ref={formRef}>
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">Patient Assessment</h2>
@@ -285,6 +395,21 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
           
           {/* Display sections using the respective components */}
           <div className={`space-y-6 ${!isEditing ? 'opacity-90 pointer-events-none' : ''}`}>
+            {/* Add the new PersonalDetails component */}
+            <PersonalDetails
+              formData={{
+                guardianOccupation: formData.guardianOccupation,
+                maritalStatus: formData.maritalStatus,
+                height: formData.height,
+                weight: formData.weight,
+                pincode: formData.pincode,
+                district: formData.district,
+                cityTown: formData.cityTown,
+              }}
+              handleInputChange={handleInputChange}
+            />
+            
+            {/* Existing components */}
             <MedicalStatus 
               formData={{
                 currentStatus: formData.currentStatus,
@@ -356,8 +481,27 @@ export default function PatientAssessment({ clientId, isEditing, onSave }: Patie
               handleInputChange={handleInputChange}
             />
           </div>
+          
+          {/* Add Save button when editing */}
+          {isEditing && (
+            <div className="mt-6 flex justify-end">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Save Assessment
+              </button>
+            </div>
+          )}
         </div>
       </form>
+      
+      {/* Show error if any */}
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
