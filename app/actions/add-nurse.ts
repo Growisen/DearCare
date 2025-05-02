@@ -740,3 +740,35 @@ export async function listNurses(): Promise<{ data: Nurse[] | null, error: strin
     }
   }
 }
+
+
+export async function updateNurseStatus(
+  nurseId: number,
+  status: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    // Update the nurse status
+    const { error } = await supabase
+      .from('nurses')
+      .update({ status })
+      .eq('nurse_id', nurseId);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating nurse status:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to update nurse status'
+    };
+  }
+}

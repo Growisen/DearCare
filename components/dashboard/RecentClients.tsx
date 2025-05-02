@@ -200,13 +200,13 @@ export default function RecentClients() {
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="col-span-2">
                         <div className="text-gray-600 mb-1">Request Date</div>
-                        <div className="font-medium">{client.requestDate}</div>
+                        <div className="font-medium text-gray-700">{client.requestDate}</div>
                       </div>
                       <div className="col-span-2 border-t border-gray-100 pt-3 mt-2">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Mail className="w-4 h-4" />
-                            <span className="text-gray-900">{client.email}</span>
+                          <div className="flex items-center gap-2 text-gray-600 overflow-hidden">
+                            <Mail className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-gray-900 truncate overflow-hidden">{client.email}</span>
                           </div>
                           <div className="flex items-center gap-2 text-gray-600">
                             <Phone className="w-4 h-4" />

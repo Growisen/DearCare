@@ -53,13 +53,13 @@ export default function Stats() {
     <>
       {stats.map((stat) => (
         <Card key={stat.title} className="p-4 group hover:shadow-lg transition-all duration-300 bg-white/50 backdrop-blur-sm border border-gray-100/20 hover:border-gray-200/30 rounded-xl">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center transition-transform group-hover:scale-105`}>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center transition-transform group-hover:scale-105 mb-2 sm:mb-0`}>
               <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
             </div>
-            <div className="flex-1">
-              <h3 className="text-xs font-medium text-gray-600">{stat.title}</h3>
-              <div className="flex items-center gap-2">
+            <div className="flex-1 w-full text-center sm:text-left">
+              <h3 className="text-xs font-medium text-gray-600 truncate">{stat.title}</h3>
+              <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xl font-bold text-gray-900">
                   {isLoading ? (
                     <span className="animate-pulse">...</span>
