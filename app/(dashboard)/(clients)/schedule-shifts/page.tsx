@@ -135,7 +135,7 @@ const ScheduleShiftsContent = () => {
         
         if (result.success) {
           alert('Shifts scheduled successfully!');
-          // window.close();
+          window.close();
         } else {
           throw new Error(result.message);
         }

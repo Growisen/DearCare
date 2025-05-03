@@ -1053,3 +1053,125 @@ export async function getClientStatus(clientId: string) {
     };
   }
 }
+
+/**
+ * Exports all clients without pagination - for data export purposes
+ */
+export async function exportClients(
+  status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
+  searchQuery?: string
+) {
+  try {
+    const supabase = await createSupabaseServerClient()
+    
+    let query = supabase
+      .from('clients')
+      .select(`
+        id,
+        client_type,
+        status,
+        created_at,
+        general_notes,
+        individual_clients:individual_clients(
+          requestor_name,
+          requestor_phone, 
+          requestor_email,
+          patient_name,
+          complete_address,
+          service_required,
+          start_date
+        ),
+        organization_clients:organization_clients(
+          organization_name,
+          contact_person_name,
+          contact_phone,
+          contact_email,
+          organization_address
+        )
+      `)
+    
+    if (status && status !== "all") {
+      query = query.eq('status', status)
+    }
+    
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      
+      const individualClientsQuery = supabase
+        .from('individual_clients')
+        .select('client_id')
+        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%`);
+      
+      const organizationClientsQuery = supabase
+        .from('organization_clients')
+        .select('client_id')
+        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%`);
+        
+      const [individualResults, organizationResults] = await Promise.all([
+        individualClientsQuery,
+        organizationClientsQuery
+      ]);
+      
+      const individualClientIds = (individualResults.data || []).map(item => item.client_id);
+      const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
+      
+      const matchingClientIds = [...individualClientIds, ...organizationClientIds];
+      
+      if (matchingClientIds.length > 0) {
+        query = query.in('id', matchingClientIds);
+      } else {
+        return { 
+          success: true, 
+          clients: []
+        };
+      }
+    }
+    
+    const { data, error } = await query
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error("Error fetching clients for export:", error)
+      return { success: false, error: error.message }
+    }
+    
+    const clients = data.map(record => {
+      const isIndividual = record.client_type === 'individual'
+      const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
+        ? record.individual_clients[0] 
+        : record.individual_clients) : null
+      const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
+        ? record.organization_clients[0] 
+        : record.organization_clients) : null
+      
+      return {
+        id: record.id,
+        name: isIndividual 
+          ? individualData?.patient_name || "Unknown" 
+          : organizationData?.organization_name || "Unknown",
+        requestDate: isIndividual
+          ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+          : new Date(record.created_at || new Date()).toISOString().split('T')[0],
+        service: isIndividual ? individualData?.service_required : "Organization Care",
+        status: record.status,
+        email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
+        phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
+        location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
+        description: record.general_notes || undefined
+      }
+    })
+      
+    return { 
+      success: true, 
+      clients
+    }
+    
+  } catch (error: unknown) {
+    console.error('Error exporting clients:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred', 
+      clients: [] 
+    }
+  }
+}

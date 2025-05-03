@@ -17,6 +17,7 @@ interface NurseAssignmentsListProps {
   nurses: Nurse[];
   onEditAssignment: (assignment: NurseAssignment) => void;
   onEndAssignment: (assignmentId: string) => void;
+  onDeleteAssignment: (assignmentId: number | string) => void;
 }
 
 const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
@@ -24,6 +25,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   nurses,
   onEditAssignment,
   onEndAssignment,
+  onDeleteAssignment,
 }) => {
   console.log(nurses)
 
@@ -81,6 +83,12 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                     </button>
                   </>
                 )}
+                <button
+                  onClick={() => onDeleteAssignment(assignment.id || assignment.nurseId)}
+                  className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>

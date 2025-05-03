@@ -257,3 +257,181 @@ export async function getAllNurseAssignments(): Promise<{
     };
   }
 }
+
+
+export async function updateNurseAssignment(
+  assignmentId: number,
+  updates: {
+    start_date?: string;
+    end_date?: string;
+    shift_start_time?: string;
+    shift_end_time?: string;
+  }
+): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    // Validate data
+    if (updates.end_date && updates.start_date) {
+      const startDate = new Date(updates.start_date);
+      const endDate = new Date(updates.end_date);
+      
+      if (endDate < startDate) {
+        return {
+          success: false,
+          message: 'End date cannot be before start date'
+        };
+      }
+    }
+    
+    if (updates.shift_start_time && updates.shift_end_time) {
+      const [startTimeStr, startSecs = '00'] = updates.shift_start_time.split(':');
+      const [endTimeStr, endSecs = '00'] = updates.shift_end_time.split(':');
+      const [startHour, startMin] = startTimeStr.split(':').map(Number);
+      const [endHour, endMin] = endTimeStr.split(':').map(Number);
+      
+      if (startHour > endHour || 
+          (startHour === endHour && startMin > endMin) || 
+          (startHour === endHour && startMin === endMin && startSecs >= endSecs)) {
+        return {
+          success: false,
+          message: 'Shift end time must be after shift start time'
+        };
+      }
+    }
+    
+    // Update the assignment in the database
+    const { error } = await supabase
+      .from('nurse_client')
+      .update(updates)
+      .eq('id', assignmentId);
+    
+    if (error) {
+      console.error('Error updating nurse assignment:', error);
+      return {
+        success: false,
+        message: `Database error: ${error.message}`
+      };
+    }
+    
+    return {
+      success: true,
+      message: 'Assignment updated successfully'
+    };
+  } catch (error) {
+    console.error('Error updating nurse assignment:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to update nurse assignment'
+    };
+  }
+}
+
+export async function endNurseAssignment(
+  assignmentId: number
+): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    // Update the assignment status to completed
+    const { error } = await supabase
+      .from('nurse_client')
+      .update({ 
+        status: 'completed',
+        end_date: new Date().toISOString().split('T')[0]
+      })
+      .eq('id', assignmentId);
+    
+    if (error) {
+      console.error('Error ending nurse assignment:', error);
+      return {
+        success: false,
+        message: `Database error: ${error.message}`
+      };
+    }
+    
+    return {
+      success: true,
+      message: 'Assignment ended successfully'
+    };
+  } catch (error) {
+    console.error('Error ending nurse assignment:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to end nurse assignment'
+    };
+  }
+}
+
+export async function deleteNurseAssignment(
+  assignmentId: number
+): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: assignment, error: fetchError } = await supabase
+      .from('nurse_client')
+      .select('nurse_id')
+      .eq('id', assignmentId)
+      .single();
+    
+    if (fetchError) {
+      console.error('Error fetching assignment details:', fetchError);
+      return {
+        success: false,
+        message: `Error fetching assignment details: ${fetchError.message}`
+      };
+    }
+    
+    const nurseId = assignment.nurse_id;
+    
+    const { error: deleteError } = await supabase
+      .from('nurse_client')
+      .delete()
+      .eq('id', assignmentId);
+    
+    if (deleteError) {
+      console.error('Error deleting nurse assignment:', deleteError);
+      return {
+        success: false,
+        message: `Database error: ${deleteError.message}`
+      };
+    }
+    
+    const { data: remainingAssignments, error: checkError } = await supabase
+      .from('nurse_client')
+      .select('id')
+      .eq('nurse_id', nurseId);
+    
+    if (checkError) {
+      console.error('Error checking remaining assignments:', checkError);
+    } else {
+      if (!remainingAssignments || remainingAssignments.length === 0) {
+        const statusResult = await updateNurseStatus(nurseId, 'unassigned');
+        if (!statusResult.success) {
+          console.warn(`Failed to update nurse ${nurseId} status to unassigned:`, statusResult.error);
+        }
+      }
+    }
+    
+    return {
+      success: true,
+      message: 'Assignment deleted successfully'
+    };
+  } catch (error) {
+    console.error('Error deleting nurse assignment:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to delete nurse assignment'
+    };
+  }
+}
