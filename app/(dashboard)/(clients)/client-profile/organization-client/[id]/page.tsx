@@ -12,6 +12,8 @@ import CategorySelector from '@/components/client/Profile/CategorySelector'
 import { updateClientCategory, getOrganizationClientDetails, getClientStatus } from '@/app/actions/client-actions'
 import { listNurses } from '@/app/actions/add-nurse'
 import { getNurseAssignments } from '@/app/actions/shift-schedule-actions'
+import EditAssignmentModal from '@/components/client/EditAssignmentModal';
+import { updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/shift-schedule-actions';
 import toast from 'react-hot-toast'
 
 // Updated interface to match the Supabase data structure
@@ -68,7 +70,8 @@ const OrganizationClientProfile = () => {
   const [status, setStatus] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingNurses, setIsLoadingNurses] = useState(false)
-
+  const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   // Utility function to handle undefined/null values
   const formatValue = (value: string | undefined | null, defaultText = 'Not specified'): string => {
     return value ? value.trim() : defaultText;
@@ -229,6 +232,71 @@ const OrganizationClientProfile = () => {
     }
   }
 
+  const handleEditAssignment = (assignment: NurseAssignment) => {
+    setEditingAssignment(assignment);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateAssignment = async (updatedAssignment: NurseAssignment) => {
+    if (!updatedAssignment.id) {
+      toast.error('Cannot update assignment without ID');
+      return;
+    }
+    
+    try {
+      const updates = {
+        start_date: updatedAssignment.startDate,
+        end_date: updatedAssignment.endDate,
+        shift_start_time: updatedAssignment.shiftStart,
+        shift_end_time: updatedAssignment.shiftEnd,
+      };
+      
+      const result = await updateNurseAssignment(updatedAssignment.id, updates);
+      
+      if (result.success) {
+        setNurseAssignments(prevAssignments => 
+          prevAssignments.map(assignment => 
+            assignment.id === updatedAssignment.id ? updatedAssignment : assignment
+          )
+        );
+        toast.success('Assignment updated successfully');
+      } else {
+        toast.error(`Failed to update assignment: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error updating assignment:', error);
+      toast.error('An error occurred while updating the assignment');
+    } finally {
+      setShowEditModal(false);
+      setEditingAssignment(null);
+    }
+  };
+
+  const handleDeleteAssignment = async (assignmentId: number | string) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this assignment?');
+    if (!confirmDelete) {
+      return;
+    }
+    
+    const numericId = typeof assignmentId === 'string' ? parseInt(assignmentId, 10) : assignmentId;
+    
+    try {
+      const result = await deleteNurseAssignment(numericId);
+      
+      if (result.success) {
+        setNurseAssignments(prevAssignments => 
+          prevAssignments.filter(assignment => assignment.id !== numericId)
+        );
+        toast.success('Assignment deleted successfully');
+      } else {
+        toast.error(`Failed to delete assignment: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error deleting assignment:', error);
+      toast.error('An error occurred while deleting the assignment');
+    }
+  };
+
   if (loading) return <Loader />
 
   if (error || !client) {
@@ -352,12 +420,11 @@ const OrganizationClientProfile = () => {
               <NurseAssignmentsList
                 assignments={nurseAssignments}
                 nurses={nurses}
-                onEditAssignment={(assignment) => {
-                  console.log('Edit assignment:', assignment)
-                }}
-                onEndAssignment={(assignmentId) => {
-                  console.log('End assignment:', assignmentId)
-                }}
+                onEditAssignment={handleEditAssignment}
+                  onEndAssignment={(assignmentId) => {
+                    console.log('End assignment:', assignmentId);
+                  }}
+                onDeleteAssignment={handleDeleteAssignment}
               />
             </div>
 
@@ -499,6 +566,18 @@ const OrganizationClientProfile = () => {
         onCancel={() => setShowConfirmation(false)}
         confirmText="Confirm Assignment"
       />
+
+      <EditAssignmentModal
+        isOpen={showEditModal}
+        assignment={editingAssignment}
+        nurse={editingAssignment ? nurses.find(n => n._id === editingAssignment.nurseId) : null}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingAssignment(null);
+        }}
+        onSave={handleUpdateAssignment}
+      />
+
     </div>
   )
 }
