@@ -697,7 +697,7 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 text-gray-700">
           {renderStep()}
         </div>
 
@@ -706,18 +706,18 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="px-4 py-2 text-sm bg-gray-100 rounded-lg disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-gray-100 rounded-lg text-gray-700 hover:text-gray-900 disabled:text-gray-400 disabled:opacity-50"
           >
             Previous
           </button>
-          <span className="text-sm text-gray-500">Step {currentStep + 1} of {FORM_CONFIG.steps.length}</span>
+          <span className="text-sm text-blue-600 font-medium">Step {currentStep + 1} of {FORM_CONFIG.steps.length}</span>
           <button
-  onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
-  disabled={!canProceed()}
-  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg disabled:opacity-50"
->
-  {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
-</button>
+            onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
+            disabled={!canProceed()}
+            className="px-4 py-2 text-sm bg-blue-600 text-white hover:text-white rounded-lg disabled:opacity-50 disabled:text-gray-100"
+          >
+            {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
+          </button>
         </div>
       </div>
     </div>
