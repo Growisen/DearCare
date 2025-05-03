@@ -483,7 +483,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
           </div>
           
           {/* Add Save button when editing */}
-          {isEditing && (
+          {/* {isEditing && (
             <div className="mt-6 flex justify-end">
               <button
                 type="submit"
@@ -492,7 +492,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
                 Save Assessment
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </form>
       
