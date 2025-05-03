@@ -9,6 +9,9 @@ import NurseCard from "../../../../components/nurse/NurseCard"
 import {  NurseBasicInfo,NurseBasicDetails } from "@/types/staff.types"
 import { fetchBasicDetails } from "@/app/actions/add-nurse"
 import Loader from "@/components/loader"
+import { exportNurseData } from '@/app/actions/add-nurse';
+import { generateNurseExcel } from '@/lib/generatexlsx';
+import { toast } from 'react-hot-toast';
 
 
 // Pagination Controls Component
@@ -126,6 +129,40 @@ const FilterSelect = ({ value, onChange, options, className }: { value: string, 
   </select>
 )
 
+
+const handleExportExcel = async () => {
+  try {
+    const result = await exportNurseData();
+    
+    if (result.error || !result.data) {
+      toast.error(result.error || 'Failed to export data');
+      return;
+    }
+
+    // Generate Excel file
+    const blob = generateNurseExcel(result.data);
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `nurse_data_${new Date().toISOString().split('T')[0]}.xlsx`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    toast.success('Excel file downloaded successfully!');
+  } catch (error) {
+    toast.error('Failed to generate Excel file');
+    console.error('Export error:', error);
+  }
+};
+
 export default function NursesPage() {
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -141,8 +178,8 @@ export default function NursesPage() {
 
   
 
-  useEffect(() => {
-    async function loadNurses() {
+ 
+  const loadNurses = async () => {
       setIsLoading(true)
       const { data, count, error } = await fetchBasicDetails({
         page: currentPage,
@@ -160,6 +197,8 @@ export default function NursesPage() {
       
       setIsLoading(false)
     }
+
+  useEffect(() => {
     
     loadNurses()
   }, [currentPage]) // Add currentPage to dependency array
@@ -193,31 +232,38 @@ export default function NursesPage() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  const handleAddNurse = (nurseData: any) => {
-    // Handle adding new nurse here
-    if (error) {
-      console.log(error)
+  const handleAddNurse = async (nurseData: any) => {
+    try {
+      // Handle adding new nurse here
+      setShowAddNurse(false);
+      // Refetch nurses after successful addition
+      await loadNurses();
+    } catch (error) {
+      console.error(error);
+      // Handle error case
     }
-    setShowAddNurse(false)
-  }
+  };
 
   return (
     <div>
       <div className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Nurse Management</h1>
-          <div className="flex gap-3 w-full sm:w-auto">
-            <button 
-              onClick={() => setShowAddNurse(true)}
-              className="flex-1 sm:flex-none px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Add Nurse
-            </button>
-            <button className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Export
-            </button>
-          </div>
-        </div>
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Nurse Management</h1>
+  <div className="flex gap-3 w-full sm:w-auto">
+    <button 
+      onClick={handleExportExcel}
+      className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+    >
+      Export Excel
+    </button>
+    <button 
+      onClick={() => setShowAddNurse(true)}
+      className="flex-1 sm:flex-none px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+    >
+      Add Nurse
+    </button>
+  </div>
+</div>
 
         <div className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="relative w-full">
@@ -308,11 +354,11 @@ export default function NursesPage() {
       
       {/* Add Nurse Overlay */}
       {showAddNurse && (
-        <AddNurseOverlay 
-          onClose={() => setShowAddNurse(false)}
-          onAdd={handleAddNurse}
-        />
-      )}
+  <AddNurseOverlay 
+    onClose={() => setShowAddNurse(false)}
+    onAdd={handleAddNurse}
+  />
+)}
 
       {/* Render the overlay when a nurse is selected */}
       {selectedNurse && (

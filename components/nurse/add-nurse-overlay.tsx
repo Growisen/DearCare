@@ -230,7 +230,8 @@ const StepContent = {
           type="date" 
           placeholder="" 
           value={formData.date_of_birth}
-          onChange={(e) => {
+          max={new Date().toISOString().split('T')[0]} // Add this line to prevent future dates
+onChange={(e) => {
             setFormData({ ...formData, date_of_birth: e.target.value });
             calculateAge(e.target.value);
           }}
@@ -652,6 +653,10 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
         healthData,
         documents
       );
+if (!result.success) {
+        toast.error(result.error || 'Failed to add nurse');
+        return;
+      }
   
       if (result.success) {
         toast.success('Nurse added successfully!');

@@ -1,5 +1,7 @@
 'use server'
 
+import * as XLSX from 'xlsx';
+
 type NurseDocuments = {
   adhar: File | null
   educational: File | null
@@ -143,14 +145,23 @@ export async function createNurse(
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
+    // First check if email already exists
+    if (nurseData.email) {
+      const { data: existingNurse, error: checkError } = await supabase
+        .from('nurses')
+        .select('nurse_id')
+        .eq('email', nurseData.email)
+        .single()
 
+      if (existingNurse) {
+        return { 
+          success: false, 
+          error: 'This email is already registered with another nurse'
+        }
+      }
+    }
 
-  
-
-    // 2. Upload documents
- 
-
-    // 3. Insert nurse base data
+    // Insert nurse base data
     const { data: nurse, error: nurseError } = await supabase
       .from('nurses')
       .insert({
@@ -180,7 +191,7 @@ export async function createNurse(
       .single()
 
     if (nurseError) throw nurseError
-
+    
     // 4. Insert reference data
     const { error: referenceError } = await supabase
       .from('nurse_references')
@@ -262,6 +273,15 @@ export async function createNurse(
 
   } catch (error) {
     console.error('Error creating nurse:', error)
+    // Handle specific database errors
+    if (error instanceof Error) {
+      if ('code' in error && error.code === '23505') {
+        return { 
+          success: false, 
+          error: 'This email address is already registered with another nurse'
+        }
+      }
+    }
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -651,6 +671,104 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
 
 
 
+export async function exportNurseData(): Promise<{ 
+  data: any[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return { data: null, error: 'Not authenticated' };
+    }
+
+    // Fetch joined data from all three tables
+    const { data, error } = await supabase
+      .from('nurses')
+      .select(`
+        *,
+        nurse_health (
+          health_status,
+          disability,
+          source
+        ),
+        nurse_references (
+          referer_name,
+          phone_number,
+          relation,
+          description,
+          family_references
+        )
+      `);
+
+    if (error) throw error;
+
+    // Transform data for Excel format
+    const excelData = data.map(nurse => ({
+      'Nurse ID': nurse.nurse_id,
+      'First Name': nurse.first_name || '',
+      'Last Name': nurse.last_name || '',
+      'Email': nurse.email || '',
+      'Phone Number': nurse.phone_number || '',
+      'Gender': nurse.gender || '',
+      'Date of Birth': nurse.date_of_birth || '',
+      'Age': nurse.age || '',
+      'Address': nurse.address || '',
+      'City': nurse.city || '',
+      'Taluk': nurse.taluk || '',
+      'State': nurse.state || '',
+      'PIN Code': nurse.pin_code || '',
+      'Languages': Array.isArray(nurse.languages) ? nurse.languages.join(', ') : '',
+      'Experience (Years)': nurse.experience || 0,
+      'Service Type': nurse.service_type || '',
+      'Shift Pattern': nurse.shift_pattern || '',
+      'Category': nurse.category || '',
+      'Status': nurse.status || '',
+      'Marital Status': nurse.marital_status || '',
+      'Religion': nurse.religion || '',
+      'Mother Tongue': nurse.mother_tongue || '',
+      'NOC Status': nurse.noc_status || '',
+      'Created Date': nurse.created_at ? new Date(nurse.created_at).toLocaleDateString() : '',
+      
+      // Health Information
+      'Health Status': nurse.nurse_health?.health_status || '',
+      'Disability': nurse.nurse_health?.disability || '',
+      'Source of Information': nurse.nurse_health?.source || '',
+      
+      // Reference Information
+      'Reference Name': nurse.nurse_references?.referer_name || '',
+      'Reference Phone': nurse.nurse_references?.phone_number || '',
+      'Reference Relation': nurse.nurse_references?.relation || '',
+      'Recommendation Details': nurse.nurse_references?.description || '',
+      
+      // Family References (formatted as a string)
+      'Family References': nurse.nurse_references?.family_references ? 
+        nurse.nurse_references.family_references.map((ref: any) => 
+          `Name: ${ref.name}, Phone: ${ref.phone}, Relation: ${ref.relation}`
+        ).join(' | ') : ''
+    }));
+
+    return { 
+      data: excelData,
+      error: null 
+    };
+
+  } catch (error) {
+    console.error('Error exporting nurse data:', error);
+    return { 
+      data: null, 
+      error: error instanceof Error ? error.message : 'Failed to export nurse data' 
+    };
+  }
+}
+
+
+
+
+
+
 
 export async function listNurses(): Promise<{ data: Nurse[] | null, error: string | null }> {
   try {
@@ -772,3 +890,5 @@ export async function updateNurseStatus(
     };
   }
 }
+
+
