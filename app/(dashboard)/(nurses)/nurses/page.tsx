@@ -180,6 +180,7 @@ export default function NursesPage() {
 
  
   const loadNurses = async () => {
+    
       setIsLoading(true)
       const { data, count, error } = await fetchBasicDetails({
         page: currentPage,
@@ -190,6 +191,7 @@ export default function NursesPage() {
 
       if (error) {
         setError(error)
+        toast.error(error)
       } else if (data) {
         setNurses(data)
         setTotalCount(count || 0)
@@ -243,6 +245,20 @@ export default function NursesPage() {
       // Handle error case
     }
   };
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center p-8">
+        <div className="text-red-600 mb-4">Error: {error}</div>
+        <button 
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={loadNurses}
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div>

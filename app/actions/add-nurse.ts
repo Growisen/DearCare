@@ -1,6 +1,5 @@
 'use server'
 
-import * as XLSX from 'xlsx';
 
 type NurseDocuments = {
   adhar: File | null
@@ -158,6 +157,10 @@ export async function createNurse(
           success: false, 
           error: 'This email is already registered with another nurse'
         }
+      }
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw checkError;
       }
     }
 
@@ -668,11 +671,50 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
     }
   }
 }
+interface ExcelNurseData {
+  'Nurse ID': number;
+  'First Name': string;
+  'Last Name': string;
+  'Email': string;
+  'Phone Number': string;
+  'Gender': string;
+  'Date of Birth': string;
+  'Age': string;
+  'Address': string;
+  'City': string;
+  'Taluk': string;
+  'State': string;
+  'PIN Code': string | number;
+  'Languages': string;
+  'Experience (Years)': number;
+  'Service Type': string;
+  'Shift Pattern': string;
+  'Category': string;
+  'Status': string;
+  'Marital Status': string;
+  'Religion': string;
+  'Mother Tongue': string;
+  'NOC Status': string;
+  'Created Date': string;
+  'Health Status': string;
+  'Disability': string;
+  'Source of Information': string;
+  'Reference Name': string;
+  'Reference Phone': string;
+  'Reference Relation': string;
+  'Recommendation Details': string;
+  'Family References': string;
+}
 
+interface FamilyReference {
+  name: string;
+  phone: string;
+  relation: string;
+}
 
 
 export async function exportNurseData(): Promise<{ 
-  data: any[] | null;
+  data: ExcelNurseData[] | null;
   error: string | null;
 }> {
   try {
@@ -745,7 +787,7 @@ export async function exportNurseData(): Promise<{
       
       // Family References (formatted as a string)
       'Family References': nurse.nurse_references?.family_references ? 
-        nurse.nurse_references.family_references.map((ref: any) => 
+        nurse.nurse_references.family_references.map((ref: FamilyReference) => 
           `Name: ${ref.name}, Phone: ${ref.phone}, Relation: ${ref.relation}`
         ).join(' | ') : ''
     }));
