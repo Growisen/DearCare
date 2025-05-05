@@ -20,73 +20,58 @@ export interface Todo {
   user_id?: string;
 }
 
+async function getAuthenticatedClient() {
+  const supabase = await createSupabaseServerClient();
+  const { data: session } = await supabase.auth.getSession();
+  const userId = session?.session?.user?.id;
+  
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+  
+  return { supabase, userId };
+}
+
 
 export async function fetchDashboardStats(): Promise<{ success: boolean; data?: StatsData; error?: string }> {
   try {
     const supabase = await createSupabaseServerClient();
     
-    // Fetch active nurses stats
-    const { count: activeNursesCount, error: nursesError } = await supabase
-      .from('nurses')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'unassigned');
-    
-    if (nursesError) {
-      throw new Error(`Error fetching nurses: ${nursesError.message}`);
-    }
-    
-    // Fetch current assignments stats
-    const { count: assignmentsCount, error: assignmentsError } = await supabase
-      .from('nurse_client')
-      .select('*', { count: 'exact', head: true });
+    const [nursesResult, assignmentsResult, requestsResult, clientsResult] = await Promise.all([
+      supabase.from('nurses').select('*', { count: 'exact', head: true }).eq('status', 'unassigned'),
       
-    if (assignmentsError) {
-      throw new Error(`Error fetching assignments: ${assignmentsError.message}`);
-    }
-    
-    // Fetch open requests stats
-    const { count: requestsCount, error: requestsError } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
+      supabase.from('nurse_client').select('*', { count: 'exact', head: true }),
       
-    if (requestsError) {
-      throw new Error(`Error fetching requests: ${requestsError.message}`);
-    }
-    
-    // Fetch active clients stats
-    const { count: clientsCount, error: clientsError } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved');
+      supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       
-    if (clientsError) {
-      throw new Error(`Error fetching clients: ${clientsError.message}`);
-    }
+      supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'approved')
+    ]);
     
-    // Calculate trends (just placeholder values for now)
-    // In a real implementation, you would compare with previous period data
+    if (nursesResult.error) throw new Error(`Error fetching nurses: ${nursesResult.error.message}`);
+    if (assignmentsResult.error) throw new Error(`Error fetching assignments: ${assignmentsResult.error.message}`);
+    if (requestsResult.error) throw new Error(`Error fetching requests: ${requestsResult.error.message}`);
+    if (clientsResult.error) throw new Error(`Error fetching clients: ${clientsResult.error.message}`);
     
     return {
       success: true,
       data: {
         activeNurses: { 
-          count: activeNursesCount || 0, 
+          count: nursesResult.count || 0, 
           trend: '+5%', 
           trendUp: true 
         },
         currentAssignments: { 
-          count: assignmentsCount || 0, 
+          count: assignmentsResult.count || 0, 
           trend: '+2%', 
           trendUp: true 
         },
         openRequests: { 
-          count: requestsCount || 0, 
+          count: requestsResult.count || 0, 
           trend: '-3%', 
           trendUp: false 
         },
         approvedClients: { 
-          count: clientsCount || 0, 
+          count: clientsResult.count || 0, 
           trend: '+10%', 
           trendUp: true 
         },
@@ -94,7 +79,6 @@ export async function fetchDashboardStats(): Promise<{ success: boolean; data?: 
     };
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    // Return default values in case of error
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred',
@@ -110,13 +94,7 @@ export async function fetchDashboardStats(): Promise<{ success: boolean; data?: 
 
 export async function fetchTodos(): Promise<{ success: boolean; data: Todo[]; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: session } = await supabase.auth.getSession();
-    const userId = session?.session?.user?.id;
-    
-    if (!userId) {
-      return { success: false, data: [], error: "User not authenticated" };
-    }
+    const { supabase, userId } = await getAuthenticatedClient();
     
     const { data, error } = await supabase
       .from('admin_dashboard_todos')
@@ -144,15 +122,8 @@ export async function fetchTodos(): Promise<{ success: boolean; data: Todo[]; er
 
 export async function addTodo(todo: Omit<Todo, 'id'>): Promise<{ success: boolean; todo?: Todo; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: session } = await supabase.auth.getSession();
-    const userId = session?.session?.user?.id;
+    const { supabase, userId } = await getAuthenticatedClient();
     
-    if (!userId) {
-      return { success: false, error: "User not authenticated" };
-    }
-    
-    // Create a new todo with user_id
     const newTodo = {
       ...todo,
       user_id: userId,
@@ -184,13 +155,7 @@ export async function addTodo(todo: Omit<Todo, 'id'>): Promise<{ success: boolea
 
 export async function updateTodoStatus(id: string, completed: boolean): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: session } = await supabase.auth.getSession();
-    const userId = session?.session?.user?.id;
-    
-    if (!userId) {
-      return { success: false, error: "User not authenticated" };
-    }
+    const { supabase, userId } = await getAuthenticatedClient();
     
     const { error } = await supabase
       .from('admin_dashboard_todos')
@@ -214,13 +179,7 @@ export async function updateTodoStatus(id: string, completed: boolean): Promise<
 
 export async function deleteTodo(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: session } = await supabase.auth.getSession();
-    const userId = session?.session?.user?.id;
-    
-    if (!userId) {
-      return { success: false, error: "User not authenticated" };
-    }
+    const { supabase, userId } = await getAuthenticatedClient();
     
     const { error } = await supabase
       .from('admin_dashboard_todos')

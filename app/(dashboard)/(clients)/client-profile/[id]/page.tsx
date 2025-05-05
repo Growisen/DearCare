@@ -13,8 +13,8 @@ import NurseAssignmentsList from '@/components/client/NurseAssignmentsList';
 import { listNurses } from '@/app/actions/add-nurse';
 import { getNurseAssignments } from '@/app/actions/shift-schedule-actions';
 import toast from 'react-hot-toast';
-
-// Component imports
+import EditAssignmentModal from '@/components/client/EditAssignmentModal';
+import { updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/shift-schedule-actions';
 import ProfileHeader from '@/components/client/Profile/ProfileHeader';
 import PatientInfo from '@/components/client/Profile/PatientInfo';
 import MedicalInfo from '@/components/client/Profile/MedicalInfo';
@@ -79,19 +79,20 @@ interface Patient {
   email: string;
   phoneNumber: string;
   clientCategory: 'DearCare' | 'TataLife';
+  profileImage?: string | null; // Add this line
   requestor: { 
     name: string;
     relation: string;
     phone: string;
     email: string;
-  };
+    profileImage?: string | null;
+  }
   emergencyContact: {
     name: string;
     relation: string;
     phone: string;
   };
   assessments: PatientAssessmentDataForApprovedClients[];
-  profileImage?: string;
   nurseAssignments?: NurseAssignment[];
 }
 
@@ -115,6 +116,9 @@ const PatientProfilePage = () => {
   const [status, setStatus] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
+
+  const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
 
@@ -169,11 +173,13 @@ const PatientProfilePage = () => {
                 email: '', // Patient's email if available
                 phoneNumber: clientData.details?.patient_phone || '',
                 clientCategory: clientData.client_category || 'DearCare',
+                profileImage: clientData.details?.patient_profile_pic_url || '',
                 requestor: {
                   name: clientData.details?.requestor_name || '',
                   relation: clientData.details?.relation_to_patient || '',
                   phone: clientData.details?.requestor_phone || '',
-                  email: clientData.details?.requestor_email || ''
+                  email: clientData.details?.requestor_email || '',
+                  profileImage: clientData.details?.requestor_profile_pic_url || ''
                 },
                 emergencyContact: {
                   name: clientData.details?.requestor_name || '',
@@ -312,11 +318,13 @@ const PatientProfilePage = () => {
             email: '', // Patient's email if available
             phoneNumber: clientData.details?.patient_phone || '',
             clientCategory: clientData.client_category || 'DearCare',
+            profileImage: clientData.details?.patient_profile_pic_url || '',
             requestor: {
               name: clientData.details?.requestor_name || '',
               relation: clientData.details?.relation_to_patient || '',
               phone: clientData.details?.requestor_phone || '',
-              email: clientData.details?.requestor_email || ''
+              email: clientData.details?.requestor_email || '',
+              profileImage: clientData.details?.requestor_profile_pic_url || ''
             },
             emergencyContact: {
               name: clientData.details?.requestor_name || '',
@@ -414,6 +422,75 @@ const PatientProfilePage = () => {
     }
   };
 
+  const handleEditAssignment = (assignment: NurseAssignment) => {
+    setEditingAssignment(assignment);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateAssignment = async (updatedAssignment: NurseAssignment) => {
+    if (!updatedAssignment.id) {
+      toast.error('Cannot update assignment without ID');
+      return;
+    }
+    
+    try {
+      // Format the data for the server action
+      const updates = {
+        start_date: updatedAssignment.startDate,
+        end_date: updatedAssignment.endDate,
+        shift_start_time: updatedAssignment.shiftStart,
+        shift_end_time: updatedAssignment.shiftEnd,
+      };
+      
+      // Call the server action
+      const result = await updateNurseAssignment(updatedAssignment.id, updates);
+      
+      if (result.success) {
+        // Update the local state
+        setNurseAssignments(prevAssignments => 
+          prevAssignments.map(assignment => 
+            assignment.id === updatedAssignment.id ? updatedAssignment : assignment
+          )
+        );
+        toast.success('Assignment updated successfully');
+      } else {
+        toast.error(`Failed to update assignment: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error updating assignment:', error);
+      toast.error('An error occurred while updating the assignment');
+    } finally {
+      setShowEditModal(false);
+      setEditingAssignment(null);
+    }
+  };
+
+
+  const handleDeleteAssignment = async (assignmentId: number | string) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this assignment?');
+    if (!confirmDelete) {
+      return;
+    }
+    
+    const numericId = typeof assignmentId === 'string' ? parseInt(assignmentId, 10) : assignmentId;
+    
+    try {
+      const result = await deleteNurseAssignment(numericId);
+      
+      if (result.success) {
+        setNurseAssignments(prevAssignments => 
+          prevAssignments.filter(assignment => assignment.id !== numericId)
+        );
+        toast.success('Assignment deleted successfully');
+      } else {
+        toast.error(`Failed to delete assignment: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error deleting assignment:', error);
+      toast.error('An error occurred while deleting the assignment');
+    }
+  };
+
 
   
 
@@ -469,12 +546,11 @@ const PatientProfilePage = () => {
                 <NurseAssignmentsList
                   assignments={nurseAssignments}
                   nurses={nurses}
-                  onEditAssignment={(assignment) => {
-                    console.log('Edit assignment:', assignment);
-                  }}
+                  onEditAssignment={handleEditAssignment}
                   onEndAssignment={(assignmentId) => {
                     console.log('End assignment:', assignmentId);
                   }}
+                  onDeleteAssignment={handleDeleteAssignment}
                 />
               </InfoSection>
             )}
@@ -517,6 +593,17 @@ const PatientProfilePage = () => {
         onConfirm={() => selectedNurse && handleAssignNurse(selectedNurse._id)}
         onCancel={() => setShowConfirmation(false)}
         confirmText="Confirm Assignment"
+      />
+
+      <EditAssignmentModal
+        isOpen={showEditModal}
+        assignment={editingAssignment}
+        nurse={editingAssignment ? nurses.find(n => n._id === editingAssignment.nurseId) : null}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingAssignment(null);
+        }}
+        onSave={handleUpdateAssignment}
       />
 
     </div>

@@ -84,6 +84,49 @@ export interface NurseFormData {
   mother_tongue: string;
 }
 
+
+export interface NurseExcelRecord {
+ 
+  'Nurse ID': number;
+  'First Name': string;
+  'Last Name': string;
+  'Email': string;
+  'Phone Number': string;
+  'Gender': string;
+  'Date of Birth': string;
+  'Age': string;
+  'Address': string;
+  'City': string;
+  'Taluk': string;
+  'State': string;
+  'PIN Code': string | number;
+  'Languages': string;
+  'Experience (Years)': number;
+  'Service Type': string;
+  'Shift Pattern': string;
+  'Category': string;
+  'Status': string;
+  'Marital Status': string;
+  'Religion': string;
+  'Mother Tongue': string;
+  'NOC Status': string;
+  'Created Date': string;
+  
+  // Health Information
+  'Health Status': string;
+  'Disability': string;
+  'Source of Information': string;
+  
+  // Reference Information
+  'Reference Name': string;
+  'Reference Phone': string;
+  'Reference Relation': string;
+  'Recommendation Details': string;
+  
+  // Family References
+  'Family References': string;
+}
+
 export interface NurseReferenceData {
   reference_name: string;
   reference_phone: string;

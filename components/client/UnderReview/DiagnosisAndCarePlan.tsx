@@ -17,7 +17,7 @@ export default function DiagnosisAndCarePlan({ formData, handleInputChange }: Di
     <div className="bg-white border border-gray-200 p-4 rounded-lg">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Diagnosis & Care Plan</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="col-span-2">
+        <div className="md:col-span-2">
           <InputField
             label="Final Diagnosis"
             type="textarea"
@@ -28,7 +28,7 @@ export default function DiagnosisAndCarePlan({ formData, handleInputChange }: Di
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="md:col-span-2">
           <InputField
             label="Foods to Include"
             type="textarea"
@@ -39,7 +39,7 @@ export default function DiagnosisAndCarePlan({ formData, handleInputChange }: Di
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="md:col-span-2">
           <InputField
             label="Foods to Avoid"
             type="textarea"
@@ -50,7 +50,7 @@ export default function DiagnosisAndCarePlan({ formData, handleInputChange }: Di
           />
         </div>
 
-        <div>
+        <div className="w-full">
           <InputField
             label="Patient Position"
             type="text"
@@ -61,7 +61,7 @@ export default function DiagnosisAndCarePlan({ formData, handleInputChange }: Di
           />
         </div>
 
-        <div>
+        <div className="w-full">
           <InputField
             label="Feeding Method"
             type="text"
