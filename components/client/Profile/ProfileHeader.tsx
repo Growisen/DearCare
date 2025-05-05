@@ -11,7 +11,7 @@ interface ProfileHeaderProps {
     gender: string;
     bloodGroup: string;
     location: string;
-    profileImage?: string;
+    profileImage?: string | null;
     clientCategory: 'DearCare' | 'TataLife';
   };
   status: string | null;

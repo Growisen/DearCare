@@ -6,6 +6,59 @@ import { IndividualFormData, OrganizationFormData, SavePatientAssessmentParams, 
 import { Database } from '@/lib/database.types';
 import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
 import { sendClientCredentials, sendClientFormLink, sendClientRejectionNotification } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid';
+
+export async function getStorageUrl(path: string | null): Promise<string | null> {
+  if (!path) return null;
+  
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('DearCare')
+      .getPublicUrl(path);
+      
+    return publicUrl;
+  } catch (error) {
+    console.error('Error generating storage URL:', error);
+    return null;
+  }
+}
+/**
+ * Uploads a file to Supabase storage
+ */
+async function uploadProfilePicture(file: File, clientId: string, type: 'requestor' | 'patient'): Promise<string | null> {
+  try {
+    if (!file) return null;
+    
+    const supabase = await createSupabaseServerClient();
+    
+    const fileArrayBuffer = await file.arrayBuffer();
+    const fileBlob = new Blob([fileArrayBuffer], { type: file.type });
+    
+    const fileExt = file.name.split('.').pop();
+    const typeFolder = type === 'patient' ? 'Patient' : 'Requestor';
+    const fileName = `Clients/ProfilePictures/${typeFolder}/${clientId}/${uuidv4()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('DearCare')
+      .upload(fileName, fileBlob, {
+        contentType: file.type,
+        cacheControl: '3600'
+      });
+    
+    if (error) {
+      console.error(`Error uploading ${type} profile picture:`, error);
+      return null;
+    }
+    
+    return data.path;
+  } catch (error) {
+    console.error(`Error in uploadProfilePicture (${type}):`, error);
+    return null;
+  }
+}
+
 /**
  * Adds a new individual client to the database
  */
@@ -29,6 +82,26 @@ export async function addIndividualClient(formData: IndividualFormData) {
       throw new Error(`Failed to create client: ${clientError.message}`);
     }
     
+    // Upload profile pictures if provided
+    let requestorProfilePicPath: string | null = null;
+    let patientProfilePicPath: string | null = null;
+    
+    if (formData.requestorProfilePic) {
+      requestorProfilePicPath = await uploadProfilePicture(
+        formData.requestorProfilePic, 
+        clientData.id, 
+        'requestor'
+      );
+    }
+    
+    if (formData.patientProfilePic) {
+      patientProfilePicPath = await uploadProfilePicture(
+        formData.patientProfilePic, 
+        clientData.id, 
+        'patient'
+      );
+    }
+    
     // Now create the individual client record
     const { error: individualError } = await supabase
       .from('individual_clients')
@@ -47,11 +120,22 @@ export async function addIndividualClient(formData: IndividualFormData) {
         requestor_phone: formData.requestorPhone,
         service_required: formData.serviceRequired,
         start_date: formData.startDate,
+        requestor_profile_pic: requestorProfilePicPath,
+        patient_profile_pic: patientProfilePicPath,
       });
     
     if (individualError) {
       // If individual client creation fails, we should remove the base client
       await supabase.from('clients').delete().eq('id', clientData.id);
+      
+      // Also clean up any uploaded files
+      if (requestorProfilePicPath) {
+        await supabase.storage.from('profile-pictures').remove([requestorProfilePicPath]);
+      }
+      if (patientProfilePicPath) {
+        await supabase.storage.from('profile-pictures').remove([patientProfilePicPath]);
+      }
+      
       throw new Error(`Failed to create individual client details: ${individualError.message}`);
     }
     
@@ -417,11 +501,23 @@ export async function getClientDetails(clientId: string) {
         return { success: false, error: individualError.message }
       }
       
+      const patientPicUrl = individualClient.patient_profile_pic ? 
+        await getStorageUrl(individualClient.patient_profile_pic) : null;
+      const requestorPicUrl = individualClient.requestor_profile_pic ? 
+        await getStorageUrl(individualClient.requestor_profile_pic) : null;
+      
       return { 
         success: true, 
         client: {
           ...client,
-          details: individualClient
+          details: {
+            ...individualClient,
+            patient_profile_pic_url: patientPicUrl,
+            requestor_profile_pic_url: requestorPicUrl,
+            // Keep original paths for reference
+            patient_profile_pic: individualClient.patient_profile_pic,
+            requestor_profile_pic: individualClient.requestor_profile_pic,
+          }
         }
       }
     } else {

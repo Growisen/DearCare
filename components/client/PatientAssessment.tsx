@@ -311,16 +311,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         sodium: formData.sodium,
         otherLabInvestigations: formData.otherLabInvestigations,
         
-        // Lab investigations as a nested object
-        lab_investigations: {
-          hb: formData.hb,
-          rbc: formData.rbc,
-          esr: formData.esr,
-          urine: formData.urine,
-          sodium: formData.sodium,
-          other: formData.otherLabInvestigations
-        },
-        
         // Psychological Assessment
         alertnessLevel: formData.alertnessLevel,
         physicalBehavior: formData.physicalBehavior,
@@ -338,16 +328,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         hasNatureView: formData.hasNatureView,
         hasSocialInteraction: formData.hasSocialInteraction,
         hasSupportiveEnv: formData.hasSupportiveEnv,
-        
-        // Environment as a nested object
-        environment: {
-          is_clean: formData.isClean,
-          is_ventilated: formData.isVentilated,
-          is_dry: formData.isDry,
-          has_nature_view: formData.hasNatureView,
-          has_social_interaction: formData.hasSocialInteraction,
-          has_supportive_env: formData.hasSupportiveEnv
-        },
         
         // Equipment
         equipment: formData.equipment,

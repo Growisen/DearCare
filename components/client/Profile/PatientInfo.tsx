@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import InfoSection from './InfoSection';
 import InfoField from './InfoField';
 import { Json } from '@/types/client.types'; 
@@ -27,6 +28,7 @@ interface PatientInfoProps {
       relation: string;
       phone: string;
       email: string;
+      profileImage?: string | null;
     };
   };
 }
@@ -55,15 +57,37 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
       </InfoSection>
 
       <InfoSection title="Requestor Information">
-        <div className="space-y-3">
-          <InfoField label="Name" value={patient.requestor.name} />
-          <InfoField label="Relation to Patient" value={patient.requestor.relation} />
-          <InfoField label="Phone" value={patient.requestor.phone} />
-          <InfoField 
-            label="Email" 
-            value={patient.requestor.email} 
-            fallback="Not provided" 
-          />
+        <div className="space-y-4">
+          {/* Requestor Profile Image */}
+          <div className="flex justify-center">
+            <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-gray-200">
+              {patient.requestor.profileImage ? (
+                <Image
+                  src={patient.requestor.profileImage}
+                  alt={patient.requestor.name}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
+              ) : (
+                <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+                  <span className="text-xl text-gray-500">
+                    {patient.requestor.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="space-y-3">
+            <InfoField label="Name" value={patient.requestor.name} />
+            <InfoField label="Relation to Patient" value={patient.requestor.relation} />
+            <InfoField label="Phone" value={patient.requestor.phone} />
+            <InfoField 
+              label="Email" 
+              value={patient.requestor.email} 
+              fallback="Not provided" 
+            />
+          </div>
         </div>
       </InfoSection>
 
