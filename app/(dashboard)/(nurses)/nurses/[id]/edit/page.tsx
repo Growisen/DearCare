@@ -7,22 +7,9 @@ import Loader from '@/components/loader'
 import Image from 'next/image';
 import { fetchNurseDetailsmain, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
 
-interface Review {
-  id: string;
-  text: string;
-  date: string;
-  rating: number;
-  reviewer: string;
-}
 
-interface NurseDocuments {
-  profile_image: string | null;
-  adhar: string | null;
-  educational?: string | null;
-  experience?: string | null;
-  noc?: string | null;
-  ration: string | null;
-}
+
+
 
 
 // interface Education {
@@ -56,71 +43,17 @@ interface NurseDocuments {
 //   proficiency: 'Expert' | 'Advanced' | 'Intermediate';
 // }
 
-interface Reference {
-  name: string;
-  relation: string;
-  phoneNumber: string;
-}
 
 type DocumentField = 'aadhar' | 'rationCard' | 'educationalQualification' | 'workExperience' | 'nocCertificate';
 
-type DocumentType = {
-  path: string;
-  name: string;
-};
+
 
 interface TempFile {
   file: File;
   preview: string;
 }
 
-interface Nurse {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  location: string;
-  status: 'assigned' | 'unassigned';
-  email: string;
-  phoneNumber: string;
-  gender: string;
-  dob: string;
-  salaryPerHour: number;
-  hiringDate: string;
-  experience: number;
-  rating: number;
-  reviews: Review[];
-  preferredLocations: string[];
-  languages?: string[];
-  profileImage?: {
-    url: string;
-    name: string;
-  };
-  address: string;
-  city: string;
-  taluk: string;
-  pinCode: string;
-  maritalStatus: 'Single' | 'Married' | 'Widow' | 'Separated';
-  religion: 'Hindu' | 'Christian' | 'Muslim';
-  state: string;
-  motherTongue: string;
-  nocCertificate: 'Yes' | 'No' | 'Applied' | 'Going To Apply';
-  documents?: {
-    aadhar?: DocumentType;
-    rationCard?: DocumentType;
-    educationalQualification?: DocumentType[];
-    workExperience?: DocumentType[];
-    nocCertificate?: DocumentType;
-  };
-  serviceType: 'Home Nurse' | 'Delivery Care' | 'Baby Care' | 'HM';
-  shiftingPattern: '24 Hour' | '12 Hour' | '8 Hour' | 'Hourly';
-  hoursIfHourly?: number;
-  staffCategory: 'Permanent' | 'Trainee' | 'Temporary';
-  primaryReference: Reference;
-  familyReferences: Reference[];
-  healthStatus: string;
-  disabilityDetails: string;
-  sourceOfInformation: string;
-}
+
 
 interface FormFieldProps {
   label: string;
@@ -147,6 +80,7 @@ interface FormMultiSelectProps extends FormFieldProps {
   onAdd: (value: string) => void;
   onRemove: (value: string) => void;
   options: { value: string; label: string; }[];
+  
 }
 
 const formFieldStyles = {
@@ -451,8 +385,31 @@ const EditNurseProfilePage: React.FC = () => {
     });
   };
 
+  const handleAddLanguage = (language: string) => {
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        basic: {
+          ...prev.basic,
+          languages: [...(prev.basic.languages || []), language]
+        }
+      };
+    });
+  };
   
- 
+  const handleRemoveLanguage = (language: string) => {
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        basic: {
+          ...prev.basic,
+          languages: (prev.basic.languages || []).filter(lang => lang !== language)
+        }
+      };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -666,6 +623,20 @@ const EditNurseProfilePage: React.FC = () => {
                     value={formData?.basic.experience?.toString() || ''} 
                     onChange={handleInputChange} 
                     type="number"
+                  />
+                  <FormMultiSelect
+                    label="Languages"
+                    name="basic.languages"
+                    values={formData?.basic.languages || []}
+                    onAdd={handleAddLanguage}
+                    onRemove={handleRemoveLanguage}
+                    options={[
+                      { value: "Malayalam", label: "Malayalam" },
+                      { value: "English", label: "English" },
+                      { value: "Hindi", label: "Hindi" },
+                      { value: "Tamil", label: "Tamil" }
+                    ]}
+                    onChange={() => {}}
                   />
                 </div>
               </div>
