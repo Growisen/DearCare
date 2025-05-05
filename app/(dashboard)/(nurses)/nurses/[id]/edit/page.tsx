@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/loader'
 import Image from 'next/image';
+import { fetchNurseDetailsmain, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
 
 interface Review {
   id: string;
@@ -13,6 +14,16 @@ interface Review {
   rating: number;
   reviewer: string;
 }
+
+interface NurseDocuments {
+  profile_image: string | null;
+  adhar: string | null;
+  educational?: string | null;
+  experience?: string | null;
+  noc?: string | null;
+  ration: string | null;
+}
+
 
 // interface Education {
 //   degree: string;
@@ -247,106 +258,163 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
 
 const EditNurseProfilePage: React.FC = () => {
   const params = useParams();
+  
   const router = useRouter();
   const id = params.id;
-  const [nurse, setNurse] = useState<Nurse | null>(null);
+   const [nurse, setNurse] = useState<SimplifiedNurseDetails | null>(null)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Nurse>>({});
+  const [formData, setFormData] = useState<SimplifiedNurseDetails | null>(null);
+
   const [saving, setSaving] = useState(false);
   // const [documents, setDocuments] = useState<Nurse['documents']>({});
   const [tempFiles, setTempFiles] = useState<Record<string, TempFile[]>>({});
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      setTimeout(() => {
-        const mockNurse: Nurse = {
-            _id: id as string,
-            firstName: "Anjali",
-            lastName: "Menon",
-            location: "Kochi",
-            status: "unassigned",
-            email: "anjali.menon@gmail.com",
-            phoneNumber: "9876543210",
-            experience: 5,
-            rating: 4.5,
-            reviews: [
-                { id: "r1", text: "Great nurse! Was very attentive and professional during my recovery.", date: "2021-01-01", rating: 5, reviewer: "John Doe" },
-                { id: "r2", text: "Very professional and knowledgeable.", date: "2021-06-15", rating: 4, reviewer: "Jane Smith" },
-                { id: "r3", text: "Excellent caregiver.", date: "2022-03-22", rating: 5, reviewer: "Raj Kumar" }
-            ],
-            preferredLocations: ["Kollam", "Palakkad", "Malappuram"],
-            languages: ["Malayalam", "English", "Hindi", "Tamil"],
-            address: "123 Medical Avenue",
-            city: "Kochi",
-            taluk: "Ernakulam",
-            pinCode: "682001",
-            maritalStatus: "Single",
-            religion: "Hindu",
-            state: "Kerala",
-            motherTongue: "Malayalam",
-            nocCertificate: "Yes",
-            documents: {
-                aadhar: {
-                    path: "/documents/aadhar.pdf",
-                    name: "Aadhar_Card_2023.pdf"
-                },
-                rationCard: {
-                    path: "/documents/ration.pdf",
-                    name: "Ration_Card_2023.pdf"
-                },
-                educationalQualification: [
-                    { path: "/documents/degree.pdf", name: "BSc_Nursing_Degree.pdf" },
-                    { path: "/documents/certificate.pdf", name: "Critical_Care_Certificate.pdf" }
-                ],
-                workExperience: [
-                    { path: "/documents/experience1.pdf", name: "Kerala_Medical_Experience.pdf" }
-                ],
-                nocCertificate: {
-                    path: "/documents/noc.pdf",
-                    name: "NOC_Certificate_2023.pdf"
-                }
-            },
-            serviceType: 'Home Nurse',
-            shiftingPattern: '12 Hour',
-            staffCategory: 'Permanent',
-            primaryReference: {
-                name: "John Thomas",
-                relation: "Uncle",
-                phoneNumber: "9876543210"
-            },
-            familyReferences: [
-                {
-                    name: "Mary Joseph",
-                    relation: "Sister",
-                    phoneNumber: "9876543211"
-                },
-                {
-                    name: "George Philip",
-                    relation: "Brother",
-                    phoneNumber: "9876543212"
-                }
-            ],
-            healthStatus: "Good physical and mental health.",
-            disabilityDetails: "None",
-            sourceOfInformation: "Direct Interview",
-            gender: 'Female',
-            dob: '1995-06-15',
-            salaryPerHour: 350,
-            hiringDate: '2020-12-20'
-        };
-        
-        setNurse(mockNurse);
-        setFormData(mockNurse);
-        setLoading(false);
-      }, 1000);
-    }
-  }, [id]);
+    console.log('Nurse ID:', id);
 
+    async function loadData() {
+          if (!params.id) return
+    
+          setLoading(true)
+          try {
+            // Fetch nurse details and assignments in parallel
+            const [nurseResponse] = await Promise.all([
+              fetchNurseDetailsmain(Number(params.id)),
+            ])
+            
+            if (nurseResponse.error) {
+              setError(nurseResponse.error)
+              return
+            }
+    
+            
+    
+            setNurse(nurseResponse.data)
+            
+            
+    
+            console.log('Nurse:', nurseResponse.data)
+            
+          } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch data')
+          } finally {
+            setLoading(false)
+          }
+        }
+    
+        loadData()
+ 
+    
+    
+  }, [id]);
+  useEffect(() => {
+    if (nurse) {
+      setFormData({
+        basic: {
+          nurse_id: nurse.basic.nurse_id,
+          first_name: nurse.basic.first_name,
+          last_name: nurse.basic.last_name,
+          email: nurse.basic.email,
+          phone_number: nurse.basic.phone_number,
+          gender: nurse.basic.gender,
+          date_of_birth: nurse.basic.date_of_birth,
+          address: nurse.basic.address,
+          city: nurse.basic.city,
+          state: nurse.basic.state,
+          pin_code: nurse.basic.pin_code,
+          languages: nurse.basic.languages,
+          experience: nurse.basic.experience,
+          service_type: nurse.basic.service_type,
+          shift_pattern: nurse.basic.shift_pattern,
+          category: nurse.basic.category,
+          status: nurse.basic.status,
+          marital_status: nurse.basic.marital_status,
+          religion: nurse.basic.religion,
+          mother_tongue: nurse.basic.mother_tongue
+        },
+        health: nurse.health ? {
+          health_status: nurse.health.health_status,
+          disability: nurse.health.disability,
+          source: nurse.health.source
+        } : null,
+        references: nurse.references ? {
+          referer_name: nurse.references.referer_name,
+          phone_number: nurse.references.phone_number,
+          relation: nurse.references.relation,
+          description: nurse.references.description,
+          family_references: nurse.references.family_references
+        } : null,
+        documents: {
+          profile_image: nurse.documents.profile_image,
+          adhar: nurse.documents.adhar,
+          educational: nurse.documents.educational,
+          experience: nurse.documents.experience,
+          noc: nurse.documents.noc,
+          ration: nurse.documents.ration
+        }
+      });
+    }
+  }, [nurse]);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (!formData) return;
+  
+    const { name, value } = e.target;
+    const [section, field] = name.split('.');
+  
+    setFormData(prev => {
+      if (!prev) return prev;
+  
+      switch (section) {
+        case 'basic':
+          return {
+            ...prev,
+            basic: {
+              ...prev.basic,
+              [field]: field === 'pin_code' || field === 'experience'
+                ? value ? Number(value) : null
+                : field === 'languages'
+                  ? value.split(',')
+                  : value
+            }
+          };
+  
+        case 'health':
+          return {
+            ...prev,
+            health: prev.health ? {
+              ...prev.health,
+              [field]: value
+            } : {
+              health_status: null,
+              disability: null,
+              source: null,
+              [field]: value
+            }
+          };
+  
+        case 'references':
+          return {
+            ...prev,
+            references: prev.references ? {
+              ...prev.references,
+              [field]: value
+            } : {
+              referer_name: null,
+              phone_number: null,
+              relation: null,
+              description: null,
+              family_references: null,
+              [field]: value
+            }
+          };
+  
+        default:
+          return prev;
+      }
+    });
   };
+
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
     const { files } = e.target;
@@ -383,48 +451,8 @@ const EditNurseProfilePage: React.FC = () => {
     });
   };
 
-  const handleRemoveDocument = (type: DocumentField, index?: number) => {
-    setFormData(prev => {
-      if (!prev.documents) return prev;
-      
-      const newDocs = { ...prev.documents };
-      
-      if (type === 'educationalQualification' || type === 'workExperience') {
-        const docs = newDocs[type];
-        if (docs && Array.isArray(docs) && typeof index === 'number') {
-          const updatedArray = [...docs.slice(0, index), ...docs.slice(index + 1)];
-          if (updatedArray.length === 0) {
-            delete newDocs[type];
-          } else {
-            newDocs[type] = updatedArray;
-          }
-        }
-      } else {
-        delete newDocs[type];
-      }
-      
-      return { ...prev, documents: newDocs };
-    });
-  };
-
-  const calculateAge = (dob: string) => {
-    const diff = Date.now() - new Date(dob).getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-  };
-
-  const handleAddLocation = (location: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferredLocations: [...(prev.preferredLocations || []), location]
-    }));
-  };
-
-  const handleRemoveLocation = (location: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferredLocations: (prev.preferredLocations || []).filter(loc => loc !== location)
-    }));
-  };
+  
+ 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -467,7 +495,7 @@ const EditNurseProfilePage: React.FC = () => {
               </h1>
               <div className="flex gap-3">
                 <Link
-                  href={`/nurses/${nurse._id}`}
+                  href={`/nurses/${nurse.basic.nurse_id}`}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg 
                     hover:bg-gray-200 transition-all duration-200 text-sm font-medium"
                 >
@@ -487,57 +515,88 @@ const EditNurseProfilePage: React.FC = () => {
           </div>
 
           <div className="p-6 space-y-6">
+            {/* Personal Information Section */}
             <section className="bg-gray-50 rounded-lg p-5">
               <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
                 Personal Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="space-y-4">
-                  <FormInput label="First Name" name="firstName" value={formData.firstName} onChange={handleInputChange} />
-                  <FormInput label="Last Name" name="lastName" value={formData.lastName} onChange={handleInputChange} />
-                  <FormInput label="Address" name="address" value={formData.address} onChange={handleInputChange} />
-                  <FormInput label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} type="tel" />
-                  <FormInput label="Email" name="email" value={formData.email} onChange={handleInputChange} type="email" />
+                  <FormInput 
+                    label="First Name" 
+                    name="basic.first_name" 
+                    value={formData?.basic.first_name || ''} 
+                    onChange={handleInputChange} 
+                  />
+                  <FormInput 
+                    label="Last Name" 
+                    name="basic.last_name" 
+                    value={formData?.basic.last_name || ''} 
+                    onChange={handleInputChange} 
+                  />
+                  <FormInput 
+                    label="Email" 
+                    name="basic.email" 
+                    value={formData?.basic.email || ''} 
+                    onChange={handleInputChange} 
+                    type="email" 
+                  />
+                  <FormInput 
+                    label="Phone Number" 
+                    name="basic.phone_number" 
+                    value={formData?.basic.phone_number || ''} 
+                    onChange={handleInputChange} 
+                  />
                   <FormSelect 
                     label="Gender"
-                    name="gender"
-                    value={formData.gender}
+                    name="basic.gender"
+                    value={formData?.basic.gender || ''}
                     onChange={handleInputChange}
                     options={[
                       { value: "", label: "Select Gender" },
                       { value: "Male", label: "Male" },
-                      { value: "Female", label: "Female" },
-                      { value: "Other", label: "Other" }
+                      { value: "Female", label: "Female" }
                     ]}
                   />
-                  <div className="space-y-1">
-                    <label className="block text-xs font-medium text-gray-600">Date of Birth</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="date"
-                        name="dob"
-                        value={formData.dob || ""}
-                        onChange={handleInputChange}
-                        className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm 
-                          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
-                          transition-all duration-200"
-                      />
-                      <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm text-gray-600 min-w-[80px] text-center">
-                        Age: {formData.dob ? calculateAge(formData.dob) : "-"}
-                      </div>
-                    </div>
-                  </div>
+                  <FormInput 
+                    label="Date of Birth" 
+                    name="basic.date_of_birth" 
+                    value={formData?.basic.date_of_birth || ''} 
+                    onChange={handleInputChange} 
+                    type="date"
+                  />
                 </div>
 
                 <div className="space-y-4">
-                  <FormInput label="City" name="city" value={formData.city} onChange={handleInputChange} />
-                  <FormInput label="Taluk" name="taluk" value={formData.taluk} onChange={handleInputChange} />
-                  <FormInput label="PIN Code" name="pinCode" value={formData.pinCode} onChange={handleInputChange} />
-                  <FormInput label="State" name="state" value={formData.state} onChange={handleInputChange} />
+                  <FormInput 
+                    label="Address" 
+                    name="basic.address" 
+                    value={formData?.basic.address || ''} 
+                    onChange={handleInputChange} 
+                  />
+                  <FormInput 
+                    label="City" 
+                    name="basic.city" 
+                    value={formData?.basic.city || ''} 
+                    onChange={handleInputChange} 
+                  />
+                  <FormInput 
+                    label="State" 
+                    name="basic.state" 
+                    value={formData?.basic.state || ''} 
+                    onChange={handleInputChange} 
+                  />
+                  <FormInput 
+                    label="PIN Code" 
+                    name="basic.pin_code" 
+                    value={formData?.basic.pin_code?.toString() || ''} 
+                    onChange={handleInputChange} 
+                    type="number"
+                  />
                   <FormSelect
                     label="Religion"
-                    name="religion"
-                    value={formData.religion}
+                    name="basic.religion"
+                    value={formData?.basic.religion || ''}
                     onChange={handleInputChange}
                     options={[
                       { value: "", label: "Select Religion" },
@@ -548,96 +607,63 @@ const EditNurseProfilePage: React.FC = () => {
                   />
                   <FormSelect
                     label="Marital Status"
-                    name="maritalStatus"
-                    value={formData.maritalStatus}
+                    name="basic.marital_status"
+                    value={formData?.basic.marital_status || ''}
                     onChange={handleInputChange}
                     options={[
                       { value: "", label: "Select Marital Status" },
                       { value: "Single", label: "Single" },
-                      { value: "Married", label: "Married" },
-                      { value: "Widow", label: "Widow" },
-                      { value: "Separated", label: "Separated" }
+                      { value: "Married", label: "Married" }
                     ]}
                   />
                 </div>
 
                 <div className="space-y-4">
-                  <FormMultiSelect
-                    label="Preferred Locations"
-                    values={formData.preferredLocations || []}
-                    onAdd={handleAddLocation}
-                    onRemove={handleRemoveLocation}
-                    options={[
-                      { value: "Kollam", label: "Kollam" },
-                      { value: "Palakkad", label: "Palakkad" },
-                      { value: "Malappuram", label: "Malappuram" },
-                      { value: "Kochi", label: "Kochi" },
-                      { value: "Trivandrum", label: "Trivandrum" },
-                      { value: "Kozhikode", label: "Kozhikode" },
-                      { value: "Thrissur", label: "Thrissur" }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    ]} name={''} onChange={function (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void {
-                      throw new Error('Function not implemented.');
-                    } }                  />
+                  <FormInput 
+                    label="Mother Tongue" 
+                    name="basic.mother_tongue" 
+                    value={formData?.basic.mother_tongue || ''} 
+                    onChange={handleInputChange} 
+                  />
                   <FormSelect
                     label="Service Type"
-                    name="serviceType"
-                    value={formData.serviceType}
+                    name="basic.service_type"
+                    value={formData?.basic.service_type || ''}
                     onChange={handleInputChange}
                     options={[
                       { value: "", label: "Select Service Type" },
                       { value: "Home Nurse", label: "Home Nurse" },
                       { value: "Delivery Care", label: "Delivery Care" },
-                      { value: "Baby Care", label: "Baby Care" },
-                      { value: "HM", label: "HM" }
+                      { value: "Baby Care", label: "Baby Care" }
                     ]}
                   />
                   <FormSelect
-                    label="Shifting Pattern"
-                    name="shiftingPattern"
-                    value={formData.shiftingPattern}
+                    label="Shift Pattern"
+                    name="basic.shift_pattern"
+                    value={formData?.basic.shift_pattern || ''}
                     onChange={handleInputChange}
                     options={[
                       { value: "", label: "Select Shift Pattern" },
                       { value: "24 Hour", label: "24 Hour" },
                       { value: "12 Hour", label: "12 Hour" },
-                      { value: "8 Hour", label: "8 Hour" },
-                      { value: "Hourly", label: "Hourly" }
+                      { value: "8 Hour", label: "8 Hour" }
                     ]}
                   />
                   <FormSelect
-                    label="Staff Category"
-                    name="staffCategory"
-                    value={formData.staffCategory}
+                    label="Category"
+                    name="basic.category"
+                    value={formData?.basic.category || ''}
                     onChange={handleInputChange}
                     options={[
-                      { value: "", label: "Select Staff Category" },
+                      { value: "", label: "Select Category" },
                       { value: "Permanent", label: "Permanent" },
-                      { value: "Trainee", label: "Trainee" },
                       { value: "Temporary", label: "Temporary" }
                     ]}
                   />
                   <FormInput 
-                    label="Salary Per Hour" 
-                    name="salaryPerHour" 
-                    value={formData.salaryPerHour} 
-                    onChange={handleInputChange} 
-                    type="number"
-                  />
-                  <div className="space-y-1">
-                    <label className={formFieldStyles.label}>Hiring Date</label>
-                    <input
-                      type="date"
-                      name="hiringDate"
-                      value={formData.hiringDate || ""}
-                      onChange={handleInputChange}
-                      className={formFieldStyles.input}
-                    />
-                  </div>
-                  <FormInput 
                     label="Experience (Years)" 
-                    name="experience" 
-                    value={formData.experience} 
+                    name="basic.experience" 
+                    value={formData?.basic.experience?.toString() || ''} 
                     onChange={handleInputChange} 
                     type="number"
                   />
@@ -645,15 +671,108 @@ const EditNurseProfilePage: React.FC = () => {
               </div>
             </section>
 
+            {/* Health Information Section */}
+            <section className="bg-gray-50 rounded-lg p-5">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Health Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <FormTextArea
+                  label="Health Status"
+                  name="health.health_status"
+                  value={formData?.health?.health_status || ''}
+                  onChange={handleInputChange}
+                />
+                <FormTextArea
+                  label="Disability"
+                  name="health.disability"
+                  value={formData?.health?.disability || ''}
+                  onChange={handleInputChange}
+                />
+                <FormInput
+                  label="Source"
+                  name="health.source"
+                  value={formData?.health?.source || ''}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </section>
+
+            {/* References Section */}
+<section className="bg-gray-50 rounded-lg p-5">
+  <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+    References
+  </h2>
+  <div className="space-y-6">
+    {/* Primary Reference */}
+    <div>
+      <h3 className="text-sm font-medium text-gray-700 mb-3">Primary Reference</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormInput 
+          label="Name" 
+          name="references.referer_name" 
+          value={formData?.references?.referer_name || ''} 
+          onChange={handleInputChange} 
+        />
+        <FormInput 
+          label="Relation" 
+          name="references.relation" 
+          value={formData?.references?.relation || ''} 
+          onChange={handleInputChange} 
+        />
+        <FormInput 
+          label="Phone Number" 
+          name="references.phone_number" 
+          value={formData?.references?.phone_number || ''} 
+          onChange={handleInputChange} 
+        />
+      </div>
+      <div className="mt-4">
+        <FormTextArea 
+          label="Description" 
+          name="references.description" 
+          value={formData?.references?.description || ''} 
+          onChange={handleInputChange} 
+        />
+      </div>
+    </div>
+
+    {/* Family References */}
+    <div>
+      <h3 className="text-sm font-medium text-gray-700 mb-3">Family References</h3>
+      {[0, 1].map((index) => (
+        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <FormInput 
+            label="Name" 
+            name={`references.family_references.${index}.name`}
+            value={formData?.references?.family_references?.[index]?.name || ''}
+            onChange={handleInputChange}
+          />
+          <FormInput 
+            label="Relation" 
+            name={`references.family_references.${index}.relation`}
+            value={formData?.references?.family_references?.[index]?.relation || ''}
+            onChange={handleInputChange}
+          />
+          <FormInput 
+            label="Phone" 
+            name={`references.family_references.${index}.phone`}
+            value={formData?.references?.family_references?.[index]?.phone || ''}
+            onChange={handleInputChange}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
             <section className="bg-gray-50 rounded-lg p-5">
               <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
                 Profile Image
               </h2>
               <div className="flex items-center gap-4">
-              {formData.profileImage?.url && (
+              {formData?.documents.profile_image && (
             <div className="relative w-16 h-16">
     <Image
-      src={formData.profileImage.url}
+      src={formData.documents.profile_image}
       alt="Profile"
       fill
       className="rounded-full border border-gray-200 object-cover"
@@ -672,9 +791,9 @@ const EditNurseProfilePage: React.FC = () => {
                       hover:file:bg-blue-100 transition-all duration-200"
                     accept=".jpg,.jpeg,.png"
                   />
-                  {formData.profileImage?.name && (
+                  {formData?.documents.profile_image && (
                     <span className="text-xs text-gray-500 block">
-                      Current: {formData.profileImage.name}
+                      Current: {formData.documents.profile_image}
                     </span>
                   )}
                 </div>
@@ -699,7 +818,7 @@ const EditNurseProfilePage: React.FC = () => {
                           hover:file:bg-blue-100 transition-all duration-200"
                         accept=".pdf,.jpg,.jpeg,.png"
                       />
-                      {formData.documents?.[doc.type] && (
+                      {/* {formData.documents?.[doc.type] && (
                         <div className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
                           <span className="text-xs text-gray-600">
                             Current: {
@@ -716,7 +835,7 @@ const EditNurseProfilePage: React.FC = () => {
                             Remove
                           </button>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 ))}
@@ -753,7 +872,7 @@ const EditNurseProfilePage: React.FC = () => {
                           </button>
                         </div>
                       ))}
-                      {Array.isArray(formData.documents?.[doc.type]) && (formData.documents?.[doc.type] as DocumentType[]).map((file, index) => (
+                      {/* {Array.isArray(formData.documents?.[doc.type]) && (formData.documents?.[doc.type] as DocumentType[]).map((file, index) => (
                         <div key={`existing-${index}`} className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
                           <span className="text-xs text-gray-600">
                             {(file as DocumentType).name}
@@ -766,11 +885,11 @@ const EditNurseProfilePage: React.FC = () => {
                             Remove
                           </button>
                         </div>
-                      ))}
+                      ))} */}
                     </div>
                   </div>
                 ))}
-                <div>
+                {/* <div>
                   <FormSelect
                     label="NOC Certificate Status"
                     name="nocCertificate"
@@ -814,50 +933,11 @@ const EditNurseProfilePage: React.FC = () => {
                       </div>
                     </div>
                   )}
-                </div>
+                </div> */}
               </div>
             </section>
 
-            <section className="bg-gray-50 rounded-lg p-5">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                References
-              </h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Primary Reference</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput label="Name" name="primaryReference.name" value={formData.primaryReference?.name} onChange={handleInputChange} />
-                    <FormInput label="Relation" name="primaryReference.relation" value={formData.primaryReference?.relation} onChange={handleInputChange} />
-                    <FormInput label="Phone Number" name="primaryReference.phoneNumber" value={formData.primaryReference?.phoneNumber} onChange={handleInputChange} />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Family References</h3>
-                  {[0, 1].map((index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <FormInput 
-                        label="Name" 
-                        name={`familyReferences[${index}].name`}
-                        value={formData.familyReferences?.[index]?.name}
-                        onChange={handleInputChange}
-                      />
-                      <FormInput 
-                        label="Relation" 
-                        name={`familyReferences[${index}].relation`}
-                        value={formData.familyReferences?.[index]?.relation}
-                        onChange={handleInputChange}
-                      />
-                      <FormInput 
-                        label="Phone Number" 
-                        name={`familyReferences[${index}].phoneNumber`}
-                        value={formData.familyReferences?.[index]?.phoneNumber}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
+           
 
             <section className="bg-gray-50 rounded-lg p-5">
               <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
@@ -867,13 +947,13 @@ const EditNurseProfilePage: React.FC = () => {
                 <FormTextArea
                   label="Current Health Status"
                   name="healthStatus"
-                  value={formData.healthStatus}
+                  value={formData?.health?.health_status||""}
                   onChange={handleInputChange}
                 />
                 <FormTextArea
                   label="Disability Details"
                   name="disabilityDetails"
-                  value={formData.disabilityDetails}
+                  value={formData?.health?.disability||""}
                   onChange={handleInputChange}
                 />
               </div>
