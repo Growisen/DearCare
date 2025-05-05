@@ -103,22 +103,6 @@ export default function PatientAssessmentPage() {
 
       const formattedData = {
         ...formData,
-        lab_investigations: {
-          hb: formData.hb,
-          rbc: formData.rbc,
-          esr: formData.esr,
-          urine: formData.urine,
-          sodium: formData.sodium,
-          other: formData.otherLabInvestigations
-        },
-        environment: {
-          isClean: formData.isClean,
-          isVentilated: formData.isVentilated,
-          isDry: formData.isDry,
-          hasNatureView: formData.hasNatureView,
-          hasSocialInteraction: formData.hasSocialInteraction,
-          hasSupportiveEnv: formData.hasSupportiveEnv
-        }
       };
 
       const assessmentResult = await savePatientAssessment({

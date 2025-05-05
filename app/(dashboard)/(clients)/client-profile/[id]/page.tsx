@@ -79,19 +79,20 @@ interface Patient {
   email: string;
   phoneNumber: string;
   clientCategory: 'DearCare' | 'TataLife';
+  profileImage?: string | null; // Add this line
   requestor: { 
     name: string;
     relation: string;
     phone: string;
     email: string;
-  };
+    profileImage?: string | null;
+  }
   emergencyContact: {
     name: string;
     relation: string;
     phone: string;
   };
   assessments: PatientAssessmentDataForApprovedClients[];
-  profileImage?: string;
   nurseAssignments?: NurseAssignment[];
 }
 
@@ -172,11 +173,13 @@ const PatientProfilePage = () => {
                 email: '', // Patient's email if available
                 phoneNumber: clientData.details?.patient_phone || '',
                 clientCategory: clientData.client_category || 'DearCare',
+                profileImage: clientData.details?.patient_profile_pic_url || '',
                 requestor: {
                   name: clientData.details?.requestor_name || '',
                   relation: clientData.details?.relation_to_patient || '',
                   phone: clientData.details?.requestor_phone || '',
-                  email: clientData.details?.requestor_email || ''
+                  email: clientData.details?.requestor_email || '',
+                  profileImage: clientData.details?.requestor_profile_pic_url || ''
                 },
                 emergencyContact: {
                   name: clientData.details?.requestor_name || '',
@@ -315,11 +318,13 @@ const PatientProfilePage = () => {
             email: '', // Patient's email if available
             phoneNumber: clientData.details?.patient_phone || '',
             clientCategory: clientData.client_category || 'DearCare',
+            profileImage: clientData.details?.patient_profile_pic_url || '',
             requestor: {
               name: clientData.details?.requestor_name || '',
               relation: clientData.details?.relation_to_patient || '',
               phone: clientData.details?.requestor_phone || '',
-              email: clientData.details?.requestor_email || ''
+              email: clientData.details?.requestor_email || '',
+              profileImage: clientData.details?.requestor_profile_pic_url || ''
             },
             emergencyContact: {
               name: clientData.details?.requestor_name || '',

@@ -80,6 +80,9 @@ export interface IndividualFormData extends BaseFormData {
   careDuration: string;
   startDate: string;
   preferredCaregiverGender: string;
+
+  requestorProfilePic?: File | null;
+  patientProfilePic?: File | null;
 }
 
 export interface OrganizationFormData extends BaseFormData {
@@ -140,6 +143,10 @@ export interface DetailedClientIndividual {
     start_date?: string;
     complete_address?: string;
     preferred_caregiver_gender?: string;
+    requestor_profile_pic_url?: string | null;
+    requestor_profile_pic?: string | null;
+    patient_profile_pic?: string | null;
+    patient_profile_pic_url?: string | null;
   };
   general_notes?: string;
 }
@@ -213,8 +220,6 @@ export interface PatientAssessmentData {
   hasSocialInteraction: boolean;
   hasSupportiveEnv: boolean;
   equipment: Json;
-  environment: Json;
-  lab_investigations: Json;
 }
 
 export interface SavePatientAssessmentParams {

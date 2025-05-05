@@ -25,7 +25,7 @@ interface NurseCardProps {
   onReviewDetails?: (nurse: NurseBasicInfo) => void;
 }
 
-const NurseCard = ({ nurse, onReviewDetails }: NurseCardProps) => {
+const NurseCard = ({ nurse }: NurseCardProps) => {
   const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
   const router = useRouter();
   

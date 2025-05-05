@@ -8,6 +8,7 @@ import { PendingContent } from '../components/client/PendingContent';
 import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization } from '../types/client.types';
 import { getClientDetails } from '../app/actions/client-actions';
+import Image from 'next/image';
 
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
@@ -94,6 +95,34 @@ export function ClientDetailsOverlay({
     }
   };
 
+
+  function ProfileImage({ src, alt, size = "md" }: { src: string | null | undefined; alt: string; size?: "sm" | "md" | "lg" }) {
+    const sizeClasses = {
+      sm: "w-12 h-12",
+      md: "w-16 h-16",
+      lg: "w-20 h-20"
+    };
+    
+    const imageSize = size === "sm" ? 48 : size === "md" ? 64 : 80;
+    
+    return src ? (
+      <div className="flex flex-col items-center">
+        <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-100 border border-gray-200`}>
+          <Image 
+            src={src} 
+            alt={alt} 
+            width={imageSize}
+            height={imageSize}
+            className="w-full h-full object-cover" 
+            onError={(e) => {
+              e.currentTarget.src = "/images/default-avatar.png";
+            }}
+          />
+        </div>
+      </div>
+    ) : null;
+  }
+
   const renderDetailedInformation = () => {
     if (loading) {
       return <div className="p-4 text-gray-700 text-center">Loading client details...</div>;
@@ -112,20 +141,48 @@ export function ClientDetailsOverlay({
         </h3>
         
         {isIndividual ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-y-4 gap-x-6">
-            <DetailItem label="Patient Name" value={detailedClient.details?.patient_name} />
-            <DetailItem label="Patient Age" value={detailedClient.details?.patient_age} />
-            <DetailItem label="Patient Gender" value={detailedClient.details?.patient_gender} />
-            <DetailItem label="Patient Phone" value={detailedClient.details?.patient_phone} />
-            <DetailItem label="Requestor Name" value={detailedClient.details?.requestor_name} />
-            <DetailItem label="Relation to Patient" value={detailedClient.details?.relation_to_patient} />
-            <DetailItem label="Requestor Email" value={detailedClient.details?.requestor_email} />
-            <DetailItem label="Requestor Phone" value={detailedClient.details?.requestor_phone} />
-            <DetailItem label="Service Required" value={detailedClient.details?.service_required} />
-            <DetailItem label="Care Duration" value={detailedClient.details?.care_duration} />
-            <DetailItem label="Start Date" value={detailedClient.details?.start_date} />
-            <DetailItem label="Complete Address" value={detailedClient.details?.complete_address} />
-            <DetailItem label="Preferred Caregiver Gender" value={detailedClient.details?.preferred_caregiver_gender} />
+          <div>
+          {/* Profile Images Section */}
+            <div className="flex flex-wrap gap-8 mb-6">
+              {detailedClient.details?.patient_profile_pic_url && (
+                <div className="flex flex-col items-center">
+                  <ProfileImage 
+                    src={detailedClient.details.patient_profile_pic_url} 
+                    alt="Patient" 
+                    size="lg" 
+                  />
+                  <p className="text-sm font-medium mt-2 text-gray-700">Patient</p>
+                  <p className="text-xs text-gray-500">{detailedClient.details?.patient_name}</p>
+                </div>
+              )}
+              
+              {detailedClient.details?.requestor_profile_pic_url && (
+                <div className="flex flex-col items-center">
+                  <ProfileImage 
+                    src={detailedClient.details.requestor_profile_pic_url} 
+                    alt="Requestor" 
+                    size="lg" 
+                  />
+                  <p className="text-sm font-medium mt-2 text-gray-700">Requestor</p>
+                  <p className="text-xs text-gray-500">{detailedClient.details?.requestor_name}</p>
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-y-4 gap-x-6">
+              <DetailItem label="Patient Name" value={detailedClient.details?.patient_name} />
+              <DetailItem label="Patient Age" value={detailedClient.details?.patient_age} />
+              <DetailItem label="Patient Gender" value={detailedClient.details?.patient_gender} />
+              <DetailItem label="Patient Phone" value={detailedClient.details?.patient_phone} />
+              <DetailItem label="Requestor Name" value={detailedClient.details?.requestor_name} />
+              <DetailItem label="Relation to Patient" value={detailedClient.details?.relation_to_patient} />
+              <DetailItem label="Requestor Email" value={detailedClient.details?.requestor_email} />
+              <DetailItem label="Requestor Phone" value={detailedClient.details?.requestor_phone} />
+              <DetailItem label="Service Required" value={detailedClient.details?.service_required} />
+              <DetailItem label="Care Duration" value={detailedClient.details?.care_duration} />
+              <DetailItem label="Start Date" value={detailedClient.details?.start_date} />
+              <DetailItem label="Complete Address" value={detailedClient.details?.complete_address} />
+              <DetailItem label="Preferred Caregiver Gender" value={detailedClient.details?.preferred_caregiver_gender} />
+            </div>
           </div>
         ) : (
           <div className="space-y-6">

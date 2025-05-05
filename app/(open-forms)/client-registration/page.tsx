@@ -8,7 +8,7 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import InputField from '@/components/open-form/InputField';
-
+import ProfileImageUpload from '@/components/open-form/ProfileImageUpload';
 
 export default function ClientFormPage() {
   const router = useRouter();
@@ -30,6 +30,10 @@ export default function ClientFormPage() {
     patientGender: '',
     patientPhone: '',
     completeAddress: '',
+    
+    // New fields for profile pictures
+    requestorProfilePic: null,
+    patientProfilePic: null,
     
     // Organization/Hospital/Carehome Fields
     organizationName: '',
@@ -64,6 +68,13 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
     [id as keyof FormData]: value
   }));
 }, []);
+
+  const handleProfileImageChange = (field: 'requestorProfilePic' | 'patientProfilePic', file: File | null) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: file
+    }));
+  };
 
   const handleStaffRequirementsChange = (staffRequirements: StaffRequirement[], startDate?: string) => {
     setFormData(prev => ({
@@ -111,6 +122,8 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
           careDuration: formData.careDuration,
           startDate: formData.startDate,
           preferredCaregiverGender: formData.preferredCaregiverGender || '',
+          requestorProfilePic: formData.requestorProfilePic,
+          patientProfilePic: formData.patientProfilePic,
         });
         
       } else {
@@ -378,6 +391,15 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
                           <option value="other">Other</option>
                         </select>
                       </div>
+                    
+                      <div className="md:col-span-2">
+                        <ProfileImageUpload
+                          id="requestorProfilePic"
+                          label="Your Profile Picture"
+                          value={formData.requestorProfilePic}
+                          onChange={(file) => handleProfileImageChange('requestorProfilePic', file)}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -433,6 +455,15 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
                           value={formData.completeAddress} 
                           onChange={handleInputChange}
                           required={true}
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <ProfileImageUpload
+                          id="patientProfilePic"
+                          label="Patient's Profile Picture"
+                          value={formData.patientProfilePic}
+                          onChange={(file) => handleProfileImageChange('patientProfilePic', file)}
                         />
                       </div>
                     </div>
