@@ -26,6 +26,9 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       // Validate file size (limit to 2MB)
       if (file.size > 2 * 1024 * 1024) {
         alert('File size must be less than 2MB');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         return;
       }
       

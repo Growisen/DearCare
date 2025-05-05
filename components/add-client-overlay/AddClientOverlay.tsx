@@ -12,6 +12,7 @@ import { PatientInfoForm } from './PatientInfoForm';
 import { OrganizationInfoForm } from './OrganizationInfoForm';
 import { IndividualCareRequirements } from './IndividualCareRequirements';
 import { FormActions } from './FormActions';
+import ProfileImageUpload from '../open-form/ProfileImageUpload';
 
 interface FormErrors {
   [key: string]: string;
@@ -36,6 +37,8 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     patientGender: '',
     patientPhone: '',
     completeAddress: '',
+    patientProfilePic: null,
+    requestorProfilePic: null,
     
     // Organization/Hospital/Carehome Fields
     organizationName: '',
@@ -309,6 +312,8 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
           careDuration: formData.careDuration,
           startDate: formData.startDate,
           preferredCaregiverGender: formData.preferredCaregiverGender || '',
+          patientProfilePic: formData.patientProfilePic,
+          requestorProfilePic: formData.requestorProfilePic,
         });
         
       } else {
@@ -388,6 +393,20 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
                 handleBlur={handleBlur}
               />
 
+              <div className="mb-6">
+                <ProfileImageUpload
+                  id="requestorProfilePic"
+                  label="Requestor's Profile Picture"
+                  value={formData.requestorProfilePic}
+                  onChange={(file) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      requestorProfilePic: file
+                    }));
+                  }}
+                />
+              </div>
+
               <PatientInfoForm 
                 formData={{
                   patientName: formData.patientName,
@@ -400,6 +419,20 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
                 handleInputChange={handleInputChange}
                 handleBlur={handleBlur}
               />
+
+              <div className="mb-6">
+                <ProfileImageUpload
+                  id="patientProfilePic"
+                  label="Patient's Profile Picture"
+                  value={formData.patientProfilePic}
+                  onChange={(file) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      patientProfilePic: file
+                    }));
+                  }}
+                />
+              </div>
             </>
           ) : (
             // Organization/Hospital/Carehome Fields
