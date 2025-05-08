@@ -360,13 +360,13 @@ export async function getClients(
       const individualClientsQuery = supabase
         .from('individual_clients')
         .select('client_id')
-        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%`);
+        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
       
       // Then handle organization_clients search
       const organizationClientsQuery = supabase
         .from('organization_clients')
         .select('client_id')
-        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%`);
+        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
         
       // Execute both queries
       const [individualResults, organizationResults] = await Promise.all([
@@ -1163,7 +1163,6 @@ export async function exportClients(
     let query = supabase
       .from('clients')
       .select(`
-        id,
         client_type,
         status,
         created_at,
@@ -1173,16 +1172,23 @@ export async function exportClients(
           requestor_phone, 
           requestor_email,
           patient_name,
+          patient_age,
+          patient_gender,
           complete_address,
           service_required,
-          start_date
+          start_date,
+          care_duration,
+          relation_to_patient
         ),
         organization_clients:organization_clients(
           organization_name,
+          organization_type,
           contact_person_name,
+          contact_person_role,
           contact_phone,
           contact_email,
-          organization_address
+          organization_address,
+          start_date
         )
       `)
     
@@ -1196,12 +1202,12 @@ export async function exportClients(
       const individualClientsQuery = supabase
         .from('individual_clients')
         .select('client_id')
-        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%`);
+        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
       
       const organizationClientsQuery = supabase
         .from('organization_clients')
         .select('client_id')
-        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%`);
+        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
         
       const [individualResults, organizationResults] = await Promise.all([
         individualClientsQuery,
@@ -1218,7 +1224,8 @@ export async function exportClients(
       } else {
         return { 
           success: true, 
-          clients: []
+          clients: [],
+          clientsData: []
         };
       }
     }
@@ -1231,6 +1238,25 @@ export async function exportClients(
       return { success: false, error: error.message }
     }
     
+    // Create detailed data for export
+    const clientsData = data.map(record => {
+      const isIndividual = record.client_type === 'individual';
+      const individualData = isIndividual ? 
+        (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients) : null;
+      const organizationData = !isIndividual ? 
+        (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients) : null;
+        
+      return {
+        client_type: record.client_type,
+        status: record.status,
+        created_at: record.created_at,
+        general_notes: record.general_notes,
+        ...individualData,
+        ...organizationData
+      };
+    });
+    
+    // Also keep the regular client objects for backward compatibility
     const clients = data.map(record => {
       const isIndividual = record.client_type === 'individual'
       const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
@@ -1241,7 +1267,6 @@ export async function exportClients(
         : record.organization_clients) : null
       
       return {
-        id: record.id,
         name: isIndividual 
           ? individualData?.patient_name || "Unknown" 
           : organizationData?.organization_name || "Unknown",
@@ -1259,7 +1284,8 @@ export async function exportClients(
       
     return { 
       success: true, 
-      clients
+      clients,
+      clientsData
     }
     
   } catch (error: unknown) {
@@ -1267,7 +1293,8 @@ export async function exportClients(
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred', 
-      clients: [] 
+      clients: [],
+      clientsData: []
     }
   }
 }
