@@ -21,6 +21,7 @@ interface ProfileHeaderProps {
   handleCancel: () => void;
   handleCategoryChange: (category: 'DearCare' | 'TataLife') => Promise<void>;
   setShowNurseList: (show: boolean) => void;
+  onDelete: () => void;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -31,7 +32,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   handleSave,
   handleCancel,
   handleCategoryChange,
-  setShowNurseList
+  setShowNurseList,
+  onDelete
 }) => {
   return (
     <div className="bg-gray-100 border-b border-gray-200 px-6 py-4">
@@ -87,37 +89,43 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </div>
         
         {/* Action buttons */}
-        <div className="flex items-center gap-2">
-          {isEditing ? (
+        <div className="flex items-center space-x-3">
+          {!isEditing ? (
             <>
-              <button 
-                onClick={handleSave}
-                className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
+              <button
+                onClick={handleEdit}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
               >
-                Save Changes
+                Edit Profile
               </button>
-              <button 
-                onClick={handleCancel}
-                className="px-4 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
+              {status === 'approved' && (
+                <button
+                  onClick={() => setShowNurseList(true)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                >
+                  Assign Nurse
+                </button>
+              )}
+              <button
+                onClick={onDelete}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
               >
-                Cancel
+                Delete Client
               </button>
             </>
           ) : (
             <>
-              {status === 'approved' && (
-                  <button 
-                    onClick={() => setShowNurseList(true)}
-                    className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-                  >
-                    Assign Nurse
-                  </button>
-                )}
-              <button 
-                onClick={handleEdit}
-                className="px-4 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-sm font-medium"
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
               >
-                Edit Details
+                Save Changes
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Cancel
               </button>
             </>
           )}

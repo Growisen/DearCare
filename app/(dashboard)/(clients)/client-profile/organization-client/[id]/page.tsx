@@ -9,7 +9,7 @@ import NurseAssignmentsList from '@/components/client/NurseAssignmentsList'
 import { Nurse } from '@/types/staff.types'
 import Link from 'next/link'
 import CategorySelector from '@/components/client/Profile/CategorySelector'
-import { updateClientCategory, getOrganizationClientDetails, getClientStatus } from '@/app/actions/client-actions'
+import { updateClientCategory, getOrganizationClientDetails, getClientStatus, deleteClient } from '@/app/actions/client-actions'
 import { listNurses } from '@/app/actions/add-nurse'
 import { getNurseAssignments } from '@/app/actions/shift-schedule-actions'
 import EditAssignmentModal from '@/components/client/EditAssignmentModal';
@@ -72,6 +72,7 @@ const OrganizationClientProfile = () => {
   const [isLoadingNurses, setIsLoadingNurses] = useState(false)
   const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   // Utility function to handle undefined/null values
   const formatValue = (value: string | undefined | null, defaultText = 'Not specified'): string => {
     return value ? value.trim() : defaultText;
@@ -297,6 +298,23 @@ const OrganizationClientProfile = () => {
     }
   };
 
+  const handleDeleteClient = async () => {
+    try {
+      const result = await deleteClient(id as string);
+      if (result.success) {
+        toast.success('Organization deleted successfully');
+        window.location.href = '/clients';
+      } else {
+        toast.error(`Failed to delete organization: ${result.error}`);
+        setShowDeleteConfirmation(false);
+      }
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+      toast.error('An error occurred while deleting the organization');
+      setShowDeleteConfirmation(false);
+    }
+  };
+
   if (loading) return <Loader />
 
   if (error || !client) {
@@ -389,23 +407,26 @@ const OrganizationClientProfile = () => {
                       Cancel
                     </button>
                   </>
-                ) : null}
-                  {status === 'approved' && (
-                    <>
+                ) : (
+                  <>
+                    {status === 'approved' && (
+                      <>
+                        <button 
+                          onClick={() => setShowNurseList(true)}
+                          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          Assign Staff
+                        </button>
+                      </>
+                    )}
                     <button 
-                      onClick={() => setShowNurseList(true)}
-                      className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                      onClick={() => setShowDeleteConfirmation(true)}
+                      className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
                     >
-                      Assign Staff
+                      Delete Organization
                     </button>
-                    {/* <button 
-                      onClick={handleEdit}
-                      className="px-4 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-sm font-medium"
-                    >
-                      Edit Details
-                    </button> */}
                   </>
-                  )}
+                )}
               </div>
             </div>
           </div>
@@ -562,7 +583,12 @@ const OrganizationClientProfile = () => {
             </span> to this organization?
           </p>
         }
-        onConfirm={() => selectedNurse && handleAssignNurse(selectedNurse._id)}
+        onConfirm={() => {
+          if (selectedNurse) {
+            return handleAssignNurse(selectedNurse._id);
+          }
+          return Promise.resolve();
+        }}
         onCancel={() => setShowConfirmation(false)}
         confirmText="Confirm Assignment"
       />
@@ -576,6 +602,24 @@ const OrganizationClientProfile = () => {
           setEditingAssignment(null);
         }}
         onSave={handleUpdateAssignment}
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Organization"
+        message={
+          <div className="text-center">
+            <p className="text-red-600 font-semibold mb-2">Warning: This action cannot be undone!</p>
+            <p>Are you sure you want to delete this organization?</p>
+            <p className="mt-2 text-sm text-gray-600">
+              All associated data including staff requirements and nurse assignments will be permanently removed.
+            </p>
+          </div>
+        }
+        onConfirm={handleDeleteClient}
+        onCancel={() => setShowDeleteConfirmation(false)}
+        confirmText="Delete Organization"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
 
     </div>

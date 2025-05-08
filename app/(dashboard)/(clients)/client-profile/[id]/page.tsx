@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/loader';
 import { Json, DetailedClientIndividual } from '@/types/client.types';
-import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus } from '@/app/actions/client-actions';
+import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus, deleteClient } from '@/app/actions/client-actions';
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { Nurse } from '@/types/staff.types';
@@ -119,6 +119,7 @@ const PatientProfilePage = () => {
 
   const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   useEffect(() => {
 
@@ -491,6 +492,24 @@ const PatientProfilePage = () => {
     }
   };
 
+  const handleDeleteClient = async () => {
+    try {
+      const result = await deleteClient(id as string);
+      if (result.success) {
+        toast.success('Client deleted successfully');
+        
+        window.location.href = '/clients';
+      } else {
+        toast.error(`Failed to delete client: ${result.error}`);
+        setShowDeleteConfirmation(false); 
+      }
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('An error occurred while deleting the client');
+      setShowDeleteConfirmation(false);
+    }
+  };
+
 
   
 
@@ -530,6 +549,7 @@ const PatientProfilePage = () => {
             handleCancel={handleCancel}
             handleCategoryChange={handleCategoryChange}
             setShowNurseList={setShowNurseList}
+            onDelete={() => setShowDeleteConfirmation(true)}
           />
 
           {/* Main Content */}
@@ -590,7 +610,12 @@ const PatientProfilePage = () => {
             </span> to this patient?
           </p>
         }
-        onConfirm={() => selectedNurse && handleAssignNurse(selectedNurse._id)}
+        onConfirm={() => {
+          if (selectedNurse) {
+            return handleAssignNurse(selectedNurse._id);
+          }
+          return Promise.resolve();
+        }}
         onCancel={() => setShowConfirmation(false)}
         confirmText="Confirm Assignment"
       />
@@ -604,6 +629,24 @@ const PatientProfilePage = () => {
           setEditingAssignment(null);
         }}
         onSave={handleUpdateAssignment}
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Client"
+        message={
+          <div className="text-center">
+            <p className="text-red-600 font-semibold mb-2">Warning: This action cannot be undone!</p>
+            <p>Are you sure you want to delete this client?</p>
+            <p className="mt-2 text-sm text-gray-600">
+              All associated data including assessments and nurse assignments will be permanently removed.
+            </p>
+          </div>
+        }
+        onConfirm={handleDeleteClient}
+        onCancel={() => setShowDeleteConfirmation(false)}
+        confirmText="Delete Client"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
 
     </div>
