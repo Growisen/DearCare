@@ -9,6 +9,7 @@ import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization } from '../types/client.types';
 import { getClientDetails } from '../app/actions/client-actions';
 import Image from 'next/image';
+import { formatFieldValue } from '../utils/formatters';
 
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
@@ -28,6 +29,7 @@ export function ClientDetailsOverlay({
       if (client.id) {
         setLoading(true);
         const result = await getClientDetails(client.id);
+        console.log("client", result.client);
         if (result.success && result.client && result.client.status) {
           setRejectionReason(result.client.rejection_reason)
           setDetailedClient(result.client as DetailedClient);
@@ -141,8 +143,8 @@ export function ClientDetailsOverlay({
         </h3>
         
         {isIndividual ? (
-          <div>
-          {/* Profile Images Section */}
+          <div className="space-y-8">
+            {/* Profile Images Section */}
             <div className="flex flex-wrap gap-8 mb-6">
               {detailedClient.details?.patient_profile_pic_url && (
                 <div className="flex flex-col items-center">
@@ -168,23 +170,72 @@ export function ClientDetailsOverlay({
                 </div>
               )}
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-y-4 gap-x-6">
-              <DetailItem label="Patient Name" value={detailedClient.details?.patient_name} />
-              <DetailItem label="Patient Age" value={detailedClient.details?.patient_age} />
-              <DetailItem label="Patient Gender" value={detailedClient.details?.patient_gender} />
-              <DetailItem label="Patient Phone" value={detailedClient.details?.patient_phone} />
-              <DetailItem label="Requestor Name" value={detailedClient.details?.requestor_name} />
-              <DetailItem label="Relation to Patient" value={detailedClient.details?.relation_to_patient} />
-              <DetailItem label="Requestor Email" value={detailedClient.details?.requestor_email} />
-              <DetailItem label="Requestor Phone" value={detailedClient.details?.requestor_phone} />
-              <DetailItem label="Service Required" value={detailedClient.details?.service_required} />
-              <DetailItem label="Care Duration" value={detailedClient.details?.care_duration} />
-              <DetailItem label="Start Date" value={detailedClient.details?.start_date} />
-              <DetailItem label="Complete Address" value={detailedClient.details?.complete_address} />
-              <DetailItem label="Preferred Caregiver Gender" value={detailedClient.details?.preferred_caregiver_gender} />
+            
+            {/* Patient Information Section */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-800 mb-3 border-b pb-2">Patient Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                <DetailItem label="Patient Name" value={detailedClient.details?.patient_name} />
+                <DetailItem label="Patient Age" value={detailedClient.details?.patient_age} />
+                <DetailItem label="Patient Gender" value={detailedClient.details?.patient_gender} />
+                <DetailItem label="Patient Phone" value={detailedClient.details?.patient_phone} />
+                <DetailItem label="Preferred Caregiver Gender" value={detailedClient.details?.preferred_caregiver_gender} />
+              </div>
+            </div>
+            
+            {/* Patient Address Section */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-800 mb-3 border-b pb-2">Patient Address</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                <DetailItem label="Address" value={detailedClient.details?.patient_address || detailedClient.details?.complete_address} />
+                <DetailItem label="City" value={detailedClient.details?.patient_city} />
+                <DetailItem label="District" value={detailedClient.details?.patient_district} />
+                <DetailItem label="Pincode" value={detailedClient.details?.patient_pincode} />
+              </div>
+            </div>
+            
+            {/* Requestor Information Section */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-800 mb-3 border-b pb-2">Requestor Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                <DetailItem label="Requestor Name" value={detailedClient.details?.requestor_name} />
+                <DetailItem label="Relation to Patient" value={detailedClient.details?.relation_to_patient} />
+                <DetailItem label="Email" value={detailedClient.details?.requestor_email} />
+                <DetailItem label="Phone" value={detailedClient.details?.requestor_phone} />
+                <DetailItem label="Emergency Phone" value={detailedClient.details?.requestor_emergency_phone} />
+                <DetailItem label="Job Details" value={detailedClient.details?.requestor_job_details} />
+              </div>
+            </div>
+            
+            {/* Requestor Address Section (if different from patient) */}
+            {(detailedClient.details?.requestor_address || 
+              detailedClient.details?.requestor_city || 
+              detailedClient.details?.requestor_district) && (
+              <div>
+                <h4 className="text-sm font-semibold text-gray-800 mb-3 border-b pb-2">Requestor Address</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                  <DetailItem label="Address" value={detailedClient.details?.requestor_address} />
+                  <DetailItem label="City" value={detailedClient.details?.requestor_city} />
+                  <DetailItem label="District" value={detailedClient.details?.requestor_district} />
+                  <DetailItem label="Pincode" value={detailedClient.details?.requestor_pincode} />
+                </div>
+              </div>
+            )}
+            
+            {/* Care Details Section */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-800 mb-3 border-b pb-2">Care Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                <DetailItem label="Service Required" value={formatFieldValue(detailedClient.details?.service_required)} />
+                <DetailItem label="Care Duration" value={detailedClient.details?.care_duration} />
+                <DetailItem label="Duty Period" value={formatFieldValue(detailedClient.duty_period)} />
+                <DetailItem label="Period Reason" value={detailedClient.duty_period_reason} />
+                <DetailItem label="Start Date" value={detailedClient.details?.start_date} />
+              </div>
             </div>
           </div>
         ) : (
+          // Organization details rendering remains the same
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
               <DetailItem label="Organization Name" value={detailedClient.details?.organization_name} />
@@ -223,7 +274,8 @@ export function ClientDetailsOverlay({
           </div>
         )}
 
-        <div className="mt-4">
+        {/* Notes Section */}
+        <div className="mt-6">
           <h4 className="text-sm font-semibold text-gray-800 mb-2">Notes</h4>
           <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
             {detailedClient.general_notes || "No notes provided"}
@@ -299,10 +351,12 @@ export function ClientDetailsOverlay({
 
 // Helper component for displaying detail items
 function DetailItem({ label, value }: { label: string; value: string | number | boolean | null | undefined }) {
-  return value ? (
-    <div>
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-sm text-gray-800">{value.toString()}</p>
+  if (!value && value !== 0) return null;
+  
+  return (
+    <div className="bg-gray-50 p-3 rounded-md h-full">
+      <p className="text-xs font-medium text-gray-500">{label}</p>
+      <p className="text-sm text-gray-800 break-words">{value.toString()}</p>
     </div>
-  ) : null;
+  );
 }

@@ -64,18 +64,29 @@ export interface BaseFormData {
   clientType: 'individual' | 'organization' | 'hospital' | 'carehome';
   clientCategory: 'DearCare' | 'TataLife';
   generalNotes: string;
+  dutyPeriod: string;
+  dutyPeriodReason: string;
 }
 
 export interface IndividualFormData extends BaseFormData {
   requestorName: string;
   requestorPhone: string;
   requestorEmail: string;
+  requestorAddress: string;
+  requestorJobDetails: string;
+  requestorEmergencyPhone: string;
+  requestorPincode: string;
+  requestorDistrict: string;
+  requestorCity: string;
   relationToPatient: "" | "other" | "self" | "spouse" | "child" | "parent" | "sibling";
   patientName: string;
   patientAge: string;
   patientGender: "" | "male" | "female" | "other";
   patientPhone: string;
-  completeAddress: string;
+  patientAddress: string,  
+  patientPincode: string, 
+  patientDistrict: string, 
+  patientCity: string, 
   serviceRequired: string;
   careDuration: string;
   startDate: string;
@@ -128,12 +139,24 @@ export interface ClientInformationProps {
 export interface DetailedClientIndividual {
   client_type: 'individual';
   client_category?: 'DearCare' | 'TataLife';
+  duty_period?: string;
+  duty_period_reason?: string;
   details?: {
     client_id?: string;
     patient_name?: string;
     patient_age?: string | number;
     patient_gender?: string;
     patient_phone?: string;
+    patient_address?: string;
+    patient_city?: string;
+    patient_district?: string;
+    patient_pincode?: string;
+    requestor_emergency_phone?: string;
+    requestor_job_details?: string;
+    requestor_address?: string;
+    requestor_city?: string;
+    requestor_district?: string;
+    requestor_pincode?: string;
     requestor_name?: string;
     relation_to_patient?: string;
     requestor_email?: string;

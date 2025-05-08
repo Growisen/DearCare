@@ -9,6 +9,8 @@ interface InputFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   required?: boolean;
   min?: string;
+  onBlur?: () => void;
+  error?: string; // Add error prop
 }
 
 const InputField = memo(({ 
@@ -19,7 +21,9 @@ const InputField = memo(({
   value, 
   onChange, 
   required = false,
-  min
+  min,
+  onBlur,
+  error
 }: InputFieldProps) => (
   <div className="mb-4">
     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={id}>
@@ -29,18 +33,23 @@ const InputField = memo(({
       type={type}
       id={id}
       name={id}
-      className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      className={`w-full border rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+        error ? 'border-red-500' : 'border-gray-300'
+      }`}
       placeholder={placeholder}
       value={value}
       onChange={onChange}
       required={required}
       autoComplete="off"
       min={min}
+      onBlur={onBlur ? () => onBlur() : undefined}
     />
+    {error && (
+      <p className="mt-1 text-sm text-red-600">{error}</p>
+    )}
   </div>
 ));
 
-// Add display name for debugging purposes
 InputField.displayName = 'InputField';
 
 export default InputField;

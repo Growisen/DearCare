@@ -1,6 +1,7 @@
 import React from 'react';
 import { Mail, Phone, Briefcase, Calendar, MapPin, User } from 'lucide-react';
 import { ClientInformationProps } from "../types/client.types"
+import { formatFieldValue } from '@/utils/formatters';
 
 
 export function ClientInformation({ client }: ClientInformationProps) {
@@ -42,7 +43,7 @@ export function ClientInformation({ client }: ClientInformationProps) {
             <Briefcase className="w-5 h-5 text-blue-500" />
             <div>
               <p className="text-sm text-gray-500">Service</p>
-              <p className="text-sm text-gray-800">{client.service}</p>
+              <p className="text-sm text-gray-800">{formatFieldValue(client.service)}</p>
             </div>
           </div>
 

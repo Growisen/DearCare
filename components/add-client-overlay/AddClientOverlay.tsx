@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { FormData, AddClientProps, StaffRequirement } from '@/types/client.types';
-import { StaffRequirements } from '../open-form/StaffRequirements';
 import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 
-import { ClientCategorySelector } from './ClientCategorySelector';
+import { StaffRequirements } from '../open-form/StaffRequirements';
 import { ClientTypeSelector } from './ClientTypeSelector';
-import { RequestorInfoForm } from './RequestorInfoForm';
-import { PatientInfoForm } from './PatientInfoForm';
-import { OrganizationInfoForm } from './OrganizationInfoForm';
-import { IndividualCareRequirements } from './IndividualCareRequirements';
+import { RequestorInfoForm } from '@/components/open-form/RequestorInfoForm';
+import { PatientInfoForm } from '@/components/open-form/PatientInfoForm';
+import { OrganizationInfoForm } from '@/components/open-form/OrganizationInfoForm';
+import { IndividualCareRequirements } from '@/components/open-form/IndividualCareRequirements';
+
+import { ClientCategorySelector } from './ClientCategorySelector';
+import { DutyPeriodSelector } from './DutyPeriodSelector';
 import { FormActions } from './FormActions';
-import ProfileImageUpload from '../open-form/ProfileImageUpload';
 
 interface FormErrors {
   [key: string]: string;
@@ -26,17 +27,29 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     // Common Fields
     clientType: 'individual',
     clientCategory: 'DearCare',
+
+    dutyPeriod: '',
+    dutyPeriodReason: '',
     
     // Individual Client Fields
     requestorName: '',
     requestorPhone: '',
     requestorEmail: '',
+    requestorAddress: '',
+    requestorJobDetails: '',
+    requestorEmergencyPhone: '',
+    requestorPincode: '',
+    requestorDistrict: '',
+    requestorCity: '',
     relationToPatient: '',
     patientName: '',
     patientAge: '',
     patientGender: '',
     patientPhone: '',
-    completeAddress: '',
+    patientAddress: '', 
+    patientPincode: '',
+    patientDistrict: '',
+    patientCity: '',
     patientProfilePic: null,
     requestorProfilePic: null,
     
@@ -68,9 +81,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<{[key: string]: boolean}>({});
 
-  // Field validation functions
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const validateField = (id: string, value: string, formType: 'individual' | 'organization' | 'hospital' | 'carehome'): string => {
+  const validateField = (id: string, value: string): string => {
     if (!value.trim()) return '';
     
     switch (id) {
@@ -90,6 +101,13 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
         return value === '' ? 'Please select a required service' : '';
       case 'careDuration':
         return value === '' ? 'Please select a care duration' : '';
+      case 'dutyPeriod':
+        return value === '' ? 'Please select a duty period' : '';
+      case 'dutyPeriodReason':
+        if (formData.dutyPeriod === 'above_3_months' && !value.trim()) {
+          return 'Please provide a reason for extended duration';
+        }
+        return '';
       case 'startDate':
       case 'staffReqStartDate':
         return isValidDate(value) ? '' : 'Please enter a valid date';
@@ -145,7 +163,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
 
     // Validate field
     const value = formData[id as keyof FormData] as string;
-    const error = validateField(id, value, clientType);
+    const error = validateField(id, value);
     
     // Set error if field is required and empty
     const isRequired = isRequiredField(id, clientType);
@@ -159,10 +177,18 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
 
   // Helper to determine if a field is required based on client type
   const isRequiredField = (id: string, type: 'individual' | 'organization' | 'hospital' | 'carehome'): boolean => {
+    const commonRequired = ['dutyPeriod'];
+
+    if (id === 'dutyPeriodReason' && formData.dutyPeriod === 'above_3_months') {
+      return true;
+    }
+
     const individualRequired = [
       'requestorName', 'requestorPhone', 'requestorEmail',
       'relationToPatient', 'patientName', 'patientAge', 'patientGender',
-      'completeAddress', 'serviceRequired', 'careDuration', 'startDate'
+      'serviceRequired', 'careDuration', 'startDate',
+      'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+      'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict'
     ];
     
     const organizationRequired = [
@@ -171,13 +197,15 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
       'organizationAddress', 'staffReqStartDate'
     ];
     
-    return type === 'individual' 
+    return commonRequired.includes(id) || (type === 'individual' 
       ? individualRequired.includes(id)
-      : organizationRequired.includes(id);
+      : organizationRequired.includes(id));
   };
 
   // Field labels for error messages
-  const fieldLabels: {[key: string]: string} = {
+    const fieldLabels: {[key: string]: string} = {
+    dutyPeriod: 'Duty period',
+    dutyPeriodReason: 'Reason for extended duration',
     requestorName: 'Your name',
     requestorPhone: 'Your phone number',
     requestorEmail: 'Your email address',
@@ -186,7 +214,6 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     patientAge: 'Patient age',
     patientGender: 'Patient gender',
     patientPhone: 'Patient phone number',
-    completeAddress: 'Complete address',
     serviceRequired: 'Service required',
     careDuration: 'Care duration',
     startDate: 'Start date',
@@ -199,6 +226,16 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     organizationAddress: 'Organization address',
     preferredCaregiverGender: 'Preferred caregiver gender',
     staffReqStartDate: 'Staff requirement start date',
+    requestorAddress: 'Your address',
+    requestorPincode: 'Your pincode',
+    requestorCity: 'Your city',
+    requestorDistrict: 'Your district',
+    patientAddress: 'Patient address',
+    patientPincode: 'Patient pincode',
+    patientCity: 'Patient city',
+    patientDistrict: 'Patient district',
+    requestorJobDetails: 'Your job details',
+    requestorEmergencyPhone: 'Emergency contact number'
   };
 
   const handleStaffRequirementsChange = (staffRequirements: StaffRequirement[]) => {
@@ -224,17 +261,27 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
   };
 
   const validateForm = (): boolean => {
-    // Implementation remains the same
-    // ...
     const newErrors: FormErrors = {};
     let isValid = true;
+
+    const commonRequired = ['dutyPeriod'];
     
-    const requiredFields = clientType === 'individual' 
-      ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
-         'patientName', 'patientAge', 'patientGender', 'completeAddress', 
-         'serviceRequired', 'careDuration', 'startDate']
-      : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
-         'contactPhone', 'contactEmail', 'organizationAddress', 'staffReqStartDate'];
+    if (formData.dutyPeriod === 'above_3_months' && !formData.dutyPeriodReason.trim()) {
+      newErrors.dutyPeriodReason = 'Please provide a reason for extended duration';
+      isValid = false;
+    }
+    
+    const requiredFields = [
+      ...commonRequired,
+      ...(clientType === 'individual' 
+        ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
+           'patientName', 'patientAge', 'patientGender', 
+           'serviceRequired', 'careDuration', 'startDate',
+           'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+           'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
+        : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
+           'contactPhone', 'contactEmail', 'organizationAddress', 'staffReqStartDate'])
+    ];
     
     // Check required fields
     for (const field of requiredFields) {
@@ -249,7 +296,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     for (const field of Object.keys(formData)) {
       const value = formData[field as keyof FormData];
       if (typeof value === 'string' && value.trim()) {
-        const error = validateField(field, value, clientType);
+        const error = validateField(field, value);
         if (error) {
           newErrors[field] = error;
           isValid = false;
@@ -299,15 +346,26 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
           clientType,
           clientCategory: formData.clientCategory as 'DearCare' | 'TataLife',
           generalNotes: formData.generalNotes,
+          dutyPeriod: formData.dutyPeriod,
+          dutyPeriodReason: formData.dutyPeriodReason,
           requestorName: formData.requestorName,
           requestorPhone: formData.requestorPhone,
           requestorEmail: formData.requestorEmail,
           relationToPatient: formData.relationToPatient,
+          requestorAddress: formData.requestorAddress,
+          requestorJobDetails: formData.requestorJobDetails,
+          requestorEmergencyPhone: formData.requestorEmergencyPhone,
+          requestorPincode: formData.requestorPincode,
+          requestorDistrict: formData.requestorDistrict,
+          requestorCity: formData.requestorCity,
           patientName: formData.patientName,
           patientAge: formData.patientAge,
           patientGender: formData.patientGender,
           patientPhone: formData.patientPhone || '',
-          completeAddress: formData.completeAddress,
+          patientAddress: formData.patientAddress,
+          patientPincode: formData.patientPincode,
+          patientDistrict: formData.patientDistrict,
+          patientCity: formData.patientCity,     
           serviceRequired: formData.serviceRequired,
           careDuration: formData.careDuration,
           startDate: formData.startDate,
@@ -322,6 +380,8 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
           clientType,
           clientCategory: formData.clientCategory as 'DearCare' | 'TataLife',
           generalNotes: formData.generalNotes,
+          dutyPeriod: formData.dutyPeriod,
+          dutyPeriodReason: formData.dutyPeriodReason,
           organizationName: formData.organizationName,
           organizationType: formData.organizationType || '',
           contactPersonName: formData.contactPersonName,
@@ -354,17 +414,21 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Add New Client</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-full transition-colors duration-200">
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-300">
+    <div className="bg-white w-full md:w-11/12 lg:w-4/5 xl:max-w-5xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl border border-gray-100">
+      {/* Header */}
+      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10 shadow-sm">
+        <h2 className="text-xl font-semibold text-gray-900">Add New Client</h2>
+        <button 
+          onClick={onClose} 
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5 text-gray-500" />
+        </button>
+      </div>
         
-        <div className="px-6 py-4 space-y-6">
+        <div className="px-6 py-6 space-y-8 md:px-8">
           {/* Client Category Selection */}
           <ClientCategorySelector 
             selectedCategory={formData.clientCategory} 
@@ -382,73 +446,39 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
             // Individual Client Fields
             <>
               <RequestorInfoForm 
-                formData={{
-                  requestorName: formData.requestorName,
-                  requestorPhone: formData.requestorPhone,
-                  requestorEmail: formData.requestorEmail,
-                  relationToPatient: formData.relationToPatient
-                }}
+                formData={formData} 
                 formErrors={formErrors}
                 handleInputChange={handleInputChange}
                 handleBlur={handleBlur}
+                handleProfileImageChange={(field, file) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    [field]: file
+                  }));
+                }}
               />
 
-              <div className="mb-6">
-                <ProfileImageUpload
-                  id="requestorProfilePic"
-                  label="Requestor's Profile Picture"
-                  value={formData.requestorProfilePic}
-                  onChange={(file) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      requestorProfilePic: file
-                    }));
-                  }}
-                />
-              </div>
 
               <PatientInfoForm 
-                formData={{
-                  patientName: formData.patientName,
-                  patientAge: formData.patientAge,
-                  patientGender: formData.patientGender,
-                  patientPhone: formData.patientPhone,
-                  completeAddress: formData.completeAddress
-                }}
-                formErrors={formErrors}
-                handleInputChange={handleInputChange}
+                formData={formData}
+                formErrors={formErrors} 
                 handleBlur={handleBlur}
+                handleInputChange={handleInputChange} 
+                handleProfileImageChange={(field, file) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    [field]: file
+                  }));
+                }}
               />
-
-              <div className="mb-6">
-                <ProfileImageUpload
-                  id="patientProfilePic"
-                  label="Patient's Profile Picture"
-                  value={formData.patientProfilePic}
-                  onChange={(file) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      patientProfilePic: file
-                    }));
-                  }}
-                />
-              </div>
             </>
           ) : (
             // Organization/Hospital/Carehome Fields
             <OrganizationInfoForm 
-              formData={{
-                organizationName: formData.organizationName,
-                organizationType: formData.organizationType,
-                contactPersonName: formData.contactPersonName,
-                contactPersonRole: formData.contactPersonRole,
-                contactPhone: formData.contactPhone,
-                contactEmail: formData.contactEmail,
-                organizationAddress: formData.organizationAddress
-              }}
-              formErrors={formErrors}
-              handleInputChange={handleInputChange}
-              handleBlur={handleBlur}
+              formData={formData}
+              formErrors={formErrors} 
+              handleBlur={handleBlur} 
+              handleInputChange={handleInputChange} 
             />
           )}
 
@@ -457,19 +487,24 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               {clientType === 'individual' ? 'Care Requirements' : 'Staff Requirements'}
             </h3>
-            
-            {clientType === 'individual' ? (
-              // Individual Care Requirements
-              <IndividualCareRequirements
-                formData={{
-                  serviceRequired: formData.serviceRequired,
-                  careDuration: formData.careDuration,
-                  startDate: formData.startDate,
-                  preferredCaregiverGender: formData.preferredCaregiverGender
-                }}
+
+            <div className="mb-6">
+              <DutyPeriodSelector
+                dutyPeriod={formData.dutyPeriod}
+                dutyPeriodReason={formData.dutyPeriodReason}
                 formErrors={formErrors}
                 handleInputChange={handleInputChange}
                 handleBlur={handleBlur}
+              />
+            </div>
+            
+            {clientType === 'individual' ? (
+              // Individual Care Requirements
+              <IndividualCareRequirements 
+                formData={formData}
+                formErrors={formErrors} 
+                handleBlur={handleBlur}  
+                handleInputChange={handleInputChange} 
               />
             ) : (
               // Organization Staff Requirements
