@@ -8,11 +8,11 @@ import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization } from '../types/client.types';
 import { getClientDetails, deleteClient } from '../app/actions/client-actions';
 import Image from 'next/image';
+
 import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
 import { getServiceLabel } from '../utils/formatters';
-
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
