@@ -26,3 +26,40 @@ export const serviceOptions = [
     { value: 'orthopedic_care', label: 'Orthopedic Care' },
     { value: 'on_call_doctor_nurse', label: 'On Call Doctor/Nurse At-Home' },
   ];
+
+
+  export const equipmentCategories = {
+    bedriddenEquipment: [
+      { id: 'hospitalBed', label: 'Hospital Bed' },
+      { id: 'adultDiaper', label: 'Adult Diaper' },
+      { id: 'disposableUnderpad', label: 'Disposable Underpad' },
+      { id: 'pillows', label: 'Pillows' },
+      { id: 'bedWedges', label: 'Bed Wedges' },
+      { id: 'bedsideCommode', label: 'Bedside Commode' },
+      { id: 'patientLift', label: 'Patient Lift' },
+      { id: 'bedsideHandRail', label: 'Bedside Hand Rail' },
+      { id: 'bedPan', label: 'Bed Pan' },
+      { id: 'decubitusMatress', label: 'Decubitus Matress' },
+      { id: 'airMatress', label: 'Air Matress' },
+      { id: 'bedLift', label: 'Bed Lift' },
+      { id: 'bedRail', label: 'Bed Rail' },
+      { id: 'overBedTable', label: 'Over Bed Table' },
+    ],
+    mobilityEquipment: [
+      { id: 'wheelChair', label: 'Wheel Chair' },
+      { id: 'cane', label: 'Cane' },
+      { id: 'walkers', label: 'Walkers' },
+      { id: 'crutches', label: 'Crutches' },
+      { id: 'electricBackLifter', label: 'Electric Back Lifter' },
+    ],
+    medicalEquipment: [
+      { id: 'examinationGloves', label: 'Examination Gloves' },
+      { id: 'noRinseCleanser', label: 'No Rinse Cleanser' },
+      { id: 'bathingWipes', label: 'Bathing Wipes' },
+      { id: 'bpMeasuringApparatus', label: 'BP Measuring Apparatus' },
+      { id: 'bpMonitor', label: 'BP Monitor' },
+      { id: 'o2Concentrator', label: 'O2 Concentrator' },
+      { id: 'suctionMachine', label: 'Suction Machine' },
+      { id: 'ivStand', label: 'IV Stand' },
+    ]
+  };

@@ -98,7 +98,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 {patient.location}
               </span>
               <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
-                ID: {patient.registration_number}
+                ID: {patient.registration_number || "Not Available"}
               </span>
               <CategorySelector
                 currentCategory={patient.clientCategory}

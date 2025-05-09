@@ -41,6 +41,29 @@ interface Equipment {
   disposableUnderpad?: boolean;
   pillows?: boolean;
   bedRidden?: boolean;
+  semiBedridden?: boolean;
+  bedWedges?: boolean;
+  bedsideCommode?: boolean;
+  patientLift?: boolean;
+  bedsideHandRail?: boolean;
+  examinationGloves?: boolean;
+  noRinseCleanser?: boolean;
+  bathingWipes?: boolean;
+  bpMeasuringApparatus?: boolean;
+  electricBackLifter?: boolean;
+  o2Concentrator?: boolean;
+  overBedTable?: boolean;
+  suctionMachine?: boolean;
+  ivStand?: boolean;
+  bedPan?: boolean;
+  decubitusMatress?: boolean;
+  airMatress?: boolean;
+  bpMonitor?: boolean;
+  bedLift?: boolean;
+  bedRail?: boolean;
+  cane?: boolean;
+  walkers?: boolean;
+  crutches?: boolean;
 }
 
 interface AssessmentData {
@@ -137,6 +160,29 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
       disposableUnderpad: false,
       pillows: false,
       bedRidden: false,
+      semiBedridden: false,
+      bedWedges: false,
+      bedsideCommode: false,
+      patientLift: false,
+      bedsideHandRail: false,
+      examinationGloves: false,
+      noRinseCleanser: false,
+      bathingWipes: false,
+      bpMeasuringApparatus: false,
+      electricBackLifter: false,
+      o2Concentrator: false,
+      overBedTable: false,
+      suctionMachine: false,
+      ivStand: false,
+      bedPan: false,
+      decubitusMatress: false,
+      airMatress: false,
+      bpMonitor: false,
+      bedLift: false,
+      bedRail: false,
+      cane: false,
+      walkers: false,
+      crutches: false,
     },
     
     // Diagnosis and Care Plan
@@ -216,6 +262,29 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
               disposableUnderpad: false,
               pillows: false,
               bedRidden: false,
+              semiBedridden: false,
+              bedWedges: false,
+              bedsideCommode: false,
+              patientLift: false,
+              bedsideHandRail: false,
+              examinationGloves: false,
+              noRinseCleanser: false,
+              bathingWipes: false,
+              bpMeasuringApparatus: false,
+              electricBackLifter: false,
+              o2Concentrator: false,
+              overBedTable: false,
+              suctionMachine: false,
+              ivStand: false,
+              bedPan: false,
+              decubitusMatress: false,
+              airMatress: false,
+              bpMonitor: false,
+              bedLift: false,
+              bedRail: false,
+              cane: false,
+              walkers: false,
+              crutches: false,
               ...(assessmentData.equipment || {})
             },
             

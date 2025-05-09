@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import InfoField from './InfoField';
 import { Json } from '@/types/client.types';
+import { equipmentCategories } from '@/utils/constants';
 
 interface MedicalInfoProps {
   assessment: {
@@ -34,6 +35,8 @@ interface MedicalInfoProps {
 
 const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  console.log('MedicalInfo assessment:', assessment.equipment);
 
   const toggleSection = (sectionName: string) => {
     if (expandedSection === sectionName) {
@@ -79,7 +82,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
             Object.entries(assessment?.lab_investigations || {}).map(([key, value]) => (
               <div key={key}>
                 <p className="text-xs text-gray-500 font-medium">{key.toUpperCase()}</p>
-                <p className="text-sm text-gray-700">{value}</p>
+                <p className="text-sm text-gray-700">{value || "Not recorded"}</p>
               </div>
             ))
           ) : (
@@ -132,47 +135,111 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <h3 className="text-sm font-medium mb-2 text-gray-800">Environment Checklist</h3>
-            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-              {Object.keys(assessment?.environment || {}).length > 0 ? (
-                Object.entries(assessment?.environment || {}).map(([key, value]) => (
-                  <div key={key} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">
-                      {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                    </label>
+            {Object.keys(assessment?.environment || {}).length > 0 ? (
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Environment Features</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {Object.entries(assessment?.environment || {}).map(([key, value]) => (
+                      <div key={key} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(value)}
+                          readOnly
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                        />
+                        <label className={`ml-2 text-sm truncate ${Boolean(value) ? 'text-gray-700' : 'text-gray-400'}`}>
+                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">No environment details recorded</p>
-              )}
-            </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No environment details recorded</p>
+            )}
           </div>
+          {/* Equipment Section */}
           <div>
             <h3 className="text-sm font-medium mb-2 text-gray-800">Equipment Needed</h3>
-            <div className="space-y-2">
-              {Object.keys(assessment?.equipment || {}).length > 0 ? (
-                Object.entries(assessment?.equipment || {}).map(([key, value]) => (
-                  <div key={key} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                    </label>
+            {Object.keys(assessment?.equipment || {}).length > 0 ? (
+              <div className="space-y-5">
+                {/* Bedridden Equipment */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Bed-related Equipment</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {equipmentCategories.bedriddenEquipment.map(item => {
+                      const equipment = assessment?.equipment as Record<string, boolean> || {};
+                      const isChecked = typeof equipment === 'object' && item.id in equipment ? equipment[item.id] : false;
+                      return (
+                        <div key={item.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
+                            {item.label}
+                          </label>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">No equipment details recorded</p>
-              )}
-            </div>
+                </div>
+
+                {/* Mobility Equipment */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Mobility Equipment</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {equipmentCategories.mobilityEquipment.map(item => {
+                      const equipment = assessment?.equipment as Record<string, boolean> || {};
+                      const isChecked = typeof equipment === 'object' && item.id in equipment ? equipment[item.id] : false;
+                      return (
+                        <div key={item.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
+                            {item.label}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Medical Equipment */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Medical Equipment</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {equipmentCategories.medicalEquipment.map(item => {
+                      const equipment = assessment?.equipment as Record<string, boolean> || {};
+                      const isChecked = typeof equipment === 'object' && item.id in equipment ? equipment[item.id] : false;
+                      return (
+                        <div key={item.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
+                            {item.label}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No equipment details recorded</p>
+            )}
           </div>
         </div>
       )

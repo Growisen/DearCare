@@ -67,7 +67,11 @@ export default function ClientFormPage() {
     contactPersonRole: '',
     contactPhone: '',
     contactEmail: '',
+    organizationState: '',
+    organizationDistrict: '',
+    organizationCity: '',
     organizationAddress: '',
+    organizationPincode: '',
     
     serviceRequired: '',
     careDuration: '',
@@ -103,7 +107,11 @@ export default function ClientFormPage() {
     contactPersonRole: 'Contact person role',
     contactPhone: 'Contact phone',
     contactEmail: 'Contact email',
+    organizationState: 'Organization state',
+    organizationDistrict: 'Organization district',
+    organizationCity: 'Organization city',
     organizationAddress: 'Organization address',
+    organizationPincode: 'Organization pincode',
     preferredCaregiverGender: 'Preferred caregiver gender',
     staffReqStartDate: 'Staff requirement start date',
     requestorAddress: 'Your address',
@@ -193,7 +201,8 @@ export default function ClientFormPage() {
     const organizationRequired = [
       'organizationName', 'organizationType', 'contactPersonName', 
       'contactPersonRole', 'contactPhone', 'contactEmail', 
-      'organizationAddress', 'staffReqStartDate'
+      'organizationState', 'organizationDistrict', 'organizationCity',
+      'organizationAddress', 'organizationPincode', 'staffReqStartDate'
     ];
     
     return commonRequired.includes(id) || (type === 'individual' 
@@ -274,7 +283,8 @@ export default function ClientFormPage() {
            'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
            'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
         : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
-           'contactPhone', 'contactEmail', 'organizationAddress', 'staffReqStartDate'])
+           'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
+            'organizationAddress', 'organizationPincode', 'staffReqStartDate'])
     ];
     
     // Check required fields
@@ -386,7 +396,11 @@ export default function ClientFormPage() {
           contactPersonRole: formData.contactPersonRole || '',
           contactPhone: formData.contactPhone,
           contactEmail: formData.contactEmail,
+          organizationState: formData.organizationState || '',
+          organizationDistrict: formData.organizationDistrict || '',
+          organizationCity: formData.organizationCity || '',
           organizationAddress: formData.organizationAddress,
+          organizationPincode: formData.organizationPincode || '',
           staffRequirements: formData.staffRequirements,
           staffReqStartDate: formData.staffReqStartDate || '',
         });

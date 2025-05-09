@@ -265,7 +265,6 @@ export function ClientDetailsOverlay({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <DetailItem label="Organization Name" value={client.details?.organization_name} />
               <DetailItem label="Organization Type" value={client.details?.organization_type} />
-              <DetailItem label="Organization Address" value={client.details?.organization_address} />
               <DetailItem label="Contract Duration" value={client.details?.contract_duration} />
             </div>
           </div>
@@ -278,6 +277,18 @@ export function ClientDetailsOverlay({
               <DetailItem label="Email" value={client.details?.contact_email} />
               <DetailItem label="Phone" value={client.details?.contact_phone} />
             </div>
+          </div>
+        </div>
+        
+        {/* Added Organization Address Section */}
+        <div className="mb-6">
+          <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Organization Address</h5>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DetailItem label="Address" value={client.details?.organization_address} />
+            <DetailItem label="City" value={client.details?.organization_city} />
+            <DetailItem label="District" value={client.details?.organization_district} />
+            <DetailItem label="State" value={client.details?.organization_state} />
+            <DetailItem label="Pincode" value={client.details?.organization_pincode} />
           </div>
         </div>
         

@@ -104,7 +104,11 @@ export interface OrganizationFormData extends BaseFormData {
   contactPersonRole: string;
   contactPhone: string;
   contactEmail: string;
+  organizationState: string;
+  organizationDistrict: string;
+  organizationCity: string;
   organizationAddress: string;
+  organizationPincode: string;
   staffRequirements: StaffRequirement[];
   staffReqStartDate: string
 }
@@ -186,6 +190,10 @@ export interface DetailedClientOrganization {
     contact_person_role?: string;
     contact_email?: string;
     contact_phone?: string;
+    organization_state?: string;
+    organization_district?: string;
+    organization_city?: string;
+    organization_pincode?: string;
     organization_address?: string;
     contract_duration?: string;
   };
