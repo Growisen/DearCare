@@ -4,8 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/loader';
-import { Json, DetailedClientIndividual } from '@/types/client.types';
-import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus } from '@/app/actions/client-actions';
+import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus, deleteClient } from '@/app/actions/client-actions';
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { Nurse } from '@/types/staff.types';
@@ -19,87 +18,11 @@ import ProfileHeader from '@/components/client/Profile/ProfileHeader';
 import PatientInfo from '@/components/client/Profile/PatientInfo';
 import MedicalInfo from '@/components/client/Profile/MedicalInfo';
 import EditPatientModal from '@/components/client/Profile/EditPatientModal';
-import InfoSection from '@/components/client/Profile/InfoSection';
+import ServiceDetailsSection from '@/components/client/Profile/ServiceDetailsSection';
+import { getServiceLabel } from '@/utils/formatters';
+import { serviceOptions } from '@/utils/constants';
 
-interface PatientAssessmentDataForApprovedClients {
-  guardianOccupation: string;
-  maritalStatus: string;
-  height: string;
-  weight: string;
-  pincode: string;
-  district: string;
-  cityTown: string;
-  currentStatus: string;
-  chronicIllness: string;
-  medicalHistory: string;
-  surgicalHistory: string;
-  medicationHistory: string;
-  alertnessLevel: string;
-  physicalBehavior: string;
-  speechPatterns: string;
-  emotionalState: string;
-  drugsUse: string;
-  alcoholUse: string;
-  tobaccoUse: string;
-  otherSocialHistory: string;
-  presentCondition: string;
-  bloodPressure: string;
-  sugarLevel: string;
-  finalDiagnosis: string;
-  foodsToInclude: string;
-  foodsToAvoid: string;
-  patientPosition: string;
-  feedingMethod: string;
-  equipment: Json;
-  environment: Json;
-  lab_investigations: Json;
-  [key: string]: string | undefined | Json;
-}
-
-interface NurseAssignment {
-  id?: number;
-  nurseId: number | string;
-  startDate: string;
-  endDate?: string;
-  shiftStart?: string;
-  shiftEnd?: string;
-  status: 'active' | 'completed' | 'cancelled';
-  shiftType?: 'day' | 'night' | '24h';
-}
-
-
-interface Patient {
-  _id?: string;
-  firstName: string;
-  lastName: string;
-  age: number | string;
-  gender: string;
-  bloodGroup: string;
-  location: string;
-  email: string;
-  phoneNumber: string;
-  clientCategory: 'DearCare' | 'TataLife';
-  profileImage?: string | null; // Add this line
-  requestor: { 
-    name: string;
-    relation: string;
-    phone: string;
-    email: string;
-    profileImage?: string | null;
-  }
-  emergencyContact: {
-    name: string;
-    relation: string;
-    phone: string;
-  };
-  assessments: PatientAssessmentDataForApprovedClients[];
-  nurseAssignments?: NurseAssignment[];
-}
-
-export interface ClientResponse {
-  success: boolean;
-  client: DetailedClientIndividual;
-}
+import { ClientResponse, Patient, NurseAssignment } from '@/types/client.types';
 
 const PatientProfilePage = () => {
   const params = useParams();
@@ -116,9 +39,11 @@ const PatientProfilePage = () => {
   const [status, setStatus] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
+  const [activeTab, setActiveTab] = useState<'profile' | 'medical' | 'assignments'>('profile');
 
   const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   useEffect(() => {
 
@@ -163,29 +88,45 @@ const PatientProfilePage = () => {
 
             // Transform the data to match the Patient interface
             const transformedPatient: Patient = {
-                _id: clientData.details?.client_id,
-                firstName: clientData.details?.patient_name?.split(' ')[0] || '',
-                lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
-                age: clientData.details?.patient_age || 0,
-                gender: clientData.details?.patient_gender || '',
-                bloodGroup: '',
-                location: clientData.details?.complete_address || '',
-                email: '', // Patient's email if available
-                phoneNumber: clientData.details?.patient_phone || '',
-                clientCategory: clientData.client_category || 'DearCare',
-                profileImage: clientData.details?.patient_profile_pic_url || '',
-                requestor: {
-                  name: clientData.details?.requestor_name || '',
-                  relation: clientData.details?.relation_to_patient || '',
-                  phone: clientData.details?.requestor_phone || '',
-                  email: clientData.details?.requestor_email || '',
-                  profileImage: clientData.details?.requestor_profile_pic_url || ''
-                },
-                emergencyContact: {
-                  name: clientData.details?.requestor_name || '',
-                  relation: clientData.details?.relation_to_patient || '',
-                  phone: clientData.details?.requestor_phone || ''
-                },
+              _id: clientData.details?.client_id,
+              registrationNumber: clientData.registration_number || '',
+              firstName: clientData.details?.patient_name?.split(' ')[0] || '',
+              lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
+              age: clientData.details?.patient_age || 0,
+              gender: clientData.details?.patient_gender || '',
+              bloodGroup: '',
+              location: clientData.details?.complete_address || '',
+              email: '', // Patient's email if available
+              phoneNumber: clientData.details?.patient_phone || '',
+              clientCategory: clientData.client_category || 'DearCare',
+              profileImage: clientData.details?.patient_profile_pic_url || '',
+              serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || '') ,
+              address: {
+                fullAddress: clientData.details?.patient_address || '',
+                city: clientData.details?.patient_city || '',
+                district: clientData.details?.patient_district || '',
+                pincode: clientData.details?.patient_pincode || '',
+              },
+              requestor: {
+                name: clientData.details?.requestor_name || '',
+                relation: clientData.details?.relation_to_patient || '',
+                phone: clientData.details?.requestor_phone || '',
+                email: clientData.details?.requestor_email || '',
+                profileImage: clientData.details?.requestor_profile_pic_url || '',
+                emergencyPhone: clientData.details?.requestor_emergency_phone || '',
+                jobDetails: clientData.details?.requestor_job_details || '',
+                address: {
+                  fullAddress: clientData.details?.requestor_address || '',
+                  city: clientData.details?.requestor_city || '',
+                  district: clientData.details?.requestor_district || '',
+                  pincode: clientData.details?.requestor_pincode || '',
+                }
+              },
+              emergencyContact: {
+                name: clientData.details?.requestor_name || '',
+                relation: clientData.details?.relation_to_patient || '',
+                phone: clientData.details?.requestor_phone || ''
+              },
               assessments: assessmentData ? [{
                 guardianOccupation: assessmentData.guardian_occupation || '',
                 maritalStatus: assessmentData.marital_status || '',
@@ -308,29 +249,45 @@ const PatientProfilePage = () => {
 
         // Transform the data to match the Patient interface
         const transformedPatient: Patient = {
-            _id: clientData.details?.client_id,
-            firstName: clientData.details?.patient_name?.split(' ')[0] || '',
-            lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
-            age: clientData.details?.patient_age || 0,
-            gender: clientData.details?.patient_gender || '',
-            bloodGroup: '',
-            location: clientData.details?.complete_address || '',
-            email: '', // Patient's email if available
-            phoneNumber: clientData.details?.patient_phone || '',
-            clientCategory: clientData.client_category || 'DearCare',
-            profileImage: clientData.details?.patient_profile_pic_url || '',
-            requestor: {
-              name: clientData.details?.requestor_name || '',
-              relation: clientData.details?.relation_to_patient || '',
-              phone: clientData.details?.requestor_phone || '',
-              email: clientData.details?.requestor_email || '',
-              profileImage: clientData.details?.requestor_profile_pic_url || ''
-            },
-            emergencyContact: {
-              name: clientData.details?.requestor_name || '',
-              relation: clientData.details?.relation_to_patient || '',
-              phone: clientData.details?.requestor_phone || ''
-            },
+          _id: clientData.details?.client_id,
+          registrationNumber: clientData.registration_number || '',
+          firstName: clientData.details?.patient_name?.split(' ')[0] || '',
+          lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
+          age: clientData.details?.patient_age || 0,
+          gender: clientData.details?.patient_gender || '',
+          bloodGroup: '',
+          location: clientData.details?.complete_address || '',
+          email: '', // Patient's email if available
+          phoneNumber: clientData.details?.patient_phone || '',
+          clientCategory: clientData.client_category || 'DearCare',
+          profileImage: clientData.details?.patient_profile_pic_url || '',
+          serviceRequired: clientData.details?.service_required || '',
+          address: {
+            fullAddress: clientData.details?.patient_address || '',
+            city: clientData.details?.patient_city || '',
+            district: clientData.details?.patient_district || '',
+            pincode: clientData.details?.patient_pincode || '',
+          },
+          requestor: {
+            name: clientData.details?.requestor_name || '',
+            relation: clientData.details?.relation_to_patient || '',
+            phone: clientData.details?.requestor_phone || '',
+            email: clientData.details?.requestor_email || '',
+            profileImage: clientData.details?.requestor_profile_pic_url || '',
+            emergencyPhone: clientData.details?.requestor_emergency_phone || '',
+            jobDetails: clientData.details?.requestor_job_details || '',
+            address: {
+              fullAddress: clientData.details?.requestor_address || '',
+              city: clientData.details?.requestor_city || '',
+              district: clientData.details?.requestor_district || '',
+              pincode: clientData.details?.requestor_pincode || '',
+            }
+          },
+          emergencyContact: {
+            name: clientData.details?.requestor_name || '',
+            relation: clientData.details?.relation_to_patient || '',
+            phone: clientData.details?.requestor_phone || ''
+          },
           assessments: assessmentData ? [{
             guardianOccupation: assessmentData.guardian_occupation || '',
             maritalStatus: assessmentData.marital_status || '',
@@ -491,6 +448,24 @@ const PatientProfilePage = () => {
     }
   };
 
+  const handleDeleteClient = async () => {
+    try {
+      const result = await deleteClient(id as string);
+      if (result.success) {
+        toast.success('Client deleted successfully');
+        
+        window.location.href = '/clients';
+      } else {
+        toast.error(`Failed to delete client: ${result.error}`);
+        setShowDeleteConfirmation(false); 
+      }
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('An error occurred while deleting the client');
+      setShowDeleteConfirmation(false);
+    }
+  };
+
 
   
 
@@ -505,7 +480,7 @@ const PatientProfilePage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-red-700">Error Loading Profile</h1>
             <p className="mt-2 text-gray-600">{error || "Patient profile not found"}</p>
-            <Link href="/" className="mt-4 inline-block text-indigo-600 hover:underline">
+            <Link href="/" className="inline-block text-indigo-600 hover:underline mt-4">
               Return to Dashboard
             </Link>
           </div>
@@ -518,9 +493,9 @@ const PatientProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[95%] mx-auto py-4">
+      <div className="w-full max-w-[98%] sm:max-w-[95%] lg:max-w-[1200px] mx-auto py-2 sm:py-4">
         {/* Profile Header */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-3 sm:mb-4">
           <ProfileHeader
             patient={patient}
             status={status}
@@ -530,10 +505,49 @@ const PatientProfilePage = () => {
             handleCancel={handleCancel}
             handleCategoryChange={handleCategoryChange}
             setShowNurseList={setShowNurseList}
+            onDelete={() => setShowDeleteConfirmation(true)}
           />
 
+          {/* Tabs Navigation */}
+          <div className="border-b border-gray-200 px-3 sm:px-6">
+            <nav className="-mb-px flex space-x-4 sm:space-x-8 whitespace-nowrap">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
+                  activeTab === 'profile'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Profile Details
+              </button>
+              <button
+                onClick={() => setActiveTab('medical')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'medical'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Medical Information
+              </button>
+              {status === 'approved' && (
+                <button
+                  onClick={() => setActiveTab('assignments')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'assignments'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Nurse Assignments
+                </button>
+              )}
+            </nav>
+          </div>
+
           {/* Main Content */}
-          <div className="p-6">
+          <div className="p-3 sm:p-4 md:p-6">
             <EditPatientModal
               isEditing={isEditing}
               clientId={id as string}
@@ -541,30 +555,56 @@ const PatientProfilePage = () => {
               handleCancel={handleCancel}
             />
             
-            {status === 'approved' && (
-              <InfoSection title="Nurse Assignments">
-                <NurseAssignmentsList
-                  assignments={nurseAssignments}
-                  nurses={nurses}
-                  onEditAssignment={handleEditAssignment}
-                  onEndAssignment={(assignmentId) => {
-                    console.log('End assignment:', assignmentId);
-                  }}
-                  onDeleteAssignment={handleDeleteAssignment}
+            {/* Profile Details Tab */}
+            {activeTab === 'profile' && (
+              <div className="space-y-6">
+                <ServiceDetailsSection 
+                  serviceRequired={patient.serviceRequired}
+                  status={status}
+                  serviceLocation={patient.location}
+                  // Add more service details as available
                 />
-              </InfoSection>
+                <PatientInfo patient={patient} />
+              </div>
             )}
             
-            {/* Patient Information */}
-            <PatientInfo patient={patient} />
+            {/* Medical Information Tab */}
+            {activeTab === 'medical' && (
+              <div className="space-y-6">
+                <MedicalInfo assessment={latestAssessment} />
+              </div>
+            )}
             
-            {/* Medical Information */}
-            <MedicalInfo assessment={latestAssessment} />
+            {/* Nurse Assignments Tab */}
+            {activeTab === 'assignments' && status === 'approved' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">Nurse Assignments</h2>
+                  <button
+                    onClick={() => setShowNurseList(true)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                  >
+                    Assign New Nurse
+                  </button>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <NurseAssignmentsList
+                    assignments={nurseAssignments}
+                    nurses={nurses}
+                    onEditAssignment={handleEditAssignment}
+                    onEndAssignment={(assignmentId) => {
+                      console.log('End assignment:', assignmentId);
+                    }}
+                    onDeleteAssignment={handleDeleteAssignment}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Add the modals */}
+      {/* All modals remain the same */}
       <NurseListModal 
         isOpen={showNurseList}
         nurses={nurses}
@@ -590,7 +630,12 @@ const PatientProfilePage = () => {
             </span> to this patient?
           </p>
         }
-        onConfirm={() => selectedNurse && handleAssignNurse(selectedNurse._id)}
+        onConfirm={() => {
+          if (selectedNurse) {
+            return handleAssignNurse(selectedNurse._id);
+          }
+          return Promise.resolve();
+        }}
         onCancel={() => setShowConfirmation(false)}
         confirmText="Confirm Assignment"
       />
@@ -606,6 +651,23 @@ const PatientProfilePage = () => {
         onSave={handleUpdateAssignment}
       />
 
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Client"
+        message={
+          <div className="text-center">
+            <p className="text-red-600 font-semibold mb-2">Warning: This action cannot be undone!</p>
+            <p>Are you sure you want to delete this client?</p>
+            <p className="mt-2 text-sm text-gray-600">
+              All associated data including assessments and nurse assignments will be permanently removed.
+            </p>
+          </div>
+        }
+        onConfirm={handleDeleteClient}
+        onCancel={() => setShowDeleteConfirmation(false)}
+        confirmText="Delete Client"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+      />
     </div>
   );
 };

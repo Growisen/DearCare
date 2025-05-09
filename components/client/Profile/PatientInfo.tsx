@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import InfoSection from './InfoSection';
 import InfoField from './InfoField';
+import ImageViewer from '@/components/common/ImageViewer';
 import { Json } from '@/types/client.types'; 
 
 interface PatientInfoProps {
   patient: {
     email: string;
     phoneNumber: string;
+    serviceRequired?: string;
+    address?: {
+      fullAddress: string;
+      city: string;
+      district: string;
+      pincode: string;
+    };
     emergencyContact: {
       name: string;
       relation: string;
@@ -29,17 +37,27 @@ interface PatientInfoProps {
       phone: string;
       email: string;
       profileImage?: string | null;
+      emergencyPhone?: string;
+      jobDetails?: string;
+      address?: {
+        fullAddress: string;
+        city: string;
+        district: string;
+        pincode: string;
+      };
     };
   };
 }
 
 const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
+
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const latestAssessment = patient.assessments[0];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       <InfoSection title="Personal Information">
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           <InfoField label="Email" value={patient.email} />
           <InfoField label="Phone" value={patient.phoneNumber} />
           <div>
@@ -56,56 +74,84 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
         </div>
       </InfoSection>
 
+      <InfoSection title="Patient Address">
+        <div className="space-y-3">
+          <InfoField label="Address" value={patient.address?.fullAddress} />
+          <div className="grid grid-cols-2 gap-3">
+            <InfoField label="City" value={patient.address?.city} />
+            <InfoField label="District" value={patient.address?.district} />
+          </div>
+          <InfoField label="Pincode" value={patient.address?.pincode} />
+        </div>
+      </InfoSection>
+
+      <InfoSection title="Physical Attributes">
+        <div className='space-y-3'>
+          <div className="grid grid-cols-2 gap-3">
+            <InfoField label="Height" value={latestAssessment?.height} />
+            <InfoField label="Weight" value={latestAssessment?.weight} />
+          </div>
+          <InfoField label="Marital Status" value={latestAssessment?.maritalStatus} />
+        </div>
+      </InfoSection>
+      
       <InfoSection title="Requestor Information">
         <div className="space-y-4">
-          {/* Requestor Profile Image */}
-          <div className="flex justify-center">
-            <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div 
+              className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200"
+              onClick={() => patient.requestor.profileImage && setIsImageViewerOpen(true)}
+              style={{ cursor: patient.requestor.profileImage ? 'pointer' : 'default' }}
+            >
               {patient.requestor.profileImage ? (
                 <Image
                   src={patient.requestor.profileImage}
                   alt={patient.requestor.name}
                   fill
                   className="object-cover"
-                  sizes="80px"
+                  sizes="48px"
                 />
               ) : (
                 <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-                  <span className="text-xl text-gray-500">
+                  <span className="text-sm text-gray-500">
                     {patient.requestor.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
             </div>
+            <div>
+              <p className="text-sm font-medium text-gray-800">{patient.requestor.name}</p>
+              <p className="text-xs text-gray-600">{patient.requestor.relation}</p>
+            </div>
           </div>
-          <div className="space-y-3">
-            <InfoField label="Name" value={patient.requestor.name} />
-            <InfoField label="Relation to Patient" value={patient.requestor.relation} />
+          <div className="space-y-2">
             <InfoField label="Phone" value={patient.requestor.phone} />
-            <InfoField 
-              label="Email" 
-              value={patient.requestor.email} 
-              fallback="Not provided" 
-            />
+            <InfoField label="Emergency Phone" value={patient.requestor.emergencyPhone} />
+            <InfoField label="Email" value={patient.requestor.email} fallback="Not provided" />
+            <InfoField label="Job Details" value={patient.requestor.jobDetails} />
           </div>
         </div>
       </InfoSection>
 
-      <InfoSection title="Physical Attributes">
-        <div className='space-y-3'>
-          <InfoField label="Height" value={latestAssessment?.height} />
-          <InfoField label="Weight" value={latestAssessment?.weight} />
-          <InfoField label="Marital Status" value={latestAssessment?.maritalStatus} />
+      <InfoSection title="Requestor Address">
+        <div className="space-y-3">
+          <InfoField label="Address" value={patient.requestor.address?.fullAddress} />
+          <div className="grid grid-cols-2 gap-3">
+            <InfoField label="City" value={patient.requestor.address?.city} />
+            <InfoField label="District" value={patient.requestor.address?.district} />
+          </div>
+          <InfoField label="Pincode" value={patient.requestor.address?.pincode} />
         </div>
       </InfoSection>
-
-      <InfoSection title="Location Details">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <InfoField label="City/Town" value={latestAssessment?.cityTown} />
-          <InfoField label="District" value={latestAssessment?.district} />
-          <InfoField label="Pincode" value={latestAssessment?.pincode} />
-        </div>
-      </InfoSection>
+      
+      {patient.requestor.profileImage && (
+        <ImageViewer
+          src={patient.requestor.profileImage}
+          alt={patient.requestor.name}
+          isOpen={isImageViewerOpen}
+          onClose={() => setIsImageViewerOpen(false)}
+        />
+      )}
     </div>
   );
 };

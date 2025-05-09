@@ -1,4 +1,5 @@
 import React from 'react';
+import { dutyPeriodOptions } from '../../utils/constants';
 
 interface DutyPeriodSelectorProps {
   dutyPeriod: string;
@@ -34,11 +35,11 @@ export function DutyPeriodSelector({
             formErrors.dutyPeriod ? 'border-red-500' : 'border-gray-200'
           } py-3 px-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-10`}
         >
-          <option value="">Select duty period</option>
-          <option value="1_month">1 Month</option>
-          <option value="2_months">2 Months</option>
-          <option value="3_months">3 Months</option>
-          <option value="above_3_months">Above 3 Months</option>
+          {dutyPeriodOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
         {formErrors.dutyPeriod && (
           <p className="mt-1 text-xs text-red-500">{formErrors.dutyPeriod}</p>
