@@ -60,7 +60,11 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     contactPersonRole: '',
     contactPhone: '',
     contactEmail: '',
+    organizationState: '',
+    organizationDistrict: '',
+    organizationCity: '',
     organizationAddress: '',
+    organizationPincode: '',
     
     // Care Requirements (Common)
     serviceRequired: '',
@@ -388,6 +392,10 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
           contactPersonRole: formData.contactPersonRole || '',
           contactPhone: formData.contactPhone,
           contactEmail: formData.contactEmail,
+          organizationState: formData.organizationState || '',
+          organizationDistrict: formData.organizationDistrict,
+          organizationCity: formData.organizationCity,
+          organizationPincode: formData.organizationPincode || '',
           organizationAddress: formData.organizationAddress,
           staffRequirements: formData.staffRequirements,
           staffReqStartDate: formData.staffReqStartDate || '',
