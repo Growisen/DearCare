@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { ClientInformation } from './clientInformation';
 import { ApprovedContent } from '../components/client/ApprovedContent';
@@ -7,9 +7,11 @@ import { UnderReviewContent } from '../components/client/UnderReview';
 import { PendingContent } from '../components/client/PendingContent';
 import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization } from '../types/client.types';
-import { getClientDetails } from '../app/actions/client-actions';
+import { getClientDetails, deleteClient } from '../app/actions/client-actions';
 import Image from 'next/image';
 import { formatFieldValue } from '../utils/formatters';
+import toast from 'react-hot-toast';
+import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
@@ -23,6 +25,7 @@ export function ClientDetailsOverlay({
   const [loading, setLoading] = useState<boolean>(true);
   const [currentClientStatus, setCurrentClientStatus] = useState<ClientStatus>(client.status);
   const [rejectionReason, setRejectionReason] = useState('')
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   useEffect(() => {
     async function fetchClientDetails() {
@@ -62,6 +65,24 @@ export function ClientDetailsOverlay({
         }
       }
       setLoading(false);
+    }
+  };
+
+  const handleDeleteClient = async (): Promise<void> => {
+    try {
+      const result = await deleteClient(client.id);
+      if (result.success) {
+        toast.success('Client deleted successfully');
+        if (onClose) onClose();
+        if (onStatusChange) onStatusChange();
+      } else {
+        toast.error(`Failed to delete client: ${result.error}`);
+        setShowDeleteConfirmation(false);
+      }
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('An error occurred while deleting the client');
+      setShowDeleteConfirmation(false);
     }
   };
 
@@ -326,6 +347,15 @@ export function ClientDetailsOverlay({
                 View Profile
               </Link>
             )}
+            {currentClientStatus !== "approved" && currentClientStatus !== "assigned" && (
+              <button
+                onClick={() => setShowDeleteConfirmation(true)}
+                className="p-2 hover:bg-red-100 rounded-lg transition-colors text-red-600"
+                title="Delete client"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            )}
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -345,6 +375,24 @@ export function ClientDetailsOverlay({
           )}
         </div>
       </div>
+      {showDeleteConfirmation && (
+        <ConfirmationModal
+          isOpen={showDeleteConfirmation}
+          title="Delete Client"
+          message={
+            <div>
+              <p className="text-red-600 font-medium mb-2">Warning: This action cannot be undone!</p>
+              <p className="text-gray-600">
+                Are you sure you want to delete this client? All associated data will be permanently removed.
+              </p>
+            </div>
+          }
+          onConfirm={handleDeleteClient}
+          onCancel={() => setShowDeleteConfirmation(false)}
+          confirmText="Delete Client"
+          confirmButtonClassName="bg-red-600 hover:bg-red-700"
+        />
+      )}
     </div>
   );
 }

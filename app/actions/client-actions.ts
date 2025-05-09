@@ -1311,3 +1311,106 @@ export async function exportClients(
     }
   }
 }
+
+
+export async function deleteClient(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('client_type')
+      .eq('id', clientId)
+      .single();
+
+    if (clientError) {
+      return { success: false, error: clientError.message };
+    }
+
+    const deleteOperations = [];
+
+    const { data: nurseAssignments } = await supabase
+      .from('nurse_client')
+      .select('nurse_id')
+      .eq('client_id', clientId);
+
+    deleteOperations.push(
+      supabase
+        .from('nurse_client')
+        .delete()
+        .eq('client_id', clientId)
+    );
+
+    deleteOperations.push(
+      supabase
+        .from('patient_assessments')
+        .delete()
+        .eq('client_id', clientId)
+    );
+
+    if (client.client_type === 'individual') {
+      deleteOperations.push(
+        supabase
+          .from('individual_clients')
+          .delete()
+          .eq('client_id', clientId)
+      );
+    } else {
+
+      deleteOperations.push(
+        supabase
+          .from('staff_requirements')
+          .delete()
+          .eq('client_id', clientId)
+      );
+      
+      deleteOperations.push(
+        supabase
+          .from('organization_clients')
+          .delete()
+          .eq('client_id', clientId)
+      );
+    }
+
+    deleteOperations.push(
+      supabase
+        .from('clients')
+        .delete()
+        .eq('id', clientId)
+    );
+
+    await Promise.all(deleteOperations);
+
+    if (nurseAssignments && nurseAssignments.length > 0) {
+      const uniqueNurseIds = [...new Set(nurseAssignments.map(na => na.nurse_id))];
+      
+      await Promise.all(
+        uniqueNurseIds.map(async (nurseId) => {
+          const { data: remainingAssignments } = await supabase
+            .from('nurse_client')
+            .select('id')
+            .eq('nurse_id', nurseId)
+            .neq('client_id', clientId);
+
+          if (!remainingAssignments || remainingAssignments.length === 0) {
+            await supabase
+              .from('nurses')
+              .update({ status: 'unassigned' })
+              .eq('nurse_id', nurseId);
+          }
+        })
+      );
+    }
+
+    revalidatePath('/clients');
+
+    return { success: true };
+    
+  } catch (error: unknown) {
+    console.error('Error deleting client:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
