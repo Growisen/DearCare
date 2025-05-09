@@ -7,6 +7,7 @@ import { AddClientOverlay } from "../../../../components/add-client-overlay"
 import { getClients, exportClients } from "../../../../app/actions/client-actions"
 import { Client } from '../../../../types/client.types'
 import Loader from '@/components/loader'
+import { formatFieldValue } from "@/utils/formatters"
 
 export default function ClientsPage() {
   const [searchInput, setSearchInput] = useState("")
@@ -462,7 +463,7 @@ export default function ClientsPage() {
                         <tr key={client.id} className="hover:bg-gray-50/50">
                           <td className="py-4 px-6 text-gray-900 font-medium">{client.name}</td>
                           <td className="py-4 px-6 text-gray-700">{client.requestDate}</td>
-                          <td className="py-4 px-6 text-gray-700">{client.service}</td>
+                          <td className="py-4 px-6 text-gray-700">{formatFieldValue(client.service)}</td>
                           <td className="py-4 px-6">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
                               <StatusIcon className="w-3.5 h-3.5" />

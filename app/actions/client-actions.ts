@@ -73,6 +73,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         client_type: formData.clientType,
         client_category: formData.clientCategory,
         general_notes: formData.generalNotes,
+        duty_period: formData.dutyPeriod,
+        duty_period_reason: formData.dutyPeriodReason,
         status: 'pending'
       })
       .select()
@@ -108,11 +110,14 @@ export async function addIndividualClient(formData: IndividualFormData) {
       .insert({
         care_duration: formData.careDuration,
         client_id: clientData.id,
-        complete_address: formData.completeAddress,
         patient_age: parseInt(formData.patientAge) || null,
         patient_gender: formData.patientGender || null,
         patient_name: formData.patientName,
         patient_phone: formData.patientPhone || null,
+        patient_address: formData.patientAddress,
+        patient_pincode: formData.patientPincode,
+        patient_district: formData.patientDistrict,
+        patient_city: formData.patientCity,     
         preferred_caregiver_gender: formData.preferredCaregiverGender || null,
         relation_to_patient: formData.relationToPatient || 'other',
         requestor_email: formData.requestorEmail,
@@ -122,6 +127,12 @@ export async function addIndividualClient(formData: IndividualFormData) {
         start_date: formData.startDate,
         requestor_profile_pic: requestorProfilePicPath,
         patient_profile_pic: patientProfilePicPath,
+        requestor_address: formData.requestorAddress || null,
+        requestor_job_details: formData.requestorJobDetails || null,
+        requestor_emergency_phone: formData.requestorEmergencyPhone || null,
+        requestor_pincode: formData.requestorPincode || null,
+        requestor_district: formData.requestorDistrict || null,
+        requestor_city: formData.requestorCity || null,
       });
     
     if (individualError) {
@@ -162,6 +173,8 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         client_type: formData.clientType,
         client_category: formData.clientCategory,
         general_notes: formData.generalNotes,
+        duty_period: formData.dutyPeriod,
+        duty_period_reason: formData.dutyPeriodReason,
         status: 'pending'
       })
       .select()

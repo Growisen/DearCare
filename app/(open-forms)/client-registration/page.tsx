@@ -7,35 +7,60 @@ import { addIndividualClient, addOrganizationClient } from '@/app/actions/client
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import InputField from '@/components/open-form/InputField';
-import ProfileImageUpload from '@/components/open-form/ProfileImageUpload';
+
+import { ClientTypeSelector } from '@/components/open-form/ClientTypeSelector';
+import { RequestorInfoForm } from '@/components/open-form/RequestorInfoForm';
+import { PatientInfoForm } from '@/components/open-form/PatientInfoForm';
+import { OrganizationInfoForm } from '@/components/open-form/OrganizationInfoForm';
+import { IndividualCareRequirements } from '@/components/open-form/IndividualCareRequirements';
+import { SuccessMessage } from '@/components/open-form/SuccessMessage';
+import { DutyPeriodSelector } from '@/components/add-client-overlay/DutyPeriodSelector';
+
+interface FormErrors {
+  [key: string]: string;
+}
 
 export default function ClientFormPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientType, setClientType] = useState<'individual' | 'organization' | 'hospital' | 'carehome'>('individual');
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<{[key: string]: boolean}>({});
   
   const [formData, setFormData] = useState<FormData>({
-    // Common Fields
     clientType: 'individual',
     clientCategory: 'DearCare',
     
-    // Individual Client Fields
+    dutyPeriod: '',
+    dutyPeriodReason: '',
+
     requestorName: '',
     requestorPhone: '',
     requestorEmail: '',
     relationToPatient: '',
+
+    requestorAddress: '',
+    requestorJobDetails: '',
+    requestorEmergencyPhone: '',
+    requestorPincode: '',
+    requestorDistrict: '',
+    requestorCity: '',
+    
     patientName: '',
     patientAge: '',
     patientGender: '',
     patientPhone: '',
-    completeAddress: '',
+
+    patientAddress: '',
+    patientPincode: '',
+    patientDistrict: '',
+    patientCity: '',
     
-    // New fields for profile pictures
     requestorProfilePic: null,
     patientProfilePic: null,
-    
-    // Organization/Hospital/Carehome Fields
+
     organizationName: '',
     organizationType: '',
     contactPersonName: '',
@@ -44,14 +69,12 @@ export default function ClientFormPage() {
     contactEmail: '',
     organizationAddress: '',
     
-    // Care Requirements (Common)
     serviceRequired: '',
     careDuration: '',
     startDate: '',
     preferredCaregiverGender: '',
     generalNotes: '',
 
-    // Staff Requirements (for non-individual clients)
     staffRequirements: [{
       staffType: '',
       count: 1,
@@ -59,15 +82,161 @@ export default function ClientFormPage() {
     }],
     staffReqStartDate: '',
   });
-  const [isSuccess, setIsSuccess] = useState(false);
 
-const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  const { id, value } = e.target;
-  setFormData(prev => ({
-    ...prev,
-    [id as keyof FormData]: value
-  }));
-}, []);
+  const fieldLabels: {[key: string]: string} = {
+    dutyPeriod: 'Duty period',
+    dutyPeriodReason: 'Reason for extended duration',
+    requestorName: 'Your name',
+    requestorPhone: 'Your phone number',
+    requestorEmail: 'Your email address',
+    relationToPatient: 'Relation to patient',
+    patientName: 'Patient name',
+    patientAge: 'Patient age',
+    patientGender: 'Patient gender',
+    patientPhone: 'Patient phone number',
+    serviceRequired: 'Service required',
+    careDuration: 'Care duration',
+    startDate: 'Start date',
+    organizationName: 'Organization name',
+    organizationType: 'Organization type',
+    contactPersonName: 'Contact person name',
+    contactPersonRole: 'Contact person role',
+    contactPhone: 'Contact phone',
+    contactEmail: 'Contact email',
+    organizationAddress: 'Organization address',
+    preferredCaregiverGender: 'Preferred caregiver gender',
+    staffReqStartDate: 'Staff requirement start date',
+    requestorAddress: 'Your address',
+    requestorPincode: 'Your pincode',
+    requestorCity: 'Your city',
+    requestorDistrict: 'Your district',
+    patientAddress: 'Patient address',
+    patientPincode: 'Patient pincode',
+    patientCity: 'Patient city',
+    patientDistrict: 'Patient district',
+  };
+
+  // Field validation functions
+  const validateField = (id: string, value: string): string => {
+    if (!value.trim()) return '';
+    
+    switch (id) {
+      case 'requestorEmail':
+      case 'contactEmail':
+        return validateEmail(value);
+      case 'requestorPhone':
+      case 'patientPhone':
+      case 'contactPhone':
+        return validatePhone(value);
+      case 'patientAge':
+        return validateAge(value);
+      case 'patientGender':
+      case 'preferredCaregiverGender':
+        return value === '' ? 'Please select a gender option' : '';
+      case 'serviceRequired':
+        return value === '' ? 'Please select a required service' : '';
+      case 'careDuration':
+        return value === '' ? 'Please select a care duration' : '';
+      case 'dutyPeriod':
+        return value === '' ? 'Please select a duty period' : '';
+      case 'dutyPeriodReason':
+        if (formData.dutyPeriod === 'above_3_months' && !value.trim()) {
+          return 'Please provide a reason for extended duration';
+        }
+        return '';
+      case 'startDate':
+      case 'staffReqStartDate':
+        return isValidDate(value) ? '' : 'Please enter a valid date';
+      default:
+        return '';
+    }
+  };
+
+  const isValidDate = (dateString: string): boolean => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+
+  const validateEmail = (email: string): string => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) ? '' : 'Please enter a valid email address';
+  };
+
+  const validatePhone = (phone: string): string => {
+    const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+    return phoneRegex.test(phone) ? '' : 'Please enter a valid phone number';
+  };
+
+  const validateAge = (age: string): string => {
+    const ageNum = Number(age);
+    if (isNaN(ageNum)) return 'Age must be a number';
+    if (ageNum <= 0 || ageNum > 120) return 'Please enter a valid age';
+    return '';
+  };
+
+  // Helper to determine if a field is required based on client type
+  const isRequiredField = (id: string, type: 'individual' | 'organization' | 'hospital' | 'carehome'): boolean => {
+    const commonRequired = ['dutyPeriod'];
+
+    if (id === 'dutyPeriodReason' && formData.dutyPeriod === 'above_3_months') {
+      return true;
+    }
+
+    const individualRequired = [
+      'requestorName', 'requestorPhone', 'requestorEmail',
+      'relationToPatient', 'patientName', 'patientAge', 'patientGender',
+      'serviceRequired', 'careDuration', 'startDate',
+      'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+      'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict'
+    ];
+    
+    const organizationRequired = [
+      'organizationName', 'organizationType', 'contactPersonName', 
+      'contactPersonRole', 'contactPhone', 'contactEmail', 
+      'organizationAddress', 'staffReqStartDate'
+    ];
+    
+    return commonRequired.includes(id) || (type === 'individual' 
+      ? individualRequired.includes(id)
+      : organizationRequired.includes(id));
+  };
+
+  // Updated handleInputChange to clear errors
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id as keyof FormData]: value
+    }));
+
+    // Clear error when user starts typing
+    if (formErrors[id]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [id]: ''
+      }));
+    }
+  }, [formErrors]);
+
+  const handleBlur = (id: string) => {
+    setTouched(prev => ({
+      ...prev,
+      [id]: true
+    }));
+
+    // Validate field
+    const value = formData[id as keyof FormData] as string;
+    const error = validateField(id, value);
+    
+    // Set error if field is required and empty
+    const isRequired = isRequiredField(id, clientType);
+    const isEmpty = !value || (typeof value === 'string' && !value.trim());
+    
+    setFormErrors(prev => ({
+      ...prev,
+      [id]: error || (touched[id] && isRequired && isEmpty ? `${fieldLabels[id] || 'This field'} is required` : '')
+    }));
+  };
 
   const handleProfileImageChange = (field: 'requestorProfilePic' | 'patientProfilePic', file: File | null) => {
     setFormData(prev => ({
@@ -84,77 +253,133 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
     }));
   };
 
+  // Validate all fields before submission
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    let isValid = true;
+
+    const commonRequired = ['dutyPeriod'];
+    
+    if (formData.dutyPeriod === 'above_3_months' && !formData.dutyPeriodReason?.trim()) {
+      newErrors.dutyPeriodReason = 'Please provide a reason for extended duration';
+      isValid = false;
+    }
+    
+    const requiredFields = [
+      ...commonRequired,
+      ...(clientType === 'individual' 
+        ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
+           'patientName', 'patientAge', 'patientGender', 
+           'serviceRequired', 'careDuration', 'startDate',
+           'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+           'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
+        : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
+           'contactPhone', 'contactEmail', 'organizationAddress', 'staffReqStartDate'])
+    ];
+    
+    // Check required fields
+    for (const field of requiredFields) {
+      const value = formData[field as keyof FormData];
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        newErrors[field] = `${fieldLabels[field] || 'This field'} is required`;
+        isValid = false;
+      }
+    }
+    
+    // Validate field formats
+    for (const field of Object.keys(formData)) {
+      const value = formData[field as keyof FormData];
+      if (typeof value === 'string' && value.trim()) {
+        const error = validateField(field, value);
+        if (error) {
+          newErrors[field] = error;
+          isValid = false;
+        }
+      }
+    }
+    
+    // Validate staff requirements for organizations
+    if (clientType !== 'individual') {
+      if (!formData.staffRequirements || formData.staffRequirements.length === 0) {
+        newErrors.staffRequirements = 'Please add at least one staff requirement';
+        isValid = false;
+      } else {
+        for (let i = 0; i < formData.staffRequirements.length; i++) {
+          const req = formData.staffRequirements[i];
+          if (!req.staffType || !req.shiftType) {
+            newErrors[`staffRequirement-${i}`] = 'Please complete all staff requirement fields';
+            isValid = false;
+            break;
+          }
+        }
+      }
+      
+      if (!formData.staffReqStartDate) {
+        newErrors.staffReqStartDate = 'Start date is required';
+        isValid = false;
+      }
+    }
+    
+    setFormErrors(newErrors);
+    return isValid;
+  };
+
+  // Updated handleSubmit to use validateForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      toast.error("Please correct the errors in the form");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       let result;
       
       if (clientType === 'individual') {
-        // Validate required fields for individual client
-        const requiredFields = [
-          'requestorName', 'requestorPhone', 'requestorEmail',
-          'relationToPatient', 'patientName', 'completeAddress',
-          'serviceRequired', 'careDuration', 'startDate'
-        ];
 
-        for (const field of requiredFields) {
-          if (!formData[field as keyof FormData]) {
-            throw new Error(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-          }
-        }
-
-        // Submit individual client data
         result = await addIndividualClient({
           clientType,
           clientCategory: formData.clientCategory as 'DearCare',
           generalNotes: formData.generalNotes,
+          dutyPeriod: formData.dutyPeriod,
+          dutyPeriodReason: formData.dutyPeriodReason,
           requestorName: formData.requestorName,
           requestorPhone: formData.requestorPhone,
           requestorEmail: formData.requestorEmail,
           relationToPatient: formData.relationToPatient,
+          requestorAddress: formData.requestorAddress,
+          requestorJobDetails: formData.requestorJobDetails,
+          requestorEmergencyPhone: formData.requestorEmergencyPhone,
+          requestorPincode: formData.requestorPincode,
+          requestorDistrict: formData.requestorDistrict,
+          requestorCity: formData.requestorCity,
           patientName: formData.patientName,
           patientAge: formData.patientAge,
           patientGender: formData.patientGender,
           patientPhone: formData.patientPhone || '',
-          completeAddress: formData.completeAddress,
+          patientAddress: formData.patientAddress,
+          patientPincode: formData.patientPincode,
+          patientDistrict: formData.patientDistrict,
+          patientCity: formData.patientCity,     
           serviceRequired: formData.serviceRequired,
           careDuration: formData.careDuration,
           startDate: formData.startDate,
           preferredCaregiverGender: formData.preferredCaregiverGender || '',
-          requestorProfilePic: formData.requestorProfilePic,
           patientProfilePic: formData.patientProfilePic,
+          requestorProfilePic: formData.requestorProfilePic,
         });
         
       } else {
-        // Validate required fields for organization
-        const requiredFields = [
-          'organizationName', 'contactPersonName', 'contactPhone',
-          'contactEmail', 'organizationAddress'
-        ];
-
-        for (const field of requiredFields) {
-          if (!formData[field as keyof FormData]) {
-            throw new Error(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-          }
-        }
-
-        // Validate staff requirements
-        if (!formData.staffRequirements || formData.staffRequirements.length === 0) {
-          throw new Error('Please add at least one staff requirement');
-        }
-
-        for (const requirement of formData.staffRequirements) {
-          if (!requirement.staffType || !requirement.shiftType) {
-            throw new Error('Please complete all staff requirements');
-          }
-        }
-
-        // Submit organization client data
+       
         result = await addOrganizationClient({
           clientType,
           clientCategory: formData.clientCategory as 'DearCare',
           generalNotes: formData.generalNotes,
+          dutyPeriod: formData.dutyPeriod,
+          dutyPeriodReason: formData.dutyPeriodReason,
           organizationName: formData.organizationName,
           organizationType: formData.organizationType || '',
           contactPersonName: formData.contactPersonName,
@@ -188,36 +413,10 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
     }
   };
 
-  const SuccessMessage = () => (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="p-8 text-center">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-          <svg className="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
-        <p className="text-md text-gray-600 mb-6">
-          Thank you for requesting service from DearCare. Your information has been submitted successfully.
-        </p>
-        <p className="text-sm text-gray-500 mb-6">
-          Our team will review your details and contact you shortly.
-          You&apos;ll be redirected to the home page in a few seconds.
-        </p>
-        <button 
-          onClick={() => router.back()}
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
-        >
-          Go Back
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-<div className="min-h-screen bg-slate-200 pt-4">
-  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
+    <div className="min-h-screen bg-slate-200 pt-4">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
           <div className="flex items-center">
             <div className="flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 border-dCblue">
               <div className="relative w-12 h-12">
@@ -245,9 +444,8 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
         </div>
 
         {isSuccess ? (
-          <SuccessMessage />
+          <SuccessMessage onGoBack={() => router.back()} />
         ) : (
-
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
               <h1 className="text-xl font-semibold text-gray-800">Client Registration Form</h1>
@@ -255,357 +453,61 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
             </div>
 
             <form onSubmit={handleSubmit} className="p-6">
-              {/* Client Category Section */}
-              <div className="mb-8 border-b border-gray-200 pb-6 hidden">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Client Category</h2>
-                <div className="flex gap-4">
-                  {[
-                    { id: 'DearCare', label: 'DearCare' }
-                  ].map((type) => (
-                    <div key={type.id} className="flex items-center">
-                      <input
-                        id={`category-${type.id}`}
-                        type="radio"
-                        name="clientCategory"
-                        checked={formData.clientCategory === type.id}
-                        onChange={() => setFormData(prev => ({ ...prev, clientCategory: type.id as 'DearCare' }))}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <label htmlFor={`category-${type.id}`} className="ml-2 block text-sm font-medium text-gray-700">
-                        {type.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Client Type Section */}
-              <div className="mb-8 border-b border-gray-200 pb-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Client Type</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { id: 'individual', label: 'Individual' },
-                    { id: 'organization', label: 'Organization' },
-                    { id: 'hospital', label: 'Hospital' },
-                    { id: 'carehome', label: 'Care Home' }
-                  ].map((type) => (
-                    <div key={type.id} className="flex items-center">
-                      <input
-                        id={`type-${type.id}`}
-                        type="radio"
-                        name="clientType"
-                        checked={clientType === type.id}
-                        onChange={() => setClientType(type.id as 'individual' | 'organization' | 'hospital' | 'carehome')}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <label htmlFor={`type-${type.id}`} className="ml-2 block text-sm font-medium text-gray-700">
-                        {type.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-
-                {clientType && (
-                  <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md">
-                    <h3 className="text-sm font-medium text-blue-700">Instructions for {clientType.charAt(0).toUpperCase() + clientType.slice(1)} Registration</h3>
-                    {clientType === 'individual' && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Please provide information about both the requestor (you) and the patient. All fields marked with * are required. 
-                        If you are registering for yourself, select &quot;Self&quot; as the relation to patient and fill the same details.
-                      </p>
-                    )}
-                    {clientType === 'organization' && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Please provide your organization details and contact information. You&apos;ll need to specify staff requirements including 
-                        staff types, counts, and shift types for each position needed.
-                      </p>
-                    )}
-                    {clientType === 'hospital' && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        For hospital registrations, include complete contact details and address information. Medical staff requirements 
-                        should be specified with qualification levels and experience requirements in the additional notes.
-                      </p>
-                    )}
-                    {clientType === 'carehome' && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        For care home registrations, please specify the facility type, number of residents, and detailed staff requirements. 
-                        Include any specific qualifications needed for specialized care in the additional notes.
-                      </p>
-                    )}
-                  </div>
-                )}
-
-              </div>
+              {/* Client Type Selection */}
+              <ClientTypeSelector clientType={clientType} onClientTypeChange={setClientType} />
 
               {/* Conditional Form Fields */}
               {clientType === 'individual' ? (
-                // Individual Client Fields
                 <>
                   {/* Requestor Information */}
-                  <div className="mb-8 border-b border-gray-200 pb-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Requestor Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <InputField 
-                        label="Your Full Name" 
-                        placeholder="Enter your name" 
-                        id="requestorName" 
-                        value={formData.requestorName} 
-                        onChange={handleInputChange}
-                        required={true}
-                      />
-                      <InputField 
-                        label="Your Phone Number" 
-                        type="tel" 
-                        placeholder="Enter your phone number" 
-                        id="requestorPhone" 
-                        value={formData.requestorPhone} 
-                        onChange={handleInputChange}
-                        required={true}
-                      />
-                      <InputField 
-                        label="Your Email Address" 
-                        type="email" 
-                        placeholder="Enter your email address" 
-                        id="requestorEmail" 
-                        value={formData.requestorEmail} 
-                        onChange={handleInputChange}
-                        required={true}
-                      />
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="relationToPatient">
-                          Relation to Patient <span className="text-red-500">*</span>
-                        </label>
-                        <select 
-                          id="relationToPatient" 
-                          value={formData.relationToPatient} 
-                          onChange={handleInputChange} 
-                          className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        >
-                          <option value="">Select relation...</option>
-                          <option value="self">Self</option>
-                          <option value="spouse">Spouse</option>
-                          <option value="child">Son/Daughter</option>
-                          <option value="parent">Parent</option>
-                          <option value="sibling">Sibling</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                    
-                      <div className="md:col-span-2">
-                        <ProfileImageUpload
-                          id="requestorProfilePic"
-                          label="Your Profile Picture"
-                          value={formData.requestorProfilePic}
-                          onChange={(file) => handleProfileImageChange('requestorProfilePic', file)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
+                  <RequestorInfoForm 
+                    formData={formData} 
+                    formErrors={formErrors}
+                    handleInputChange={handleInputChange}
+                    handleBlur={handleBlur}
+                    handleProfileImageChange={handleProfileImageChange}
+                  />
+                  
                   {/* Patient Information */}
-                  <div className="mb-8 border-b border-gray-200 pb-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Patient Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <InputField 
-                        label="Patient's Full Name" 
-                        placeholder="Enter patient's name" 
-                        id="patientName" 
-                        value={formData.patientName} 
-                        onChange={handleInputChange}
-                        required={true}
-                      />
-                      <InputField 
-                        label="Patient's Age" 
-                        type="number" 
-                        placeholder="Enter patient's age" 
-                        id="patientAge" 
-                        value={formData.patientAge} 
-                        onChange={handleInputChange}
-                      />
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="patientGender">
-                          Patient&apos;s Gender
-                        </label>
-                        <select 
-                          id="patientGender" 
-                          value={formData.patientGender} 
-                          onChange={handleInputChange} 
-                          className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          <option value="">Select gender...</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      <InputField 
-                        label="Patient's Phone Number" 
-                        type="tel" 
-                        placeholder="Enter patient's phone number" 
-                        id="patientPhone" 
-                        value={formData.patientPhone} 
-                        onChange={handleInputChange}
-                      />
-                      <div className="md:col-span-2">
-                        <InputField 
-                          label="Complete Address" 
-                          placeholder="Enter patient's complete address" 
-                          id="completeAddress" 
-                          value={formData.completeAddress} 
-                          onChange={handleInputChange}
-                          required={true}
-                        />
-                      </div>
-                      
-                      <div className="md:col-span-2">
-                        <ProfileImageUpload
-                          id="patientProfilePic"
-                          label="Patient's Profile Picture"
-                          value={formData.patientProfilePic}
-                          onChange={(file) => handleProfileImageChange('patientProfilePic', file)}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <PatientInfoForm 
+                    formData={formData}
+                    formErrors={formErrors} 
+                    handleBlur={handleBlur}
+                    handleInputChange={handleInputChange} 
+                    handleProfileImageChange={handleProfileImageChange} 
+                  />
                 </>
               ) : (
-                // Organization/Hospital/Carehome Fields
-                <div className="mb-8 border-b border-gray-200 pb-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Organization Details</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField 
-                      label="Organization Name" 
-                      placeholder="Enter organization name" 
-                      id="organizationName" 
-                      value={formData.organizationName} 
-                      onChange={handleInputChange}
-                      required={true}
-                    />
-                    <InputField 
-                      label="Contact Person Name" 
-                      placeholder="Enter contact person name" 
-                      id="contactPersonName" 
-                      value={formData.contactPersonName} 
-                      onChange={handleInputChange}
-                      required={true}
-                    />
-                    <InputField 
-                      label="Contact Person Role" 
-                      placeholder="Enter role/designation" 
-                      id="contactPersonRole" 
-                      value={formData.contactPersonRole} 
-                      onChange={handleInputChange}
-                    />
-                    <InputField 
-                      label="Contact Phone" 
-                      type="tel"
-                      placeholder="Enter contact phone" 
-                      id="contactPhone" 
-                      value={formData.contactPhone} 
-                      onChange={handleInputChange}
-                      required={true}
-                    />
-                    <InputField 
-                      label="Contact Email" 
-                      type="email"
-                      placeholder="Enter contact email" 
-                      id="contactEmail" 
-                      value={formData.contactEmail} 
-                      onChange={handleInputChange}
-                      required={true}
-                    />
-                    <div className="md:col-span-2">
-                      <InputField 
-                        label="Organization Address" 
-                        placeholder="Enter complete address" 
-                        id="organizationAddress" 
-                        value={formData.organizationAddress} 
-                        onChange={handleInputChange}
-                        required={true}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <OrganizationInfoForm 
+                  formData={formData}
+                  formErrors={formErrors} 
+                  handleBlur={handleBlur} 
+                  handleInputChange={handleInputChange} 
+                />
               )}
 
-              {/* Care Requirements Section */}
-              <div className="mb-8 border-b border-gray-200 pb-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">
-                  {clientType === 'individual' ? 'Care Requirements' : 'Staff Requirements'}
-                </h2>
-                
-                {clientType === 'individual' ? (
-                  // Individual Care Requirements
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="serviceRequired">
-                        Service Required <span className="text-red-500">*</span>
-                      </label>
-                      <select 
-                        id="serviceRequired" 
-                        value={formData.serviceRequired} 
-                        onChange={handleInputChange} 
-                        className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Select service...</option>
-                        <option value="home_care">Home Care</option>
-                        <option value="elder_care">Elder Care</option>
-                        <option value="post_surgery">Post-Surgery Care</option>
-                        <option value="physiotherapy">Physiotherapy</option>
-                        <option value="palliative">Palliative Care</option>
-                        <option value="disability">Disability Care</option>
-                      </select>
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="careDuration">
-                        Care Duration <span className="text-red-500">*</span>
-                      </label>
-                      <select 
-                        id="careDuration" 
-                        value={formData.careDuration} 
-                        onChange={handleInputChange} 
-                        className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Select duration...</option>
-                        <option value="24_7">24/7 Care</option>
-                        <option value="12_hours">12 Hour Shift</option>
-                        <option value="day">Day Care</option>
-                        <option value="night">Night Care</option>
-                        <option value="weekly">Weekly Visits</option>
-                      </select>
-                    </div>
-                    <InputField 
-                      label="Start Date"
-                      type="date" 
-                      placeholder="Select start date" 
-                      id="startDate" 
-                      value={formData.startDate} 
-                      onChange={handleInputChange}
-                      required={true}
-                      min={new Date().toISOString().split('T')[0]}
+              {/* Care Requirements */}
+              {clientType === 'individual' ? (
+                <IndividualCareRequirements 
+                  formData={formData}
+                  formErrors={formErrors} 
+                  handleBlur={handleBlur}  
+                  handleInputChange={handleInputChange} 
+                />
+              ) : (
+                <div className="mb-8 border-b border-gray-200 pb-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Staff Requirements</h2>
+                  
+                  <div className="mb-6">
+                    <DutyPeriodSelector
+                      dutyPeriod={formData.dutyPeriod}
+                      dutyPeriodReason={formData.dutyPeriodReason}
+                      formErrors={formErrors}
+                      handleInputChange={handleInputChange}
+                      handleBlur={handleBlur}
                     />
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="preferredCaregiverGender">
-                        Preferred Caregiver Gender
-                      </label>
-                      <select 
-                        id="preferredCaregiverGender" 
-                        value={formData.preferredCaregiverGender} 
-                        onChange={handleInputChange} 
-                        className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Select preference...</option>
-                        <option value="female">Female</option>
-                        <option value="male">Male</option>
-                        <option value="any">No Preference</option>
-                      </select>
-                    </div>
                   </div>
-                ) : (
-                  // Organization Staff Requirements
+                  
                   <StaffRequirements 
                     clientType={clientType}
                     formData={{
@@ -614,25 +516,21 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | H
                     }}
                     onChange={handleStaffRequirementsChange}
                   />
-                )}
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="generalNotes">
-                    Additional Requirements
-                  </label>
-                  <textarea 
-                    id="generalNotes" 
-                    value={formData.generalNotes} 
-                    onChange={handleInputChange} 
-                    className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
-                    placeholder={
-                      clientType === 'individual' 
-                        ? "Any special care instructions or requirements"
-                        : "Additional staffing requirements, qualifications needed, or other specifications"
-                    }
-                  ></textarea>
+                  
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="generalNotes">
+                      Additional Requirements
+                    </label>
+                    <textarea 
+                      id="generalNotes" 
+                      value={formData.generalNotes} 
+                      onChange={handleInputChange} 
+                      className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
+                      placeholder="Additional staffing requirements, qualifications needed, or other specifications"
+                    ></textarea>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Form Actions */}
               <div className="mt-8 flex justify-end">
