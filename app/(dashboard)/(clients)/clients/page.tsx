@@ -7,7 +7,8 @@ import { AddClientOverlay } from "../../../../components/add-client-overlay"
 import { getClients, exportClients } from "../../../../app/actions/client-actions"
 import { Client } from '../../../../types/client.types'
 import Loader from '@/components/loader'
-import { formatFieldValue } from "@/utils/formatters"
+import { getServiceLabel } from "@/utils/formatters"
+import { serviceOptions } from "@/utils/constants"
 
 export default function ClientsPage() {
   const [searchInput, setSearchInput] = useState("")
@@ -58,6 +59,8 @@ export default function ClientsPage() {
       
       try {
         const result = await getClients(selectedStatus, searchQuery, currentPage, pageSize)
+
+        console.log("Fetched clients:", result.clients)
         
         if (result.success && result.clients) {
           // Add type assertion to make sure the status is of the correct type
@@ -70,6 +73,8 @@ export default function ClientsPage() {
             status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
           }))
           setClients(typedClients)
+
+          console.log("Clients loaded:", typedClients)
           
           // Set pagination data
           if (result.pagination) {
@@ -463,7 +468,7 @@ export default function ClientsPage() {
                         <tr key={client.id} className="hover:bg-gray-50/50">
                           <td className="py-4 px-6 text-gray-900 font-medium">{client.name}</td>
                           <td className="py-4 px-6 text-gray-700">{client.requestDate}</td>
-                          <td className="py-4 px-6 text-gray-700">{formatFieldValue(client.service)}</td>
+                          <td className="py-4 px-6 text-gray-700">{getServiceLabel(serviceOptions, client.service || '')}</td>
                           <td className="py-4 px-6">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
                               <StatusIcon className="w-3.5 h-3.5" />

@@ -122,6 +122,9 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     },
   });
 
+  const [sharableLink, setSharableLink] = useState('');
+  const [showLinkModal, setShowLinkModal] = useState(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({
@@ -287,6 +290,28 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     }
   };
 
+  const generateSharableLink = () => {
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/patient-assessment/${clientId}`;
+    setSharableLink(link);
+    setShowLinkModal(true);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(sharableLink);
+      toast.success('Link copied to clipboard!');
+    } catch (err) {
+      toast.error('Failed to copy link');
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const shareViaWhatsApp = () => {
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Please fill out this assessment form: ${sharableLink}`)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   useEffect(() => {
     if (clientType === "individual") {
       checkFormStatus();
@@ -344,7 +369,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                 // When form is not filled, show the regular options
                 <div className="w-full max-w-md">
                   <p className="text-lg text-gray-700 mb-6">Please select how you would like to proceed with the client assessment</p>
-                  <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
                     <button 
                       onClick={() => setShowForm(true)}
                       className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 disabled:bg-blue-400"
@@ -362,9 +387,21 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                     </button>
                   </div>
                   
+                  {/* New sharable link button */}
+                  <button 
+                    onClick={generateSharableLink}
+                    className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center"
+                    disabled={isSendingForm || formStatus.isChecking}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                    </svg>
+                    Generate Sharable Link
+                  </button>
+                  
                   <button 
                     onClick={checkFormStatus}
-                    className="mt-4 w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
+                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
                     disabled={formStatus.isChecking}
                   >
                     {formStatus.isChecking ? 'Checking whether form is filled...' : 'Not filled, check if form is filled'}
@@ -450,6 +487,64 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
         setRejectionReason={setRejectionReason}
         isSubmitting={isSubmitting}
       />
+
+      {/* New sharable link modal */}
+      {showLinkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium mb-4">Sharable Assessment Form Link</h3>
+            
+            <div className="mb-4">
+              <div className="flex">
+                <input
+                  type="text"
+                  value={sharableLink}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-l-md py-2 px-3 text-gray-700 focus:outline-none"
+                />
+                <button
+                  onClick={copyToClipboard}
+                  className="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <button
+                onClick={copyToClipboard}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded flex items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                </svg>
+                Copy Link
+              </button>
+              <button
+                onClick={shareViaWhatsApp}
+                className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded flex items-center justify-center"
+              >
+                <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z" />
+                </svg>
+                Share via WhatsApp
+              </button>
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowLinkModal(false)}
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

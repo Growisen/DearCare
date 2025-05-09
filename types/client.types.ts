@@ -7,6 +7,7 @@ export type Json =
   | Json[]
 
 export interface Client {
+  registrationNumber?: string;
   id: string;
   name: string;
   requestDate: string;
@@ -137,6 +138,7 @@ export interface ClientInformationProps {
 
 
 export interface DetailedClientIndividual {
+  registration_number?: string;
   client_type: 'individual';
   client_category?: 'DearCare' | 'TataLife';
   duty_period?: string;
@@ -172,6 +174,7 @@ export interface DetailedClientIndividual {
     patient_profile_pic_url?: string | null;
   };
   general_notes?: string;
+  created_at?: string;
 }
 
 export interface DetailedClientOrganization {
@@ -254,4 +257,101 @@ export interface SavePatientAssessmentResult {
   success: boolean;
   id?: string;
   error?: string;
+}
+
+
+export interface PatientAssessmentDataForApprovedClients {
+  guardianOccupation: string;
+  maritalStatus: string;
+  height: string;
+  weight: string;
+  pincode: string;
+  district: string;
+  cityTown: string;
+  currentStatus: string;
+  chronicIllness: string;
+  medicalHistory: string;
+  surgicalHistory: string;
+  medicationHistory: string;
+  alertnessLevel: string;
+  physicalBehavior: string;
+  speechPatterns: string;
+  emotionalState: string;
+  drugsUse: string;
+  alcoholUse: string;
+  tobaccoUse: string;
+  otherSocialHistory: string;
+  presentCondition: string;
+  bloodPressure: string;
+  sugarLevel: string;
+  finalDiagnosis: string;
+  foodsToInclude: string;
+  foodsToAvoid: string;
+  patientPosition: string;
+  feedingMethod: string;
+  equipment: Json;
+  environment: Json;
+  lab_investigations: Json;
+  [key: string]: string | undefined | Json;
+}
+
+export interface NurseAssignment {
+  id?: number;
+  nurseId: number | string;
+  startDate: string;
+  endDate?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  shiftType?: 'day' | 'night' | '24h';
+}
+
+
+export interface Patient {
+  _id?: string;
+  registrationNumber?: string;
+  firstName: string;
+  lastName: string;
+  age: number | string;
+  gender: string;
+  bloodGroup: string;
+  location: string;
+  email: string;
+  phoneNumber: string;
+  clientCategory: 'DearCare' | 'TataLife';
+  profileImage?: string | null;
+  serviceRequired?: string;
+  address: {
+    fullAddress: string;
+    city: string;
+    district: string;
+    pincode: string;
+  };
+  requestor: { 
+    name: string;
+    relation: string;
+    phone: string;
+    email: string;
+    profileImage?: string | null;
+    emergencyPhone?: string;
+    jobDetails?: string;
+    address?: {
+      fullAddress: string;
+      city: string;
+      district: string;
+      pincode: string;
+    };
+  }
+  emergencyContact: {
+    name: string;
+    relation: string;
+    phone: string;
+  };
+  assessments: PatientAssessmentDataForApprovedClients[];
+  nurseAssignments?: NurseAssignment[];
+}
+
+export interface ClientResponse {
+  success: boolean;
+  client: DetailedClientIndividual;
 }
