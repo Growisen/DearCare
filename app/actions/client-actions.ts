@@ -881,6 +881,7 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       feeding_method: data.assessmentData.feedingMethod,
       environment: environmentData,
       equipment: data.assessmentData.equipment, 
+      family_members: data.assessmentData.familyMembers,
       updated_at: new Date().toISOString()
     };
     

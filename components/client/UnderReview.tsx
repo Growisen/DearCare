@@ -11,7 +11,9 @@ import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import ReviewChecklist from './UnderReview/ReviewChecklist';
 import RejectModal from './RejectModal';
-
+import { v4 as uuidv4 } from 'uuid';
+import { FamilyMember } from '@/types/client.types';
+import FamilyMembers from '@/components/client/UnderReview/FamilyMembers';
 
 interface InputFieldProps {
   label: string;
@@ -143,6 +145,8 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       walkers: false,
       crutches: false,
     },
+
+    familyMembers: [] as FamilyMember[],
   });
 
   const [sharableLink, setSharableLink] = useState('');
@@ -170,6 +174,39 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
         ...prev.equipment,
         [equipmentId]: checked
       }
+    }));
+  };
+
+  const handleAddFamilyMember = () => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: [
+        ...prev.familyMembers,
+        {
+          id: uuidv4(),
+          name: '',
+          age: '',
+          job: '',
+          relation: '',
+          medicalRecords: ''
+        }
+      ]
+    }));
+  };
+
+  const handleRemoveFamilyMember = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter(member => member.id !== id)
+    }));
+  };
+
+  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      )
     }));
   };
 
@@ -450,6 +487,14 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
               <SocialHistory formData={formData} handleInputChange={handleInputChange} />
               <CurrentDetails formData={formData} handleInputChange={handleInputChange} />
               <DiagnosisAndCarePlan formData={formData} handleInputChange={handleInputChange} />
+              
+              <FamilyMembers 
+                familyMembers={formData.familyMembers}
+                onAddFamilyMember={handleAddFamilyMember}
+                onRemoveFamilyMember={handleRemoveFamilyMember}
+                onFamilyMemberChange={handleFamilyMemberChange}
+              />
+              
               <EnvironmentAndEquipment 
                 formData={formData} 
                 handleCheckboxChange={handleCheckboxChange}

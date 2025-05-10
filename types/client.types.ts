@@ -212,6 +212,15 @@ export interface EquipmentData {
   [key: string]: boolean | string | number | null | JSON;
 }
 
+export type FamilyMember = {
+  id: string;
+  name: string;
+  age: string;
+  job: string;
+  relation: string;
+  medicalRecords: string;
+};
+
 export interface PatientAssessmentData {
   guardianOccupation: string;
   maritalStatus: string;
@@ -254,6 +263,7 @@ export interface PatientAssessmentData {
   hasSocialInteraction: boolean;
   hasSupportiveEnv: boolean;
   equipment: Json;
+  familyMembers: FamilyMember[],
 }
 
 export interface SavePatientAssessmentParams {
@@ -300,6 +310,7 @@ export interface PatientAssessmentDataForApprovedClients {
   equipment: Json;
   environment: Json;
   lab_investigations: Json;
+  familyMembers: FamilyMember[];
   [key: string]: string | undefined | Json;
 }
 

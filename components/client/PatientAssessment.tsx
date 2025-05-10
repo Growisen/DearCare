@@ -7,6 +7,9 @@ import SocialHistory from './UnderReview/SocialHistory';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
 import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions'
+import { FamilyMember } from '@/types/client.types';
+import FamilyMembers from './UnderReview/FamilyMembers';
+
 
 interface PatientAssessmentProps {
   clientId: string;
@@ -98,6 +101,7 @@ interface AssessmentData {
   lab_investigations?: LabInvestigations;
   environment?: Environment;
   equipment?: Equipment;
+  family_members: FamilyMember[];
 }
 
 export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
@@ -191,6 +195,8 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     foodsToAvoid: '',
     patientPosition: '',
     feedingMethod: '',
+
+    familyMembers: [] as FamilyMember[],
   });
 
   // Fetch patient assessment data when component mounts or clientId changes
@@ -203,6 +209,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         if (result.success && result.assessment) {
           // Transform database data to match component state structure
           const assessmentData = result.assessment as AssessmentData;
+          console.log("dsd", assessmentData)
           const environment = assessmentData.environment || {};
           const labInvestigations = assessmentData.lab_investigations || {};
           
@@ -294,6 +301,8 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             foodsToAvoid: assessmentData.foods_to_avoid || '',
             patientPosition: assessmentData.patient_position || '',
             feedingMethod: assessmentData.feeding_method || '',
+
+            familyMembers: assessmentData.family_members || [],
           });
 
           setLoading(false);
@@ -341,6 +350,45 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         ...prev.equipment,
         [equipmentId]: checked,
       },
+    }));
+  };
+
+  const handleAddFamilyMember = () => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: [
+        ...prev.familyMembers,
+        {
+          id: crypto.randomUUID(),
+          name: '',
+          age: '',
+          job: '',
+          relation: '',
+          medicalRecords: ''
+        }
+      ]
+    }));
+  };
+  
+  const handleRemoveFamilyMember = (id: string) => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter(member => member.id !== id)
+    }));
+  };
+  
+  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      )
     }));
   };
 
@@ -407,6 +455,8 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         foodsToAvoid: formData.foodsToAvoid,
         patientPosition: formData.patientPosition,
         feedingMethod: formData.feedingMethod,
+
+        familyMembers: formData.familyMembers,
       }
     });
       
@@ -503,6 +553,13 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
                 otherSocialHistory: formData.otherSocialHistory,
               }}
               handleInputChange={handleInputChange}
+            />
+
+            <FamilyMembers
+              familyMembers={formData.familyMembers}
+              onAddFamilyMember={handleAddFamilyMember}
+              onRemoveFamilyMember={handleRemoveFamilyMember}
+              onFamilyMemberChange={handleFamilyMemberChange}
             />
             
             <EnvironmentAndEquipment 

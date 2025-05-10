@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import InfoField from './InfoField';
-import { Json } from '@/types/client.types';
+import { Json, FamilyMember } from '@/types/client.types';
 import { equipmentCategories } from '@/utils/constants';
 
 interface MedicalInfoProps {
@@ -29,6 +29,7 @@ interface MedicalInfoProps {
     lab_investigations?: Json;
     equipment?: Json | Record<string, boolean>;
     environment?: Json | Record<string, boolean>;
+    familyMembers: Array<FamilyMember>;
     [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined;
   };
 }
@@ -72,6 +73,57 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
         </div>
       ),
       alwaysExpanded: true
+    },
+    {
+      id: 'family-members',
+      title: 'Family Members',
+      content: (
+        <div className="space-y-4">
+          {assessment?.familyMembers && assessment.familyMembers.length > 0 ? (
+            assessment.familyMembers.map((member) => (
+              <div key={member.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3">
+                  <h3 className="font-medium text-gray-900">
+                    {member.name}
+                  </h3>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {member.relation}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                  <div>
+                    <span className="text-xs text-gray-500 font-medium">Age</span>
+                    <p className="text-sm text-gray-800">{member.age || "Not provided"}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-xs text-gray-500 font-medium">Occupation</span>
+                    <p className="text-sm text-gray-800">{member.job || "Not provided"}</p>
+                  </div>
+                  
+                  {member.medicalRecords && (
+                    <div className="md:col-span-2">
+                      <span className="text-xs text-gray-500 font-medium">Medical Records</span>
+                      <p className="text-sm text-gray-800 p-2 bg-white rounded border border-gray-200 mt-1">
+                        {member.medicalRecords}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p className="mt-2 text-gray-500">No family members information available</p>
+            </div>
+          )}
+        </div>
+      ),
+      alwaysExpanded: false
     },
     {
       id: 'lab-investigations',

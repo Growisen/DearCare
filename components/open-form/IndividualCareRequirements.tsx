@@ -115,19 +115,6 @@ export const IndividualCareRequirements = ({ formData, handleInputChange, formEr
           </select>
         </div>
       </div>
-      
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="generalNotes">
-          Additional Requirements
-        </label>
-        <textarea 
-          id="generalNotes" 
-          value={formData.generalNotes} 
-          onChange={handleInputChange} 
-          className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
-          placeholder="Any special care instructions or requirements"
-        ></textarea>
-      </div>
     </div>
   );
 };
