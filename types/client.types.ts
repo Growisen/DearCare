@@ -6,6 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
+
 export interface Client {
   registrationNumber?: string;
   id: string;
@@ -373,4 +375,90 @@ export interface Patient {
 export interface ClientResponse {
   success: boolean;
   client: DetailedClientIndividual;
+}
+
+
+export interface LabInvestigations {
+  hb?: string;
+  rbc?: string;
+  esr?: string;
+  urine?: string;
+  sodium?: string;
+  other?: string;
+}
+
+export interface Environment {
+  is_clean?: boolean;
+  is_ventilated?: boolean;
+  is_dry?: boolean;
+  has_nature_view?: boolean;
+  has_social_interaction?: boolean;
+  has_supportive_env?: boolean;
+}
+
+export interface Equipment {
+  hospitalBed?: boolean;
+  wheelChair?: boolean;
+  adultDiaper?: boolean;
+  disposableUnderpad?: boolean;
+  pillows?: boolean;
+  bedRidden?: boolean;
+  semiBedridden?: boolean;
+  bedWedges?: boolean;
+  bedsideCommode?: boolean;
+  patientLift?: boolean;
+  bedsideHandRail?: boolean;
+  examinationGloves?: boolean;
+  noRinseCleanser?: boolean;
+  bathingWipes?: boolean;
+  bpMeasuringApparatus?: boolean;
+  electricBackLifter?: boolean;
+  o2Concentrator?: boolean;
+  overBedTable?: boolean;
+  suctionMachine?: boolean;
+  ivStand?: boolean;
+  bedPan?: boolean;
+  decubitusMatress?: boolean;
+  airMatress?: boolean;
+  bpMonitor?: boolean;
+  bedLift?: boolean;
+  bedRail?: boolean;
+  cane?: boolean;
+  walkers?: boolean;
+  crutches?: boolean;
+}
+
+export interface AssessmentData {
+  guardian_occupation?: string;
+  marital_status?: string;
+  height?: string;
+  weight?: string;
+  pincode?: string;
+  district?: string;
+  city_town?: string;
+  current_status?: string;
+  chronic_illness?: string;
+  medical_history?: string;
+  surgical_history?: string;
+  medication_history?: string;
+  present_condition?: string;
+  blood_pressure?: string;
+  sugar_level?: string;
+  alertness_level?: string;
+  physical_behavior?: string;
+  speech_patterns?: string;
+  emotional_state?: string;
+  drugs_use?: string;
+  alcohol_use?: string;
+  tobacco_use?: string;
+  other_social_history?: string;
+  final_diagnosis?: string;
+  foods_to_include?: string;
+  foods_to_avoid?: string;
+  patient_position?: string;
+  feeding_method?: string;
+  lab_investigations?: LabInvestigations;
+  environment?: Environment;
+  equipment?: Equipment;
+  family_members: FamilyMember[];
 }

@@ -7,9 +7,8 @@ import SocialHistory from './UnderReview/SocialHistory';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
 import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions'
-import { FamilyMember } from '@/types/client.types';
+import { AssessmentData, FamilyMember } from '@/types/client.types';
 import FamilyMembers from './UnderReview/FamilyMembers';
-
 
 interface PatientAssessmentProps {
   clientId: string;
@@ -19,90 +18,7 @@ interface PatientAssessmentProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-interface LabInvestigations {
-  hb?: string;
-  rbc?: string;
-  esr?: string;
-  urine?: string;
-  sodium?: string;
-  other?: string;
-}
 
-interface Environment {
-  is_clean?: boolean;
-  is_ventilated?: boolean;
-  is_dry?: boolean;
-  has_nature_view?: boolean;
-  has_social_interaction?: boolean;
-  has_supportive_env?: boolean;
-}
-
-interface Equipment {
-  hospitalBed?: boolean;
-  wheelChair?: boolean;
-  adultDiaper?: boolean;
-  disposableUnderpad?: boolean;
-  pillows?: boolean;
-  bedRidden?: boolean;
-  semiBedridden?: boolean;
-  bedWedges?: boolean;
-  bedsideCommode?: boolean;
-  patientLift?: boolean;
-  bedsideHandRail?: boolean;
-  examinationGloves?: boolean;
-  noRinseCleanser?: boolean;
-  bathingWipes?: boolean;
-  bpMeasuringApparatus?: boolean;
-  electricBackLifter?: boolean;
-  o2Concentrator?: boolean;
-  overBedTable?: boolean;
-  suctionMachine?: boolean;
-  ivStand?: boolean;
-  bedPan?: boolean;
-  decubitusMatress?: boolean;
-  airMatress?: boolean;
-  bpMonitor?: boolean;
-  bedLift?: boolean;
-  bedRail?: boolean;
-  cane?: boolean;
-  walkers?: boolean;
-  crutches?: boolean;
-}
-
-interface AssessmentData {
-  guardian_occupation?: string;
-  marital_status?: string;
-  height?: string;
-  weight?: string;
-  pincode?: string;
-  district?: string;
-  city_town?: string;
-  current_status?: string;
-  chronic_illness?: string;
-  medical_history?: string;
-  surgical_history?: string;
-  medication_history?: string;
-  present_condition?: string;
-  blood_pressure?: string;
-  sugar_level?: string;
-  alertness_level?: string;
-  physical_behavior?: string;
-  speech_patterns?: string;
-  emotional_state?: string;
-  drugs_use?: string;
-  alcohol_use?: string;
-  tobacco_use?: string;
-  other_social_history?: string;
-  final_diagnosis?: string;
-  foods_to_include?: string;
-  foods_to_avoid?: string;
-  patient_position?: string;
-  feeding_method?: string;
-  lab_investigations?: LabInvestigations;
-  environment?: Environment;
-  equipment?: Equipment;
-  family_members: FamilyMember[];
-}
 
 export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
   const [loading, setLoading] = useState<boolean>(true);

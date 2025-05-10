@@ -13,6 +13,8 @@ import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
 import { getServiceLabel } from '../utils/formatters';
+import ImageViewer from './common/ImageViewer';
+
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
@@ -120,6 +122,7 @@ export function ClientDetailsOverlay({
 
 
   function ProfileImage({ src, alt, size = "md" }: { src: string | null | undefined; alt: string; size?: "sm" | "md" | "lg" }) {
+    const [isImageViewerOpen, setIsImageViewerOpen] = useState(false); // Add state for image viewer
     const sizeClasses = {
       sm: "w-12 h-12",
       md: "w-16 h-16",
@@ -130,7 +133,10 @@ export function ClientDetailsOverlay({
     
     return src ? (
       <div className="flex flex-col items-center">
-        <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-100 border border-gray-200`}>
+        <div 
+          className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer`}
+          onClick={() => setIsImageViewerOpen(true)}
+        >
           <Image 
             src={src} 
             alt={alt} 
@@ -142,6 +148,15 @@ export function ClientDetailsOverlay({
             }}
           />
         </div>
+
+        {src && (
+          <ImageViewer
+            src={src}
+            alt={alt}
+            isOpen={isImageViewerOpen}
+            onClose={() => setIsImageViewerOpen(false)}
+          />
+        )}
       </div>
     ) : null;
   }

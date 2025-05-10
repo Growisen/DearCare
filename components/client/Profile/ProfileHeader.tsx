@@ -129,7 +129,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     clipRule="evenodd"
                   />
                 </svg>
-                Edit Profile
+                Edit Assessment
               </button>
 
               <button
