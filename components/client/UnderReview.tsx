@@ -2,18 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { updateClientStatus, savePatientAssessment, sendClientAssessmentFormLink, getClientAssessmentFormStatus } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import PersonalInfo from './UnderReview/PersonalInfo';
-import MedicalStatus from './UnderReview/MedicalStatus';
-import PsychologicalAssessment from './UnderReview/PsychologicalAssessment';
-import SocialHistory from './UnderReview/SocialHistory';
-import CurrentDetails from './UnderReview/CurrentHistory';
-import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
-import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
-import ReviewChecklist from './UnderReview/ReviewChecklist';
+import PatientAssessmentForm, { usePatientAssessmentForm } from './PatientAssessmentForm';
 import RejectModal from './RejectModal';
-import { v4 as uuidv4 } from 'uuid';
-import { FamilyMember } from '@/types/client.types';
-import FamilyMembers from '@/components/client/UnderReview/FamilyMembers';
 
 interface InputFieldProps {
   label: string;
@@ -72,170 +62,21 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     isFormFilled: false,
   });
   
-  const [formData, setFormData] = useState({
-    // All form fields remain unchanged
-    guardianOccupation: '',
-    maritalStatus: '',
-    height: '',
-    weight: '',
-    pincode: '',
-    district: '',
-    cityTown: '',
-    currentStatus: '',
-    chronicIllness: '',
-    medicalHistory: '',
-    surgicalHistory: '',
-    medicationHistory: '',
-    alertnessLevel: '',
-    physicalBehavior: '',
-    speechPatterns: '',
-    emotionalState: '',
-    drugsUse: '',
-    alcoholUse: '',
-    tobaccoUse: '',
-    otherSocialHistory: '',
-    presentCondition: '',
-    bloodPressure: '',
-    sugarLevel: '',
-    hb: '',
-    rbc: '',
-    esr: '',
-    urine: '',
-    sodium: '',
-    otherLabInvestigations: '',
-    customLabTests: [] as Array<{ id: string; name: string; value: string }>,
-    finalDiagnosis: '',
-    foodsToInclude: '',
-    foodsToAvoid: '',
-    patientPosition: '',
-    feedingMethod: '',
-    isClean: false,
-    isVentilated: false,
-    isDry: false,
-    hasNatureView: false,
-    hasSocialInteraction: false,
-    hasSupportiveEnv: false,
-    equipment: {
-      hospitalBed: false,
-      wheelChair: false,
-      adultDiaper: false,
-      disposableUnderpad: false,
-      pillows: false,
-      bedRidden: false,
-      semiBedridden: false,
-      bedWedges: false,
-      bedsideCommode: false,
-      patientLift: false,
-      bedsideHandRail: false,
-      examinationGloves: false,
-      noRinseCleanser: false,
-      bathingWipes: false,
-      bpMeasuringApparatus: false,
-      electricBackLifter: false,
-      o2Concentrator: false,
-      overBedTable: false,
-      suctionMachine: false,
-      ivStand: false,
-      bedPan: false,
-      decubitusMatress: false,
-      airMatress: false,
-      bpMonitor: false,
-      bedLift: false,
-      bedRail: false,
-      cane: false,
-      walkers: false,
-      crutches: false,
-    },
-
-    familyMembers: [] as FamilyMember[],
-  });
+  const {
+    formData,
+    handleInputChange,
+    handleCheckboxChange,
+    handleEquipmentChange,
+    handleCustomLabChange,
+    handleAddCustomLab,
+    handleRemoveCustomLab,
+    handleAddFamilyMember,
+    handleRemoveFamilyMember,
+    handleFamilyMemberChange
+  } = usePatientAssessmentForm();
 
   const [sharableLink, setSharableLink] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
-
-  const handleAddCustomLab = () => {
-    setFormData(prev => ({
-      ...prev,
-      customLabTests: [
-        ...prev.customLabTests,
-        { id: uuidv4(), name: '', value: '' }
-      ]
-    }));
-  };
-  
-  const handleRemoveCustomLab = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      customLabTests: prev.customLabTests.filter(test => test.id !== id)
-    }));
-  };
-  
-  const handleCustomLabChange = (id: string, field: 'name' | 'value', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      customLabTests: prev.customLabTests.map(test => 
-        test.id === id ? { ...test, [field]: value } : test
-      )
-    }));
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
-
-  const handleCheckboxChange = (id: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [id]: checked
-    }));
-  };
-
-  const handleEquipmentChange = (equipmentId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      equipment: {
-        ...prev.equipment,
-        [equipmentId]: checked
-      }
-    }));
-  };
-
-  const handleAddFamilyMember = () => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: [
-        ...prev.familyMembers,
-        {
-          id: uuidv4(),
-          name: '',
-          age: '',
-          job: '',
-          relation: '',
-          medicalRecords: ''
-        }
-      ]
-    }));
-  };
-
-  const handleRemoveFamilyMember = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: prev.familyMembers.filter(member => member.id !== id)
-    }));
-  };
-
-  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: prev.familyMembers.map(member => 
-        member.id === id ? { ...member, [field]: value } : member
-      )
-    }));
-  };
 
   const handleApprove = async () => {
     try {
@@ -296,7 +137,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       setIsSubmitting(false);
     }
   };
-
 
   const handleReject = async () => {
     try {
@@ -509,43 +349,20 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                 </button>
               </div>
               
-              <PersonalInfo formData={formData} handleInputChange={handleInputChange} />
-              <MedicalStatus formData={formData} handleInputChange={handleInputChange} />
-              <PsychologicalAssessment formData={formData} handleInputChange={handleInputChange} />
-              <SocialHistory formData={formData} handleInputChange={handleInputChange} />
-              <CurrentDetails 
-                formData={{
-                  presentCondition: formData.presentCondition,
-                  bloodPressure: formData.bloodPressure,
-                  sugarLevel: formData.sugarLevel,
-                  hb: formData.hb,
-                  rbc: formData.rbc,
-                  esr: formData.esr,
-                  urine: formData.urine,
-                  sodium: formData.sodium,
-                  otherLabInvestigations: formData.otherLabInvestigations,
-                  customLabTests: formData.customLabTests,
-                }} 
+              <PatientAssessmentForm 
+                formData={formData}
+                isEditable={true}
                 handleInputChange={handleInputChange}
+                handleCheckboxChange={handleCheckboxChange}
+                handleEquipmentChange={handleEquipmentChange}
                 handleCustomLabChange={handleCustomLabChange}
                 handleAddCustomLab={handleAddCustomLab}
                 handleRemoveCustomLab={handleRemoveCustomLab}
+                handleAddFamilyMember={handleAddFamilyMember}
+                handleRemoveFamilyMember={handleRemoveFamilyMember}
+                handleFamilyMemberChange={handleFamilyMemberChange}
+                showReviewChecklist={true}
               />
-              <DiagnosisAndCarePlan formData={formData} handleInputChange={handleInputChange} />
-              
-              <FamilyMembers 
-                familyMembers={formData.familyMembers}
-                onAddFamilyMember={handleAddFamilyMember}
-                onRemoveFamilyMember={handleRemoveFamilyMember}
-                onFamilyMemberChange={handleFamilyMemberChange}
-              />
-              
-              <EnvironmentAndEquipment 
-                formData={formData} 
-                handleCheckboxChange={handleCheckboxChange}
-                handleEquipmentChange={handleEquipmentChange}
-              />
-              <ReviewChecklist />
               
               <div className="flex w-full gap-4">
                 <button 

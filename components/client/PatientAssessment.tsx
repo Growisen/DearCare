@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import PersonalDetails from './UnderReview/PersonalDetails';
-import CurrentDetails from './UnderReview/CurrentHistory';
-import MedicalStatus from './UnderReview/MedicalStatus';
-import PsychologicalAssessment from './UnderReview/PsychologicalAssessment';
-import SocialHistory from './UnderReview/SocialHistory';
-import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
-import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
-import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions'
-import { AssessmentData, FamilyMember } from '@/types/client.types';
-import FamilyMembers from './UnderReview/FamilyMembers';
+import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions';
+import { AssessmentData } from '@/types/client.types';
+import PatientAssessmentForm, { 
+  usePatientAssessmentForm, 
+  getDefaultFormData,  
+} from './PatientAssessmentForm';
 
 interface PatientAssessmentProps {
   clientId: string;
@@ -18,103 +14,23 @@ interface PatientAssessmentProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-
-
 export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  // Combined state for all assessment sections
-  const [formData, setFormData] = useState({
-    // Personal Details (new section)
-    guardianOccupation: '',
-    maritalStatus: '',
-    height: '',
-    weight: '',
-    pincode: '',
-    district: '',
-    cityTown: '',
-    
-    // Existing fields
-    currentStatus: '',
-    chronicIllness: '',
-    medicalHistory: '',
-    surgicalHistory: '',
-    medicationHistory: '',
-    
-    // Current Details
-    presentCondition: '',
-    bloodPressure: '',
-    sugarLevel: '',
-    hb: '',
-    rbc: '',
-    esr: '',
-    urine: '',
-    sodium: '',
-    otherLabInvestigations: '',
-    customLabTests: [] as Array<{ id: string; name: string; value: string }>,
-    
-    // Psychological Assessment
-    alertnessLevel: '',
-    physicalBehavior: '',
-    speechPatterns: '',
-    emotionalState: '',
-    
-    // Social History
-    drugsUse: '',
-    alcoholUse: '',
-    tobaccoUse: '',
-    otherSocialHistory: '',
-    
-    // Environment Assessment
-    isClean: false,
-    isVentilated: false,
-    isDry: false,
-    hasNatureView: false,
-    hasSocialInteraction: false,
-    hasSupportiveEnv: false,
-    
-    // Equipment
-    equipment: {
-      hospitalBed: false,
-      wheelChair: false,
-      adultDiaper: false,
-      disposableUnderpad: false,
-      pillows: false,
-      bedRidden: false,
-      semiBedridden: false,
-      bedWedges: false,
-      bedsideCommode: false,
-      patientLift: false,
-      bedsideHandRail: false,
-      examinationGloves: false,
-      noRinseCleanser: false,
-      bathingWipes: false,
-      bpMeasuringApparatus: false,
-      electricBackLifter: false,
-      o2Concentrator: false,
-      overBedTable: false,
-      suctionMachine: false,
-      ivStand: false,
-      bedPan: false,
-      decubitusMatress: false,
-      airMatress: false,
-      bpMonitor: false,
-      bedLift: false,
-      bedRail: false,
-      cane: false,
-      walkers: false,
-      crutches: false,
-    },
-    
-    // Diagnosis and Care Plan
-    finalDiagnosis: '',
-    foodsToInclude: '',
-    foodsToAvoid: '',
-    patientPosition: '',
-    feedingMethod: '',
-
-    familyMembers: [] as FamilyMember[],
-  });
+  
+  const {
+    formData,
+    setFormData,
+    handleInputChange,
+    handleCheckboxChange,
+    handleEquipmentChange,
+    handleCustomLabChange,
+    handleAddCustomLab,
+    handleRemoveCustomLab,
+    handleAddFamilyMember,
+    handleRemoveFamilyMember,
+    handleFamilyMemberChange
+  } = usePatientAssessmentForm(getDefaultFormData(), isEditing);
 
   // Fetch patient assessment data when component mounts or clientId changes
   useEffect(() => {
@@ -126,7 +42,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         if (result.success && result.assessment) {
           // Transform database data to match component state structure
           const assessmentData = result.assessment as AssessmentData;
-          console.log("dsd", assessmentData)
           const environment = assessmentData.environment || {};
           const labInvestigations = assessmentData.lab_investigations || {};
           
@@ -235,182 +150,18 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     };
 
     fetchAssessmentData();
-  }, [clientId]);
-
-  const handleAddCustomLab = () => {
-    if (!isEditing) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      customLabTests: [
-        ...prev.customLabTests,
-        { id: crypto.randomUUID(), name: '', value: '' }
-      ]
-    }));
-  };
-  
-  const handleRemoveCustomLab = (id: string) => {
-    if (!isEditing) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      customLabTests: prev.customLabTests.filter(test => test.id !== id)
-    }));
-  };
-  
-  const handleCustomLabChange = (id: string, field: 'name' | 'value', value: string) => {
-    if (!isEditing) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      customLabTests: prev.customLabTests.map(test => 
-        test.id === id ? { ...test, [field]: value } : test
-      )
-    }));
-  };
-
-  // Handle text and select inputs
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (!isEditing) return;
-    
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  // Handle checkbox inputs for environment assessment
-  const handleCheckboxChange = (id: string, checked: boolean) => {
-    if (!isEditing) return;
-    
-    setFormData((prev) => ({
-      ...prev,
-      [id]: checked,
-    }));
-  };
-
-  // Handle checkbox inputs for equipment
-  const handleEquipmentChange = (equipmentId: string, checked: boolean) => {
-    if (!isEditing) return;
-    
-    setFormData((prev) => ({
-      ...prev,
-      equipment: {
-        ...prev.equipment,
-        [equipmentId]: checked,
-      },
-    }));
-  };
-
-  const handleAddFamilyMember = () => {
-    if (!isEditing) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: [
-        ...prev.familyMembers,
-        {
-          id: crypto.randomUUID(),
-          name: '',
-          age: '',
-          job: '',
-          relation: '',
-          medicalRecords: ''
-        }
-      ]
-    }));
-  };
-  
-  const handleRemoveFamilyMember = (id: string) => {
-    if (!isEditing) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: prev.familyMembers.filter(member => member.id !== id)
-    }));
-  };
-  
-  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
-    if (!isEditing) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: prev.familyMembers.map(member => 
-        member.id === id ? { ...member, [field]: value } : member
-      )
-    }));
-  };
+  }, [clientId, setFormData]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  try {
-    const response = await savePatientAssessment({
-      clientId,
-      assessmentData: {
-        // Personal Details
-        guardianOccupation: formData.guardianOccupation,
-        maritalStatus: formData.maritalStatus,
-        height: formData.height,
-        weight: formData.weight,
-        pincode: formData.pincode,
-        district: formData.district,
-        cityTown: formData.cityTown,
-        
-        // Medical Status
-        currentStatus: formData.currentStatus,
-        chronicIllness: formData.chronicIllness,
-        medicalHistory: formData.medicalHistory,
-        surgicalHistory: formData.surgicalHistory,
-        medicationHistory: formData.medicationHistory,
-        
-        // Current Details
-        presentCondition: formData.presentCondition,
-        bloodPressure: formData.bloodPressure,
-        sugarLevel: formData.sugarLevel,
-
-        hb: formData.hb,
-        rbc: formData.rbc,
-        esr: formData.esr,
-        urine: formData.urine,
-        sodium: formData.sodium,
-        otherLabInvestigations: formData.otherLabInvestigations,
-        customLabTests: formData.customLabTests,
-        
-        // Psychological Assessment
-        alertnessLevel: formData.alertnessLevel,
-        physicalBehavior: formData.physicalBehavior,
-        speechPatterns: formData.speechPatterns,
-        emotionalState: formData.emotionalState,
-        
-        // Social History
-        drugsUse: formData.drugsUse,
-        alcoholUse: formData.alcoholUse,
-        tobaccoUse: formData.tobaccoUse,
-        otherSocialHistory: formData.otherSocialHistory,
-        isClean: formData.isClean,
-        isVentilated: formData.isVentilated,
-        isDry: formData.isDry,
-        hasNatureView: formData.hasNatureView,
-        hasSocialInteraction: formData.hasSocialInteraction,
-        hasSupportiveEnv: formData.hasSupportiveEnv,
-        
-        // Equipment
-        equipment: formData.equipment,
-        
-        // Diagnosis and Care Plan
-        finalDiagnosis: formData.finalDiagnosis,
-        foodsToInclude: formData.foodsToInclude,
-        foodsToAvoid: formData.foodsToAvoid,
-        patientPosition: formData.patientPosition,
-        feedingMethod: formData.feedingMethod,
-
-        familyMembers: formData.familyMembers,
-      }
-    });
-      
+    e.preventDefault();
+    
+    try {
+      const response = await savePatientAssessment({
+        clientId,
+        assessmentData: formData
+      });
+          
       if (response.success) {
         // Call the onSave callback provided by the parent component
         onSave();
@@ -443,117 +194,19 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             <h2 className="text-xl font-semibold text-gray-800">Patient Assessment</h2>
           </div>
           
-          {/* Display sections using the respective components */}
-          <div className={`space-y-6 ${!isEditing ? 'opacity-90 pointer-events-none' : ''}`}>
-            {/* Add the new PersonalDetails component */}
-            <PersonalDetails
-              formData={{
-                guardianOccupation: formData.guardianOccupation,
-                maritalStatus: formData.maritalStatus,
-                height: formData.height,
-                weight: formData.weight,
-                pincode: formData.pincode,
-                district: formData.district,
-                cityTown: formData.cityTown,
-              }}
-              handleInputChange={handleInputChange}
-            />
-            
-            {/* Existing components */}
-            <MedicalStatus 
-              formData={{
-                currentStatus: formData.currentStatus,
-                chronicIllness: formData.chronicIllness,
-                medicalHistory: formData.medicalHistory,
-                surgicalHistory: formData.surgicalHistory,
-                medicationHistory: formData.medicationHistory,
-              }}
-              handleInputChange={handleInputChange}
-            />
-            
-            <CurrentDetails 
-              formData={{
-                presentCondition: formData.presentCondition,
-                bloodPressure: formData.bloodPressure,
-                sugarLevel: formData.sugarLevel,
-                hb: formData.hb,
-                rbc: formData.rbc,
-                esr: formData.esr,
-                urine: formData.urine,
-                sodium: formData.sodium,
-                otherLabInvestigations: formData.otherLabInvestigations,
-                customLabTests: formData.customLabTests,
-              }}
-              handleInputChange={handleInputChange}
-              handleCustomLabChange={handleCustomLabChange}
-              handleAddCustomLab={handleAddCustomLab}
-              handleRemoveCustomLab={handleRemoveCustomLab}
-            />
-            
-            <PsychologicalAssessment 
-              formData={{
-                alertnessLevel: formData.alertnessLevel,
-                physicalBehavior: formData.physicalBehavior,
-                speechPatterns: formData.speechPatterns,
-                emotionalState: formData.emotionalState,
-              }}
-              handleInputChange={handleInputChange}
-            />
-            
-            <SocialHistory 
-              formData={{
-                drugsUse: formData.drugsUse,
-                alcoholUse: formData.alcoholUse,
-                tobaccoUse: formData.tobaccoUse,
-                otherSocialHistory: formData.otherSocialHistory,
-              }}
-              handleInputChange={handleInputChange}
-            />
-
-            <FamilyMembers
-              familyMembers={formData.familyMembers}
-              onAddFamilyMember={handleAddFamilyMember}
-              onRemoveFamilyMember={handleRemoveFamilyMember}
-              onFamilyMemberChange={handleFamilyMemberChange}
-            />
-            
-            <EnvironmentAndEquipment 
-              formData={{
-                isClean: formData.isClean,
-                isVentilated: formData.isVentilated,
-                isDry: formData.isDry,
-                hasNatureView: formData.hasNatureView,
-                hasSocialInteraction: formData.hasSocialInteraction,
-                hasSupportiveEnv: formData.hasSupportiveEnv,
-                equipment: formData.equipment,
-              }}
-              handleCheckboxChange={handleCheckboxChange}
-              handleEquipmentChange={handleEquipmentChange}
-            />
-            
-            <DiagnosisAndCarePlan 
-              formData={{
-                finalDiagnosis: formData.finalDiagnosis,
-                foodsToInclude: formData.foodsToInclude,
-                foodsToAvoid: formData.foodsToAvoid,
-                patientPosition: formData.patientPosition,
-                feedingMethod: formData.feedingMethod,
-              }}
-              handleInputChange={handleInputChange}
-            />
-          </div>
-          
-          {/* Add Save button when editing */}
-          {/* {isEditing && (
-            <div className="mt-6 flex justify-end">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Save Assessment
-              </button>
-            </div>
-          )} */}
+          <PatientAssessmentForm
+            formData={formData}
+            isEditable={isEditing}
+            handleInputChange={handleInputChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleEquipmentChange={handleEquipmentChange}
+            handleCustomLabChange={handleCustomLabChange}
+            handleAddCustomLab={handleAddCustomLab}
+            handleRemoveCustomLab={handleRemoveCustomLab}
+            handleAddFamilyMember={handleAddFamilyMember}
+            handleRemoveFamilyMember={handleRemoveFamilyMember}
+            handleFamilyMemberChange={handleFamilyMemberChange}
+          />
         </div>
       </form>
       

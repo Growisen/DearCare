@@ -3,7 +3,7 @@ import Image from 'next/image';
 import InfoSection from './InfoSection';
 import InfoField from './InfoField';
 import ImageViewer from '@/components/common/ImageViewer';
-import { Json } from '@/types/client.types'; 
+import { Json, LabInvestigations } from '@/types/client.types'; 
 import { MapPin, Phone, Mail, Briefcase, User, Heart, Ruler, Weight, Users } from 'lucide-react';
 import { createMapLink } from '../../../utils/mapUtils';
 
@@ -31,7 +31,7 @@ interface PatientInfoProps {
       cityTown?: string;
       district?: string;
       pincode?: string;
-      [key: string]: string | undefined | Json;
+      [key: string]: string | undefined | Json | LabInvestigations;
     }>;
     requestor: {
       name: string;

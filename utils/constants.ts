@@ -72,3 +72,15 @@ export const clientTypeOptions = [
   { id: 'hospital' as ClientType, label: 'Hospital' },
   { id: 'carehome' as ClientType, label: 'Care Home' }
 ];
+
+export const relationOptions = [
+  { value: '', label: 'Select relation' },
+  { value: 'son', label: 'Son' },
+  { value: 'daughter', label: 'Daughter' },
+  { value: 'spouse', label: 'Spouse' },
+  { value: 'son_in_law', label: 'Son-in-law' },
+  { value: 'daughter_in_law', label: 'Daughter-in-law' },
+  { value: 'parent', label: 'Parent' },
+  { value: 'sibling', label: 'Sibling' },
+  { value: 'other', label: 'Other' },
+];

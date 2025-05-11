@@ -4,7 +4,7 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
 
@@ -312,9 +312,9 @@ export interface PatientAssessmentDataForApprovedClients {
   feedingMethod: string;
   equipment: Json;
   environment: Json;
-  lab_investigations: Json;
+  lab_investigations: LabInvestigations;
   familyMembers: FamilyMember[];
-  [key: string]: string | undefined | Json;
+  [key: string]: string | undefined | Json | LabInvestigations | FamilyMember[];
 }
 
 export interface NurseAssignment {

@@ -8,12 +8,14 @@ interface PatientInfoFormProps {
   formErrors: {
     [key: string]: string;
   };
+  isSameAddress: boolean;
   handleBlur: (id: string) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleProfileImageChange: (field: 'requestorProfilePic' | 'patientProfilePic', file: File | null) => void;
+  handleSameAddressToggle: (checked: boolean) => void;
 }
 
-export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImageChange, formErrors, handleBlur }: PatientInfoFormProps) => {
+export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImageChange, formErrors, handleBlur, handleSameAddressToggle, isSameAddress }: PatientInfoFormProps) => {
   return (
     <div className="mb-8 border-b border-gray-200 pb-6">
       <h2 className="text-lg font-medium text-gray-900 mb-4">Patient Information</h2>
@@ -70,9 +72,24 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           error={formErrors.patientPhone}
           required
         />
-        
+
+        <div className="md:col-span-2 mb-4">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="sameAsRequestor"
+              checked={isSameAddress}
+              onChange={(e) => handleSameAddressToggle(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="sameAsRequestor" className="ml-2 block text-sm text-gray-700">
+              Patient address is same as requestor&apos;s address
+            </label>
+          </div>
+        </div>
+
         <InputField 
-          label="Patient's Address" 
+          label="Patient's Address"
           placeholder="Enter patient's address" 
           id="patientAddress" 
           value={formData.patientAddress} 
@@ -81,6 +98,7 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           error={formErrors.patientAddress}
           required
         />
+        
         <InputField 
           label="Pincode" 
           placeholder="Enter patient's pincode" 

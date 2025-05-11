@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import InfoField from './InfoField';
-import { Json, FamilyMember } from '@/types/client.types';
+import { Json, FamilyMember, LabInvestigations } from '@/types/client.types';
 import { equipmentCategories } from '@/utils/constants';
 
 interface MedicalInfoProps {
@@ -26,18 +26,18 @@ interface MedicalInfoProps {
     otherSocialHistory?: string;
     feedingMethod?: string;
     currentStatus?: string;
-    lab_investigations?: Json;
+    lab_investigations?: LabInvestigations;
     equipment?: Json | Record<string, boolean>;
     environment?: Json | Record<string, boolean>;
     familyMembers: Array<FamilyMember>;
-    [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined;
+    [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined | LabInvestigations;
   };
 }
 
 const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  console.log('MedicalInfo assessment:', assessment.equipment);
+  console.log('MedicalInfo assessment:', assessment.lab_investigations);
 
   const toggleSection = (sectionName: string) => {
     if (expandedSection === sectionName) {
@@ -129,17 +129,42 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
       id: 'lab-investigations',
       title: 'Lab Investigations',
       content: (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(assessment?.lab_investigations || {}).length > 0 ? (
-            Object.entries(assessment?.lab_investigations || {}).map(([key, value]) => (
-              <div key={key}>
-                <p className="text-xs text-gray-500 font-medium">{key.toUpperCase()}</p>
-                <p className="text-sm text-gray-700">{value || "Not recorded"}</p>
-              </div>
-            ))
+        <div className="space-y-4">
+          {/* Standard lab tests */}
+          {assessment?.lab_investigations && Object.keys(assessment.lab_investigations).length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Object.entries(assessment.lab_investigations).map(([key, value]) => {
+                // Skip rendering the custom_tests here as we'll handle it separately
+                if (key === 'custom_tests') return null;
+                
+                return (
+                  <div key={key} className="bg-gray-50 p-3 rounded-md">
+                    <p className="text-xs text-gray-500 font-medium">{key.toUpperCase()}</p>
+                    <p className="text-sm text-gray-700">{value || "Not recorded"}</p>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
-            <p className="text-sm text-gray-500 col-span-full">No lab investigations recorded</p>
+            <p className="text-sm text-gray-500">No standard lab investigations recorded</p>
           )}
+    
+          {/* Custom tests section */}
+          {assessment?.lab_investigations?.custom_tests && 
+          Array.isArray(assessment.lab_investigations.custom_tests) && 
+          assessment.lab_investigations.custom_tests.length > 0 ? (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-3 text-gray-700">Custom Tests</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {assessment.lab_investigations.custom_tests.map((test, index) => (
+                  <div key={index} className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                    <p className="text-xs text-gray-500 font-medium">{test.name.toUpperCase()}</p>
+                    <p className="text-sm text-gray-700">{test.value || "Not recorded"}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       )
     },
