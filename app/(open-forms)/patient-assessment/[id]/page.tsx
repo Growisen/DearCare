@@ -53,6 +53,7 @@ export default function PatientAssessmentPage() {
     urine: '',
     sodium: '',
     otherLabInvestigations: '',
+    customLabTests: [] as Array<{ id: string; name: string; value: string }>,
     finalDiagnosis: '',
     foodsToInclude: '',
     foodsToAvoid: '',
@@ -97,6 +98,32 @@ export default function PatientAssessmentPage() {
     },
     familyMembers: [] as FamilyMember[],
   });
+
+  const handleAddCustomLab = () => {
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: [
+        ...prev.customLabTests,
+        { id: uuidv4(), name: '', value: '' }
+      ]
+    }));
+  };
+  
+  const handleRemoveCustomLab = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: prev.customLabTests.filter(test => test.id !== id)
+    }));
+  };
+  
+  const handleCustomLabChange = (id: string, field: 'name' | 'value', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: prev.customLabTests.map(test => 
+        test.id === id ? { ...test, [field]: value } : test
+      )
+    }));
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -232,7 +259,13 @@ export default function PatientAssessmentPage() {
                         <MedicalStatus formData={formData} handleInputChange={handleInputChange} />
                         <PsychologicalAssessment formData={formData} handleInputChange={handleInputChange} />
                         <SocialHistory formData={formData} handleInputChange={handleInputChange} />
-                        <CurrentDetails formData={formData} handleInputChange={handleInputChange} />
+                        <CurrentDetails 
+                          formData={formData} 
+                          handleInputChange={handleInputChange}
+                          handleAddCustomLab={handleAddCustomLab}
+                          handleRemoveCustomLab={handleRemoveCustomLab}
+                          handleCustomLabChange={handleCustomLabChange}
+                        />
                         
                         <FamilyMembers 
                             familyMembers={formData.familyMembers}

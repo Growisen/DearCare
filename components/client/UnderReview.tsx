@@ -103,6 +103,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     urine: '',
     sodium: '',
     otherLabInvestigations: '',
+    customLabTests: [] as Array<{ id: string; name: string; value: string }>,
     finalDiagnosis: '',
     foodsToInclude: '',
     foodsToAvoid: '',
@@ -151,6 +152,32 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
 
   const [sharableLink, setSharableLink] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
+
+  const handleAddCustomLab = () => {
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: [
+        ...prev.customLabTests,
+        { id: uuidv4(), name: '', value: '' }
+      ]
+    }));
+  };
+  
+  const handleRemoveCustomLab = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: prev.customLabTests.filter(test => test.id !== id)
+    }));
+  };
+  
+  const handleCustomLabChange = (id: string, field: 'name' | 'value', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: prev.customLabTests.map(test => 
+        test.id === id ? { ...test, [field]: value } : test
+      )
+    }));
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -223,7 +250,8 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
             esr: formData.esr,
             urine: formData.urine,
             sodium: formData.sodium,
-            other: formData.otherLabInvestigations
+            other: formData.otherLabInvestigations,
+            custom_tests: formData.customLabTests
           },
           environment: {
             isClean: formData.isClean,
@@ -485,7 +513,24 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
               <MedicalStatus formData={formData} handleInputChange={handleInputChange} />
               <PsychologicalAssessment formData={formData} handleInputChange={handleInputChange} />
               <SocialHistory formData={formData} handleInputChange={handleInputChange} />
-              <CurrentDetails formData={formData} handleInputChange={handleInputChange} />
+              <CurrentDetails 
+                formData={{
+                  presentCondition: formData.presentCondition,
+                  bloodPressure: formData.bloodPressure,
+                  sugarLevel: formData.sugarLevel,
+                  hb: formData.hb,
+                  rbc: formData.rbc,
+                  esr: formData.esr,
+                  urine: formData.urine,
+                  sodium: formData.sodium,
+                  otherLabInvestigations: formData.otherLabInvestigations,
+                  customLabTests: formData.customLabTests,
+                }} 
+                handleInputChange={handleInputChange}
+                handleCustomLabChange={handleCustomLabChange}
+                handleAddCustomLab={handleAddCustomLab}
+                handleRemoveCustomLab={handleRemoveCustomLab}
+              />
               <DiagnosisAndCarePlan formData={formData} handleInputChange={handleInputChange} />
               
               <FamilyMembers 

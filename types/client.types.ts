@@ -266,6 +266,7 @@ export interface PatientAssessmentData {
   hasSupportiveEnv: boolean;
   equipment: Json;
   familyMembers: FamilyMember[],
+  customLabTests: Array<{ id: string; name: string; value: string }>;
 }
 
 export interface SavePatientAssessmentParams {
@@ -385,6 +386,7 @@ export interface LabInvestigations {
   urine?: string;
   sodium?: string;
   other?: string;
+  custom_tests?: Array<{ id: string; name: string; value: string }>;
 }
 
 export interface Environment {

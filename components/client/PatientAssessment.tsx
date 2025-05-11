@@ -51,6 +51,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     urine: '',
     sodium: '',
     otherLabInvestigations: '',
+    customLabTests: [] as Array<{ id: string; name: string; value: string }>,
     
     // Psychological Assessment
     alertnessLevel: '',
@@ -156,6 +157,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             urine: labInvestigations.urine || '',
             sodium: labInvestigations.sodium || '',
             otherLabInvestigations: labInvestigations.other || '',
+            customLabTests: labInvestigations.custom_tests || [],
             
             // Psychological Assessment
             alertnessLevel: assessmentData.alertness_level || '',
@@ -234,6 +236,38 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
 
     fetchAssessmentData();
   }, [clientId]);
+
+  const handleAddCustomLab = () => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: [
+        ...prev.customLabTests,
+        { id: crypto.randomUUID(), name: '', value: '' }
+      ]
+    }));
+  };
+  
+  const handleRemoveCustomLab = (id: string) => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: prev.customLabTests.filter(test => test.id !== id)
+    }));
+  };
+  
+  const handleCustomLabChange = (id: string, field: 'name' | 'value', value: string) => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      customLabTests: prev.customLabTests.map(test => 
+        test.id === id ? { ...test, [field]: value } : test
+      )
+    }));
+  };
 
   // Handle text and select inputs
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -343,6 +377,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         urine: formData.urine,
         sodium: formData.sodium,
         otherLabInvestigations: formData.otherLabInvestigations,
+        customLabTests: formData.customLabTests,
         
         // Psychological Assessment
         alertnessLevel: formData.alertnessLevel,
@@ -447,8 +482,12 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
                 urine: formData.urine,
                 sodium: formData.sodium,
                 otherLabInvestigations: formData.otherLabInvestigations,
+                customLabTests: formData.customLabTests,
               }}
               handleInputChange={handleInputChange}
+              handleCustomLabChange={handleCustomLabChange}
+              handleAddCustomLab={handleAddCustomLab}
+              handleRemoveCustomLab={handleRemoveCustomLab}
             />
             
             <PsychologicalAssessment 
