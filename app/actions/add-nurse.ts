@@ -188,6 +188,8 @@ export async function createNurse(
         religion: nurseData.religion,
         mother_tongue: nurseData.mother_tongue,
         noc_status: nurseData.noc_status,
+        nurse_reg_no: nurseData.nurse_reg_no,
+        admitted_type: nurseData.admitted_type,
         created_at: new Date().toISOString()
       })
       .select('nurse_id')

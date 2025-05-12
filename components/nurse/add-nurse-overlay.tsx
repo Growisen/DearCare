@@ -10,10 +10,11 @@ const FORM_CONFIG = {
     languagesAvailable: ["English", "Malayalam", "Hindi", "Tamil", "Kannada", "Telugu"] as string[],
     maritalStatus: ["Single", "Married", "Widow", "Separated"] as string[],
     religions: ["Hindu", "Christian", "Muslim", "Other"] as string[],
-    serviceTypes: ["Home Nurse", "Delivery Care", "Baby Care", "HM"] as string[],
+    serviceTypes: ["Home Nurse", "Delivery Care", "Baby Care", "HM"," Ayurveda"," Panchakarma Therapist"] as string[],
     shiftingPatterns: ["24 Hour", "12 Hour", "8 Hour", "Hourly"] as string[],
     staffCategories: ["Permanent", "Trainee", "Temporary"] as string[],
     nocOptions: ["Yes", "No", "Applied", "Going To Apply"] as string[],
+    admittedTypes: ['Tata_Homenursing', 'Dearcare_Llp'] as string[],
     sourceOfInformation: [
       "Leads From Facebook",
       "Leads From Ivr",
@@ -223,6 +224,18 @@ const StepContent = {
       <FormLayout>
         <Fields.Input label="First Name" placeholder="Enter first name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
         <Fields.Input label="Last Name" placeholder="Enter last name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
+           <Fields.Input 
+          label="Nurse Registration Number" 
+          placeholder="Enter registration number" 
+          value={formData.nurse_reg_no} 
+          onChange={(e) => setFormData({ ...formData, nurse_reg_no: e.target.value })} 
+        />
+        <Fields.Select 
+          label="Admitted Type" 
+          options={FORM_CONFIG.options.admittedTypes} 
+          value={formData.admitted_type} 
+          onChange={(e) => setFormData({ ...formData, admitted_type: e.target.value as 'Tata_Homenursing' | 'Dearcare_Llp' })} 
+        />
         <Fields.Select label="Gender" options={["Male", "Female"]} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} />
         <Fields.Select label="Marital Status" options={FORM_CONFIG.options.maritalStatus} value={formData.marital_status} onChange={(e) => setFormData({ ...formData, marital_status: e.target.value })} />
         <Fields.Input 
@@ -275,12 +288,12 @@ onChange={(e) => {
     return (
       <FormLayout>
         <div className="sm:col-span-2">
-          <Fields.Input label="Address" placeholder="Enter full address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+          <Fields.Input label="Address" placeholder="Enter full address" value={formData.address}  required={false} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
         </div>
-        <Fields.Input label="City" placeholder="Enter city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
-        <Fields.Input label="Taluk" placeholder="Enter taluk" value={formData.taluk} onChange={(e) => setFormData({ ...formData, taluk: e.target.value })} />
-        <Fields.Input label="State" placeholder="Enter state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
-        <Fields.Input label="PIN Code" placeholder="Enter PIN code" value={formData.pin_code} onChange={(e) => setFormData({ ...formData, pin_code: e.target.value })} />
+        <Fields.Input label="City"  placeholder="Enter city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} required={false}/>
+        <Fields.Input label="Taluk"  required={false} placeholder="Enter taluk" value={formData.taluk} onChange={(e) => setFormData({ ...formData, taluk: e.target.value })} />
+        <Fields.Input label="State"  required={false} placeholder="Enter state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
+        <Fields.Input label="PIN Code"  required={false} placeholder="Enter PIN code" value={formData.pin_code} onChange={(e) => setFormData({ ...formData, pin_code: e.target.value })} />
         <Fields.Input label="Phone Number" placeholder="Enter phone number" value={formData.phone_number} onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })} />
         <Fields.Input 
         label="Email" 
@@ -315,31 +328,31 @@ onChange={(e) => {
           label="Profile Image" 
           docType="profile_image" 
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, profile_image: file }))}
-          required={true}
+          required={false}
         />
         <Fields.File 
           label="Aadhar Card" 
           docType="adhar" 
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, adhar: file }))}
-          required={true}
+          required={false}
         />
         <Fields.File 
           label="Educational Certificates" 
           docType="educational"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, educational: file }))}
-          required={true}
+          required={false}
         />
         <Fields.File 
           label="Experience Certificates" 
           docType="experience"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, experience: file }))}
-          required={true}
+          required={false}
         />
         <Fields.File 
           label="Ration Card" 
           docType="ration"
           onFileSelect={(file) => setDocuments(prev => ({ ...prev, ration: file }))}
-          required={true}
+          required={false}
         />
         <div className="space-y-4">
           <FormField label="NOC Certificate Status">
@@ -380,7 +393,7 @@ onChange={(e) => {
         </div>
         
         <div className="grid grid-cols-3 gap-4">
-          <Fields.Input label="Full Name" placeholder="Enter name" value={data.reference_name} onChange={(e) => setData({ ...data, reference_name: e.target.value })} />
+          <Fields.Input label="Full Name" placeholder="Enter name" value={data.reference_name}  onChange={(e) => setData({ ...data, reference_name: e.target.value })} />
           <Fields.Input label="Relation" placeholder="Enter relation" value={data.reference_relation} onChange={(e) => setData({ ...data, reference_relation: e.target.value })} />
           <Fields.Input label="Phone Number" type="tel" placeholder="Enter phone number" value={data.reference_phone} onChange={(e) => setData({ ...data, reference_phone: e.target.value })} />
         </div>
@@ -389,6 +402,7 @@ onChange={(e) => {
           label="Recommendation Details"
           placeholder="Please provide details about why they recommend this nurse..."
           rows={3}
+          required={false}
           value={data.recommendation_details}
           onChange={(e) => setData({ ...data, recommendation_details: e.target.value })}
         />
@@ -405,7 +419,8 @@ onChange={(e) => {
             <p className="text-sm text-gray-500">Reference {index + 1}</p>
             <div className="grid grid-cols-3 gap-4">
               <Fields.Input 
-                label="Full Name" 
+                label="Full Name"
+                required={false} 
                 placeholder="Enter name" 
                 value={data.family_references[index]?.name || ''}
                 onChange={(e) => {
@@ -418,6 +433,7 @@ onChange={(e) => {
                 label="Relation" 
                 placeholder="Enter relation"
                 value={data.family_references[index]?.relation || ''}
+                required={false}
                 onChange={(e) => {
                   const newRefs = [...data.family_references];
                   newRefs[index] = { ...newRefs[index] || {}, relation: e.target.value };
@@ -429,6 +445,7 @@ onChange={(e) => {
                 type="tel" 
                 placeholder="Enter phone number"
                 value={data.family_references[index]?.phone || ''}
+                required={false}
                 onChange={(e) => {
                   const newRefs = [...data.family_references];
                   newRefs[index] = { ...newRefs[index] || {}, phone: e.target.value };
@@ -453,9 +470,9 @@ onChange={(e) => {
 
   Health: ({ data, setData }: { data: NurseHealthData, setData: React.Dispatch<React.SetStateAction<NurseHealthData>> }) => (
     <FormLayout>
-      <Fields.TextArea label="Current Health Status" placeholder="Enter current health status" value={data.health_status} onChange={(e) => setData({ ...data, health_status: e.target.value })} />
-      <Fields.TextArea label="Disability Details" placeholder="Enter disability details if any" value={data.disability} onChange={(e) => setData({ ...data, disability: e.target.value })} />
-      <Fields.Select label="Source of Information" options={FORM_CONFIG.options.sourceOfInformation} value={data.source} onChange={(e) => setData({ ...data, source: e.target.value })} />
+      <Fields.TextArea label="Current Health Status" required={false} placeholder="Enter current health status" value={data.health_status} onChange={(e) => setData({ ...data, health_status: e.target.value })} />
+      <Fields.TextArea label="Disability Details" required={false} placeholder="Enter disability details if any" value={data.disability} onChange={(e) => setData({ ...data, disability: e.target.value })} />
+      <Fields.Select label="Source of Information" required={true} options={FORM_CONFIG.options.sourceOfInformation} value={data.source} onChange={(e) => setData({ ...data, source: e.target.value })} />
     </FormLayout>
   )
 };
@@ -476,11 +493,7 @@ const validateStep = (step: number, data: StepData): boolean => {
     
     case 1: // Contact Information
       return !!(
-        (data as NurseFormData).address &&
-        (data as NurseFormData).city &&
-        (data as NurseFormData).taluk &&
-        (data as NurseFormData).state &&
-        (data as NurseFormData).pin_code &&
+        
         (data as NurseFormData).phone_number &&
         (data as NurseFormData).email &&
         (data as NurseFormData).languages.length > 0
@@ -490,11 +503,8 @@ const validateStep = (step: number, data: StepData): boolean => {
       return !!(
         (data as NurseReferenceData).reference_name &&
         (data as NurseReferenceData).reference_phone &&
-        (data as NurseReferenceData).reference_relation &&
-        (data as NurseReferenceData).recommendation_details &&
-        (data as NurseReferenceData).family_references[0].name &&
-        (data as NurseReferenceData).family_references[0].phone &&
-        (data as NurseReferenceData).family_references[0].relation
+        (data as NurseReferenceData).reference_relation 
+      
       );
     
     case 3: // Work Details
@@ -507,18 +517,13 @@ const validateStep = (step: number, data: StepData): boolean => {
     
     case 4: // Health & Additional Info
       return !!(
-        (data as NurseHealthData).health_status &&
+        
         (data as NurseHealthData).source
       );
     
     case 5: // Document Upload
     return !!(
-      (data as NurseDocuments).profile_image && 
-      (data as NurseDocuments).adhar && 
-      (data as NurseDocuments).educational && 
-      (data as NurseDocuments).experience && 
-      (data as NurseDocuments).ration && 
-      (data as NurseFormData).noc_status && 
+      
       // If NOC status is Yes, require the NOC file
       ((data as NurseFormData).noc_status !== 'Yes' || (data as NurseDocuments).noc)
     );
@@ -563,7 +568,9 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     marital_status: '',
     religion: '',
     mother_tongue: '',
-    age: ''
+    age: '',
+    nurse_reg_no: '',
+    admitted_type: 'Tata_Homenursing'
   });
   
   const [referenceData, setReferenceData] = useState<NurseReferenceData>({
