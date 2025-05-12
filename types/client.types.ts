@@ -203,17 +203,6 @@ export interface DetailedClientOrganization {
   general_notes?: string;
 }
 
-
-export interface EquipmentData {
-  hospitalBed: boolean;
-  wheelChair: boolean;
-  adultDiaper: boolean;
-  disposableUnderpad: boolean;
-  pillows: boolean;
-  bedRidden: boolean;
-  [key: string]: boolean | string | number | null | JSON;
-}
-
 export type FamilyMember = {
   id: string;
   name: string;

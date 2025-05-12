@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { updateClientStatus, savePatientAssessment, sendClientAssessmentFormLink, getClientAssessmentFormStatus } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import PatientAssessmentForm, { usePatientAssessmentForm } from './PatientAssessmentForm';
+import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
+import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
 import RejectModal from './RejectModal';
 
 interface InputFieldProps {

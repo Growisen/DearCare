@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions';
 import { AssessmentData } from '@/types/client.types';
-import PatientAssessmentForm, { 
-  usePatientAssessmentForm, 
-  getDefaultFormData,  
-} from './PatientAssessmentForm';
+import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
+import { usePatientAssessmentForm, getDefaultFormData } from '@/hooks/usePatientAssessment';
 
 interface PatientAssessmentProps {
   clientId: string;

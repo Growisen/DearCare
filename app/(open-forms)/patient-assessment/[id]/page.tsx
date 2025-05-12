@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { savePatientAssessment } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-import PatientAssessmentForm, { usePatientAssessmentForm } from '@/components/client/PatientAssessmentForm';
+import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
+import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
 
 export default function PatientAssessmentPage() {
   const params = useParams();
