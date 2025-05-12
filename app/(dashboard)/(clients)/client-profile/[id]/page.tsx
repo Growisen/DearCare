@@ -39,7 +39,16 @@ const PatientProfilePage = () => {
   const [status, setStatus] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'medical' | 'assignments'>('profile');
+  
+  const [activeTab, setActiveTab] = useState<'profile' | 'medical' | 'assignments'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTab = localStorage.getItem(`patient-${id}-activeTab`);
+      if (savedTab === 'profile' || savedTab === 'medical' || savedTab === 'assignments') {
+        return savedTab;
+      }
+    }
+    return 'profile';
+  });
 
   const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -337,6 +346,11 @@ const PatientProfilePage = () => {
     }
   };
 
+  const handleTabChange = (tab: 'profile' | 'medical' | 'assignments') => {
+    setActiveTab(tab);
+    localStorage.setItem(`patient-${id}-activeTab`, tab);
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
     // TODO: Reset any edited data to original state
@@ -512,41 +526,41 @@ const PatientProfilePage = () => {
 
           {/* Tabs Navigation */}
           <div className="border-b border-gray-200 px-3 sm:px-6">
-            <nav className="-mb-px flex space-x-4 sm:space-x-8 whitespace-nowrap">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
-                  activeTab === 'profile'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Profile Details
-              </button>
-              <button
-                onClick={() => setActiveTab('medical')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'medical'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Medical Information
-              </button>
-              {status === 'approved' && (
-                <button
-                  onClick={() => setActiveTab('assignments')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'assignments'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Nurse Assignments
-                </button>
-              )}
-            </nav>
-          </div>
+        <nav className="-mb-px flex space-x-4 sm:space-x-8 whitespace-nowrap">
+          <button
+            onClick={() => handleTabChange('profile')}
+            className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
+              activeTab === 'profile'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Profile Details
+          </button>
+          <button
+            onClick={() => handleTabChange('medical')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'medical'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Medical Information
+          </button>
+          {status === 'approved' && (
+            <button
+              onClick={() => handleTabChange('assignments')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'assignments'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Nurse Assignments
+            </button>
+          )}
+        </nav>
+      </div>
 
           {/* Main Content */}
           <div className="p-3 sm:p-4 md:p-6">

@@ -24,12 +24,16 @@ export type LeaveRequest = {
  */
 export async function getLeaveRequests(
   status?: 'pending' | 'approved' | 'rejected' | null,
-  searchQuery?: string
+  searchQuery?: string,
+  startDate?: string | null,
+  endDate?: string | null,
+  page: number = 1,
+  pageSize: number = 10
 ) {
   try {
     const supabase = await createSupabaseServerClient()
     
-    let query = supabase
+    let baseQuery = supabase
       .from('nurse_leave_requests')
       .select(`
         id,
@@ -46,85 +50,111 @@ export async function getLeaveRequests(
       `)
     
     if (status) {
-      query = query.eq('status', status)
+      baseQuery = baseQuery.eq('status', status)
     }
     
-    const { data: countData, error: countError } = await supabase
-      .from('nurse_leave_requests')
-      .select('id', { count: 'exact' })
+    if (startDate) {
+      baseQuery = baseQuery.gte('applied_on', startDate)
+    }
     
-    console.log("Total records in nurse_leave_requests:", countData ? countData.length : 0)
+    if (endDate) {
+      baseQuery = baseQuery.lte('applied_on', endDate)
+    }
+    
+    let countQuery = supabase
+      .from('nurse_leave_requests')
+      .select('*', { count: 'exact', head: true })
+    
+    if (status) {
+      countQuery = countQuery.eq('status', status)
+    }
+    if (startDate) {
+      countQuery = countQuery.gte('applied_on', startDate)
+    }
+    if (endDate) {
+      countQuery = countQuery.lte('applied_on', endDate)
+    }
+    
+    const { count, error: countError } = await countQuery
     
     if (countError) {
       console.error('Error counting leave requests:', countError)
+      return { success: false, error: countError.message, leaveRequests: [], totalCount: 0 }
     }
+    
+    const query = baseQuery
+      .order('applied_on', { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1)
     
     const { data: leaveData, error: leaveError } = await query
     
     if (leaveError) {
       console.error('Error fetching leave requests:', leaveError)
-      return { success: false, error: leaveError.message, leaveRequests: [] }
+      return { success: false, error: leaveError.message, leaveRequests: [], totalCount: 0 }
     }
 
-    if (leaveData && leaveData.length > 0) {
-      const nurseIds = [...new Set(leaveData.map(item => item.nurse_id))]
-      
-      const { data: nursesData, error: nursesError } = await supabase
-        .from('nurses')
-        .select('nurse_id, first_name, last_name')
-        .in('nurse_id', nurseIds)
-      
-      if (nursesError) {
-        console.error('Error fetching nurses:', nursesError)
-      }
-      
-      const nurseMap = new Map()
-      if (nursesData) {
-        nursesData.forEach(nurse => {
-          nurseMap.set(nurse.nurse_id, 
-            `${nurse.first_name || ''} ${nurse.last_name || ''}`.trim())
-        })
-      }
-      
-      const leaveRequests: LeaveRequest[] = leaveData.map(item => ({
-        id: item.id,
-        nurseId: String(item.nurse_id),
-        nurseName: nurseMap.get(item.nurse_id) || 'Unknown',
-        leaveType: formatLeaveType(item.leave_type),
-        leaveMode: formatLeaveMode(item.leave_mode),
-        startDate: item.start_date,
-        endDate: item.end_date,
-        days: item.days,
-        reason: item.reason || '',
-        status: item.status,
-        appliedOn: item.applied_on,
-        rejectionReason: item.rejection_reason
-      }))
-      
-      const filteredRequests = searchQuery ? 
-        leaveRequests.filter(request => 
-          request.nurseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          request.nurseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          request.leaveType.toLowerCase().includes(searchQuery.toLowerCase())
-        ) : 
-        leaveRequests
-      
-      return { 
-        success: true, 
-        leaveRequests: filteredRequests 
-      }
+    if (!leaveData || leaveData.length === 0) {
+      return { success: true, leaveRequests: [], totalCount: count || 0 }
     }
     
-    return { success: true, leaveRequests: [] }
+    const nurseIds = [...new Set(leaveData.map(item => item.nurse_id))]
+    
+    const { data: nursesData, error: nursesError } = await supabase
+      .from('nurses')
+      .select('nurse_id, first_name, last_name')
+      .in('nurse_id', nurseIds)
+    
+    if (nursesError) {
+      console.error('Error fetching nurses:', nursesError)
+    }
+    
+    const nurseMap = new Map()
+    if (nursesData) {
+      nursesData.forEach(nurse => {
+        nurseMap.set(nurse.nurse_id, 
+          `${nurse.first_name || ''} ${nurse.last_name || ''}`.trim())
+      })
+    }
+    
+    const leaveRequests: LeaveRequest[] = leaveData.map(item => ({
+      id: item.id,
+      nurseId: String(item.nurse_id),
+      nurseName: nurseMap.get(item.nurse_id) || 'Unknown',
+      leaveType: formatLeaveType(item.leave_type),
+      leaveMode: formatLeaveMode(item.leave_mode),
+      startDate: item.start_date,
+      endDate: item.end_date,
+      days: item.days,
+      reason: item.reason || '',
+      status: item.status,
+      appliedOn: item.applied_on,
+      rejectionReason: item.rejection_reason
+    }))
+    
+    const filteredRequests = searchQuery ? 
+      leaveRequests.filter(request => 
+        request.nurseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.nurseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.leaveType.toLowerCase().includes(searchQuery.toLowerCase())
+      ) : 
+      leaveRequests
+    
+    return { 
+      success: true, 
+      leaveRequests: filteredRequests,
+      totalCount: count
+    }
   } catch (error: unknown) {
     console.error('Error in getLeaveRequests:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
-      leaveRequests: [] 
+      leaveRequests: [],
+      totalCount: 0
     }
   }
 }
+
 
 /**
  * Updates the status of a leave request
