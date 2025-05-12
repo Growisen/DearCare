@@ -4,7 +4,7 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
 
@@ -203,17 +203,6 @@ export interface DetailedClientOrganization {
   general_notes?: string;
 }
 
-
-export interface EquipmentData {
-  hospitalBed: boolean;
-  wheelChair: boolean;
-  adultDiaper: boolean;
-  disposableUnderpad: boolean;
-  pillows: boolean;
-  bedRidden: boolean;
-  [key: string]: boolean | string | number | null | JSON;
-}
-
 export type FamilyMember = {
   id: string;
   name: string;
@@ -266,6 +255,7 @@ export interface PatientAssessmentData {
   hasSupportiveEnv: boolean;
   equipment: Json;
   familyMembers: FamilyMember[],
+  customLabTests: Array<{ id: string; name: string; value: string }>;
 }
 
 export interface SavePatientAssessmentParams {
@@ -311,9 +301,9 @@ export interface PatientAssessmentDataForApprovedClients {
   feedingMethod: string;
   equipment: Json;
   environment: Json;
-  lab_investigations: Json;
+  lab_investigations: LabInvestigations;
   familyMembers: FamilyMember[];
-  [key: string]: string | undefined | Json;
+  [key: string]: string | undefined | Json | LabInvestigations | FamilyMember[];
 }
 
 export interface NurseAssignment {
@@ -385,6 +375,7 @@ export interface LabInvestigations {
   urine?: string;
   sodium?: string;
   other?: string;
+  custom_tests?: Array<{ id: string; name: string; value: string }>;
 }
 
 export interface Environment {

@@ -2,6 +2,7 @@ import React from 'react';
 import InputField from '@/components/open-form/InputField';
 import ProfileImageUpload from '@/components/open-form/ProfileImageUpload';
 import { FormData } from '@/types/client.types';
+import { relationOptions } from '@/utils/constants';
 
 interface RequestorInfoFormProps {
   formData: FormData;
@@ -62,15 +63,11 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
             className={`w-full border ${formErrors.relationToPatient ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             required
           >
-            <option value="">Select relation...</option>
-            <option value="self">Self</option>
-            <option value="spouse">Spouse</option>
-            <option value="child">Son/Daughter</option>
-            <option value="parent">Parent</option>
-            <option value="son-in-law">Son In Law</option>
-            <option value="daughter-in-law">Daughter In Law</option>
-            <option value="sibling">Sibling</option>
-            <option value="other">Other</option>
+            {relationOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
           {formErrors.relationToPatient && (
             <p className="mt-1 text-sm text-red-600">{formErrors.relationToPatient}</p>

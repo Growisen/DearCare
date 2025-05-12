@@ -845,7 +845,8 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       esr: data.assessmentData.esr,
       urine: data.assessmentData.urine,
       sodium: data.assessmentData.sodium,
-      other: data.assessmentData.otherLabInvestigations
+      other: data.assessmentData.otherLabInvestigations,
+      custom_tests: data.assessmentData.customLabTests || []
     };
     
     // Common assessment data for both insert and update

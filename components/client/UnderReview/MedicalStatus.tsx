@@ -14,10 +14,10 @@ interface MedicalStatusProps {
 
 export default function MedicalStatus({ formData, handleInputChange }: MedicalStatusProps) {
   return (
-    <div className="bg-white border border-gray-200 p-4 rounded-lg">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Current Medical Status</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+    <div className="bg-white border border-gray-200 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm">
+      <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Current Medical Status</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Current Status
           </label>
@@ -25,7 +25,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
             id="currentStatus"
             value={formData.currentStatus}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-gray-300 rounded-md py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Select status</option>
             <option value="HOSPITALIZED">Hospitalized</option>
@@ -33,7 +33,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
           </select>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Chronic Illness
           </label>
@@ -41,7 +41,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
             id="chronicIllness"
             value={formData.chronicIllness}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-gray-300 rounded-md py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Select option</option>
             <option value="YES">Yes</option>
@@ -49,7 +49,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
           </select>
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-1 sm:col-span-2">
           <InputField
             label="Medical History"
             type="textarea"
@@ -60,7 +60,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-1 sm:col-span-2">
           <InputField
             label="Surgical History"
             type="textarea"
@@ -71,7 +71,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-1 sm:col-span-2">
           <InputField
             label="Medication History"
             type="textarea"
