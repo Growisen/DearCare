@@ -22,7 +22,7 @@ import ServiceDetailsSection from '@/components/client/Profile/ServiceDetailsSec
 import { getServiceLabel } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
 
-import { ClientResponse, Patient, NurseAssignment } from '@/types/client.types';
+import { ClientResponse, Patient, NurseAssignment, ClientCategory } from '@/types/client.types';
 
 const PatientProfilePage = () => {
   const params = useParams();
@@ -98,7 +98,7 @@ const PatientProfilePage = () => {
               location: clientData.details?.complete_address || '',
               email: '', // Patient's email if available
               phoneNumber: clientData.details?.patient_phone || '',
-              clientCategory: clientData.client_category || 'DearCare',
+              clientCategory: clientData.client_category || 'DearCare LLP',
               profileImage: clientData.details?.patient_profile_pic_url || '',
               serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || '') ,
               address: {
@@ -260,7 +260,7 @@ const PatientProfilePage = () => {
           location: clientData.details?.complete_address || '',
           email: '', // Patient's email if available
           phoneNumber: clientData.details?.patient_phone || '',
-          clientCategory: clientData.client_category || 'DearCare',
+          clientCategory: clientData.client_category || 'DearCare LLP',
           profileImage: clientData.details?.patient_profile_pic_url || '',
           serviceRequired: clientData.details?.service_required || '',
           address: {
@@ -342,7 +342,7 @@ const PatientProfilePage = () => {
     // TODO: Reset any edited data to original state
   };
 
-  const handleCategoryChange = async (newCategory: 'DearCare' | 'TataLife') => {
+  const handleCategoryChange = async (newCategory: ClientCategory) => {
     try {
       
       setPatient(currentPatient => {

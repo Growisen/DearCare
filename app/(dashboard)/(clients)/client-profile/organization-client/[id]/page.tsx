@@ -17,12 +17,13 @@ import { updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/shif
 import toast from 'react-hot-toast'
 import ImageViewer from '@/components/common/ImageViewer'
 import { createMapLink } from '@/utils/mapUtils'
+import { ClientCategory } from '@/types/client.types'
 
 // Updated interface to match the Supabase data structure
 interface OrganizationClientData {
   id: string
   client_type: string
-  client_category: 'DearCare' | 'TataLife'
+  client_category: ClientCategory
   status: string
   created_at: string
   general_notes?: string
@@ -203,7 +204,7 @@ const OrganizationClientProfile = () => {
     // TODO: Reset any edited data to original state
   }
 
-  const handleCategoryChange = async (newCategory: 'DearCare' | 'TataLife') => {
+  const handleCategoryChange = async (newCategory: ClientCategory) => {
     try {
       setClient(currentClient => {
         if (!currentClient) return null

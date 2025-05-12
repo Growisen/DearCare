@@ -8,6 +8,7 @@ import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
 import { sendClientCredentials, sendClientFormLink, sendClientRejectionNotification } from '@/lib/email'
 import { v4 as uuidv4 } from 'uuid';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { ClientCategory } from "@/types/client.types";
 
 export async function getStorageUrl(path: string | null): Promise<string | null> {
   if (!path) return null;
@@ -1442,12 +1443,12 @@ export async function deleteClient(clientId: string) {
  */
 async function generateRegistrationNumber(
   clientType: 'individual' | 'organization' | 'hospital' | 'carehome',
-  clientCategory: 'DearCare' | 'TataLife'
+  clientCategory: ClientCategory
 ): Promise<string> {
   const supabase = await createSupabaseAdminClient();
   const currentYear = new Date().getFullYear() % 100;
   
-  const categoryPrefix = clientCategory === 'DearCare' ? 'DC' : 'TL';
+  const categoryPrefix = clientCategory === 'DearCare LLP' ? 'DC' : 'TL';
 
   let typeCode;
   switch (clientType) {

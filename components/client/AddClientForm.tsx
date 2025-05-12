@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormData, StaffRequirement } from '@/types/client.types';
+import { FormData, StaffRequirement, ClientCategory } from '@/types/client.types';
 import { ClientTypeSelector } from '@/components/open-form/ClientTypeSelector';
 import { RequestorInfoForm } from '@/components/open-form/RequestorInfoForm';
 import { PatientInfoForm } from '@/components/open-form/PatientInfoForm';
@@ -24,7 +24,7 @@ interface ClientFormComponentProps {
   handleProfileImageChange: (field: 'requestorProfilePic' | 'patientProfilePic', file: File | null) => void;
   handleStaffRequirementsChange: (staffRequirements: StaffRequirement[], startDate?: string) => void;
   handleClientTypeChange: (type: 'individual' | 'organization' | 'hospital' | 'carehome') => void;
-  handleClientCategoryChange?: (category: 'DearCare' | 'TataLife') => void;
+  handleClientCategoryChange?: (category: ClientCategory) => void;
   handleSameAddressToggle: (checked: boolean) => void;
   handleSubmit: (e?: React.FormEvent) => Promise<void>;
   showCategories?: boolean;

@@ -1,4 +1,4 @@
-import { Json } from './client.types';
+import { ClientCategory, Json } from './client.types';
 import { DetailedClientIndividual } from './client.types';
 
 export interface PatientAssessmentDataForApprovedClients {
@@ -53,7 +53,7 @@ export interface Patient {
   location: string;
   email: string;
   phoneNumber: string;
-  clientCategory: 'DearCare' | 'TataLife';
+  clientCategory: ClientCategory;
   requestor: {
     name: string;
     relation: string;
