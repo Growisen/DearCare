@@ -6,14 +6,19 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type ClientCategory = 'DearCare LLP' | 'Tata HomeNursing';
+export type ClientStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned';
 export type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
+export type RelationToPatient = "" | "other" | "self" | "spouse" | "child" | "parent" | "sibling" | "son/daughter" 
+                                   | "son_in_law" | "daughter_in_law";
+export type Gender = "" | "male" | "female" | "other"
 
 export interface Client {
   registrationNumber?: string;
   id: string;
   name: string;
   requestDate: string;
-  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned';
+  status: ClientStatus;
   service?: string;
   email?: string;
   phone?: string;
@@ -64,8 +69,8 @@ export interface StaffRequirement {
 }
 
 export interface BaseFormData {
-  clientType: 'individual' | 'organization' | 'hospital' | 'carehome';
-  clientCategory: 'DearCare' | 'TataLife';
+  clientType: ClientType;
+  clientCategory: ClientCategory;
   generalNotes: string;
   dutyPeriod: string;
   dutyPeriodReason: string;
@@ -81,10 +86,10 @@ export interface IndividualFormData extends BaseFormData {
   requestorPincode: string;
   requestorDistrict: string;
   requestorCity: string;
-  relationToPatient: "" | "other" | "self" | "spouse" | "child" | "parent" | "sibling";
+  relationToPatient: RelationToPatient;
   patientName: string;
   patientAge: string;
-  patientGender: "" | "male" | "female" | "other";
+  patientGender: Gender;
   patientPhone: string;
   patientAddress: string,  
   patientPincode: string, 
@@ -146,7 +151,7 @@ export interface ClientInformationProps {
 export interface DetailedClientIndividual {
   registration_number?: string;
   client_type: 'individual';
-  client_category?: 'DearCare' | 'TataLife';
+  client_category?: ClientCategory;
   duty_period?: string;
   duty_period_reason?: string;
   details?: {
@@ -329,7 +334,7 @@ export interface Patient {
   location: string;
   email: string;
   phoneNumber: string;
-  clientCategory: 'DearCare' | 'TataLife';
+  clientCategory: ClientCategory;
   profileImage?: string | null;
   serviceRequired?: string;
   address: {

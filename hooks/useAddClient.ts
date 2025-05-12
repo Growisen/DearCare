@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { FormData, StaffRequirement } from '@/types/client.types';
+import { ClientCategory, FormData, StaffRequirement } from '@/types/client.types';
 import { toast } from 'react-hot-toast';
 import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
 
@@ -24,7 +24,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   
   const [formData, setFormData] = useState<FormData>({
     clientType: 'individual',
-    clientCategory: 'DearCare',
+    clientCategory: 'DearCare LLP',
     dutyPeriod: '',
     dutyPeriodReason: '',
     requestorName: '',
@@ -272,7 +272,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     setTouched({});
   };
 
-  const handleClientCategoryChange = (category: 'DearCare' | 'TataLife') => {
+  const handleClientCategoryChange = (category: ClientCategory) => {
     setFormData(prev => ({
       ...prev,
       clientCategory: category
@@ -402,7 +402,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       if (clientType === 'individual') {
         result = await addIndividualClient({
           clientType,
-          clientCategory: formData.clientCategory as 'DearCare' | 'TataLife',
+          clientCategory: formData.clientCategory as ClientCategory,
           generalNotes: formData.generalNotes,
           dutyPeriod: formData.dutyPeriod,
           dutyPeriodReason: formData.dutyPeriodReason,
@@ -434,7 +434,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       } else {
         result = await addOrganizationClient({
           clientType,
-          clientCategory: formData.clientCategory as 'DearCare' | 'TataLife',
+          clientCategory: formData.clientCategory as ClientCategory,
           generalNotes: formData.generalNotes,
           dutyPeriod: formData.dutyPeriod,
           dutyPeriodReason: formData.dutyPeriodReason,

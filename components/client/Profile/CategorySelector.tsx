@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-
-type ClientCategory = 'DearCare' | 'TataLife';
+import { ClientCategory } from '@/types/client.types';
 
 interface CategorySelectorProps {
   currentCategory: ClientCategory;
@@ -13,7 +12,7 @@ interface CategorySelectorProps {
 const CategorySelector = ({ 
   currentCategory, 
   onCategoryChange, 
-  categories = ['DearCare', 'TataLife'] 
+  categories = ['DearCare LLP', 'Tata HomeNursing'] 
 }: CategorySelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

@@ -1,8 +1,9 @@
+import { ClientCategory } from '@/types/client.types';
 import React from 'react';
 
 interface ClientCategorySelectorProps {
   selectedCategory: string;
-  onCategoryChange: (category: 'DearCare' | 'TataLife') => void;
+  onCategoryChange: (category: ClientCategory) => void;
 }
 
 export const ClientCategorySelector = ({ selectedCategory, onCategoryChange }: ClientCategorySelectorProps) => {
@@ -10,12 +11,12 @@ export const ClientCategorySelector = ({ selectedCategory, onCategoryChange }: C
     <div>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { id: 'DearCare', label: 'DearCare' },
-          { id: 'TataLife', label: 'Tata Life' }
+          { id: 'DearCare LLP', label: 'DearCare LLP' },
+          { id: 'Tata HomeNursing', label: 'Tata HomeNursing' }
         ].map((type) => (
           <button
             key={type.id}
-            onClick={() => onCategoryChange(type.id as 'DearCare' | 'TataLife')}
+            onClick={() => onCategoryChange(type.id as ClientCategory)}
             className={`p-3 rounded-lg border ${
               selectedCategory === type.id
                 ? 'border-blue-500 bg-blue-50 text-blue-700'
