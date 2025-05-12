@@ -15,17 +15,113 @@ interface EnvironmentAndEquipmentProps {
       disposableUnderpad: boolean;
       pillows: boolean;
       bedRidden: boolean;
+      semiBedridden: boolean;
+      bedWedges: boolean;
+      bedsideCommode: boolean;
+      patientLift: boolean;
+      bedsideHandRail: boolean;
+      examinationGloves: boolean;
+      noRinseCleanser: boolean;
+      bathingWipes: boolean;
+      bpMeasuringApparatus: boolean;
+      electricBackLifter: boolean;
+      o2Concentrator: boolean;
+      overBedTable: boolean;
+      suctionMachine: boolean;
+      ivStand: boolean;
+      bedPan: boolean;
+      decubitusMatress: boolean;
+      airMatress: boolean;
+      bpMonitor: boolean;
+      bedLift: boolean;
+      bedRail: boolean;
+      cane: boolean;
+      walkers: boolean;
+      crutches: boolean;
     };
   };
   handleCheckboxChange: (id: string, checked: boolean) => void;
   handleEquipmentChange: (equipmentId: string, checked: boolean) => void;
 }
 
+// Reusable checkbox component
+const Checkbox = ({ 
+  id, 
+  checked, 
+  onChange, 
+  label 
+}: { 
+  id: string; 
+  checked: boolean; 
+  onChange: (id: string, checked: boolean) => void; 
+  label: string;
+}) => (
+  <div className="flex items-center">
+    <input
+      type="checkbox"
+      id={id}
+      checked={checked}
+      onChange={(e) => onChange(id, e.target.checked)}
+      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+    />
+    <label htmlFor={id} className="ml-2 block text-sm text-gray-700">
+      {label}
+    </label>
+  </div>
+);
+
 export default function EnvironmentAndEquipment({ 
   formData, 
   handleCheckboxChange,
-  handleEquipmentChange 
+  handleEquipmentChange
 }: EnvironmentAndEquipmentProps) {
+
+  const environmentOptions = [
+    { id: 'isClean', label: 'Clean Environment' },
+    { id: 'isVentilated', label: 'Well Ventilated' },
+    { id: 'isDry', label: 'Dry Environment' },
+    { id: 'hasNatureView', label: 'Nature View' },
+    { id: 'hasSocialInteraction', label: 'Social Interaction' },
+    { id: 'hasSupportiveEnv', label: 'Supportive Environment' }
+  ];
+
+  // Equipment options categorized by type
+  const equipmentCategories = {
+    bedriddenEquipment: [
+      { id: 'hospitalBed', label: 'Hospital Bed' },
+      { id: 'adultDiaper', label: 'Adult Diaper' },
+      { id: 'disposableUnderpad', label: 'Disposable Underpad' },
+      { id: 'pillows', label: 'Pillows' },
+      { id: 'bedWedges', label: 'Bed Wedges' },
+      { id: 'bedsideCommode', label: 'Bedside Commode' },
+      { id: 'patientLift', label: 'Patient Lift' },
+      { id: 'bedsideHandRail', label: 'Bedside Hand Rail' },
+      { id: 'bedPan', label: 'Bed Pan' },
+      { id: 'decubitusMatress', label: 'Decubitus Matress' },
+      { id: 'airMatress', label: 'Air Matress' },
+      { id: 'bedLift', label: 'Bed Lift' },
+      { id: 'bedRail', label: 'Bed Rail' },
+      { id: 'overBedTable', label: 'Over Bed Table' },
+    ],
+    mobilityEquipment: [
+      { id: 'wheelChair', label: 'Wheel Chair' },
+      { id: 'cane', label: 'Cane' },
+      { id: 'walkers', label: 'Walkers' },
+      { id: 'crutches', label: 'Crutches' },
+      { id: 'electricBackLifter', label: 'Electric Back Lifter' },
+    ],
+    medicalEquipment: [
+      { id: 'examinationGloves', label: 'Examination Gloves' },
+      { id: 'noRinseCleanser', label: 'No Rinse Cleanser' },
+      { id: 'bathingWipes', label: 'Bathing Wipes' },
+      { id: 'bpMeasuringApparatus', label: 'BP Measuring Apparatus' },
+      { id: 'bpMonitor', label: 'BP Monitor' },
+      { id: 'o2Concentrator', label: 'O2 Concentrator' },
+      { id: 'suctionMachine', label: 'Suction Machine' },
+      { id: 'ivStand', label: 'IV Stand' },
+    ]
+  };
+
   return (
     <div className="bg-white border border-gray-200 p-4 rounded-lg">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Environment & Equipment</h3>
@@ -33,166 +129,60 @@ export default function EnvironmentAndEquipment({
       <div className="mb-6">
         <h4 className="text-md font-medium text-gray-800 mb-3">Environment Assessment</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isClean"
-              checked={formData.isClean}
-              onChange={(e) => handleCheckboxChange('isClean', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          {environmentOptions.map((option) => (
+            <Checkbox
+              key={option.id}
+              id={option.id}
+              checked={Boolean(formData[option.id as keyof typeof formData])}
+              onChange={handleCheckboxChange}
+              label={option.label}
             />
-            <label htmlFor="isClean" className="ml-2 block text-sm text-gray-700">
-              Clean Environment
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isVentilated"
-              checked={formData.isVentilated}
-              onChange={(e) => handleCheckboxChange('isVentilated', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isVentilated" className="ml-2 block text-sm text-gray-700">
-              Well Ventilated
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isDry"
-              checked={formData.isDry}
-              onChange={(e) => handleCheckboxChange('isDry', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isDry" className="ml-2 block text-sm text-gray-700">
-              Dry Environment
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="hasNatureView"
-              checked={formData.hasNatureView}
-              onChange={(e) => handleCheckboxChange('hasNatureView', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="hasNatureView" className="ml-2 block text-sm text-gray-700">
-              Nature View
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="hasSocialInteraction"
-              checked={formData.hasSocialInteraction}
-              onChange={(e) => handleCheckboxChange('hasSocialInteraction', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="hasSocialInteraction" className="ml-2 block text-sm text-gray-700">
-              Social Interaction
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="hasSupportiveEnv"
-              checked={formData.hasSupportiveEnv}
-              onChange={(e) => handleCheckboxChange('hasSupportiveEnv', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="hasSupportiveEnv" className="ml-2 block text-sm text-gray-700">
-              Supportive Environment
-            </label>
-          </div>
+          ))}
         </div>
       </div>
       
-      <div>
-        <h4 className="text-md font-medium text-gray-800 mb-3">Required Equipment</h4>
+      <div className="mb-6">
+        <h4 className="text-md font-medium text-gray-800 mb-3">Bed-related Equipment</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="hospitalBed"
-              checked={formData.equipment.hospitalBed}
-              onChange={(e) => handleEquipmentChange('hospitalBed', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          {equipmentCategories.bedriddenEquipment.map((option) => (
+            <Checkbox
+              key={option.id}
+              id={option.id}
+              checked={Boolean(formData.equipment[option.id as keyof typeof formData.equipment])}
+              onChange={handleEquipmentChange}
+              label={option.label}
             />
-            <label htmlFor="hospitalBed" className="ml-2 block text-sm text-gray-700">
-              Hospital Bed
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="wheelChair"
-              checked={formData.equipment.wheelChair}
-              onChange={(e) => handleEquipmentChange('wheelChair', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          ))}
+        </div>
+      </div>
+      
+      <div className="mb-6">
+        <h4 className="text-md font-medium text-gray-800 mb-3">Mobility Equipment</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {equipmentCategories.mobilityEquipment.map((option) => (
+            <Checkbox
+              key={option.id}
+              id={option.id}
+              checked={Boolean(formData.equipment[option.id as keyof typeof formData.equipment])}
+              onChange={handleEquipmentChange}
+              label={option.label}
             />
-            <label htmlFor="wheelChair" className="ml-2 block text-sm text-gray-700">
-              Wheel Chair
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="adultDiaper"
-              checked={formData.equipment.adultDiaper}
-              onChange={(e) => handleEquipmentChange('adultDiaper', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          ))}
+        </div>
+      </div>
+      
+      <div className="mb-6">
+        <h4 className="text-md font-medium text-gray-800 mb-3">Medical Equipment</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {equipmentCategories.medicalEquipment.map((option) => (
+            <Checkbox
+              key={option.id}
+              id={option.id}
+              checked={Boolean(formData.equipment[option.id as keyof typeof formData.equipment])}
+              onChange={handleEquipmentChange}
+              label={option.label}
             />
-            <label htmlFor="adultDiaper" className="ml-2 block text-sm text-gray-700">
-              Adult Diaper
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="disposableUnderpad"
-              checked={formData.equipment.disposableUnderpad}
-              onChange={(e) => handleEquipmentChange('disposableUnderpad', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="disposableUnderpad" className="ml-2 block text-sm text-gray-700">
-              Disposable Underpad
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="pillows"
-              checked={formData.equipment.pillows}
-              onChange={(e) => handleEquipmentChange('pillows', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="pillows" className="ml-2 block text-sm text-gray-700">
-              Pillows
-            </label>
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="bedRidden"
-              checked={formData.equipment.bedRidden}
-              onChange={(e) => handleEquipmentChange('bedRidden', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="bedRidden" className="ml-2 block text-sm text-gray-700">
-              Bed Ridden
-            </label>
-          </div>
+          ))}
         </div>
       </div>
     </div>

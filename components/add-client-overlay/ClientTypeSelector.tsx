@@ -1,6 +1,6 @@
 import React from 'react';
-
-type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
+import { ClientType } from '../../types/client.types';
+import { clientTypeOptions } from '../../utils/constants';
 
 interface ClientTypeSelectorProps {
   selectedType: ClientType;
@@ -12,15 +12,10 @@ export const ClientTypeSelector = ({ selectedType, onTypeChange }: ClientTypeSel
     <div>
       <h3 className="text-lg font-semibold text-gray-900 mb-3">Client Type</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { id: 'individual', label: 'Individual' },
-          { id: 'organization', label: 'Organization' },
-          { id: 'hospital', label: 'Hospital' },
-          { id: 'carehome', label: 'Care Home' }
-        ].map((type) => (
+        {clientTypeOptions.map((type) => (
           <button
             key={type.id}
-            onClick={() => onTypeChange(type.id as ClientType)}
+            onClick={() => onTypeChange(type.id)}
             className={`p-3 rounded-lg border ${
               selectedType === type.id
                 ? 'border-blue-500 bg-blue-50 text-blue-700'

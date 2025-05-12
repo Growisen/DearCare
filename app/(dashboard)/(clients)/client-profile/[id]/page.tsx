@@ -156,6 +156,7 @@ const PatientProfilePage = () => {
                 foodsToAvoid: assessmentData.foods_to_avoid || '',
                 patientPosition: assessmentData.patient_position || '',
                 feedingMethod: assessmentData.feeding_method || '',
+                familyMembers: assessmentData.family_members || [],
                 equipment: assessmentData.equipment || {},
                 environment: assessmentData.environment || {},
                 lab_investigations: assessmentData.lab_investigations || {}
@@ -315,6 +316,7 @@ const PatientProfilePage = () => {
             finalDiagnosis: assessmentData.final_diagnosis || '',
             foodsToInclude: assessmentData.foods_to_include || '',
             foodsToAvoid: assessmentData.foods_to_avoid || '',
+            familyMembers: assessmentData.family_members || [],
             patientPosition: assessmentData.patient_position || '',
             feedingMethod: assessmentData.feeding_method || '',
             equipment: assessmentData.equipment || {},

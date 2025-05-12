@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import InfoField from './InfoField';
-import { Json } from '@/types/client.types';
+import { Json, FamilyMember } from '@/types/client.types';
+import { equipmentCategories } from '@/utils/constants';
 
 interface MedicalInfoProps {
   assessment: {
@@ -28,12 +29,15 @@ interface MedicalInfoProps {
     lab_investigations?: Json;
     equipment?: Json | Record<string, boolean>;
     environment?: Json | Record<string, boolean>;
+    familyMembers: Array<FamilyMember>;
     [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined;
   };
 }
 
 const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  console.log('MedicalInfo assessment:', assessment.equipment);
 
   const toggleSection = (sectionName: string) => {
     if (expandedSection === sectionName) {
@@ -71,6 +75,57 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
       alwaysExpanded: true
     },
     {
+      id: 'family-members',
+      title: 'Family Members',
+      content: (
+        <div className="space-y-4">
+          {assessment?.familyMembers && assessment.familyMembers.length > 0 ? (
+            assessment.familyMembers.map((member) => (
+              <div key={member.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3">
+                  <h3 className="font-medium text-gray-900">
+                    {member.name}
+                  </h3>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {member.relation}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                  <div>
+                    <span className="text-xs text-gray-500 font-medium">Age</span>
+                    <p className="text-sm text-gray-800">{member.age || "Not provided"}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-xs text-gray-500 font-medium">Occupation</span>
+                    <p className="text-sm text-gray-800">{member.job || "Not provided"}</p>
+                  </div>
+                  
+                  {member.medicalRecords && (
+                    <div className="md:col-span-2">
+                      <span className="text-xs text-gray-500 font-medium">Medical Records</span>
+                      <p className="text-sm text-gray-800 p-2 bg-white rounded border border-gray-200 mt-1">
+                        {member.medicalRecords}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p className="mt-2 text-gray-500">No family members information available</p>
+            </div>
+          )}
+        </div>
+      ),
+      alwaysExpanded: false
+    },
+    {
       id: 'lab-investigations',
       title: 'Lab Investigations',
       content: (
@@ -79,7 +134,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
             Object.entries(assessment?.lab_investigations || {}).map(([key, value]) => (
               <div key={key}>
                 <p className="text-xs text-gray-500 font-medium">{key.toUpperCase()}</p>
-                <p className="text-sm text-gray-700">{value}</p>
+                <p className="text-sm text-gray-700">{value || "Not recorded"}</p>
               </div>
             ))
           ) : (
@@ -132,47 +187,111 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <h3 className="text-sm font-medium mb-2 text-gray-800">Environment Checklist</h3>
-            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-              {Object.keys(assessment?.environment || {}).length > 0 ? (
-                Object.entries(assessment?.environment || {}).map(([key, value]) => (
-                  <div key={key} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">
-                      {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                    </label>
+            {Object.keys(assessment?.environment || {}).length > 0 ? (
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Environment Features</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {Object.entries(assessment?.environment || {}).map(([key, value]) => (
+                      <div key={key} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(value)}
+                          readOnly
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                        />
+                        <label className={`ml-2 text-sm truncate ${Boolean(value) ? 'text-gray-700' : 'text-gray-400'}`}>
+                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">No environment details recorded</p>
-              )}
-            </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No environment details recorded</p>
+            )}
           </div>
+          {/* Equipment Section */}
           <div>
             <h3 className="text-sm font-medium mb-2 text-gray-800">Equipment Needed</h3>
-            <div className="space-y-2">
-              {Object.keys(assessment?.equipment || {}).length > 0 ? (
-                Object.entries(assessment?.equipment || {}).map(([key, value]) => (
-                  <div key={key} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                    </label>
+            {Object.keys(assessment?.equipment || {}).length > 0 ? (
+              <div className="space-y-5">
+                {/* Bedridden Equipment */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Bed-related Equipment</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {equipmentCategories.bedriddenEquipment.map(item => {
+                      const equipment = assessment?.equipment as Record<string, boolean> || {};
+                      const isChecked = typeof equipment === 'object' && item.id in equipment ? equipment[item.id] : false;
+                      return (
+                        <div key={item.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
+                            {item.label}
+                          </label>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">No equipment details recorded</p>
-              )}
-            </div>
+                </div>
+
+                {/* Mobility Equipment */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Mobility Equipment</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {equipmentCategories.mobilityEquipment.map(item => {
+                      const equipment = assessment?.equipment as Record<string, boolean> || {};
+                      const isChecked = typeof equipment === 'object' && item.id in equipment ? equipment[item.id] : false;
+                      return (
+                        <div key={item.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
+                            {item.label}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Medical Equipment */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Medical Equipment</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+                    {equipmentCategories.medicalEquipment.map(item => {
+                      const equipment = assessment?.equipment as Record<string, boolean> || {};
+                      const isChecked = typeof equipment === 'object' && item.id in equipment ? equipment[item.id] : false;
+                      return (
+                        <div key={item.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
+                            {item.label}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No equipment details recorded</p>
+            )}
           </div>
         </div>
       )

@@ -13,6 +13,8 @@ import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
 import { getServiceLabel } from '../utils/formatters';
+import ImageViewer from './common/ImageViewer';
+
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
@@ -120,6 +122,7 @@ export function ClientDetailsOverlay({
 
 
   function ProfileImage({ src, alt, size = "md" }: { src: string | null | undefined; alt: string; size?: "sm" | "md" | "lg" }) {
+    const [isImageViewerOpen, setIsImageViewerOpen] = useState(false); // Add state for image viewer
     const sizeClasses = {
       sm: "w-12 h-12",
       md: "w-16 h-16",
@@ -130,7 +133,10 @@ export function ClientDetailsOverlay({
     
     return src ? (
       <div className="flex flex-col items-center">
-        <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-100 border border-gray-200`}>
+        <div 
+          className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer`}
+          onClick={() => setIsImageViewerOpen(true)}
+        >
           <Image 
             src={src} 
             alt={alt} 
@@ -142,6 +148,15 @@ export function ClientDetailsOverlay({
             }}
           />
         </div>
+
+        {src && (
+          <ImageViewer
+            src={src}
+            alt={alt}
+            isOpen={isImageViewerOpen}
+            onClose={() => setIsImageViewerOpen(false)}
+          />
+        )}
       </div>
     ) : null;
   }
@@ -265,7 +280,6 @@ export function ClientDetailsOverlay({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <DetailItem label="Organization Name" value={client.details?.organization_name} />
               <DetailItem label="Organization Type" value={client.details?.organization_type} />
-              <DetailItem label="Organization Address" value={client.details?.organization_address} />
               <DetailItem label="Contract Duration" value={client.details?.contract_duration} />
             </div>
           </div>
@@ -278,6 +292,18 @@ export function ClientDetailsOverlay({
               <DetailItem label="Email" value={client.details?.contact_email} />
               <DetailItem label="Phone" value={client.details?.contact_phone} />
             </div>
+          </div>
+        </div>
+        
+        {/* Added Organization Address Section */}
+        <div className="mb-6">
+          <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Organization Address</h5>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DetailItem label="Address" value={client.details?.organization_address} />
+            <DetailItem label="City" value={client.details?.organization_city} />
+            <DetailItem label="District" value={client.details?.organization_district} />
+            <DetailItem label="State" value={client.details?.organization_state} />
+            <DetailItem label="Pincode" value={client.details?.organization_pincode} />
           </div>
         </div>
         

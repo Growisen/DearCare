@@ -11,7 +11,9 @@ import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import ReviewChecklist from './UnderReview/ReviewChecklist';
 import RejectModal from './RejectModal';
-
+import { v4 as uuidv4 } from 'uuid';
+import { FamilyMember } from '@/types/client.types';
+import FamilyMembers from '@/components/client/UnderReview/FamilyMembers';
 
 interface InputFieldProps {
   label: string;
@@ -119,7 +121,32 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       disposableUnderpad: false,
       pillows: false,
       bedRidden: false,
+      semiBedridden: false,
+      bedWedges: false,
+      bedsideCommode: false,
+      patientLift: false,
+      bedsideHandRail: false,
+      examinationGloves: false,
+      noRinseCleanser: false,
+      bathingWipes: false,
+      bpMeasuringApparatus: false,
+      electricBackLifter: false,
+      o2Concentrator: false,
+      overBedTable: false,
+      suctionMachine: false,
+      ivStand: false,
+      bedPan: false,
+      decubitusMatress: false,
+      airMatress: false,
+      bpMonitor: false,
+      bedLift: false,
+      bedRail: false,
+      cane: false,
+      walkers: false,
+      crutches: false,
     },
+
+    familyMembers: [] as FamilyMember[],
   });
 
   const [sharableLink, setSharableLink] = useState('');
@@ -147,6 +174,39 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
         ...prev.equipment,
         [equipmentId]: checked
       }
+    }));
+  };
+
+  const handleAddFamilyMember = () => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: [
+        ...prev.familyMembers,
+        {
+          id: uuidv4(),
+          name: '',
+          age: '',
+          job: '',
+          relation: '',
+          medicalRecords: ''
+        }
+      ]
+    }));
+  };
+
+  const handleRemoveFamilyMember = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter(member => member.id !== id)
+    }));
+  };
+
+  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      )
     }));
   };
 
@@ -427,6 +487,14 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
               <SocialHistory formData={formData} handleInputChange={handleInputChange} />
               <CurrentDetails formData={formData} handleInputChange={handleInputChange} />
               <DiagnosisAndCarePlan formData={formData} handleInputChange={handleInputChange} />
+              
+              <FamilyMembers 
+                familyMembers={formData.familyMembers}
+                onAddFamilyMember={handleAddFamilyMember}
+                onRemoveFamilyMember={handleRemoveFamilyMember}
+                onFamilyMemberChange={handleFamilyMemberChange}
+              />
+              
               <EnvironmentAndEquipment 
                 formData={formData} 
                 handleCheckboxChange={handleCheckboxChange}
@@ -492,7 +560,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       {showLinkModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium mb-4">Sharable Assessment Form Link</h3>
+            <h3 className="text-lg font-medium mb-4 text-gray-950">Sharable Assessment Form Link</h3>
             
             <div className="mb-4">
               <div className="flex">

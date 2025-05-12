@@ -7,6 +7,8 @@ import SocialHistory from './UnderReview/SocialHistory';
 import EnvironmentAndEquipment from './UnderReview/EnvironmentAndEquipment';
 import DiagnosisAndCarePlan from './UnderReview/DiagnosisAndCarePlan';
 import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions'
+import { AssessmentData, FamilyMember } from '@/types/client.types';
+import FamilyMembers from './UnderReview/FamilyMembers';
 
 interface PatientAssessmentProps {
   clientId: string;
@@ -16,66 +18,7 @@ interface PatientAssessmentProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-interface LabInvestigations {
-  hb?: string;
-  rbc?: string;
-  esr?: string;
-  urine?: string;
-  sodium?: string;
-  other?: string;
-}
 
-interface Environment {
-  is_clean?: boolean;
-  is_ventilated?: boolean;
-  is_dry?: boolean;
-  has_nature_view?: boolean;
-  has_social_interaction?: boolean;
-  has_supportive_env?: boolean;
-}
-
-interface Equipment {
-  hospitalBed?: boolean;
-  wheelChair?: boolean;
-  adultDiaper?: boolean;
-  disposableUnderpad?: boolean;
-  pillows?: boolean;
-  bedRidden?: boolean;
-}
-
-interface AssessmentData {
-  guardian_occupation?: string;
-  marital_status?: string;
-  height?: string;
-  weight?: string;
-  pincode?: string;
-  district?: string;
-  city_town?: string;
-  current_status?: string;
-  chronic_illness?: string;
-  medical_history?: string;
-  surgical_history?: string;
-  medication_history?: string;
-  present_condition?: string;
-  blood_pressure?: string;
-  sugar_level?: string;
-  alertness_level?: string;
-  physical_behavior?: string;
-  speech_patterns?: string;
-  emotional_state?: string;
-  drugs_use?: string;
-  alcohol_use?: string;
-  tobacco_use?: string;
-  other_social_history?: string;
-  final_diagnosis?: string;
-  foods_to_include?: string;
-  foods_to_avoid?: string;
-  patient_position?: string;
-  feeding_method?: string;
-  lab_investigations?: LabInvestigations;
-  environment?: Environment;
-  equipment?: Equipment;
-}
 
 export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
   const [loading, setLoading] = useState<boolean>(true);
@@ -137,6 +80,29 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
       disposableUnderpad: false,
       pillows: false,
       bedRidden: false,
+      semiBedridden: false,
+      bedWedges: false,
+      bedsideCommode: false,
+      patientLift: false,
+      bedsideHandRail: false,
+      examinationGloves: false,
+      noRinseCleanser: false,
+      bathingWipes: false,
+      bpMeasuringApparatus: false,
+      electricBackLifter: false,
+      o2Concentrator: false,
+      overBedTable: false,
+      suctionMachine: false,
+      ivStand: false,
+      bedPan: false,
+      decubitusMatress: false,
+      airMatress: false,
+      bpMonitor: false,
+      bedLift: false,
+      bedRail: false,
+      cane: false,
+      walkers: false,
+      crutches: false,
     },
     
     // Diagnosis and Care Plan
@@ -145,6 +111,8 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     foodsToAvoid: '',
     patientPosition: '',
     feedingMethod: '',
+
+    familyMembers: [] as FamilyMember[],
   });
 
   // Fetch patient assessment data when component mounts or clientId changes
@@ -157,6 +125,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         if (result.success && result.assessment) {
           // Transform database data to match component state structure
           const assessmentData = result.assessment as AssessmentData;
+          console.log("dsd", assessmentData)
           const environment = assessmentData.environment || {};
           const labInvestigations = assessmentData.lab_investigations || {};
           
@@ -216,6 +185,29 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
               disposableUnderpad: false,
               pillows: false,
               bedRidden: false,
+              semiBedridden: false,
+              bedWedges: false,
+              bedsideCommode: false,
+              patientLift: false,
+              bedsideHandRail: false,
+              examinationGloves: false,
+              noRinseCleanser: false,
+              bathingWipes: false,
+              bpMeasuringApparatus: false,
+              electricBackLifter: false,
+              o2Concentrator: false,
+              overBedTable: false,
+              suctionMachine: false,
+              ivStand: false,
+              bedPan: false,
+              decubitusMatress: false,
+              airMatress: false,
+              bpMonitor: false,
+              bedLift: false,
+              bedRail: false,
+              cane: false,
+              walkers: false,
+              crutches: false,
               ...(assessmentData.equipment || {})
             },
             
@@ -225,6 +217,8 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             foodsToAvoid: assessmentData.foods_to_avoid || '',
             patientPosition: assessmentData.patient_position || '',
             feedingMethod: assessmentData.feeding_method || '',
+
+            familyMembers: assessmentData.family_members || [],
           });
 
           setLoading(false);
@@ -272,6 +266,45 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         ...prev.equipment,
         [equipmentId]: checked,
       },
+    }));
+  };
+
+  const handleAddFamilyMember = () => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: [
+        ...prev.familyMembers,
+        {
+          id: crypto.randomUUID(),
+          name: '',
+          age: '',
+          job: '',
+          relation: '',
+          medicalRecords: ''
+        }
+      ]
+    }));
+  };
+  
+  const handleRemoveFamilyMember = (id: string) => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter(member => member.id !== id)
+    }));
+  };
+  
+  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
+    if (!isEditing) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      )
     }));
   };
 
@@ -338,6 +371,8 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         foodsToAvoid: formData.foodsToAvoid,
         patientPosition: formData.patientPosition,
         feedingMethod: formData.feedingMethod,
+
+        familyMembers: formData.familyMembers,
       }
     });
       
@@ -434,6 +469,13 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
                 otherSocialHistory: formData.otherSocialHistory,
               }}
               handleInputChange={handleInputChange}
+            />
+
+            <FamilyMembers
+              familyMembers={formData.familyMembers}
+              onAddFamilyMember={handleAddFamilyMember}
+              onRemoveFamilyMember={handleRemoveFamilyMember}
+              onFamilyMemberChange={handleFamilyMemberChange}
             />
             
             <EnvironmentAndEquipment 

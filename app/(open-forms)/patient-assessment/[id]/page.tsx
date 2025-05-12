@@ -13,6 +13,9 @@ import CurrentDetails from '@/components/client/UnderReview/CurrentHistory';
 import DiagnosisAndCarePlan from '@/components/client/UnderReview/DiagnosisAndCarePlan';
 import EnvironmentAndEquipment from '@/components/client/UnderReview/EnvironmentAndEquipment';
 import ReviewChecklist from '@/components/client/UnderReview/ReviewChecklist';
+import FamilyMembers from '@/components/client/UnderReview/FamilyMembers'; 
+import { v4 as uuidv4 } from 'uuid';
+import { FamilyMember } from '@/types/client.types';
 
 export default function PatientAssessmentPage() {
   const params = useParams();
@@ -68,7 +71,31 @@ export default function PatientAssessmentPage() {
       disposableUnderpad: false,
       pillows: false,
       bedRidden: false,
+      semiBedridden: false,
+      bedWedges: false,
+      bedsideCommode: false,
+      patientLift: false,
+      bedsideHandRail: false,
+      examinationGloves: false,
+      noRinseCleanser: false,
+      bathingWipes: false,
+      bpMeasuringApparatus: false,
+      electricBackLifter: false,
+      o2Concentrator: false,
+      overBedTable: false,
+      suctionMachine: false,
+      ivStand: false,
+      bedPan: false,
+      decubitusMatress: false,
+      airMatress: false,
+      bpMonitor: false,
+      bedLift: false,
+      bedRail: false,
+      cane: false,
+      walkers: false,
+      crutches: false,
     },
+    familyMembers: [] as FamilyMember[],
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -95,6 +122,40 @@ export default function PatientAssessmentPage() {
       }
     }));
   };
+
+  const handleAddFamilyMember = () => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: [
+        ...prev.familyMembers,
+        {
+          id: uuidv4(),
+          name: '',
+          age: '',
+          job: '',
+          relation: '',
+          medicalRecords: ''
+        }
+      ]
+    }));
+  };
+
+  const handleRemoveFamilyMember = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter(member => member.id !== id)
+    }));
+  };
+
+  const handleFamilyMemberChange = (id: string, field: keyof FamilyMember, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      familyMembers: prev.familyMembers.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      )
+    }));
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,6 +233,14 @@ export default function PatientAssessmentPage() {
                         <PsychologicalAssessment formData={formData} handleInputChange={handleInputChange} />
                         <SocialHistory formData={formData} handleInputChange={handleInputChange} />
                         <CurrentDetails formData={formData} handleInputChange={handleInputChange} />
+                        
+                        <FamilyMembers 
+                            familyMembers={formData.familyMembers}
+                            onAddFamilyMember={handleAddFamilyMember}
+                            onRemoveFamilyMember={handleRemoveFamilyMember}
+                            onFamilyMemberChange={handleFamilyMemberChange}
+                        />
+                        
                         <DiagnosisAndCarePlan formData={formData} handleInputChange={handleInputChange} />
                         <EnvironmentAndEquipment 
                             formData={formData} 

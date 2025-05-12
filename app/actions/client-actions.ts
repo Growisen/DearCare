@@ -197,7 +197,11 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         contact_phone: formData.contactPhone,
         contact_email: formData.contactEmail,
         organization_address: formData.organizationAddress,
-        start_date: formData.staffReqStartDate || null
+        start_date: formData.staffReqStartDate || null,
+        organization_state: formData.organizationState || '',
+        organization_district: formData.organizationDistrict || '',
+        organization_city: formData.organizationCity || '',
+        organization_pincode: formData.organizationPincode || ''
       });
     
     if (organizationError) {
@@ -877,6 +881,7 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       feeding_method: data.assessmentData.feedingMethod,
       environment: environmentData,
       equipment: data.assessmentData.equipment, 
+      family_members: data.assessmentData.familyMembers,
       updated_at: new Date().toISOString()
     };
     
