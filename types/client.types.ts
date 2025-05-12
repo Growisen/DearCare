@@ -4,9 +4,12 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
+
+export type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
 
 export interface Client {
+  registrationNumber?: string;
   id: string;
   name: string;
   requestDate: string;
@@ -64,18 +67,29 @@ export interface BaseFormData {
   clientType: 'individual' | 'organization' | 'hospital' | 'carehome';
   clientCategory: 'DearCare' | 'TataLife';
   generalNotes: string;
+  dutyPeriod: string;
+  dutyPeriodReason: string;
 }
 
 export interface IndividualFormData extends BaseFormData {
   requestorName: string;
   requestorPhone: string;
   requestorEmail: string;
+  requestorAddress: string;
+  requestorJobDetails: string;
+  requestorEmergencyPhone: string;
+  requestorPincode: string;
+  requestorDistrict: string;
+  requestorCity: string;
   relationToPatient: "" | "other" | "self" | "spouse" | "child" | "parent" | "sibling";
   patientName: string;
   patientAge: string;
   patientGender: "" | "male" | "female" | "other";
   patientPhone: string;
-  completeAddress: string;
+  patientAddress: string,  
+  patientPincode: string, 
+  patientDistrict: string, 
+  patientCity: string, 
   serviceRequired: string;
   careDuration: string;
   startDate: string;
@@ -92,7 +106,11 @@ export interface OrganizationFormData extends BaseFormData {
   contactPersonRole: string;
   contactPhone: string;
   contactEmail: string;
+  organizationState: string;
+  organizationDistrict: string;
+  organizationCity: string;
   organizationAddress: string;
+  organizationPincode: string;
   staffRequirements: StaffRequirement[];
   staffReqStartDate: string
 }
@@ -126,14 +144,27 @@ export interface ClientInformationProps {
 
 
 export interface DetailedClientIndividual {
+  registration_number?: string;
   client_type: 'individual';
   client_category?: 'DearCare' | 'TataLife';
+  duty_period?: string;
+  duty_period_reason?: string;
   details?: {
     client_id?: string;
     patient_name?: string;
     patient_age?: string | number;
     patient_gender?: string;
     patient_phone?: string;
+    patient_address?: string;
+    patient_city?: string;
+    patient_district?: string;
+    patient_pincode?: string;
+    requestor_emergency_phone?: string;
+    requestor_job_details?: string;
+    requestor_address?: string;
+    requestor_city?: string;
+    requestor_district?: string;
+    requestor_pincode?: string;
     requestor_name?: string;
     relation_to_patient?: string;
     requestor_email?: string;
@@ -149,6 +180,7 @@ export interface DetailedClientIndividual {
     patient_profile_pic_url?: string | null;
   };
   general_notes?: string;
+  created_at?: string;
 }
 
 export interface DetailedClientOrganization {
@@ -160,6 +192,10 @@ export interface DetailedClientOrganization {
     contact_person_role?: string;
     contact_email?: string;
     contact_phone?: string;
+    organization_state?: string;
+    organization_district?: string;
+    organization_city?: string;
+    organization_pincode?: string;
     organization_address?: string;
     contract_duration?: string;
   };
@@ -167,16 +203,14 @@ export interface DetailedClientOrganization {
   general_notes?: string;
 }
 
-
-export interface EquipmentData {
-  hospitalBed: boolean;
-  wheelChair: boolean;
-  adultDiaper: boolean;
-  disposableUnderpad: boolean;
-  pillows: boolean;
-  bedRidden: boolean;
-  [key: string]: boolean | string | number | null | JSON;
-}
+export type FamilyMember = {
+  id: string;
+  name: string;
+  age: string;
+  job: string;
+  relation: string;
+  medicalRecords: string;
+};
 
 export interface PatientAssessmentData {
   guardianOccupation: string;
@@ -220,6 +254,8 @@ export interface PatientAssessmentData {
   hasSocialInteraction: boolean;
   hasSupportiveEnv: boolean;
   equipment: Json;
+  familyMembers: FamilyMember[],
+  customLabTests: Array<{ id: string; name: string; value: string }>;
 }
 
 export interface SavePatientAssessmentParams {
@@ -231,4 +267,189 @@ export interface SavePatientAssessmentResult {
   success: boolean;
   id?: string;
   error?: string;
+}
+
+
+export interface PatientAssessmentDataForApprovedClients {
+  guardianOccupation: string;
+  maritalStatus: string;
+  height: string;
+  weight: string;
+  pincode: string;
+  district: string;
+  cityTown: string;
+  currentStatus: string;
+  chronicIllness: string;
+  medicalHistory: string;
+  surgicalHistory: string;
+  medicationHistory: string;
+  alertnessLevel: string;
+  physicalBehavior: string;
+  speechPatterns: string;
+  emotionalState: string;
+  drugsUse: string;
+  alcoholUse: string;
+  tobaccoUse: string;
+  otherSocialHistory: string;
+  presentCondition: string;
+  bloodPressure: string;
+  sugarLevel: string;
+  finalDiagnosis: string;
+  foodsToInclude: string;
+  foodsToAvoid: string;
+  patientPosition: string;
+  feedingMethod: string;
+  equipment: Json;
+  environment: Json;
+  lab_investigations: LabInvestigations;
+  familyMembers: FamilyMember[];
+  [key: string]: string | undefined | Json | LabInvestigations | FamilyMember[];
+}
+
+export interface NurseAssignment {
+  id?: number;
+  nurseId: number | string;
+  startDate: string;
+  endDate?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  shiftType?: 'day' | 'night' | '24h';
+}
+
+
+export interface Patient {
+  _id?: string;
+  registrationNumber?: string;
+  firstName: string;
+  lastName: string;
+  age: number | string;
+  gender: string;
+  bloodGroup: string;
+  location: string;
+  email: string;
+  phoneNumber: string;
+  clientCategory: 'DearCare' | 'TataLife';
+  profileImage?: string | null;
+  serviceRequired?: string;
+  address: {
+    fullAddress: string;
+    city: string;
+    district: string;
+    pincode: string;
+  };
+  requestor: { 
+    name: string;
+    relation: string;
+    phone: string;
+    email: string;
+    profileImage?: string | null;
+    emergencyPhone?: string;
+    jobDetails?: string;
+    address?: {
+      fullAddress: string;
+      city: string;
+      district: string;
+      pincode: string;
+    };
+  }
+  emergencyContact: {
+    name: string;
+    relation: string;
+    phone: string;
+  };
+  assessments: PatientAssessmentDataForApprovedClients[];
+  nurseAssignments?: NurseAssignment[];
+}
+
+export interface ClientResponse {
+  success: boolean;
+  client: DetailedClientIndividual;
+}
+
+
+export interface LabInvestigations {
+  hb?: string;
+  rbc?: string;
+  esr?: string;
+  urine?: string;
+  sodium?: string;
+  other?: string;
+  custom_tests?: Array<{ id: string; name: string; value: string }>;
+}
+
+export interface Environment {
+  is_clean?: boolean;
+  is_ventilated?: boolean;
+  is_dry?: boolean;
+  has_nature_view?: boolean;
+  has_social_interaction?: boolean;
+  has_supportive_env?: boolean;
+}
+
+export interface Equipment {
+  hospitalBed?: boolean;
+  wheelChair?: boolean;
+  adultDiaper?: boolean;
+  disposableUnderpad?: boolean;
+  pillows?: boolean;
+  bedRidden?: boolean;
+  semiBedridden?: boolean;
+  bedWedges?: boolean;
+  bedsideCommode?: boolean;
+  patientLift?: boolean;
+  bedsideHandRail?: boolean;
+  examinationGloves?: boolean;
+  noRinseCleanser?: boolean;
+  bathingWipes?: boolean;
+  bpMeasuringApparatus?: boolean;
+  electricBackLifter?: boolean;
+  o2Concentrator?: boolean;
+  overBedTable?: boolean;
+  suctionMachine?: boolean;
+  ivStand?: boolean;
+  bedPan?: boolean;
+  decubitusMatress?: boolean;
+  airMatress?: boolean;
+  bpMonitor?: boolean;
+  bedLift?: boolean;
+  bedRail?: boolean;
+  cane?: boolean;
+  walkers?: boolean;
+  crutches?: boolean;
+}
+
+export interface AssessmentData {
+  guardian_occupation?: string;
+  marital_status?: string;
+  height?: string;
+  weight?: string;
+  pincode?: string;
+  district?: string;
+  city_town?: string;
+  current_status?: string;
+  chronic_illness?: string;
+  medical_history?: string;
+  surgical_history?: string;
+  medication_history?: string;
+  present_condition?: string;
+  blood_pressure?: string;
+  sugar_level?: string;
+  alertness_level?: string;
+  physical_behavior?: string;
+  speech_patterns?: string;
+  emotional_state?: string;
+  drugs_use?: string;
+  alcohol_use?: string;
+  tobacco_use?: string;
+  other_social_history?: string;
+  final_diagnosis?: string;
+  foods_to_include?: string;
+  foods_to_avoid?: string;
+  patient_position?: string;
+  feeding_method?: string;
+  lab_investigations?: LabInvestigations;
+  environment?: Environment;
+  equipment?: Equipment;
+  family_members: FamilyMember[];
 }

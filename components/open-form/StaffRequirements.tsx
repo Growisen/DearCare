@@ -188,7 +188,7 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
       </button>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Service Start Date</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Expected Service Start Date</label>
         <input
           type="date"
           value={formData.staffReqStartDate || ''}

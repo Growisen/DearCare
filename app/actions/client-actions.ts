@@ -7,6 +7,7 @@ import { Database } from '@/lib/database.types';
 import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
 import { sendClientCredentials, sendClientFormLink, sendClientRejectionNotification } from '@/lib/email'
 import { v4 as uuidv4 } from 'uuid';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export async function getStorageUrl(path: string | null): Promise<string | null> {
   if (!path) return null;
@@ -73,6 +74,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         client_type: formData.clientType,
         client_category: formData.clientCategory,
         general_notes: formData.generalNotes,
+        duty_period: formData.dutyPeriod,
+        duty_period_reason: formData.dutyPeriodReason,
         status: 'pending'
       })
       .select()
@@ -108,11 +111,14 @@ export async function addIndividualClient(formData: IndividualFormData) {
       .insert({
         care_duration: formData.careDuration,
         client_id: clientData.id,
-        complete_address: formData.completeAddress,
         patient_age: parseInt(formData.patientAge) || null,
         patient_gender: formData.patientGender || null,
         patient_name: formData.patientName,
         patient_phone: formData.patientPhone || null,
+        patient_address: formData.patientAddress,
+        patient_pincode: formData.patientPincode,
+        patient_district: formData.patientDistrict,
+        patient_city: formData.patientCity,     
         preferred_caregiver_gender: formData.preferredCaregiverGender || null,
         relation_to_patient: formData.relationToPatient || 'other',
         requestor_email: formData.requestorEmail,
@@ -122,6 +128,12 @@ export async function addIndividualClient(formData: IndividualFormData) {
         start_date: formData.startDate,
         requestor_profile_pic: requestorProfilePicPath,
         patient_profile_pic: patientProfilePicPath,
+        requestor_address: formData.requestorAddress || null,
+        requestor_job_details: formData.requestorJobDetails || null,
+        requestor_emergency_phone: formData.requestorEmergencyPhone || null,
+        requestor_pincode: formData.requestorPincode || null,
+        requestor_district: formData.requestorDistrict || null,
+        requestor_city: formData.requestorCity || null,
       });
     
     if (individualError) {
@@ -162,6 +174,8 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         client_type: formData.clientType,
         client_category: formData.clientCategory,
         general_notes: formData.generalNotes,
+        duty_period: formData.dutyPeriod,
+        duty_period_reason: formData.dutyPeriodReason,
         status: 'pending'
       })
       .select()
@@ -183,7 +197,11 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         contact_phone: formData.contactPhone,
         contact_email: formData.contactEmail,
         organization_address: formData.organizationAddress,
-        start_date: formData.staffReqStartDate || null
+        start_date: formData.staffReqStartDate || null,
+        organization_state: formData.organizationState || '',
+        organization_district: formData.organizationDistrict || '',
+        organization_city: formData.organizationCity || '',
+        organization_pincode: formData.organizationPincode || ''
       });
     
     if (organizationError) {
@@ -328,6 +346,7 @@ export async function getClients(
         status,
         created_at,
         general_notes,
+        registration_number,
         individual_clients:individual_clients(
           requestor_name,
           requestor_phone, 
@@ -360,13 +379,13 @@ export async function getClients(
       const individualClientsQuery = supabase
         .from('individual_clients')
         .select('client_id')
-        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%`);
+        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
       
       // Then handle organization_clients search
       const organizationClientsQuery = supabase
         .from('organization_clients')
         .select('client_id')
-        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%`);
+        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
         
       // Execute both queries
       const [individualResults, organizationResults] = await Promise.all([
@@ -441,7 +460,8 @@ export async function getClients(
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
         location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
-        description: record.general_notes || undefined
+        description: record.general_notes || undefined,
+        registrationNumber: record.registration_number || undefined,
       }
     })
       
@@ -563,54 +583,32 @@ export async function getClientDetails(clientId: string) {
 export async function updateClientStatus(
   clientId: string,
   newStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned',
-  rejectionReason?: string) {
+  rejectionReason?: string
+) {
   try {
     const supabase = await createSupabaseAdminClient();
-
-     if (newStatus === 'rejected' && rejectionReason) {
-      const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('client_type')
-        .eq('id', clientId)
-        .single();
-        
-      if (clientError) {
-        return { success: false, error: clientError.message };
-      }
+    
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('client_type, client_category')
+      .eq('id', clientId)
+      .single();
       
-      let clientEmail = '';
-      let clientName = '';
-      
-      // Get client email and name based on client type
-      if (client.client_type === 'individual') {
-        const { data: individualData, error: individualError } = await supabase
-          .from('individual_clients')
-          .select('requestor_email, requestor_name, patient_name')
-          .eq('client_id', clientId)
-          .single();
-          
-        if (individualError) {
-          return { success: false, error: individualError.message };
-        }
-        
-        clientEmail = individualData.requestor_email;
-        clientName = individualData.requestor_name || individualData.patient_name;
-      } else {
-        const { data: orgData, error: orgError } = await supabase
-          .from('organization_clients')
-          .select('contact_email, contact_person_name, organization_name')
-          .eq('client_id', clientId)
-          .single();
-          
-        if (orgError) {
-          return { success: false, error: orgError.message };
-        }
-        
-        clientEmail = orgData.contact_email;
-        clientName = orgData.contact_person_name || orgData.organization_name;
-      }
-
-      // Update client status in database
+    if (clientError) {
+      return { success: false, error: clientError.message };
+    }
+    
+    const { clientEmail, clientName, error: contactError } = await getClientContactInfo(
+      supabase,
+      clientId,
+      client.client_type
+    );
+    
+    if (contactError) {
+      return { success: false, error: contactError };
+    }
+    
+    if (newStatus === 'rejected' && rejectionReason) {
       const { data, error } = await supabase
         .from('clients')
         .update({ 
@@ -635,111 +633,43 @@ export async function updateClientStatus(
           console.log(`Rejection notification sent to ${clientEmail}`);
         } catch (emailError) {
           console.error('Error sending rejection email:', emailError);
-          // Continue even if email fails - don't block the client rejection process
         }
       } else {
         console.warn('Unable to send rejection email: Missing client email or name');
       }
       
       revalidatePath('/clients');
-      
       return { success: true, client: data };
     }
     else if (newStatus === 'approved') {
-      const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('client_type')
-        .eq('id', clientId)
-        .single();
-        
-      if (clientError) {
-        return { success: false, error: clientError.message };
-      }
-      
-      let clientEmail = '';
-      let clientName = '';
-      
-      if (client.client_type === 'individual') {
-        const { data: individualData, error: individualError } = await supabase
-          .from('individual_clients')
-          .select('requestor_email, requestor_name')
-          .eq('client_id', clientId)
-          .single();
-          
-        if (individualError) {
-          return { success: false, error: individualError.message };
-        }
-        
-        clientEmail = individualData.requestor_email;
-        clientName = individualData.requestor_name;
-      } else {
-        const { data: orgData, error: orgError } = await supabase
-          .from('organization_clients')
-          .select('contact_email, contact_person_name')
-          .eq('client_id', clientId)
-          .single();
-          
-        if (orgError) {
-          return { success: false, error: orgError.message };
-        }
-        
-        clientEmail = orgData.contact_email;
-        clientName = orgData.contact_person_name;
-      }
-      
-      const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
-      
-      if (userListError) {
-        return { success: false, error: userListError.message };
-      }
-      
-      const existingUser = userList?.users?.find(user => 
-        user.email?.toLowerCase() === clientEmail.toLowerCase()
+
+      const registrationNumber = await generateRegistrationNumber(
+        client.client_type,
+        client.client_category
       );
-
-      if (!existingUser && clientEmail) {
-        const generateUniquePassword = () => {
-          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-          const timestamp = Date.now().toString(36);
-          let password = timestamp.slice(0, 4);
-          
-          for (let i = 0; i < 8; i++) {
-            password += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          
-          return password;
-        };
-        
-        const password = generateUniquePassword();
-        
-        const { error: createError } = await supabase.auth.admin.createUser({
-          email: clientEmail,
-          password: password,
-          email_confirm: true,
-          user_metadata: {
-            name: clientName,
-            role: 'client',
-            client_id: clientId,
-            requiresPasswordChange: true
-          }
-        });
-        
-        if (createError) {
-          console.error('Error creating user account:', createError);
-        } else {
-          const emailResult = await sendClientCredentials(clientEmail, {
-            name: clientName,
-            password: password,
-            appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download'
-          });
-          if (emailResult.error) {
-            console.error('Error sending welcome email:', emailResult.error);
-          } else {
-            console.log(`Welcome email sent to ${clientEmail}`);
-          }
-        }
+      
+      if (clientEmail) {
+        await createUserAccountIfNeeded(supabase, clientEmail, clientName, clientId);
       }
 
+      const { data, error } = await supabase
+        .from('clients')
+        .update({ 
+          status: newStatus,
+          registration_number: registrationNumber
+        })
+        .eq('id', clientId)
+        .select()
+        .single();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      revalidatePath('/clients');
+      return { success: true, client: data };
+    }
+    else {
       const { data, error } = await supabase
         .from('clients')
         .update({ status: newStatus })
@@ -750,25 +680,8 @@ export async function updateClientStatus(
       if (error) {
         return { success: false, error: error.message };
       }
-
-      revalidatePath('/clients');
-
-      return { success: true, client: data };
-    }
-    else{
-      const { data, error } = await supabase
-      .from('clients')
-      .update({ status: newStatus,})
-      .eq('id', clientId)
-      .select()
-      .single();
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
       
       revalidatePath('/clients');
-      
       return { success: true, client: data };
     }
     
@@ -778,6 +691,125 @@ export async function updateClientStatus(
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
     };
+  }
+}
+
+/**
+ * Helper function to get client contact information
+ */
+async function getClientContactInfo(
+  supabase: SupabaseClient<Database>,  
+  clientId: string, 
+  clientType: string
+): Promise<{
+  clientEmail: string;
+  clientName: string;
+  error: string | null;
+}> {
+  try {
+    let clientEmail = '';
+    let clientName = '';
+    
+    if (clientType === 'individual') {
+      const { data: individualData, error: individualError } = await supabase
+        .from('individual_clients')
+        .select('requestor_email, requestor_name, patient_name')
+        .eq('client_id', clientId)
+        .single();
+        
+      if (individualError) {
+        return { clientEmail, clientName, error: individualError.message };
+      }
+      
+      clientEmail = individualData.requestor_email;
+      clientName = individualData.requestor_name || individualData.patient_name;
+    } else {
+      const { data: orgData, error: orgError } = await supabase
+        .from('organization_clients')
+        .select('contact_email, contact_person_name, organization_name')
+        .eq('client_id', clientId)
+        .single();
+        
+      if (orgError) {
+        return { clientEmail, clientName, error: orgError.message };
+      }
+      
+      clientEmail = orgData.contact_email;
+      clientName = orgData.contact_person_name || orgData.organization_name;
+    }
+    
+    return { clientEmail, clientName, error: null };
+  } catch (error) {
+    return { 
+      clientEmail: '', 
+      clientName: '', 
+      error: error instanceof Error ? error.message : 'Error getting client info'
+    };
+  }
+}
+
+/**
+ * Helper function to create a user account if needed
+ */
+async function createUserAccountIfNeeded(
+  supabase: SupabaseClient<Database>,
+  clientEmail: string,
+  clientName: string,
+  clientId: string
+): Promise<void> {
+  const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
+  
+  if (userListError) {
+    console.error('Error listing users:', userListError);
+    return;
+  }
+  
+  const existingUser = userList?.users?.find(user => 
+    user.email?.toLowerCase() === clientEmail.toLowerCase()
+  );
+
+  if (!existingUser) {
+    const generateUniquePassword = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      const timestamp = Date.now().toString(36);
+      let password = timestamp.slice(0, 4);
+      
+      for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      return password;
+    };
+    
+    const password = generateUniquePassword();
+    
+    const { error: createError } = await supabase.auth.admin.createUser({
+      email: clientEmail,
+      password: password,
+      email_confirm: true,
+      user_metadata: {
+        name: clientName,
+        role: 'client',
+        client_id: clientId,
+        requiresPasswordChange: true
+      }
+    });
+    
+    if (createError) {
+      console.error('Error creating user account:', createError);
+    } else {
+      const emailResult = await sendClientCredentials(clientEmail, {
+        name: clientName,
+        password: password,
+        appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download'
+      });
+      
+      if (emailResult.error) {
+        console.error('Error sending welcome email:', emailResult.error);
+      } else {
+        console.log(`Welcome email sent to ${clientEmail}`);
+      }
+    }
   }
 }
 
@@ -813,7 +845,8 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       esr: data.assessmentData.esr,
       urine: data.assessmentData.urine,
       sodium: data.assessmentData.sodium,
-      other: data.assessmentData.otherLabInvestigations
+      other: data.assessmentData.otherLabInvestigations,
+      custom_tests: data.assessmentData.customLabTests || []
     };
     
     // Common assessment data for both insert and update
@@ -849,6 +882,7 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       feeding_method: data.assessmentData.feedingMethod,
       environment: environmentData,
       equipment: data.assessmentData.equipment, 
+      family_members: data.assessmentData.familyMembers,
       updated_at: new Date().toISOString()
     };
     
@@ -1163,7 +1197,6 @@ export async function exportClients(
     let query = supabase
       .from('clients')
       .select(`
-        id,
         client_type,
         status,
         created_at,
@@ -1173,16 +1206,23 @@ export async function exportClients(
           requestor_phone, 
           requestor_email,
           patient_name,
+          patient_age,
+          patient_gender,
           complete_address,
           service_required,
-          start_date
+          start_date,
+          care_duration,
+          relation_to_patient
         ),
         organization_clients:organization_clients(
           organization_name,
+          organization_type,
           contact_person_name,
+          contact_person_role,
           contact_phone,
           contact_email,
-          organization_address
+          organization_address,
+          start_date
         )
       `)
     
@@ -1196,12 +1236,12 @@ export async function exportClients(
       const individualClientsQuery = supabase
         .from('individual_clients')
         .select('client_id')
-        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%`);
+        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
       
       const organizationClientsQuery = supabase
         .from('organization_clients')
         .select('client_id')
-        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%`);
+        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
         
       const [individualResults, organizationResults] = await Promise.all([
         individualClientsQuery,
@@ -1218,7 +1258,8 @@ export async function exportClients(
       } else {
         return { 
           success: true, 
-          clients: []
+          clients: [],
+          clientsData: []
         };
       }
     }
@@ -1231,6 +1272,25 @@ export async function exportClients(
       return { success: false, error: error.message }
     }
     
+    // Create detailed data for export
+    const clientsData = data.map(record => {
+      const isIndividual = record.client_type === 'individual';
+      const individualData = isIndividual ? 
+        (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients) : null;
+      const organizationData = !isIndividual ? 
+        (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients) : null;
+        
+      return {
+        client_type: record.client_type,
+        status: record.status,
+        created_at: record.created_at,
+        general_notes: record.general_notes,
+        ...individualData,
+        ...organizationData
+      };
+    });
+    
+    // Also keep the regular client objects for backward compatibility
     const clients = data.map(record => {
       const isIndividual = record.client_type === 'individual'
       const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
@@ -1241,7 +1301,6 @@ export async function exportClients(
         : record.organization_clients) : null
       
       return {
-        id: record.id,
         name: isIndividual 
           ? individualData?.patient_name || "Unknown" 
           : organizationData?.organization_name || "Unknown",
@@ -1259,7 +1318,8 @@ export async function exportClients(
       
     return { 
       success: true, 
-      clients
+      clients,
+      clientsData
     }
     
   } catch (error: unknown) {
@@ -1267,7 +1327,153 @@ export async function exportClients(
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred', 
-      clients: [] 
+      clients: [],
+      clientsData: []
     }
   }
+}
+
+
+export async function deleteClient(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('client_type')
+      .eq('id', clientId)
+      .single();
+
+    if (clientError) {
+      return { success: false, error: clientError.message };
+    }
+
+    const deleteOperations = [];
+
+    const { data: nurseAssignments } = await supabase
+      .from('nurse_client')
+      .select('nurse_id')
+      .eq('client_id', clientId);
+
+    deleteOperations.push(
+      supabase
+        .from('nurse_client')
+        .delete()
+        .eq('client_id', clientId)
+    );
+
+    deleteOperations.push(
+      supabase
+        .from('patient_assessments')
+        .delete()
+        .eq('client_id', clientId)
+    );
+
+    if (client.client_type === 'individual') {
+      deleteOperations.push(
+        supabase
+          .from('individual_clients')
+          .delete()
+          .eq('client_id', clientId)
+      );
+    } else {
+
+      deleteOperations.push(
+        supabase
+          .from('staff_requirements')
+          .delete()
+          .eq('client_id', clientId)
+      );
+      
+      deleteOperations.push(
+        supabase
+          .from('organization_clients')
+          .delete()
+          .eq('client_id', clientId)
+      );
+    }
+
+    deleteOperations.push(
+      supabase
+        .from('clients')
+        .delete()
+        .eq('id', clientId)
+    );
+
+    await Promise.all(deleteOperations);
+
+    if (nurseAssignments && nurseAssignments.length > 0) {
+      const uniqueNurseIds = [...new Set(nurseAssignments.map(na => na.nurse_id))];
+      
+      await Promise.all(
+        uniqueNurseIds.map(async (nurseId) => {
+          const { data: remainingAssignments } = await supabase
+            .from('nurse_client')
+            .select('id')
+            .eq('nurse_id', nurseId)
+            .neq('client_id', clientId);
+
+          if (!remainingAssignments || remainingAssignments.length === 0) {
+            await supabase
+              .from('nurses')
+              .update({ status: 'unassigned' })
+              .eq('nurse_id', nurseId);
+          }
+        })
+      );
+    }
+
+    revalidatePath('/clients');
+
+    return { success: true };
+    
+  } catch (error: unknown) {
+    console.error('Error deleting client:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+
+/**
+ * Generates a unique registration number for a client
+ */
+async function generateRegistrationNumber(
+  clientType: 'individual' | 'organization' | 'hospital' | 'carehome',
+  clientCategory: 'DearCare' | 'TataLife'
+): Promise<string> {
+  const supabase = await createSupabaseAdminClient();
+  const currentYear = new Date().getFullYear() % 100;
+  
+  const categoryPrefix = clientCategory === 'DearCare' ? 'DC' : 'TL';
+
+  let typeCode;
+  switch (clientType) {
+    case 'individual': typeCode = 'I'; break;
+    case 'organization': typeCode = 'O'; break;
+    case 'hospital': typeCode = 'H'; break;
+    case 'carehome': typeCode = 'C'; break;
+    default: typeCode = 'X';
+  }
+
+  const { data: counterData, error: counterError } = await supabase.rpc(
+    'increment_registration_counter',
+    { 
+      p_category: categoryPrefix,
+      p_type: typeCode,
+      p_year: currentYear.toString()
+    }
+  );
+  
+  if (counterError) {
+    console.error('Error generating sequence number:', counterError);
+    const timestamp = Date.now().toString().slice(-5);
+    return `${categoryPrefix}${typeCode}${currentYear}E${timestamp}`;
+  }
+  
+  const sequenceStr = counterData.toString().padStart(4, '0');
+  
+  return `${categoryPrefix}-${typeCode}${currentYear}-${sequenceStr}`;
 }

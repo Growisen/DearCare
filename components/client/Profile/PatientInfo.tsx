@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import InfoSection from './InfoSection';
 import InfoField from './InfoField';
-import { Json } from '@/types/client.types'; 
+import ImageViewer from '@/components/common/ImageViewer';
+import { Json, LabInvestigations } from '@/types/client.types'; 
+import { MapPin, Phone, Mail, Briefcase, User, Heart, Ruler, Weight, Users } from 'lucide-react';
+import { createMapLink } from '../../../utils/mapUtils';
 
 interface PatientInfoProps {
   patient: {
     email: string;
     phoneNumber: string;
+    serviceRequired?: string;
+    address?: {
+      fullAddress: string;
+      city: string;
+      district: string;
+      pincode: string;
+    };
     emergencyContact: {
       name: string;
       relation: string;
@@ -21,7 +31,7 @@ interface PatientInfoProps {
       cityTown?: string;
       district?: string;
       pincode?: string;
-      [key: string]: string | undefined | Json;
+      [key: string]: string | undefined | Json | LabInvestigations;
     }>;
     requestor: {
       name: string;
@@ -29,83 +39,207 @@ interface PatientInfoProps {
       phone: string;
       email: string;
       profileImage?: string | null;
+      emergencyPhone?: string;
+      jobDetails?: string;
+      address?: {
+        fullAddress: string;
+        city: string;
+        district: string;
+        pincode: string;
+      };
     };
   };
 }
 
 const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const latestAssessment = patient.assessments[0];
+  
+
+
+
+  const patientMapLink = createMapLink(patient.address);
+  const requestorMapLink = createMapLink(patient.requestor.address);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <InfoSection title="Personal Information">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <InfoSection title="Personal Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
         <div className="space-y-3">
-          <InfoField label="Email" value={patient.email} />
-          <InfoField label="Phone" value={patient.phoneNumber} />
-          <div>
-            <p className="text-xs text-gray-500 font-medium">Emergency Contact</p>
-            <p className="text-sm text-gray-700">{patient.emergencyContact.name}</p>
-            <p className="text-xs text-gray-600">
-              {patient.emergencyContact.relation} • {patient.emergencyContact.phone}
+          <InfoField 
+            label="Email" 
+            value={patient.email} 
+            icon={<Mail className="w-4 h-4 text-blue-500" />} 
+          />
+          <InfoField 
+            label="Phone" 
+            value={patient.phoneNumber} 
+            icon={<Phone className="w-4 h-4 text-blue-500" />} 
+          />
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
+            <p className="text-xs font-medium text-gray-500 mb-1 flex items-center">
+              <Users className="w-3 h-3 mr-1 text-blue-500" />
+              Emergency Contact
+            </p>
+            <p className="text-sm font-medium text-gray-800">{patient.emergencyContact.name}</p>
+            <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
+              <span className="text-blue-600">{patient.emergencyContact.relation}</span> • 
+              <span className="text-gray-700">{patient.emergencyContact.phone}</span>
             </p>
           </div>
           <InfoField 
             label="Guardian Occupation" 
             value={latestAssessment?.guardianOccupation} 
+            icon={<Briefcase className="w-4 h-4 text-blue-500" />} 
           />
         </div>
       </InfoSection>
 
-      <InfoSection title="Requestor Information">
+      <InfoSection title="Patient Address" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <div className="space-y-3">
+          <InfoField 
+            label="Address" 
+            value={patient.address?.fullAddress}
+            icon={<MapPin className="w-4 h-4 text-blue-500" />}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoField label="City" value={patient.address?.city} />
+            <InfoField label="District" value={patient.address?.district} />
+          </div>
+          <InfoField label="Pincode" value={patient.address?.pincode} />
+          
+          {patient.address && (
+            <div className="mt-2 pt-3 border-t border-gray-100">
+              <a 
+                href={patientMapLink || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                View on Google Maps
+              </a>
+            </div>
+          )}
+        </div>
+      </InfoSection>
+
+
+      <InfoSection title="Physical Attributes" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <div className='space-y-3'>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoField 
+              label="Height" 
+              value={latestAssessment?.height} 
+              icon={<Ruler className="w-4 h-4 text-blue-500" />} 
+            />
+            <InfoField 
+              label="Weight" 
+              value={latestAssessment?.weight} 
+              icon={<Weight className="w-4 h-4 text-blue-500" />} 
+            />
+          </div>
+          <InfoField 
+            label="Marital Status" 
+            value={latestAssessment?.maritalStatus} 
+            icon={<Heart className="w-4 h-4 text-blue-500" />} 
+          />
+        </div>
+      </InfoSection>
+      
+      <InfoSection title="Requestor Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
         <div className="space-y-4">
-          {/* Requestor Profile Image */}
-          <div className="flex justify-center">
-            <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div 
+              className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+              onClick={() => patient.requestor.profileImage && setIsImageViewerOpen(true)}
+              style={{ cursor: patient.requestor.profileImage ? 'pointer' : 'default' }}
+            >
               {patient.requestor.profileImage ? (
                 <Image
                   src={patient.requestor.profileImage}
                   alt={patient.requestor.name}
                   fill
-                  className="object-cover"
-                  sizes="80px"
+                  className="object-cover hover:scale-105 transition-transform"
+                  sizes="(max-width: 768px) 56px, 56px"
                 />
               ) : (
-                <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-                  <span className="text-xl text-gray-500">
-                    {patient.requestor.name.charAt(0).toUpperCase()}
-                  </span>
+                <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                  <User className="w-6 h-6 text-gray-600" />
                 </div>
               )}
             </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800">{patient.requestor.name}</p>
+              <p className="text-xs text-blue-600">{patient.requestor.relation}</p>
+            </div>
           </div>
           <div className="space-y-3">
-            <InfoField label="Name" value={patient.requestor.name} />
-            <InfoField label="Relation to Patient" value={patient.requestor.relation} />
-            <InfoField label="Phone" value={patient.requestor.phone} />
+            <InfoField 
+              label="Phone" 
+              value={patient.requestor.phone}
+              icon={<Phone className="w-4 h-4 text-blue-500" />}
+            />
+            <InfoField 
+              label="Emergency Phone" 
+              value={patient.requestor.emergencyPhone} 
+              icon={<Phone className="w-4 h-4 text-red-500" />}
+            />
             <InfoField 
               label="Email" 
               value={patient.requestor.email} 
-              fallback="Not provided" 
+              fallback="Not provided"
+              icon={<Mail className="w-4 h-4 text-blue-500" />}
+            />
+            <InfoField 
+              label="Job Details" 
+              value={patient.requestor.jobDetails}
+              icon={<Briefcase className="w-4 h-4 text-blue-500" />}
             />
           </div>
         </div>
       </InfoSection>
 
-      <InfoSection title="Physical Attributes">
-        <div className='space-y-3'>
-          <InfoField label="Height" value={latestAssessment?.height} />
-          <InfoField label="Weight" value={latestAssessment?.weight} />
-          <InfoField label="Marital Status" value={latestAssessment?.maritalStatus} />
+      <InfoSection title="Requestor Address" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <div className="space-y-3">
+          <InfoField 
+            label="Address" 
+            value={patient.requestor.address?.fullAddress}
+            icon={<MapPin className="w-4 h-4 text-blue-500" />}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoField label="City" value={patient.requestor.address?.city} />
+            <InfoField label="District" value={patient.requestor.address?.district} />
+          </div>
+          <InfoField label="Pincode" value={patient.requestor.address?.pincode} />
+          
+          {patient.requestor.address && (
+            <div className="mt-2 pt-3 border-t border-gray-100">
+              <a 
+                href={requestorMapLink || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                View on Google Maps
+              </a>
+            </div>
+          )}
         </div>
       </InfoSection>
-
-      <InfoSection title="Location Details">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <InfoField label="City/Town" value={latestAssessment?.cityTown} />
-          <InfoField label="District" value={latestAssessment?.district} />
-          <InfoField label="Pincode" value={latestAssessment?.pincode} />
-        </div>
-      </InfoSection>
+      
+      {patient.requestor.profileImage && (
+        <ImageViewer
+          src={patient.requestor.profileImage}
+          alt={patient.requestor.name}
+          isOpen={isImageViewerOpen}
+          onClose={() => setIsImageViewerOpen(false)}
+        />
+      )}
     </div>
   );
 };
