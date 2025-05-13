@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
 import ImageViewer from '@/components/common/ImageViewer';
+import { ClientCategory } from '@/types/client.types';
 
 interface ProfileHeaderProps {
   patient: {
@@ -14,14 +15,14 @@ interface ProfileHeaderProps {
     bloodGroup: string;
     location: string;
     profileImage?: string | null;
-    clientCategory: 'DearCare' | 'TataLife';
+    clientCategory: ClientCategory;
   };
   status: string | null;
   isEditing: boolean;
   handleEdit: () => void;
   handleSave: () => void;
   handleCancel: () => void;
-  handleCategoryChange: (category: 'DearCare' | 'TataLife') => Promise<void>;
+  handleCategoryChange: (category: ClientCategory) => Promise<void>;
   setShowNurseList: (show: boolean) => void;
   onDelete: () => void;
 }

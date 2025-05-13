@@ -73,33 +73,77 @@ export type Database = {
       }
       academy_faculties: {
         Row: {
+          address: string | null
           created_at: string
           department: string | null
+          dob: string | null
           email: string | null
+          gender: string | null
           id: number
           join_date: string | null
+          martialstatus: string | null
           name: string | null
           phone_no: string | null
+          role: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          department?: string | null
+          dob?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: number
+          join_date?: string | null
+          martialstatus?: string | null
+          name?: string | null
+          phone_no?: string | null
+          role?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          department?: string | null
+          dob?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: number
+          join_date?: string | null
+          martialstatus?: string | null
+          name?: string | null
+          phone_no?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
+      academy_rejects: {
+        Row: {
+          created_at: string
+          id: number
+          reason: string | null
+          student_id: number | null
         }
         Insert: {
           created_at?: string
-          department?: string | null
-          email?: string | null
           id?: number
-          join_date?: string | null
-          name?: string | null
-          phone_no?: string | null
+          reason?: string | null
+          student_id?: number | null
         }
         Update: {
           created_at?: string
-          department?: string | null
-          email?: string | null
           id?: number
-          join_date?: string | null
-          name?: string | null
-          phone_no?: string | null
+          reason?: string | null
+          student_id?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "academy_rejects_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       academy_roles: {
         Row: {
@@ -121,6 +165,38 @@ export type Database = {
           uid?: string | null
         }
         Relationships: []
+      }
+      academy_student_attendance: {
+        Row: {
+          created_at: string
+          date: string | null
+          id: number
+          present: boolean | null
+          student_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          id?: number
+          present?: boolean | null
+          student_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          id?: number
+          present?: boolean | null
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_student_attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       academy_supervisors: {
         Row: {
@@ -152,11 +228,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_dashboard_todos: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          date: string
+          id: string
+          location: string
+          text: string
+          time: string
+          urgent: boolean | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          date: string
+          id?: string
+          location: string
+          text: string
+          time: string
+          urgent?: boolean | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string
+          text?: string
+          time?: string
+          urgent?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       attendence_individual: {
         Row: {
           assigned_id: number
           created_at: string
           date: string
+          end_location: string | null
           end_time: string | null
           id: number
           location: string | null
@@ -167,6 +280,7 @@ export type Database = {
           assigned_id: number
           created_at?: string
           date: string
+          end_location?: string | null
           end_time?: string | null
           id?: number
           location?: string | null
@@ -177,6 +291,7 @@ export type Database = {
           assigned_id?: number
           created_at?: string
           date?: string
+          end_location?: string | null
           end_time?: string | null
           id?: number
           location?: string | null
@@ -198,8 +313,12 @@ export type Database = {
           client_category: Database["public"]["Enums"]["client_category"]
           client_type: Database["public"]["Enums"]["client_type"]
           created_at: string | null
+          duty_period: string | null
+          duty_period_reason: string | null
           general_notes: string | null
           id: string
+          otp_preference: boolean | null
+          registration_number: string | null
           rejection_reason: string | null
           status: Database["public"]["Enums"]["client_status"] | null
           updated_at: string | null
@@ -208,8 +327,12 @@ export type Database = {
           client_category: Database["public"]["Enums"]["client_category"]
           client_type: Database["public"]["Enums"]["client_type"]
           created_at?: string | null
+          duty_period?: string | null
+          duty_period_reason?: string | null
           general_notes?: string | null
           id?: string
+          otp_preference?: boolean | null
+          registration_number?: string | null
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["client_status"] | null
           updated_at?: string | null
@@ -218,8 +341,12 @@ export type Database = {
           client_category?: Database["public"]["Enums"]["client_category"]
           client_type?: Database["public"]["Enums"]["client_type"]
           created_at?: string | null
+          duty_period?: string | null
+          duty_period_reason?: string | null
           general_notes?: string | null
           id?: string
+          otp_preference?: boolean | null
+          registration_number?: string | null
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["client_status"] | null
           updated_at?: string | null
@@ -262,52 +389,126 @@ export type Database = {
           },
         ]
       }
+      faculty_experiences: {
+        Row: {
+          created_at: string
+          duration: string | null
+          faculty_id: number | null
+          id: number
+          organization: string | null
+          posted_role: string | null
+          responsibilities: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: string | null
+          faculty_id?: number | null
+          id?: number
+          organization?: string | null
+          posted_role?: string | null
+          responsibilities?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration?: string | null
+          faculty_id?: number | null
+          id?: number
+          organization?: string | null
+          posted_role?: string | null
+          responsibilities?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_experiences_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "academy_faculties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       individual_clients: {
         Row: {
           care_duration: string
           client_id: string
-          complete_address: string
+          complete_address: string | null
+          patient_address: string | null
           patient_age: number | null
+          patient_city: string | null
+          patient_district: string | null
           patient_gender: Database["public"]["Enums"]["gender_type"] | null
           patient_name: string
           patient_phone: string | null
+          patient_pincode: string | null
+          patient_profile_pic: string | null
           preferred_caregiver_gender: string | null
           relation_to_patient: Database["public"]["Enums"]["relation_type"]
+          requestor_address: string | null
+          requestor_city: string | null
+          requestor_district: string | null
           requestor_email: string
+          requestor_emergency_phone: string | null
+          requestor_job_details: string | null
           requestor_name: string
           requestor_phone: string
+          requestor_pincode: string | null
+          requestor_profile_pic: string | null
           service_required: string
           start_date: string
         }
         Insert: {
           care_duration: string
           client_id: string
-          complete_address: string
+          complete_address?: string | null
+          patient_address?: string | null
           patient_age?: number | null
+          patient_city?: string | null
+          patient_district?: string | null
           patient_gender?: Database["public"]["Enums"]["gender_type"] | null
           patient_name: string
           patient_phone?: string | null
+          patient_pincode?: string | null
+          patient_profile_pic?: string | null
           preferred_caregiver_gender?: string | null
           relation_to_patient: Database["public"]["Enums"]["relation_type"]
+          requestor_address?: string | null
+          requestor_city?: string | null
+          requestor_district?: string | null
           requestor_email: string
+          requestor_emergency_phone?: string | null
+          requestor_job_details?: string | null
           requestor_name: string
           requestor_phone: string
+          requestor_pincode?: string | null
+          requestor_profile_pic?: string | null
           service_required: string
           start_date: string
         }
         Update: {
           care_duration?: string
           client_id?: string
-          complete_address?: string
+          complete_address?: string | null
+          patient_address?: string | null
           patient_age?: number | null
+          patient_city?: string | null
+          patient_district?: string | null
           patient_gender?: Database["public"]["Enums"]["gender_type"] | null
           patient_name?: string
           patient_phone?: string | null
+          patient_pincode?: string | null
+          patient_profile_pic?: string | null
           preferred_caregiver_gender?: string | null
           relation_to_patient?: Database["public"]["Enums"]["relation_type"]
+          requestor_address?: string | null
+          requestor_city?: string | null
+          requestor_district?: string | null
           requestor_email?: string
+          requestor_emergency_phone?: string | null
+          requestor_job_details?: string | null
           requestor_name?: string
           requestor_phone?: string
+          requestor_pincode?: string | null
+          requestor_profile_pic?: string | null
           service_required?: string
           start_date?: string
         }
@@ -590,7 +791,11 @@ export type Database = {
           contact_person_role: string | null
           contact_phone: string
           organization_address: string
+          organization_city: string | null
+          organization_district: string | null
           organization_name: string
+          organization_pincode: string | null
+          organization_state: string | null
           organization_type: string | null
           start_date: string | null
         }
@@ -601,7 +806,11 @@ export type Database = {
           contact_person_role?: string | null
           contact_phone: string
           organization_address: string
+          organization_city?: string | null
+          organization_district?: string | null
           organization_name: string
+          organization_pincode?: string | null
+          organization_state?: string | null
           organization_type?: string | null
           start_date?: string | null
         }
@@ -612,7 +821,11 @@ export type Database = {
           contact_person_role?: string | null
           contact_phone?: string
           organization_address?: string
+          organization_city?: string | null
+          organization_district?: string | null
           organization_name?: string
+          organization_pincode?: string | null
+          organization_state?: string | null
           organization_type?: string | null
           start_date?: string | null
         }
@@ -623,6 +836,45 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "clients"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      otp: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: number
+          nurse_id: number
+          otp: number
+        }
+        Insert: {
+          client_id?: string
+          created_at?: string
+          id?: number
+          nurse_id: number
+          otp: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: number
+          nurse_id?: number
+          otp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "otp_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "otp_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "nurses"
+            referencedColumns: ["nurse_id"]
           },
         ]
       }
@@ -641,6 +893,7 @@ export type Database = {
           emotional_state: string | null
           environment: Json | null
           equipment: Json | null
+          family_members: Json | null
           feeding_method: string | null
           final_diagnosis: string | null
           foods_to_avoid: string | null
@@ -678,6 +931,7 @@ export type Database = {
           emotional_state?: string | null
           environment?: Json | null
           equipment?: Json | null
+          family_members?: Json | null
           feeding_method?: string | null
           final_diagnosis?: string | null
           foods_to_avoid?: string | null
@@ -715,6 +969,7 @@ export type Database = {
           emotional_state?: string | null
           environment?: Json | null
           equipment?: Json | null
+          family_members?: Json | null
           feeding_method?: string | null
           final_diagnosis?: string | null
           foods_to_avoid?: string | null
@@ -747,6 +1002,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registration_counters: {
+        Row: {
+          category: string
+          counter: number | null
+          type: string
+          year: string
+        }
+        Insert: {
+          category: string
+          counter?: number | null
+          type: string
+          year: string
+        }
+        Update: {
+          category?: string
+          counter?: number | null
+          type?: string
+          year?: string
+        }
+        Relationships: []
       }
       staff_requirements: {
         Row: {
@@ -893,6 +1169,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "student_guardian_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_leave_request: {
+        Row: {
+          created_at: string
+          days: number | null
+          end_date: string | null
+          id: number
+          leave_mode: string | null
+          leave_type: string | null
+          reason: string | null
+          rejection_reason: string | null
+          start_date: string | null
+          status: string | null
+          student_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          days?: number | null
+          end_date?: string | null
+          id?: number
+          leave_mode?: string | null
+          leave_type?: string | null
+          reason?: string | null
+          rejection_reason?: string | null
+          start_date?: string | null
+          status?: string | null
+          student_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          days?: number | null
+          end_date?: string | null
+          id?: number
+          leave_mode?: string | null
+          leave_type?: string | null
+          reason?: string | null
+          rejection_reason?: string | null
+          start_date?: string | null
+          status?: string | null
+          student_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_leave_request_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
@@ -1136,11 +1462,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_registration_counter: {
+        Args: { p_category: string; p_type: string; p_year: string }
+        Returns: number
+      }
     }
     Enums: {
       assigned_type: "individual" | "organization"
-      client_category: "DearCare" | "TataLife"
+      client_category: "DearCare LLP" | "Tata HomeNursing"
       client_status:
         | "pending"
         | "under_review"
@@ -1167,6 +1496,8 @@ export type Database = {
         | "parent"
         | "sibling"
         | "other"
+        | "son_in_law"
+        | "daughter_in_law"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1283,7 +1614,7 @@ export const Constants = {
   public: {
     Enums: {
       assigned_type: ["individual", "organization"],
-      client_category: ["DearCare", "TataLife"],
+      client_category: ["DearCare LLP", "Tata HomeNursing"],
       client_status: [
         "pending",
         "under_review",
@@ -1305,7 +1636,16 @@ export const Constants = {
         "unpaid",
       ],
       nurse_status: ["unassigned", "assigned", "leave"],
-      relation_type: ["self", "spouse", "child", "parent", "sibling", "other"],
+      relation_type: [
+        "self",
+        "spouse",
+        "child",
+        "parent",
+        "sibling",
+        "other",
+        "son_in_law",
+        "daughter_in_law",
+      ],
     },
   },
 } as const

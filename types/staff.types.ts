@@ -82,6 +82,8 @@ export interface NurseFormData {
   marital_status: string;
   religion: string;
   mother_tongue: string;
+  nurse_reg_no: string;
+  admitted_type: 'Tata_Homenursing' | 'Dearcare_Llp';
 }
 
 
