@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Loader from '@/components/loader';
+import Loader from '@/components/Loader';
 import { getClientDetails, getPatientAssessment, updateClientCategory, getClientStatus, deleteClient } from '@/app/actions/client-actions';
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
