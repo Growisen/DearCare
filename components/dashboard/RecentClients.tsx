@@ -75,7 +75,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
   }
 
   return (
-    <Card className="p-6 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl">
+    <Card className="p-6 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl hover:shadow-md transition-all duration-300">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">

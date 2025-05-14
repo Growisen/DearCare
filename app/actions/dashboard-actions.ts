@@ -35,6 +35,13 @@ export interface DashboardData {
   };
   todos: Todo[];
   recentClients: Client[];
+  attendance: {
+    present: number;
+    absent: number;
+    onLeave: number;
+    total: number;
+    presentPercentage: number;
+  };
 }
 
 export async function fetchDashboardData(): Promise<{
@@ -51,13 +58,19 @@ export async function fetchDashboardData(): Promise<{
       throw new Error("User not authenticated");
     }
 
+    const today = new Date().toISOString().split('T')[0];
+
     const [
       nursesResult, 
       assignmentsResult, 
       requestsResult, 
       clientsResult,
       todosResult,
-      recentClientsResult
+      recentClientsResult,
+      totalStaffResult,
+      presentStaffResult,
+      onLeaveStaffResult
+
     ] = await Promise.all([
 
       supabase.from('nurses').select('*', { count: 'exact', head: true }).eq('status', 'unassigned'),
@@ -95,8 +108,24 @@ export async function fetchDashboardData(): Promise<{
         `)
         .eq('status', 'pending')
         .limit(5)
-        .order('created_at', { ascending: false })
-    ]);
+        .order('created_at', { ascending: false }),
+
+        supabase.from('nurses')
+          .select('nurse_id', { count: 'exact', head: true }),
+          
+        supabase.from('attendence_individual')
+            .select('assigned_id', { count: 'exact' })
+            .eq('date', today)
+            .not('start_time', 'is', null),
+          
+        supabase.from('nurse_leave_requests')
+            .select('nurse_id', { count: 'exact' })
+            .eq('status', 'approved')
+            .lte('start_date', today)
+            .gte('end_date', today)
+        ]);
+  
+
     
     if (nursesResult.error) throw new Error(`Error fetching nurses: ${nursesResult.error.message}`);
     if (assignmentsResult.error) throw new Error(`Error fetching assignments: ${assignmentsResult.error.message}`);
@@ -104,7 +133,9 @@ export async function fetchDashboardData(): Promise<{
     if (clientsResult.error) throw new Error(`Error fetching clients: ${clientsResult.error.message}`);
     if (todosResult.error) throw new Error(`Error fetching todos: ${todosResult.error.message}`);
     if (recentClientsResult.error) throw new Error(`Error fetching recent clients: ${recentClientsResult.error.message}`);
-    
+    if (totalStaffResult.error) throw new Error(`Error fetching total staff: ${totalStaffResult.error.message}`);
+    if (presentStaffResult.error) throw new Error(`Error fetching present staff: ${presentStaffResult.error.message}`);
+    if (onLeaveStaffResult.error) throw new Error(`Error fetching staff on leave: ${onLeaveStaffResult.error.message}`);
 
     const recentClients = recentClientsResult.data.map(record => {
       const isIndividual = record.client_type === 'individual';
@@ -129,6 +160,12 @@ export async function fetchDashboardData(): Promise<{
         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
       };
     });
+
+    const totalStaff = totalStaffResult.count || 0;
+    const presentStaff = presentStaffResult.count || 0;
+    const onLeaveStaff = onLeaveStaffResult.count || 0;
+    const absentStaff = 0;
+    const presentPercentage = totalStaff > 0 ? Math.round((presentStaff / totalStaff) * 100) : 0;
     
     return {
       success: true,
@@ -156,7 +193,14 @@ export async function fetchDashboardData(): Promise<{
           },
         },
         todos: todosResult.data as Todo[] || [],
-        recentClients: recentClients
+        recentClients: recentClients,
+        attendance: {
+          present: presentStaff,
+          absent: absentStaff,
+          onLeave: onLeaveStaff,
+          total: totalStaff,
+          presentPercentage: presentPercentage
+        }
       }
     };
     

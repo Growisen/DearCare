@@ -5,7 +5,7 @@ import { useExportClients } from "@/hooks/useExportClients"
 import { Client } from "@/types/client.types"
 
 import { ClientHeader } from "@/components/client/clients/ClientHeader"
-import { ClientFilters } from "@/components/client/clients/ClientFilters" 
+// import { ClientFilters } from "@/components/client/clients/ClientFilters" 
 import { ClientTable } from "@/components/client/clients/ClientTable"
 import { ClientDetailsOverlay } from "@/components/client-details-overlay"
 import { AddClientOverlay } from "@/components/add-client-overlay"
@@ -71,16 +71,21 @@ export default function ClientsPage() {
           onExport={handleExport}
           isExporting={isExporting}
           selectedStatus={selectedStatus}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          handleStatusChange={handleStatusChange}
+          handleSearch={handleSearch}
+          handleResetFilters={handleResetFilters}
         />
 
-        <ClientFilters
+        {/* <ClientFilters
           searchInput={searchInput}
           setSearchInput={setSearchInput}
           selectedStatus={selectedStatus}
           handleStatusChange={handleStatusChange}
           handleSearch={handleSearch}
           handleResetFilters={handleResetFilters}
-        />
+        /> */}
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
           {isLoading ? (

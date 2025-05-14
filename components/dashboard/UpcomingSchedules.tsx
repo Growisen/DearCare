@@ -203,7 +203,7 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   };
 
   return (
-    <Card className="p-4 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl h-[400px]">
+    <Card className="p-4 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl h-[400px] hover:shadow-md transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-emerald-100">

@@ -10,7 +10,7 @@ const activities = [
 
 export default function RecentActivities() {
   return (
-    <Card className="p-2 sm:p-4 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl min-h-[250px] h-auto col-span-full sm:col-span-2">
+    <Card className="p-2 sm:p-4 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl min-h-[250px] h-auto col-span-full sm:col-span-2 hover:shadow-md transition-all duration-300">
       <div className="flex items-center justify-between mb-2 sm:mb-4">
         <div className="flex items-center gap-1 sm:gap-2">
           <div className="p-1 sm:p-1.5 rounded-lg bg-[#004d6d]/10">

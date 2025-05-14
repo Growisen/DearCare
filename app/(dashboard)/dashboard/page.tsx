@@ -74,7 +74,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 min-h-screen p-4 custom-scrollbar">
+    <div className="flex flex-col gap-5 min-h-screen p-4 custom-scrollbar">
       {/* Main Content Section */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -82,7 +82,10 @@ export default function DashboardPage() {
           <Stats statsData={dashboardData?.stats} />
 
           {/* Staff Attendance */}
-          <StaffAttendance currentTime={currentTime} />
+          <StaffAttendance 
+            currentTime={currentTime} 
+            attendanceData={dashboardData?.attendance} 
+          />
 
           {/* Recent Activities */}
           <RecentActivities />
