@@ -68,13 +68,12 @@ export function useClientData() {
         const result = await getClients(selectedStatus, searchQuery, currentPage, pageSize)
         
         if (result.success && result.clients) {
-          // Add type assertion to make sure the status is of the correct type
           const typedClients = result.clients.map(client => ({
             ...client,
             service: client.service || "Not specified",
             email: client.email || "No email provided",
             phone: client.phone || "No phone provided",
-            location: client.location || "No location specified",
+            // location: client.location || "No location specified",
             status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
           }))
           setClients(typedClients)

@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react"
 import { Card } from "../ui/card"
 import { Calendar, CheckCircle, Circle, Clock, MapPin, Plus, X, Loader2 } from "lucide-react"
-import { fetchTodos, addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
+import { addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
 import toast from 'react-hot-toast';
 
+interface UpcomingSchedulesProps {
+  todosData?: Todo[];
+}
 
-export default function TodoScheduler() {
+export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -30,25 +33,11 @@ export default function TodoScheduler() {
 
   // Fetch todos on component mount
   useEffect(() => {
-    const loadTodos = async () => {
-      setIsLoading(true);
-      try {
-        const result = await fetchTodos();
-        if (result.success) {
-          setTodos(result.data);
-        } else {
-          toast.error(result.error || "Failed to load tasks");
-        }
-      } catch (error) {
-        console.error("Error loading todos:", error);
-        toast.error("Failed to load your tasks. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadTodos();
-  }, []);
+    if (todosData) {
+      setTodos(todosData);
+      setIsLoading(false);
+    }
+  }, [todosData]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;

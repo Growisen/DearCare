@@ -53,14 +53,10 @@ export default function ClientsPage() {
   const handleResetFilters = () => {
     console.log("handleResetFilters called");
     try {
-      // Reset search input
       setSearchInput("");
       
-      // Call setSearchQuery directly with empty string instead of using handleSearch
-      // which would use the not-yet-updated searchInput
       setSearchQuery(""); 
       
-      // Use a single refresh call after setting all filters
       refreshData();
     } catch (error) {
       console.error("Error in handleResetFilters:", error);
