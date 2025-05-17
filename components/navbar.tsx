@@ -2,6 +2,7 @@
 import { Bell, Search, User, Menu, BarChart2, HelpCircle } from "lucide-react"
 import Image from "next/image"
 import { Input } from "./ui/input"
+import Link from "next/link"
 
 export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
@@ -44,15 +45,17 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
           </button>
           <div className="h-6 w-px bg-gray-200 mx-1"></div>
-          <button className="flex items-center gap-3 px-2 py-1.5 hover:bg-gray-50 rounded-lg transition-colors group">
-            <div className="w-8 h-8 rounded-full ring-2 ring-gray-100 bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white">
-              <User className="w-4 h-4" />
-            </div>
-            <div className="hidden md:block text-left">
-              <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Admin User</p>
-              <p className="text-xs text-gray-500">Super Admin</p>
-            </div>
-          </button>
+          <Link href="/profile">
+            <button className="flex items-center gap-3 px-2 py-1.5 hover:bg-gray-50 rounded-lg transition-colors group">
+              <div className="w-8 h-8 rounded-full ring-2 ring-gray-100 bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Admin User</p>
+                <p className="text-xs text-gray-500">Super Admin</p>
+              </div>
+            </button>
+          </Link>
         </div>
       </div>
     </div>
