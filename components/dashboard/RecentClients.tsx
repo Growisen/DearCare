@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/card"
 import { Users, Search, Download, Mail, Phone, Eye, Clock } from "lucide-react"
 import { Client } from "../../types/client.types"
 import Link from "next/link"
+import { serviceOptions } from "@/utils/constants"
+import { getServiceLabel } from "@/utils/formatters"
 
 
 interface RecentClientsProps {
@@ -148,7 +150,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-600">{client.requestDate}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{client.service}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600"> {getServiceLabel(serviceOptions, client.service || "")}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyles(client.status)}`}>
                           <StatusIcon className="w-3.5 h-3.5" />

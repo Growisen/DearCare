@@ -5,7 +5,6 @@ import { useExportClients } from "@/hooks/useExportClients"
 import { Client } from "@/types/client.types"
 
 import { ClientHeader } from "@/components/client/clients/ClientHeader"
-// import { ClientFilters } from "@/components/client/clients/ClientFilters" 
 import { ClientTable } from "@/components/client/clients/ClientTable"
 import { ClientDetailsOverlay } from "@/components/client-details-overlay"
 import { AddClientOverlay } from "@/components/add-client-overlay"

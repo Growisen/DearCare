@@ -16,8 +16,8 @@ export interface Todo {
 
 async function getAuthenticatedClient() {
   const supabase = await createSupabaseServerClient();
-  const { data: session } = await supabase.auth.getSession();
-  const userId = session?.session?.user?.id;
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
   
   if (!userId) {
     throw new Error("User not authenticated");
@@ -50,42 +50,31 @@ export async function fetchDashboardData(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: session } = await supabase.auth.getSession();
-    const userId = session?.session?.user?.id;
+    const { supabase, userId } = await getAuthenticatedClient();
     
-    if (!userId) {
-      throw new Error("User not authenticated");
-    }
-
     const today = new Date().toISOString().split('T')[0];
 
+    // Use more specific selects to only get what we need
     const [
-      nursesResult, 
-      assignmentsResult, 
-      requestsResult, 
-      clientsResult,
+      statsResults,
       todosResult,
       recentClientsResult,
-      totalStaffResult,
-      presentStaffResult,
-      onLeaveStaffResult
-
+      attendanceResult
     ] = await Promise.all([
-
-      supabase.from('nurses').select('*', { count: 'exact', head: true }).eq('status', 'unassigned'),
-      supabase.from('nurse_client').select('*', { count: 'exact', head: true }),
-      supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
-      
+      // Combine stats queries into one batch
+      Promise.all([
+        supabase.from('nurses').select('count').eq('status', 'unassigned').single(),
+        supabase.from('nurse_client').select('count').single(),
+        supabase.from('clients').select('count').eq('status', 'pending').single(),
+        supabase.from('clients').select('count').eq('status', 'approved').single()
+      ]),
 
       supabase
         .from('admin_dashboard_todos')
-        .select('*')
+        .select('id, text, time, date, location, urgent, completed')
         .eq('user_id', userId)
         .order('created_at', { ascending: false }),
         
-
       supabase
         .from('clients')
         .select(`
@@ -110,32 +99,21 @@ export async function fetchDashboardData(): Promise<{
         .limit(5)
         .order('created_at', { ascending: false }),
 
-        supabase.from('nurses')
-          .select('nurse_id', { count: 'exact', head: true }),
-          
-        supabase.from('attendence_individual')
-            .select('assigned_id', { count: 'exact' })
-            .eq('date', today)
-            .not('start_time', 'is', null),
-          
-        supabase.from('nurse_leave_requests')
-            .select('nurse_id', { count: 'exact' })
-            .eq('status', 'approved')
-            .lte('start_date', today)
-            .gte('end_date', today)
-        ]);
-  
+      // Use our new RPC function
+      supabase.rpc('get_attendance_data', { curr_date: today })
+    ]);
 
+    // Destructure stats results
+    const [nursesResult, assignmentsResult, requestsResult, clientsResult] = statsResults;
     
+    // Check for errors in the responses
     if (nursesResult.error) throw new Error(`Error fetching nurses: ${nursesResult.error.message}`);
     if (assignmentsResult.error) throw new Error(`Error fetching assignments: ${assignmentsResult.error.message}`);
     if (requestsResult.error) throw new Error(`Error fetching requests: ${requestsResult.error.message}`);
     if (clientsResult.error) throw new Error(`Error fetching clients: ${clientsResult.error.message}`);
     if (todosResult.error) throw new Error(`Error fetching todos: ${todosResult.error.message}`);
     if (recentClientsResult.error) throw new Error(`Error fetching recent clients: ${recentClientsResult.error.message}`);
-    if (totalStaffResult.error) throw new Error(`Error fetching total staff: ${totalStaffResult.error.message}`);
-    if (presentStaffResult.error) throw new Error(`Error fetching present staff: ${presentStaffResult.error.message}`);
-    if (onLeaveStaffResult.error) throw new Error(`Error fetching staff on leave: ${onLeaveStaffResult.error.message}`);
+    if (attendanceResult.error) throw new Error(`Error fetching attendance: ${attendanceResult.error.message}`);
 
     const recentClients = recentClientsResult.data.map(record => {
       const isIndividual = record.client_type === 'individual';
@@ -161,9 +139,11 @@ export async function fetchDashboardData(): Promise<{
       };
     });
 
-    const totalStaff = totalStaffResult.count || 0;
-    const presentStaff = presentStaffResult.count || 0;
-    const onLeaveStaff = onLeaveStaffResult.count || 0;
+    // Process attendance data from our RPC
+    const attendanceData = attendanceResult.data || { total: 0, present: 0, onLeave: 0 };
+    const totalStaff = attendanceData.total || 0;
+    const presentStaff = attendanceData.present || 0;
+    const onLeaveStaff = attendanceData.onLeave || 0;
     const absentStaff = 0;
     const presentPercentage = totalStaff > 0 ? Math.round((presentStaff / totalStaff) * 100) : 0;
     
@@ -172,22 +152,22 @@ export async function fetchDashboardData(): Promise<{
       data: {
         stats: {
           activeNurses: { 
-            count: nursesResult.count || 0, 
+            count: parseInt(String(nursesResult.data?.count)) || 0, 
             trend: '+5%', 
             trendUp: true 
           },
           currentAssignments: { 
-            count: assignmentsResult.count || 0, 
+            count: parseInt(String(assignmentsResult.data?.count)) || 0, 
             trend: '+2%', 
             trendUp: true 
           },
           openRequests: { 
-            count: requestsResult.count || 0, 
+            count: parseInt(String(requestsResult.data?.count)) || 0, 
             trend: '-3%', 
             trendUp: false 
           },
           approvedClients: { 
-            count: clientsResult.count || 0, 
+            count: parseInt(String(clientsResult.data?.count)) || 0, 
             trend: '+10%', 
             trendUp: true 
           },

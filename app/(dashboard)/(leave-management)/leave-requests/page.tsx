@@ -9,7 +9,6 @@ import { LeaveRequest } from '@/types/leave.types'
 
 import { LeaveRequestsHeader } from '@/components/leaveManagement/LeaveRequestsHeader'
 import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTable'
-import { LeaveRequestsCards } from '@/components/leaveManagement/LeaveRequestsCards'
 import { PaginationControls } from '@/components/leaveManagement/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
 
@@ -40,6 +39,7 @@ export default function LeaveRequestsPage() {
   // Local state
   const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [confirmationModal, setConfirmationModal] = useState<{
     isOpen: boolean;
     requestId: string | null;
@@ -50,7 +50,8 @@ export default function LeaveRequestsPage() {
     action: null,
   })
   
-  const statuses = ['All', 'Approved', 'Pending', 'Rejected']
+  // Filter statuses without 'All' since it's handled separately in the header
+  const statuses = ['Pending', 'Approved', 'Rejected']
   
   // Event handlers
   const handleViewLeaveRequest = (request: LeaveRequest) => {
@@ -58,22 +59,7 @@ export default function LeaveRequestsPage() {
     setIsModalOpen(true)
   }
 
-  const confirmApproval = (id: string) => {
-    setConfirmationModal({
-      isOpen: true,
-      requestId: id,
-      action: 'approve'
-    })
-  }
-  
-  const confirmRejection = (id: string) => {
-    setSelectedLeaveRequest(leaveRequests.find(req => req.id === id) || null)
-    setIsModalOpen(true)
-  }
-
   const handleApproveLeaveRequest = async (id: string) => {
-    setConfirmationModal({isOpen: false, requestId: null, action: null})
-    
     setProcessingRequestIds(prev => new Set(prev).add(id))
     
     try {
@@ -138,50 +124,65 @@ export default function LeaveRequestsPage() {
     setCurrentPage(1)
   }
 
+  const handleSearch = () => {
+    setCurrentPage(1)
+    fetchLeaveRequests()
+  }
+
+  const handleResetFilters = () => {
+    clearAllFilters()
+    fetchLeaveRequests()
+  }
+
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulated export function
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Leave requests exported successfully')
+    } catch {
+      toast.error('Failed to export leave requests')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   return (
     <div className="space-y-8 pb-10">
-    
       <LeaveRequestsHeader 
-        title="Leave Requests"
+        onExport={handleExport}
+        isExporting={isExporting}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
         dateRange={dateRange}
         setDateRange={setDateRange}
-        clearAllFilters={clearAllFilters}
+        handleSearch={handleSearch}
+        handleResetFilters={handleResetFilters}
         statuses={statuses}
       />
 
-      <div className="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
         <LeaveRequestsTable
           leaveRequests={leaveRequests}
           isLoading={isLoading}
           processingRequestIds={processingRequestIds}
           onView={handleViewLeaveRequest}
-          onApprove={confirmApproval}
-          onReject={confirmRejection}
-        />
-        
-        <LeaveRequestsCards
-          leaveRequests={leaveRequests}
-          isLoading={isLoading}
-          processingRequestIds={processingRequestIds}
-          onView={handleViewLeaveRequest}
-          onApprove={confirmApproval}
-          onReject={confirmRejection}
         />
         
         {!isLoading && leaveRequests.length > 0 && (
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            pageSize={pageSize}
-            itemsLength={leaveRequests.length}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
+          <div className="p-4 bg-gray-50 border-t border-gray-200">
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              itemsLength={leaveRequests.length}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
         )}
       </div>
 
