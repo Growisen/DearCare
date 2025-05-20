@@ -16,7 +16,7 @@ import ResolutionDetails from "@/components/complaints/ComplaintView/ResolutionD
 
 // Import types and mock data
 import { Complaint } from "@/types/complaint.types"
-import { fetchComplaintById } from "@/app/actions/complaints-actions"
+import { fetchComplaintById, getProfileUrl } from "@/app/actions/complaints-actions"
 
 export default function ComplaintDetailPage() {
   const params = useParams();
@@ -25,6 +25,7 @@ export default function ComplaintDetailPage() {
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileUrl, setProfileUrl] = useState("");
   
   useEffect(() => {
     async function fetchComplaintDetail() {
@@ -38,6 +39,12 @@ export default function ComplaintDetailPage() {
         }
         
         setComplaint(response.data);
+        
+        // Fetch profile URL if reportedId exists
+        if (response.data.reportedId) {
+          const result = await getProfileUrl(response.data.reportedId);
+          setProfileUrl(result.url || "");
+        }
       } catch (error) {
         setError("Failed to load complaint details. Please try again.");
         console.error("Error fetching complaint:", error);
@@ -83,7 +90,11 @@ export default function ComplaintDetailPage() {
         <div className="col-span-2 space-y-6">
           <SubmitterInfo submitter={complaint.submitter} />
           
-          <ComplaintDescription description={complaint.description} />
+          <ComplaintDescription 
+            description={complaint.description} 
+            reportedId={complaint.reportedId}
+            profileUrl={profileUrl}
+          />
           
           {complaint.supportingMedia && complaint.supportingMedia.length > 0 && (
             <SupportingMediaContainer media={complaint.supportingMedia} />

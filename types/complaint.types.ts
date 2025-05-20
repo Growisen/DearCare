@@ -30,6 +30,7 @@ export interface Complaint {
   submitter?: Submitter | null;
   supportingMedia?: SupportingMedia[];
   statusHistory?: StatusHistoryEntry[];
+  reportedId?: string | number;
 }
 
 // export type Complaint = {

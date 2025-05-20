@@ -333,6 +333,7 @@ export async function fetchComplaintById(complaintId: string): Promise<{
       supportingMedia: supportingMedia,
       resolution: resolutionDetails,
       statusHistory,
+      reportedId: complaint.reported_id
     };
 
     
@@ -442,6 +443,76 @@ export async function updateComplaintStatus(
     return { success: true };
   } catch (error) {
     console.error('Error updating complaint status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+
+export async function getProfileUrl(
+  id: string | number,
+  entityType?: 'client' | 'nurse' | 'organization' | string
+): Promise<{
+  success: boolean;
+  url?: string;
+  error?: string;
+}> {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    // If entityType is not provided, determine it from available data
+    if (!entityType) {
+      // First check if it's a nurse
+      const { data: nurse, error: nurseError } = await supabase
+        .from('nurses')
+        .select('nurse_id')
+        .eq('nurse_id', id)
+        .maybeSingle();
+
+      if (!nurseError && nurse) {
+        entityType = 'nurse';
+      } else {
+        // Check if it's a client
+        const { data: client, error: clientError } = await supabase
+          .from('clients')
+          .select('id, client_type')
+          .eq('id', id)
+          .maybeSingle();
+
+        if (!clientError && client) {
+          entityType = client.client_type === 'organization' ? 'organization' : 'client';
+        }
+      }
+    }
+
+    // Generate URL based on entity type
+    let url = '';
+    switch (entityType) {
+      case 'nurse':
+        url = `/nurses/${id}/profile`;
+        break;
+      case 'organization':
+        url = `/client-profile/organization-client/${id}`;
+        break;
+      case 'client':
+      case 'individual':
+        url = `/client-profile/${id}`;
+        break;
+      default:
+        return {
+          success: false,
+          error: 'Unable to determine profile type'
+        };
+    }
+
+    return {
+      success: true,
+      url
+    };
+  } catch (error) {
+    console.error('Error generating profile URL:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
