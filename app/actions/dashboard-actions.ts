@@ -42,6 +42,12 @@ export interface DashboardData {
     total: number;
     presentPercentage: number;
   };
+  complaints: {
+    open: number;
+    underReview: number;
+    resolved: number;
+    total: number;
+  };
 }
 
 export async function fetchDashboardData(): Promise<{
@@ -54,21 +60,21 @@ export async function fetchDashboardData(): Promise<{
     
     const today = new Date().toISOString().split('T')[0];
 
-    // Use more specific selects to only get what we need
     const [
       statsResults,
       todosResult,
       recentClientsResult,
-      attendanceResult
+      attendanceResult,
+      complaintsResults
     ] = await Promise.all([
-      // Combine stats queries into one batch
+
       Promise.all([
         supabase.from('nurses').select('count').eq('status', 'unassigned').single(),
         supabase.from('nurse_client').select('count').single(),
         supabase.from('clients').select('count').eq('status', 'pending').single(),
         supabase.from('clients').select('count').eq('status', 'approved').single()
       ]),
-
+    
       supabase
         .from('admin_dashboard_todos')
         .select('id, text, time, date, location, urgent, completed')
@@ -98,15 +104,20 @@ export async function fetchDashboardData(): Promise<{
         .eq('status', 'pending')
         .limit(5)
         .order('created_at', { ascending: false }),
-
-      // Use our new RPC function
-      supabase.rpc('get_attendance_data', { curr_date: today })
+    
+      supabase.rpc('get_attendance_data', { curr_date: today }),
+      
+      Promise.all([
+        supabase.from('dearcare_complaints').select('count').single(),
+        supabase.from('dearcare_complaints').select('count').eq('status', 'open').single(),
+        supabase.from('dearcare_complaints').select('count').eq('status', 'under_review').single(),
+        supabase.from('dearcare_complaints').select('count').eq('status', 'resolved').single()
+      ])
     ]);
 
-    // Destructure stats results
     const [nursesResult, assignmentsResult, requestsResult, clientsResult] = statsResults;
-    
-    // Check for errors in the responses
+    const [totalComplaintsResult, openComplaintsResult, underReviewComplaintsResult, resolvedComplaintsResult] = complaintsResults;
+
     if (nursesResult.error) throw new Error(`Error fetching nurses: ${nursesResult.error.message}`);
     if (assignmentsResult.error) throw new Error(`Error fetching assignments: ${assignmentsResult.error.message}`);
     if (requestsResult.error) throw new Error(`Error fetching requests: ${requestsResult.error.message}`);
@@ -114,6 +125,11 @@ export async function fetchDashboardData(): Promise<{
     if (todosResult.error) throw new Error(`Error fetching todos: ${todosResult.error.message}`);
     if (recentClientsResult.error) throw new Error(`Error fetching recent clients: ${recentClientsResult.error.message}`);
     if (attendanceResult.error) throw new Error(`Error fetching attendance: ${attendanceResult.error.message}`);
+    
+    if (totalComplaintsResult.error) throw new Error(`Error fetching total complaints: ${totalComplaintsResult.error.message}`);
+    if (openComplaintsResult.error) throw new Error(`Error fetching pending complaints: ${openComplaintsResult.error.message}`);
+    if (underReviewComplaintsResult.error) throw new Error(`Error fetching under review complaints: ${underReviewComplaintsResult.error.message}`);
+    if (resolvedComplaintsResult.error) throw new Error(`Error fetching resolved complaints: ${resolvedComplaintsResult.error.message}`);
 
     const recentClients = recentClientsResult.data.map(record => {
       const isIndividual = record.client_type === 'individual';
@@ -146,7 +162,12 @@ export async function fetchDashboardData(): Promise<{
     const onLeaveStaff = attendanceData.onLeave || 0;
     const absentStaff = 0;
     const presentPercentage = totalStaff > 0 ? Math.round((presentStaff / totalStaff) * 100) : 0;
-    
+
+    const totalComplaints = parseInt(String(totalComplaintsResult.data?.count)) || 0;
+    const openComplaints = parseInt(String(openComplaintsResult.data?.count)) || 0;
+    const underReviewComplaints = parseInt(String(underReviewComplaintsResult.data?.count)) || 0;
+    const resolvedComplaints = parseInt(String(resolvedComplaintsResult.data?.count)) || 0;
+        
     return {
       success: true,
       data: {
@@ -180,6 +201,12 @@ export async function fetchDashboardData(): Promise<{
           onLeave: onLeaveStaff,
           total: totalStaff,
           presentPercentage: presentPercentage
+        },
+        complaints: {
+          open: openComplaints,
+          underReview: underReviewComplaints,
+          resolved: resolvedComplaints,
+          total: totalComplaints
         }
       }
     };

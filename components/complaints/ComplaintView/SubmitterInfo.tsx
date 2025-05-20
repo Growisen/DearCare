@@ -1,7 +1,7 @@
 import { Submitter } from "@/types/complaint.types";
 
 interface SubmitterInfoProps {
-  submitter: Submitter | undefined;
+  submitter: Submitter | undefined | null;
 }
 
 export default function SubmitterInfo({ submitter }: SubmitterInfoProps) {

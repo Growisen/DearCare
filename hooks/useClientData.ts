@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
 import { getClients } from "@/app/actions/client-actions"
-import { Client } from '@/types/client.types'
+import { Client, ClientFilters, ClientStatus } from '@/types/client.types'
 
 export function useClientData() {
   const [searchInput, setSearchInput] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState<"pending" | "under_review" | "approved" | "rejected" | "assigned" | "all">("pending")
+  const [selectedStatus, setSelectedStatus] = useState<ClientFilters>("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -23,7 +23,7 @@ export function useClientData() {
     setSearchQuery(searchInput)
   }
 
-  const handleStatusChange = (status: "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all") => {
+  const handleStatusChange = (status: ClientFilters) => {
     setCurrentPage(1) 
     setSelectedStatus(status);
     localStorage.setItem('clientsPageStatus', status);
@@ -51,7 +51,7 @@ export function useClientData() {
   useEffect(() => {
     const saved = localStorage.getItem('clientsPageStatus');
     if (saved && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(saved)) {
-      setSelectedStatus(saved as "pending" | "under_review" | "approved" | "rejected" | "assigned" | "all");
+      setSelectedStatus(saved as ClientFilters);
     }
     setIsStatusLoaded(true);
   }, []);
@@ -74,7 +74,7 @@ export function useClientData() {
             email: client.email || "No email provided",
             phone: client.phone || "No phone provided",
             // location: client.location || "No location specified",
-            status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
+            status: client.status as ClientStatus
           }))
           setClients(typedClients)
           

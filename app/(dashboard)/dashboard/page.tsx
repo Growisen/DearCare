@@ -88,7 +88,7 @@ export default function DashboardPage() {
           />
 
           {/* Recent Activities */}
-          <RecentActivities />
+          <RecentActivities complaintsData={dashboardData?.complaints} />
         </div>
 
         {/* Upcoming Schedules Sidebar */}

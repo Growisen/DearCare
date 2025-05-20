@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Complaint, ComplaintStatus } from "@/types/complaint.types";
 import { statusOptions } from "@/types/complaint.types";
+import { updateComplaintStatus } from "@/app/actions/complaints-actions";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface StatusManagementProps {
   complaint: Complaint;
@@ -8,6 +11,7 @@ interface StatusManagementProps {
 }
 
 export default function StatusManagement({ complaint, updateComplaint }: StatusManagementProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<ComplaintStatus>(complaint.status);
   const [resolution, setResolution] = useState("");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -15,34 +19,50 @@ export default function StatusManagement({ complaint, updateComplaint }: StatusM
   const handleUpdateStatus = async () => {
     if (!complaint) return;
     
-    // Require resolution when changing to resolved status
     if (status === "resolved" && complaint.status !== "resolved" && !resolution.trim()) {
-      alert("Please provide resolution details before marking as resolved.");
+      toast.error("Please provide resolution details before marking as resolved.");
       return;
     }
     
     setIsUpdatingStatus(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await updateComplaintStatus(complaint.id, status, 
+        status === "resolved" && complaint.status !== "resolved" ? resolution : undefined
+      );
       
-      // Update the local state
+      if (!result.success) {
+        throw new Error(result.error || "Failed to update status");
+      }
+      
+      const currentDate = new Date().toISOString();
+      const formattedDate = currentDate.split('T')[0];
+      
       const updatedComplaint = {
         ...complaint,
         status: status,
-        lastUpdated: new Date().toISOString().split('T')[0],
+        lastUpdated: formattedDate,
       };
       
-      // Add resolution if changing to resolved
       if (status === "resolved" && complaint.status !== "resolved") {
-        updatedComplaint.resolution = resolution;
+        updatedComplaint.resolution = {
+          ...(updatedComplaint.resolution || {}),
+          resolutionNotes: resolution,
+          resolutionDate: formattedDate,
+          resolvedBy: "current_user_id",
+        };
       }
       
       updateComplaint(updatedComplaint);
       
-      alert("Status updated successfully!");
-    } catch {
-      alert("Failed to update status. Please try again.");
+      toast.success("Status updated successfully!");
+      
+      // Refresh the page to get the latest data
+      setTimeout(() => {
+        router.refresh();
+      }, 1000); // Small delay to allow the toast to be visible
+    } catch (error) {
+      console.error("Error updating complaint status:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update status. Please try again.");
     } finally {
       setIsUpdatingStatus(false);
     }

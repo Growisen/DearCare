@@ -27,7 +27,7 @@ export default function CommentSection({ complaint, updateComplaint }: CommentSe
       // Update complaint with admin comment
       updateComplaint({
         ...complaint,
-        adminComment: adminComment,
+        comments: adminComment,
         lastUpdated: new Date().toISOString().split('T')[0],
       });
       
@@ -51,7 +51,7 @@ export default function CommentSection({ complaint, updateComplaint }: CommentSe
       // Update complaint with edited comment
       updateComplaint({
         ...complaint,
-        adminComment: editedComment,
+        comments: editedComment,
         lastUpdated: new Date().toISOString().split('T')[0],
       });
       
@@ -74,7 +74,7 @@ export default function CommentSection({ complaint, updateComplaint }: CommentSe
       // Remove the admin comment
       updateComplaint({
         ...complaint,
-        adminComment: undefined,
+        comments: undefined,
         lastUpdated: new Date().toISOString().split('T')[0],
       });
       
@@ -90,18 +90,18 @@ export default function CommentSection({ complaint, updateComplaint }: CommentSe
     <div className="border rounded-lg p-4">
       <h3 className="font-semibold text-lg mb-3 text-gray-900">Any Comment</h3>
       
-      {complaint.adminComment && !isEditingComment ? (
+      {complaint.comments && !isEditingComment ? (
         <CommentView 
-          comment={complaint.adminComment}
+          comment={complaint.comments}
           lastUpdated={complaint.lastUpdated}
           onEdit={() => {
-            setEditedComment(complaint.adminComment || "");
+            setEditedComment(complaint.comments || "");
             setIsEditingComment(true);
           }}
           onDelete={handleDeleteComment}
           isDeletingComment={isDeletingComment}
         />
-      ) : complaint.adminComment && isEditingComment ? (
+      ) : complaint.comments && isEditingComment ? (
         <CommentEdit
           editedComment={editedComment}
           setEditedComment={setEditedComment}

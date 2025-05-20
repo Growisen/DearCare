@@ -9,14 +9,14 @@ import ComplaintHeader from "@/components/complaints/ComplaintView/ComplaintHead
 import SubmitterInfo from "@/components/complaints/ComplaintView/SubmitterInfo"
 import ComplaintDescription from "@/components/complaints/ComplaintView/ComplaintDescription"
 import SupportingMediaContainer from "@/components/complaints/ComplaintView/SupportingMediaContainer"
-import CommentSection from "@/components/complaints/ComplaintView/CommentSection"
+// import CommentSection from "@/components/complaints/ComplaintView/CommentSection"
 import StatusManagement from "@/components/complaints/ComplaintView/StatusManagement"
 import ComplaintTimeline from "@/components/complaints/ComplaintView/ComplaintTimeline"
 import ResolutionDetails from "@/components/complaints/ComplaintView/ResolutionDetails"
 
 // Import types and mock data
 import { Complaint } from "@/types/complaint.types"
-import { mockComplaints } from "@/components/complaints/ComplaintView/MockData"
+import { fetchComplaintById } from "@/app/actions/complaints-actions"
 
 export default function ComplaintDetailPage() {
   const params = useParams();
@@ -30,18 +30,17 @@ export default function ComplaintDetailPage() {
     async function fetchComplaintDetail() {
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
+        const response = await fetchComplaintById(complaintId);
         
-        const foundComplaint = mockComplaints.find(c => c.id === complaintId);
-        if (!foundComplaint) {
-          setError("Complaint not found");
+        if (!response.success || !response.data) {
+          setError(response.error || "Failed to fetch complaint details");
           return;
         }
         
-        setComplaint(foundComplaint);
-      } catch {
+        setComplaint(response.data);
+      } catch (error) {
         setError("Failed to load complaint details. Please try again.");
+        console.error("Error fetching complaint:", error);
       } finally {
         setLoading(false);
       }
@@ -90,10 +89,10 @@ export default function ComplaintDetailPage() {
             <SupportingMediaContainer media={complaint.supportingMedia} />
           )}
           
-          <CommentSection 
+          {/* <CommentSection 
             complaint={complaint}
             updateComplaint={setComplaint}
-          />
+          /> */}
           
           {/* Resolution Details (if resolved) */}
           {complaint.status === "resolved" && complaint.resolution && (

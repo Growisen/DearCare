@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ClientCategory, FormData, StaffRequirement } from '@/types/client.types';
+import { ClientCategory, FormData, StaffRequirement, ClientType } from '@/types/client.types';
 import { toast } from 'react-hot-toast';
 import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
 
@@ -14,7 +14,7 @@ interface UseClientFormProps {
 
 export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProps = {}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [clientType, setClientType] = useState<'individual' | 'organization' | 'hospital' | 'carehome'>(
+  const [clientType, setClientType] = useState<ClientType>(
     initialData.clientType || 'individual'
   );
   const [isSuccess, setIsSuccess] = useState(false);
@@ -170,7 +170,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   };
 
   // Helper to determine if a field is required based on client type
-  const isRequiredField = (id: string, type: 'individual' | 'organization' | 'hospital' | 'carehome'): boolean => {
+  const isRequiredField = (id: string, type: ClientType): boolean => {
     const commonRequired = ['dutyPeriod'];
 
     if (id === 'dutyPeriodReason' && formData.dutyPeriod === 'above_3_months') {
@@ -261,7 +261,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }));
   };
 
-  const handleClientTypeChange = (type: 'individual' | 'organization' | 'hospital' | 'carehome') => {
+  const handleClientTypeChange = (type: ClientType) => {
     setClientType(type);
     setFormData(prev => ({
       ...prev,
