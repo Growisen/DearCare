@@ -3,7 +3,7 @@ import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Users, Calendar, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
+import { Users, Calendar, ClipboardList, Home, LogOut, ArrowLeftCircle, MessageSquare } from "lucide-react"
 //import { Users, Briefcase, Calendar, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
 import { useAuth } from '@/contexts/AuthContext'
@@ -59,6 +59,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
              // { icon: Briefcase, label: "Assignments", href: "/assignments" },
               { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
               { icon: ClipboardList, label: "Staff Attendance", href: "/staff-attendance" },
+              { icon: MessageSquare, label: "Complaints", href: "/complaints" },
               // { icon: MapPin, label: "Locations", href: "/locations" },
               //{ icon: Calendar, label: "Schedule", href: "/schedule" },
               //{ icon: ClipboardList, label: "Reports", href: "/reports" },

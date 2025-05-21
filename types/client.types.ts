@@ -8,6 +8,7 @@ export type Json =
 
 export type ClientCategory = 'DearCare LLP' | 'Tata HomeNursing';
 export type ClientStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned';
+export type ClientFilters = 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all';
 export type ClientType = 'individual' | 'organization' | 'hospital' | 'carehome';
 export type RelationToPatient = "" | "other" | "self" | "spouse" | "child" | "parent" | "sibling" | "son/daughter" 
                                    | "son_in_law" | "daughter_in_law";

@@ -240,12 +240,16 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
   }
 }
 
-
-// export async function getClients(status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', searchQuery?: string) {
+// export async function getClients(
+//   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
+//   searchQuery?: string,
+//   page: number = 1,
+//   pageSize: number = 10
+// ) {
 //   try {
 //     const supabase = await createSupabaseServerClient()
     
-//     // Build the query
+//     // Build the base query
 //     let query = supabase
 //       .from('clients')
 //       .select(`
@@ -254,6 +258,7 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
 //         status,
 //         created_at,
 //         general_notes,
+//         registration_number,
 //         individual_clients:individual_clients(
 //           requestor_name,
 //           requestor_phone, 
@@ -270,14 +275,73 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
 //           contact_email,
 //           organization_address
 //         )
-//       `)
+//       `, { count: 'exact' })
     
 //     // Apply status filter if provided and not "all"
 //     if (status && status !== "all") {
 //       query = query.eq('status', status)
 //     }
     
+//     // Apply search filter at the database level if provided
+//     if (searchQuery && searchQuery.trim() !== '') {
+//       const searchTerm = searchQuery.toLowerCase().trim();
+      
+//       // Create a text search filter using Supabase's textSearch method
+//       // First, handle individual_clients search
+//       const individualClientsQuery = supabase
+//         .from('individual_clients')
+//         .select('client_id')
+//         .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
+      
+//       // Then handle organization_clients search
+//       const organizationClientsQuery = supabase
+//         .from('organization_clients')
+//         .select('client_id')
+//         .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
+        
+//       // Execute both queries
+//       const [individualResults, organizationResults] = await Promise.all([
+//         individualClientsQuery,
+//         organizationClientsQuery
+//       ]);
+      
+//       // Extract client IDs from both queries
+//       const individualClientIds = (individualResults.data || []).map(item => item.client_id);
+//       const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
+      
+//       // Combine all matching client IDs
+//       const matchingClientIds = [...individualClientIds, ...organizationClientIds];
+      
+//       if (matchingClientIds.length > 0) {
+//         // Filter the main query to include only matching client IDs
+//         query = query.in('id', matchingClientIds);
+//       } else {
+//         // If no matches, return empty result
+//         return { 
+//           success: true, 
+//           clients: [],
+//           pagination: {
+//             totalCount: 0,
+//             currentPage: page,
+//             pageSize: pageSize,
+//             totalPages: 0
+//           }
+//         };
+//       }
+//     }
+    
+//     // Get total count first
+//     const { count, error: countError } = await query
+    
+//     if (countError) {
+//       console.error("Error counting clients:", countError)
+//       return { success: false, error: countError.message }
+//     }
+    
+//     // Apply pagination to the main query
 //     const { data, error } = await query
+//       .range((page - 1) * pageSize, (page * pageSize) - 1)
+//       .order('created_at', { ascending: false })
     
 //     if (error) {
 //       console.error("Error fetching clients:", error)
@@ -287,9 +351,13 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
 //     // Map database records to Client interface
 //     const clients = data.map(record => {
 //       const isIndividual = record.client_type === 'individual'
-//       // Access the data directly without indexing
-//       const individualData = isIndividual ? record.individual_clients : null
-//       const organizationData = !isIndividual ? record.organization_clients : null
+//       // Extract the first item from the arrays or use null
+//       const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
+//         ? record.individual_clients[0] 
+//         : record.individual_clients) : null
+//       const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
+//         ? record.organization_clients[0] 
+//         : record.organization_clients) : null
       
 //       return {
 //         id: record.id,
@@ -304,20 +372,21 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
 //         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
 //         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
 //         location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
-//         // Convert null to undefined to match Client type
-//         description: record.general_notes || undefined
+//         description: record.general_notes || undefined,
+//         registrationNumber: record.registration_number || undefined,
 //       }
 //     })
-    
-//     // Apply search filter in JavaScript if provided
-//     const filteredClients = searchQuery
-//       ? clients.filter(client => 
-//           client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//           client.email?.toLowerCase().includes(searchQuery.toLowerCase())
-//         )
-//       : clients
       
-//     return { success: true, clients: filteredClients }
+//     return { 
+//       success: true, 
+//       clients,
+//       pagination: {
+//         totalCount: count || 0,
+//         currentPage: page,
+//         pageSize: pageSize,
+//         totalPages: Math.ceil((count || 0) / pageSize)
+//       }
+//     }
     
 //   } catch (error: unknown) {
 //     console.error('Error fetching clients:', error)
@@ -338,97 +407,92 @@ export async function getClients(
   try {
     const supabase = await createSupabaseServerClient()
     
-    // Build the base query
-    let query = supabase
+    const selectFields = `
+       id,
+          client_type,
+          status,
+          created_at,
+          individual_clients:individual_clients(
+            requestor_email,
+            requestor_phone,
+            patient_name,
+            service_required,
+            start_date
+          ),
+          organization_clients:organization_clients(
+            organization_name,
+            contact_email,
+            contact_phone
+          )
+    `
+    
+    const countQuery = supabase
       .from('clients')
-      .select(`
-        id,
-        client_type,
-        status,
-        created_at,
-        general_notes,
-        registration_number,
-        individual_clients:individual_clients(
-          requestor_name,
-          requestor_phone, 
-          requestor_email,
-          patient_name,
-          complete_address,
-          service_required,
-          start_date
-        ),
-        organization_clients:organization_clients(
-          organization_name,
-          contact_person_name,
-          contact_phone,
-          contact_email,
-          organization_address
-        )
-      `, { count: 'exact' })
+      .select('id', { count: 'exact', head: true })
     
-    // Apply status filter if provided and not "all"
+    const dataQuery = supabase
+      .from('clients')
+      .select(selectFields)
+    
     if (status && status !== "all") {
-      query = query.eq('status', status)
+      countQuery.eq('status', status)
+      dataQuery.eq('status', status)
     }
-    
-    // Apply search filter at the database level if provided
+
     if (searchQuery && searchQuery.trim() !== '') {
-      const searchTerm = searchQuery.toLowerCase().trim();
+      const searchTerm = searchQuery.toLowerCase().trim()
       
-      // Create a text search filter using Supabase's textSearch method
-      // First, handle individual_clients search
-      const individualClientsQuery = supabase
-        .from('individual_clients')
+      const { data: matchingIds, error: searchError } = await supabase.rpc(
+        'search_clients', 
+        { search_term: `%${searchTerm}%` }
+      )
+      
+      // If DB doesn't have an RPC function:
+      /*
+      const { data: matchingIds, error: searchError } = await supabase
+        .from('client_search_view')  // Consider creating a optimized view for searching
         .select('client_id')
-        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
+        .ilike('search_text', `%${searchTerm}%`)
+      */
       
-      // Then handle organization_clients search
-      const organizationClientsQuery = supabase
-        .from('organization_clients')
-        .select('client_id')
-        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
-        
-      // Execute both queries
-      const [individualResults, organizationResults] = await Promise.all([
-        individualClientsQuery,
-        organizationClientsQuery
-      ]);
+      if (searchError) {
+        console.error("Error in search query:", searchError)
+        return { success: false, error: searchError.message }
+      }
       
-      // Extract client IDs from both queries
-      const individualClientIds = (individualResults.data || []).map(item => item.client_id);
-      const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
-      
-      // Combine all matching client IDs
-      const matchingClientIds = [...individualClientIds, ...organizationClientIds];
-      
-      if (matchingClientIds.length > 0) {
-        // Filter the main query to include only matching client IDs
-        query = query.in('id', matchingClientIds);
-      } else {
-        // If no matches, return empty result
+      if (!matchingIds || matchingIds.length === 0) {
         return { 
           success: true, 
           clients: [],
-          pagination: {
-            totalCount: 0,
-            currentPage: page,
-            pageSize: pageSize,
-            totalPages: 0
-          }
-        };
+          pagination: { totalCount: 0, currentPage: page, pageSize, totalPages: 0 }
+        }
       }
+      
+      interface SearchResult {
+        client_id: string;
+      }
+
+      const clientIds: string[] = (matchingIds as SearchResult[]).map(item => item.client_id);
+      countQuery.in('id', clientIds)
+      dataQuery.in('id', clientIds)
     }
     
-    // Get total count first
-    const { count, error: countError } = await query
+    const { count, error: countError } = await countQuery
     
     if (countError) {
       console.error("Error counting clients:", countError)
       return { success: false, error: countError.message }
     }
     
-    // Apply pagination to the main query
-    const { data, error } = await query
+    if (count === 0) {
+      return { 
+        success: true, 
+        clients: [],
+        pagination: { totalCount: 0, currentPage: page, pageSize, totalPages: 0 }
+      }
+    }
+    
+    const { data, error } = await dataQuery
       .range((page - 1) * pageSize, (page * pageSize) - 1)
       .order('created_at', { ascending: false })
     
@@ -437,22 +501,21 @@ export async function getClients(
       return { success: false, error: error.message }
     }
     
-    // Map database records to Client interface
+
     const clients = data.map(record => {
       const isIndividual = record.client_type === 'individual'
-      // Extract the first item from the arrays or use null
-      const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
-        ? record.individual_clients[0] 
-        : record.individual_clients) : null
-      const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
-        ? record.organization_clients[0] 
-        : record.organization_clients) : null
+      const individualData = isIndividual && record.individual_clients ? 
+        (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients) 
+        : null
+      const organizationData = !isIndividual && record.organization_clients ? 
+        (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients) 
+        : null
       
       return {
         id: record.id,
         name: isIndividual 
-          ? individualData?.patient_name || "Unknown" 
-          : organizationData?.organization_name || "Unknown",
+          ? (individualData?.patient_name || "Unknown") 
+          : (organizationData?.organization_name || "Unknown"),
         requestDate: isIndividual
           ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
           : new Date(record.created_at || new Date()).toISOString().split('T')[0],
@@ -460,12 +523,9 @@ export async function getClients(
         status: record.status,
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
-        location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
-        description: record.general_notes || undefined,
-        registrationNumber: record.registration_number || undefined,
       }
     })
-      
+    
     return { 
       success: true, 
       clients,
@@ -486,7 +546,6 @@ export async function getClients(
     }
   }
 }
-
 
 /**
  * Fetches detailed information for a specific client by ID

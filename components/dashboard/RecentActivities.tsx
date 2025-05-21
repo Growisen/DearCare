@@ -1,37 +1,90 @@
 import { Card } from "../ui/card"
-import { Activity } from "lucide-react"
+import { MdOutlineReportProblem } from "react-icons/md"
+import { 
+  BiSolidTimeFive, 
+  BiSolidCheckCircle, 
+  BiSolidXCircle 
+} from "react-icons/bi"
+import { useEffect, useState } from "react"
 
-const activities = [
-  { text: "New nurse assignment in Kochi", time: "2h ago" },
-  { text: "Staff training at Kaloor center completed", time: "4h ago" },
-  { text: "Nurse assigned to client in Trivandrum", time: "6h ago" },
-  { text: "New client onboarding in Thrissur", time: "8h ago" }
-]
+interface ComplaintsData {
+  open: number;
+  underReview: number;
+  resolved: number;
+  total: number;
+}
 
-export default function RecentActivities() {
+interface ComplaintsStatsProps {
+  complaintsData?: ComplaintsData;
+}
+
+export default function ComplaintsStats({ complaintsData }: ComplaintsStatsProps) {
+  const [stats, setStats] = useState({
+    open: 0,
+    underReview: 0,
+    resolved: 0,
+    total: 0
+  })
+  
+  useEffect(() => {
+    if(complaintsData) {
+      setStats(complaintsData)
+    }
+  }, [complaintsData])
+
+  const complaintItems = [
+    { 
+      label: "Open Complaints", 
+      count: stats.open, 
+      icon: <BiSolidTimeFive className="w-4 h-4 text-gray-600" />,
+      percentage: stats.total ? Math.round((stats.open / stats.total) * 100) : 0
+    },
+    { 
+      label: "Under Review", 
+      count: stats.underReview, 
+      icon: <BiSolidXCircle className="w-4 h-4 text-gray-600" />,
+      percentage: stats.total ? Math.round((stats.underReview / stats.total) * 100) : 0
+    },
+    { 
+      label: "Resolved", 
+      count: stats.resolved, 
+      icon: <BiSolidCheckCircle className="w-4 h-4 text-gray-600" />,
+      percentage: stats.total ? Math.round((stats.resolved / stats.total) * 100) : 0
+    },
+    { 
+      label: "Total", 
+      count: stats.total, 
+      icon: <MdOutlineReportProblem className="w-4 h-4 text-gray-600" />,
+      percentage: 100
+    }
+  ]
+
   return (
-    <Card className="p-2 sm:p-4 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl min-h-[250px] h-auto col-span-full sm:col-span-2">
-      <div className="flex items-center justify-between mb-2 sm:mb-4">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <div className="p-1 sm:p-1.5 rounded-lg bg-[#004d6d]/10">
-            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-[#004d6d]-600" />
-          </div>
-          <h3 className="text-sm sm:text-md font-semibold text-gray-800">Recent Activities</h3>
-        </div>
+    <Card className="p-4 bg-white border border-gray-200 shadow-sm rounded-lg col-span-full sm:col-span-2">
+      <div className="flex items-center mb-4 border-b border-gray-100 pb-2">
+        <MdOutlineReportProblem className="w-5 h-5 text-gray-700 mr-2" />
+        <h3 className="text-md font-medium text-gray-800">Complaints Overview</h3>
       </div>
-      <div className="space-y-1 sm:space-y-2">
-        {activities.map((activity, i) => (
-          <div key={i} className="flex items-center gap-2 sm:gap-3 text-sm p-1.5 sm:p-2 rounded-lg hover:bg-gray-50/50 transition-colors">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
-            <div className="flex-1 flex items-center justify-between flex-wrap sm:flex-nowrap">
-              <p className="text-gray-800 text-xs sm:text-sm font-medium mr-1">{activity.text}</p>
-              <p className="text-gray-400 text-[10px] sm:text-xs ml-auto">{activity.time}</p>
+      
+      <div className="grid grid-cols-2 gap-3">
+        {complaintItems.map((item, i) => (
+          <div key={i} className="border border-gray-200 rounded-md p-3">
+            <div className="flex items-center gap-2 mb-2">
+              {item.icon}
+              <span className="text-sm font-medium text-gray-700">{item.label}</span>
+            </div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-lg font-semibold text-gray-800">{item.count}</span>
+              <span className="text-xs text-gray-500">{item.percentage}%</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-1.5">
+              <div 
+                className="bg-gray-600 h-1.5 rounded-full" 
+                style={{ width: `${item.percentage}%` }}
+              ></div>
             </div>
           </div>
         ))}
-        <div className="text-center mt-2 sm:mt-4">
-          <button className="text-xs text-blue-600 hover:text-blue-800 font-medium py-1">View More</button>
-        </div>
       </div>
     </Card>
   )

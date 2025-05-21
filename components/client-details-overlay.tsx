@@ -5,7 +5,7 @@ import { ApprovedContent } from '../components/client/ApprovedContent';
 import { UnderReviewContent } from '../components/client/UnderReview';
 import { PendingContent } from '../components/client/PendingContent';
 import { RejectedContent } from '../components/client/RejectedContent';
-import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization } from '../types/client.types';
+import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization, ClientStatus } from '../types/client.types';
 import { getClientDetails, deleteClient } from '../app/actions/client-actions';
 import Image from 'next/image';
 
@@ -15,7 +15,6 @@ import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
 import { getServiceLabel } from '../utils/formatters';
 import ImageViewer from './common/ImageViewer';
 
-type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
 export function ClientDetailsOverlay({ 

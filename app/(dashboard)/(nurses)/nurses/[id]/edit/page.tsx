@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Loader from '@/components/loader'
+import Loader from '@/components/Loader'
 import Image from 'next/image';
 import { fetchNurseDetailsmain, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
 

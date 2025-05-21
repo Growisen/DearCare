@@ -39,14 +39,28 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
+  // Get category-specific border color
+  const getCategoryBorderColor = () => {
+    switch (patient.clientCategory) {
+      case 'DearCare LLP':
+        return 'border-blue-400';
+      case 'Tata HomeNursing':
+        return 'border-green-400';
+      default:
+        return 'border-gray-200';
+    }
+  };
+
+  const borderColor = getCategoryBorderColor();
+
   return (
-    <div className="bg-gray-100 border-b border-gray-200 px-4 sm:px-6 py-4">
+    <div className={`bg-gray-100 border-b border-gray-200 px-4 sm:px-6 py-4 ${patient.clientCategory ? `border-l-4 ${borderColor}` : ''}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         {/* Left Section: Profile Image and Details */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
           {/* Profile Image */}
           <div
-            className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0"
+            className={`relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden border-2 ${borderColor} flex-shrink-0`}
             onClick={() => patient.profileImage && setIsImageViewerOpen(true)}
             style={{ cursor: patient.profileImage ? 'pointer' : 'default' }}
           >
@@ -184,7 +198,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 >
                   <path
                     fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414z"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 011.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414z"
                     clipRule="evenodd"
                   />
                 </svg>

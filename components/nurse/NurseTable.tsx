@@ -1,6 +1,6 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
 import { NurseBasicDetails } from "@/types/staff.types"
-import Loader from '@/components/loader'
+import Loader from '@/components/Loader'
 import { useRouter } from 'next/navigation'
 
 const statusColors = {

@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react"
 import { Card } from "../ui/card"
 import { Calendar, CheckCircle, Circle, Clock, MapPin, Plus, X, Loader2 } from "lucide-react"
-import { fetchTodos, addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
+import { addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
 import toast from 'react-hot-toast';
 
+interface UpcomingSchedulesProps {
+  todosData?: Todo[];
+}
 
-export default function TodoScheduler() {
+export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -30,25 +33,11 @@ export default function TodoScheduler() {
 
   // Fetch todos on component mount
   useEffect(() => {
-    const loadTodos = async () => {
-      setIsLoading(true);
-      try {
-        const result = await fetchTodos();
-        if (result.success) {
-          setTodos(result.data);
-        } else {
-          toast.error(result.error || "Failed to load tasks");
-        }
-      } catch (error) {
-        console.error("Error loading todos:", error);
-        toast.error("Failed to load your tasks. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadTodos();
-  }, []);
+    if (todosData) {
+      setTodos(todosData);
+      setIsLoading(false);
+    }
+  }, [todosData]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
@@ -214,7 +203,7 @@ export default function TodoScheduler() {
   };
 
   return (
-    <Card className="p-4 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl h-[400px]">
+    <Card className="p-4 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl h-[400px] hover:shadow-md transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-emerald-100">
