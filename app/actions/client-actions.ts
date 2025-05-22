@@ -908,6 +908,13 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       other: data.assessmentData.otherLabInvestigations,
       custom_tests: data.assessmentData.customLabTests || []
     };
+
+    const recorderData = {
+      recorderId: data.assessmentData.recorderInfo.recorderId,
+      recorderName: data.assessmentData.recorderInfo.recorderName,
+      recorderRole: data.assessmentData.recorderInfo.recorderRole,
+      recordedAt: data.assessmentData.recorderInfo.recorderTimestamp || new Date().toISOString()
+    };
     
     // Common assessment data for both insert and update
     const assessmentData = {
@@ -943,6 +950,7 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       environment: environmentData,
       equipment: data.assessmentData.equipment, 
       family_members: data.assessmentData.familyMembers,
+      recorder_info: recorderData,
       updated_at: new Date().toISOString()
     };
     

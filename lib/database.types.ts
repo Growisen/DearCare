@@ -353,6 +353,95 @@ export type Database = {
         }
         Relationships: []
       }
+      dearcare_complaint_resolutions: {
+        Row: {
+          complaint_id: string
+          created_at: string | null
+          id: string
+          resolution_date: string | null
+          resolution_notes: string | null
+          resolved_by: string | null
+          status_history: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          complaint_id: string
+          created_at?: string | null
+          id?: string
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          status_history?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          complaint_id?: string
+          created_at?: string | null
+          id?: string
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          status_history?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dearcare_complaint_resolutions_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "dearcare_complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dearcare_complaints: {
+        Row: {
+          admin_comment: string | null
+          created_at: string
+          description: string
+          id: string
+          media_files: Json | null
+          reported_id: string | null
+          resolution: string | null
+          source: Database["public"]["Enums"]["complaint_source"]
+          status: Database["public"]["Enums"]["complaint_status"]
+          submission_date: string
+          submitter_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_comment?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          media_files?: Json | null
+          reported_id?: string | null
+          resolution?: string | null
+          source: Database["public"]["Enums"]["complaint_source"]
+          status?: Database["public"]["Enums"]["complaint_status"]
+          submission_date?: string
+          submitter_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_comment?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          media_files?: Json | null
+          reported_id?: string | null
+          resolution?: string | null
+          source?: Database["public"]["Enums"]["complaint_source"]
+          status?: Database["public"]["Enums"]["complaint_status"]
+          submission_date?: string
+          submitter_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faculty_assignment: {
         Row: {
           created_at: string
@@ -708,6 +797,7 @@ export type Database = {
       nurses: {
         Row: {
           address: string | null
+          admitted_type: Database["public"]["Enums"]["admission_type"] | null
           category: string | null
           city: string | null
           created_at: string
@@ -722,6 +812,7 @@ export type Database = {
           mother_tongue: string | null
           noc_status: string | null
           nurse_id: number
+          nurse_reg_no: string | null
           phone_number: string | null
           pin_code: number | null
           religion: string | null
@@ -733,6 +824,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          admitted_type?: Database["public"]["Enums"]["admission_type"] | null
           category?: string | null
           city?: string | null
           created_at?: string
@@ -747,6 +839,7 @@ export type Database = {
           mother_tongue?: string | null
           noc_status?: string | null
           nurse_id?: number
+          nurse_reg_no?: string | null
           phone_number?: string | null
           pin_code?: number | null
           religion?: string | null
@@ -758,6 +851,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          admitted_type?: Database["public"]["Enums"]["admission_type"] | null
           category?: string | null
           city?: string | null
           created_at?: string
@@ -772,6 +866,7 @@ export type Database = {
           mother_tongue?: string | null
           noc_status?: string | null
           nurse_id?: number
+          nurse_reg_no?: string | null
           phone_number?: string | null
           pin_code?: number | null
           religion?: string | null
@@ -902,7 +997,7 @@ export type Database = {
           height: string | null
           id: string
           lab_investigations: Json | null
-          marital_status: string | null
+          martial_status: string | null
           medical_history: string | null
           medication_history: string | null
           other_social_history: string | null
@@ -910,6 +1005,7 @@ export type Database = {
           physical_behavior: string | null
           pincode: string | null
           present_condition: string | null
+          recorder_info: Json | null
           speech_patterns: string | null
           sugar_level: string | null
           surgical_history: string | null
@@ -940,7 +1036,7 @@ export type Database = {
           height?: string | null
           id?: string
           lab_investigations?: Json | null
-          marital_status?: string | null
+          martial_status?: string | null
           medical_history?: string | null
           medication_history?: string | null
           other_social_history?: string | null
@@ -948,6 +1044,7 @@ export type Database = {
           physical_behavior?: string | null
           pincode?: string | null
           present_condition?: string | null
+          recorder_info?: Json | null
           speech_patterns?: string | null
           sugar_level?: string | null
           surgical_history?: string | null
@@ -978,7 +1075,7 @@ export type Database = {
           height?: string | null
           id?: string
           lab_investigations?: Json | null
-          marital_status?: string | null
+          martial_status?: string | null
           medical_history?: string | null
           medication_history?: string | null
           other_social_history?: string | null
@@ -986,6 +1083,7 @@ export type Database = {
           physical_behavior?: string | null
           pincode?: string | null
           present_condition?: string | null
+          recorder_info?: Json | null
           speech_patterns?: string | null
           sugar_level?: string | null
           surgical_history?: string | null
@@ -1462,12 +1560,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_attendance_data: {
+        Args: { curr_date: string }
+        Returns: Json
+      }
       increment_registration_counter: {
         Args: { p_category: string; p_type: string; p_year: string }
         Returns: number
       }
+      search_clients: {
+        Args: { search_term: string }
+        Returns: {
+          client_id: string
+        }[]
+      }
     }
     Enums: {
+      admission_type: "Tata_Homenursing" | "Dearcare_Llp"
       assigned_type: "individual" | "organization"
       client_category: "DearCare LLP" | "Tata HomeNursing"
       client_status:
@@ -1477,6 +1586,8 @@ export type Database = {
         | "rejected"
         | "assigned"
       client_type: "individual" | "organization" | "hospital" | "carehome"
+      complaint_source: "client" | "nurse"
+      complaint_status: "open" | "under_review" | "resolved"
       gender_type: "male" | "female" | "other"
       leave_mode: "full_day" | "half_day_morning" | "half_day_afternoon"
       leave_status: "pending" | "approved" | "rejected"
@@ -1613,6 +1724,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admission_type: ["Tata_Homenursing", "Dearcare_Llp"],
       assigned_type: ["individual", "organization"],
       client_category: ["DearCare LLP", "Tata HomeNursing"],
       client_status: [
@@ -1623,6 +1735,8 @@ export const Constants = {
         "assigned",
       ],
       client_type: ["individual", "organization", "hospital", "carehome"],
+      complaint_source: ["client", "nurse"],
+      complaint_status: ["open", "under_review", "resolved"],
       gender_type: ["male", "female", "other"],
       leave_mode: ["full_day", "half_day_morning", "half_day_afternoon"],
       leave_status: ["pending", "approved", "rejected"],

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/app/actions/auth"; // Import the server action directly
+import { signIn } from "@/app/actions/auth"; 
 
 const LoginPage = () => {
   const router = useRouter();
@@ -20,8 +20,8 @@ const LoginPage = () => {
 
     try {
       const formData = new FormData(e.currentTarget);
-      // Use the server action directly
-      const { error, success } = await signIn(formData);
+
+      const { error, success, user } = await signIn(formData);
       
       if (error) {
         if (error.includes('Invalid login credentials')) {
@@ -35,6 +35,12 @@ const LoginPage = () => {
       }
       
       if (success) {
+
+        if (user) {
+          console.log("sfsf", user);
+          sessionStorage.setItem('userDetails', JSON.stringify(user));
+        }
+
         const searchParams = new URLSearchParams(window.location.search);
         const redirectTo = searchParams.get('redirectTo') || '/dashboard';
         router.push(redirectTo);

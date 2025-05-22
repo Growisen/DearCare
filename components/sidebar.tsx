@@ -3,14 +3,14 @@ import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Users, Calendar, ClipboardList, Home, LogOut, ArrowLeftCircle, MessageSquare } from "lucide-react"
+import { Users, Calendar, ClipboardList, Home, ArrowLeftCircle, MessageSquare } from "lucide-react"
 //import { Users, Briefcase, Calendar, Settings, ClipboardList, Home, LogOut, ArrowLeftCircle } from "lucide-react"
 import { useEffect } from "react"
-import { useAuth } from '@/contexts/AuthContext'
+// import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
-  const { signOut } = useAuth()
+  // const { signOut } = useAuth()
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const sidebar = document.getElementById('sidebar')
@@ -19,9 +19,9 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
     }
   }, [onClose])
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+  // const handleSignOut = async () => {
+  //   await signOut();
+  // };
 
   useEffect(() => {
     if (isOpen) {
@@ -64,14 +64,14 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               //{ icon: Calendar, label: "Schedule", href: "/schedule" },
               //{ icon: ClipboardList, label: "Reports", href: "/reports" },
               //{ icon: Settings, label: "Settings", href: "/settings" },
-              { icon: LogOut, label: "Logout", href: "#", onClick: () => handleSignOut() },
+              // { icon: LogOut, label: "Logout", href: "#", onClick: () => handleSignOut() },
             ].map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={item.onClick}
+                  //onClick={item.onClick}
                   className={`flex items-center gap-3 px-1 py-2 rounded-xl transition-all duration-200 group relative
                     ${isActive 
                       ? 'bg-white/15 text-white' 
