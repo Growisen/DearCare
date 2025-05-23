@@ -1,12 +1,13 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { User, UserCircle, LogOut, AlertCircle } from "lucide-react"
+import { User, UserCircle, LogOut, AlertCircle, Loader2 } from "lucide-react"
 import { useAuth } from '@/contexts/AuthContext'
 import ModalPortal from '@/components/ui/ModalPortal'
 
 export default function AccountDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuth();
 
@@ -16,8 +17,15 @@ export default function AccountDropdown() {
   };
 
   const confirmSignOut = async () => {
-    await signOut();
-    setShowConfirmModal(false);
+    try {
+      setIsSigningOut(true);
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      setIsSigningOut(false);
+      setShowConfirmModal(false);
+    }
   };
 
   const cancelSignOut = () => {
@@ -100,17 +108,27 @@ export default function AccountDropdown() {
                 Are you sure you want to sign out? You will need to log in again to access your account.
               </p>
               <div className="flex justify-end gap-3">
-                <button 
-                  onClick={cancelSignOut}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
-                >
-                  Cancel
-                </button>
+                {!isSigningOut && (
+                  <button 
+                    onClick={cancelSignOut}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button 
                   onClick={confirmSignOut}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md flex items-center justify-center min-w-[80px]"
+                  disabled={isSigningOut}
                 >
-                  Sign Out
+                  {isSigningOut ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <span>Signing out...</span>
+                    </>
+                  ) : (
+                    <span>Sign Out</span>
+                  )}
                 </button>
               </div>
             </div>

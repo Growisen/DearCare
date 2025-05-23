@@ -17,10 +17,9 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const formData = new FormData(e.currentTarget);
-
       const { error, success, user } = await signIn(formData);
       
       if (error) {
@@ -31,25 +30,25 @@ const LoginPage = () => {
         } else {
           setError(error || 'Invalid credentials');
         }
+        setIsLoading(false);
         return;
       }
       
       if (success) {
-
         if (user) {
-          console.log("sfsf", user);
+          console.log("User data:", user);
           sessionStorage.setItem('userDetails', JSON.stringify(user));
         }
-
+      
         const searchParams = new URLSearchParams(window.location.search);
         const redirectTo = searchParams.get('redirectTo') || '/dashboard';
-        router.push(redirectTo);
+        
+        return router.push(redirectTo);
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Login failed", error);
       setError('An unexpected error occurred');
-    } finally {
       setIsLoading(false);
     }
   };
