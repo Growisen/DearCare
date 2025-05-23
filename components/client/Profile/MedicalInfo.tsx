@@ -38,8 +38,6 @@ interface MedicalInfoProps {
 const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  console.log('MedicalInfo assessment:', assessment.lab_investigations);
-
   const toggleSection = (sectionName: string) => {
     if (expandedSection === sectionName) {
       setExpandedSection(null);

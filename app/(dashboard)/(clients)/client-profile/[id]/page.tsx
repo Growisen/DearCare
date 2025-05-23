@@ -168,7 +168,7 @@ const PatientProfilePage = () => {
                 familyMembers: assessmentData.family_members || [],
                 equipment: assessmentData.equipment || {},
                 environment: assessmentData.environment || {},
-                lab_investigations: assessmentData.lab_investigations || {},
+                lab_investigations: assessmentData?.lab_investigations || {},
                 recorderInfo: assessmentData.recorder_info || {
                   recorderId: '',
                   recorderName: '',
@@ -337,7 +337,7 @@ const PatientProfilePage = () => {
             feedingMethod: assessmentData.feeding_method || '',
             equipment: assessmentData.equipment || {},
             environment: assessmentData.environment || {},
-            lab_investigations: assessmentData.lab_investigations || {},
+            lab_investigations: assessmentData?.lab_investigations || {},
             recorderInfo: assessmentData.recorder_info || {
               recorderId: '',
               recorderName: '',
