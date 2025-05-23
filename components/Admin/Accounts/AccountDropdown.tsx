@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { User, UserCircle, Key, LogOut, AlertCircle } from "lucide-react"
+import { User, UserCircle, LogOut, AlertCircle } from "lucide-react"
 import { useAuth } from '@/contexts/AuthContext'
 import ModalPortal from '@/components/ui/ModalPortal'
 
@@ -64,13 +64,13 @@ export default function AccountDropdown() {
             </a>
           </div>
           
-          <div className="py-1 border-t border-gray-100">
+          {/* <div className="py-1 border-t border-gray-100">
             <p className="px-4 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">Security</p>
             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
               <Key className="w-4 h-4 text-gray-500" />
               <span>Reset Password</span>
             </button>
-          </div>
+          </div> */}
           
           <div className="border-t border-gray-100 pt-1 mt-1">
             <button 

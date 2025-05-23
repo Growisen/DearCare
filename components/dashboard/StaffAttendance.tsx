@@ -41,7 +41,7 @@ export default function StaffAttendance({ currentTime, attendanceData }:
           className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-800 font-medium mt-1 mr-1"
           onClick={handleDetailsClick}
         >
-          Details
+          View details →
         </button>
       </div>
       
