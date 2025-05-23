@@ -93,6 +93,15 @@ export interface PatientAssessmentFormData {
   
   // Family Members
   familyMembers: FamilyMember[];
+
+  recorderInfo: {
+    recorderId: string;
+    recorderName: string;
+    recorderRole: string;
+    familyRelationship: string;
+    recorderTimestamp: string;
+    nurseRegistrationNumber: string;
+  };
 }
 
 // Create empty default form data
@@ -186,6 +195,15 @@ export const getDefaultFormData = (): PatientAssessmentFormData => ({
   },
   
   familyMembers: [],
+
+  recorderInfo: {
+    recorderId: '',
+    recorderName: '',
+    recorderRole: '',
+    familyRelationship: '',
+    recorderTimestamp: '',
+    nurseRegistrationNumber: ''
+  }
 });
 
 // The actual hook

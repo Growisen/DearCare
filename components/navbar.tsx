@@ -45,11 +45,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
           </button>
           <div className="h-6 w-px bg-gray-200 mx-1"></div>
-          <AccountDropdown 
-            name="Admin User"
-            email="admin@dearcare.com"
-            role="Super Admin"
-          />
+          <AccountDropdown />
         </div>
       </div>
     </div>

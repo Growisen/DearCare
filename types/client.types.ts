@@ -218,6 +218,15 @@ export type FamilyMember = {
   medicalRecords: string;
 };
 
+export interface RecorderInfo {
+  recorderId: string;
+  recorderName: string;
+  recorderRole: string;
+  familyRelationship: string;
+  recorderTimestamp: string;
+  nurseRegistrationNumber?: string;
+}
+
 export interface PatientAssessmentData {
   guardianOccupation: string;
   maritalStatus: string;
@@ -262,6 +271,7 @@ export interface PatientAssessmentData {
   equipment: Json;
   familyMembers: FamilyMember[],
   customLabTests: Array<{ id: string; name: string; value: string }>;
+  recorderInfo: RecorderInfo;
 }
 
 export interface SavePatientAssessmentParams {
@@ -309,7 +319,8 @@ export interface PatientAssessmentDataForApprovedClients {
   environment: Json;
   lab_investigations: LabInvestigations;
   familyMembers: FamilyMember[];
-  [key: string]: string | undefined | Json | LabInvestigations | FamilyMember[];
+  recorderInfo: RecorderInfo;
+  [key: string]: string | undefined | Json | LabInvestigations | FamilyMember[] | RecorderInfo;
 }
 
 export interface NurseAssignment {
@@ -458,4 +469,5 @@ export interface AssessmentData {
   environment?: Environment;
   equipment?: Equipment;
   family_members: FamilyMember[];
+  recorder_info: RecorderInfo;
 }

@@ -6,6 +6,7 @@ import { savePatientAssessment } from '@/app/actions/client-actions';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
+import RecorderInfoForm from '@/components/client/RecorderInfoForm';
 import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
 
 export default function PatientAssessmentPage() {
@@ -13,6 +14,17 @@ export default function PatientAssessmentPage() {
   const id = params.id;
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // State for recorder information with more inclusive defaults
+  const [recorderInfo, setRecorderInfo] = useState({
+    recorderId: '', 
+    recorderName: '',
+    recorderRole: '',
+    familyRelationship: '',
+    nurseRegistrationNumber: '',
+    otherRoleSpecify: '',
+    recorderTimestamp: new Date().toISOString()
+  });
 
   const {
     formData,
@@ -27,18 +39,40 @@ export default function PatientAssessmentPage() {
     handleFamilyMemberChange
   } = usePatientAssessmentForm();
 
+  // Handle recorder info changes
+  const handleRecorderInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setRecorderInfo(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
 
-      const formattedData = {
-        ...formData,
+      let finalRecorderRole = recorderInfo.recorderRole;
+      
+      if (recorderInfo.recorderRole === "Family Member" && recorderInfo.familyRelationship) {
+        finalRecorderRole = `Family Member: ${recorderInfo.familyRelationship}`;
+      } else if (recorderInfo.recorderRole === "Nurse" && recorderInfo.nurseRegistrationNumber) {
+        finalRecorderRole = `Nurse: ${recorderInfo.nurseRegistrationNumber}`;
+      }
+
+      const updatedRecorderInfo = {
+        ...recorderInfo,
+        recorderRole: finalRecorderRole,
+        recorderTimestamp: new Date().toISOString()
       };
 
       const assessmentResult = await savePatientAssessment({
         clientId: id as string,
-        assessmentData: formattedData
+        assessmentData: {
+          ...formData,
+          recorderInfo: updatedRecorderInfo
+        }
       });
 
       if (!assessmentResult.success) {
@@ -46,7 +80,7 @@ export default function PatientAssessmentPage() {
       }
 
       toast.success('Assessment saved successfully!');
-      router.push('/dashboard'); // or wherever you want to redirect after success
+      router.push('/dashboard');
 
     } catch (error) {
       console.error('Error saving assessment:', error);
@@ -98,6 +132,12 @@ export default function PatientAssessmentPage() {
           {/* Form Section */}
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Recorder Information Section - Now as component */}
+              <RecorderInfoForm 
+                recorderInfo={recorderInfo}
+                handleRecorderInfoChange={handleRecorderInfoChange}
+              />
+
               <PatientAssessmentForm
                 formData={formData}
                 isEditable={true}
@@ -125,7 +165,7 @@ export default function PatientAssessmentPage() {
                 <button
                   type="submit"
                   className="px-6 py-2.5 bg-dCblue text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200 font-medium shadow-md"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !recorderInfo.recorderName || !recorderInfo.recorderRole}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
