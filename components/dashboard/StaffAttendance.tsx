@@ -26,77 +26,98 @@ export default function StaffAttendance({ currentTime, attendanceData }:
   }
   
   return (
-    <Card className="p-3 sm:p-4 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl min-h-[250px] h-auto col-span-full sm:col-span-2 hover:shadow-md transition-all duration-300">
-      <div className="flex items-start justify-between mb-3 sm:mb-4">
-        <div className="flex items-start gap-2 sm:gap-3">
-          <div className="p-1 sm:p-1.5 rounded-lg bg-[#004d6d]/10">
-            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#004d6d]" />
-          </div>
+    <Card className="p-4 bg-white border border-slate-200 shadow-sm rounded-lg col-span-full sm:col-span-2">
+      <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-2">
+        <div className="flex items-center">
+          <Users className="w-5 h-5 text-slate-700 mr-2" />
           <div>
-            <h3 className="text-sm sm:text-md font-semibold text-gray-800">Staff Attendance</h3>
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1">{currentTime}</p>
+            <h3 className="text-md font-medium text-slate-800">Staff Attendance</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{currentTime}</p>
           </div>
         </div>
         <button 
-          className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-800 font-medium mt-1 mr-1"
+          className="text-xs font-medium text-blue-600 hover:text-blue-800"
           onClick={handleDetailsClick}
         >
           View details →
         </button>
       </div>
       
-      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            <circle 
-              className="text-gray-100" 
-              strokeWidth="10" 
-              stroke="currentColor" 
-              fill="transparent" 
-              r="40" 
-              cx="50" 
-              cy="50" 
-            />
-            <circle 
-              className="text-emerald-500" 
-              strokeWidth="10" 
-              strokeDasharray={251.2} 
-              strokeDashoffset={251.2 * (1 - presentPercentage/100)} 
-              strokeLinecap="round" 
-              stroke="currentColor" 
-              fill="transparent" 
-              r="40" 
-              cx="50" 
-              cy="50" 
-            />
-          </svg>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-            <p className="text-base sm:text-lg font-bold text-gray-900">{presentPercentage}%</p>
-            <p className="text-[10px] sm:text-xs text-gray-500">Present</p>
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+        {/* Percentage circle - reduced size and improved display */}
+        <div className="col-span-1 sm:col-span-2 flex justify-center items-center">
+          <div className="relative w-32 h-32">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              {/* Background circle */}
+              <circle 
+                className="text-slate-200" 
+                strokeWidth="8" 
+                stroke="currentColor" 
+                fill="transparent" 
+                r="44" 
+                cx="50" 
+                cy="50" 
+              />
+              {/* Progress circle with smooth animation and improved styling */}
+              <circle 
+                className="text-emerald-500 transition-all duration-1000 ease-out" 
+                strokeWidth="8" 
+                strokeDasharray={276.46} 
+                strokeDashoffset={276.46 * (1 - presentPercentage/100)} 
+                strokeLinecap="round" 
+                stroke="currentColor" 
+                fill="transparent" 
+                r="44" 
+                cx="50" 
+                cy="50" 
+                style={{
+                  filter: 'drop-shadow(0 0 2px rgba(16, 185, 129, 0.3))'
+                }}
+              />
+            </svg>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+              <p className="text-2xl font-bold text-slate-900">{presentPercentage}%</p>
+              <p className="text-xs text-slate-600 font-medium">Present</p>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2 sm:space-y-4 flex-1 w-full">
-          <div className="flex items-center justify-between p-2 sm:p-3 bg-emerald-50/50 rounded-lg">
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
-              <span className="text-xs sm:text-sm text-gray-700">Present</span>
+        {/* Attendance stats - with improved spacing */}
+        <div className="col-span-1 sm:col-span-3 space-y-3 flex flex-col justify-center">
+          <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-emerald-50 rounded-md">
+                  <UserCheck className="w-5 h-5 text-emerald-600" />
+                </div>
+                <span className="text-sm font-medium text-slate-800">Present</span>
+              </div>
+              <span className="text-lg font-semibold text-slate-900">{present}</span>
             </div>
-            <span className="font-semibold text-emerald-600">{present}</span>
           </div>
-          <div className="flex items-center justify-between p-1.5 sm:p-2 bg-rose-50/50 rounded-lg">
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <UserX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500" />
-              <span className="text-xs sm:text-sm text-gray-700">Absent</span>
+
+          <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-rose-50 rounded-md">
+                  <UserX className="w-5 h-5 text-rose-600" />
+                </div>
+                <span className="text-sm font-medium text-slate-800">Absent</span>
+              </div>
+              <span className="text-lg font-semibold text-slate-900">{absent}</span>
             </div>
-            <span className="font-semibold text-rose-600">{absent}</span>
           </div>
-          <div className="flex items-center justify-between p-1.5 sm:p-2 bg-indigo-50/50 rounded-lg">
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
-              <span className="text-xs sm:text-sm text-gray-700">On Leave</span>
+
+          <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-indigo-50 rounded-md">
+                  <Calendar className="w-5 h-5 text-indigo-600" />
+                </div>
+                <span className="text-sm font-medium text-slate-800">On Leave</span>
+              </div>
+              <span className="text-lg font-semibold text-slate-900">{onLeave}</span>
             </div>
-            <span className="font-semibold text-indigo-600">{onLeave}</span>
           </div>
         </div>
       </div>

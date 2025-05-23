@@ -5,6 +5,7 @@ import { Card } from "../ui/card"
 import { Calendar, CheckCircle, Circle, Clock, MapPin, Plus, X, Loader2 } from "lucide-react"
 import { addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
 import toast from 'react-hot-toast';
+// import Link from "next/link"
 
 interface UpcomingSchedulesProps {
   todosData?: Todo[];
@@ -203,68 +204,73 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   };
 
   return (
-    <Card className="p-4 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl h-[400px] hover:shadow-md transition-all duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-emerald-100">
-            <CheckCircle className="w-5 h-5 text-emerald-600" />
+    <Card className="p-3 sm:p-4 bg-gradient-to-br from-white to-indigo-50/30 hover:from-white hover:to-indigo-50/30 border border-slate-200 shadow-sm rounded-lg h-[400px]">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-indigo-100 pb-2">
+        <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
+          <div className="mr-2">
+            <CheckCircle className="w-5 h-5 text-indigo-600" />
           </div>
-          <h3 className="text-md font-semibold text-gray-800">Todo Scheduler</h3>
+          <h3 className="text-sm sm:text-md font-medium text-slate-800">Todo Scheduler</h3>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          disabled={isLoading}
-          className="p-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 transition-colors disabled:opacity-70"
-        >
-          {showForm ? (
-            <X className="w-4 h-4 text-emerald-600" />
-          ) : (
-            <Plus className="w-4 h-4 text-emerald-600" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* <Link href="/tasks" className="text-xs font-medium text-blue-600 hover:text-blue-800 mr-2">
+            View all →
+          </Link> */}
+          <button
+            onClick={() => setShowForm(!showForm)}
+            disabled={isLoading}
+            className="p-1.5 rounded-md bg-indigo-100 hover:bg-indigo-200 transition-colors disabled:opacity-70"
+          >
+            {showForm ? (
+              <X className="w-4 h-4 text-indigo-700" />
+            ) : (
+              <Plus className="w-4 h-4 text-indigo-700" />
+            )}
+          </button>
+        </div>
       </div>
 
       {showForm ? (
-        <div className="mb-4 p-3 border border-emerald-100 rounded-lg bg-emerald-50/30 relative">
+        <div className="mb-3 p-3 border border-indigo-100 rounded-md bg-white shadow-sm relative">
           <div className="flex flex-col gap-2">
             <input
               type="text"
               value={newTodo}
               onChange={(e) => setNewTodo(e.target.value)}
               placeholder="Add a new task..."
-              className="w-full p-2 rounded border border-gray-200 text-sm text-gray-700"
+              className="w-full p-2 rounded-md border border-indigo-200 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300 text-sm text-slate-700"
               disabled={isAddingTodo}
             />
             <div className="flex flex-wrap gap-2">
-              <div className="flex items-center gap-1.5 bg-white p-1.5 rounded border border-gray-100">
-                <Clock className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-md border border-amber-200 shadow-sm">
+                <Clock className="w-4 h-4 text-amber-500" />
                 <input
                   type="time"
                   value={newTime}
                   onChange={handleTimeChange}
-                  className={`text-xs text-gray-800 border-none outline-none ${timeError ? 'ring-2 ring-red-400' : ''}`}
+                  className={`text-xs text-slate-800 border-none outline-none ${timeError ? 'ring-2 ring-red-400' : ''}`}
                   disabled={isAddingTodo}
                 />
               </div>
-              <div className="flex items-center gap-1.5 bg-white p-1.5 rounded border border-gray-100">
-                <Calendar className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-md border border-emerald-200 shadow-sm">
+                <Calendar className="w-4 h-4 text-emerald-500" />
                 <input
                   type="date"
                   value={newDate}
                   onChange={handleDateChange}
                   min={today}
-                  className={`text-xs text-gray-800 border-none outline-none ${dateError ? 'ring-2 ring-red-400' : ''}`}
+                  className={`text-xs text-slate-800 border-none outline-none ${dateError ? 'ring-2 ring-red-400' : ''}`}
                   disabled={isAddingTodo}
                 />
               </div>
-              <div className="flex items-center gap-1.5 bg-white p-1.5 rounded border border-gray-100 flex-grow">
-                <MapPin className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-md border border-blue-200 shadow-sm flex-grow">
+                <MapPin className="w-4 h-4 text-blue-500" />
                 <input
                   type="text"
                   value={newLocation}
                   onChange={(e) => setNewLocation(e.target.value)}
                   placeholder="Location"
-                  className="text-xs text-gray-800 border-none outline-none w-full"
+                  className="text-xs text-slate-800 border-none outline-none w-full"
                   disabled={isAddingTodo}
                 />
               </div>
@@ -276,12 +282,12 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
               <p className="text-xs text-red-500">Please select a future time for today&apos;s tasks</p>
             )}
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-1.5 text-xs text-gray-800">
+              <label className="flex items-center gap-1.5 text-xs text-slate-800">
                 <input
                   type="checkbox"
                   checked={newUrgent}
                   onChange={() => setNewUrgent(!newUrgent)}
-                  className="rounded text-rose-500"
+                  className="rounded text-purple-600 focus:ring-purple-500"
                   disabled={isAddingTodo}
                 />
                 Mark as urgent
@@ -289,7 +295,7 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
               <div className="flex gap-2">
                 <button
                   onClick={resetForm}
-                  className="px-3 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+                  className="px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-50"
                   disabled={isAddingTodo}
                 >
                   Cancel
@@ -297,10 +303,10 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                 <button
                   onClick={handleAddTodo}
                   disabled={isAddingTodo || dateError || timeError || newTodo.trim() === ""}
-                  className={`px-3 py-1 text-xs rounded flex items-center gap-1.5 ${
+                  className={`px-3 py-1 text-xs rounded-md flex items-center gap-1.5 ${
                     isAddingTodo || dateError || timeError || newTodo.trim() === "" 
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                    : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+                    ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+                    : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 shadow-sm"
                   }`}
                 >
                   {isAddingTodo && <Loader2 className="w-3 h-3 animate-spin" />}
@@ -311,24 +317,24 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
           </div>
           
           {isAddingTodo && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center rounded-lg">
-              <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center rounded-md">
+              <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
             </div>
           )}
         </div>
       ) : (
-        <div className="space-y-3 overflow-y-auto custom-scrollbar" style={{ height: "calc(100% - 60px)" }}>
+        <div className="space-y-2 overflow-y-auto custom-scrollbar" style={{ height: "calc(100% - 55px)" }}>
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
-                <span className="text-sm text-gray-500">Loading tasks...</span>
+                <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
+                <span className="text-sm text-slate-500">Loading tasks...</span>
               </div>
             </div>
           ) : todos.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
+            <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 p-4">
               <div className="mb-2">
-                <Calendar className="w-10 h-10 mx-auto opacity-20" />
+                <Calendar className="w-10 h-10 mx-auto text-indigo-200" />
               </div>
               <p className="text-sm mb-1">No tasks scheduled</p>
               <p className="text-xs">Click the + button to add your first task</p>
@@ -337,14 +343,16 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
             todos.map((todo) => (
               <div 
                 key={todo.id} 
-                className={`p-3 rounded-xl transition-colors border relative group
+                className={`p-2 sm:p-3 rounded-md border relative group shadow-sm
                   ${todo.completed 
-                    ? "bg-gray-50/50 border-gray-100/20" 
-                    : "bg-blue-50/30 hover:bg-blue-50/50 border-blue-100/20"}`}
+                    ? "bg-slate-50/80 border-slate-200" 
+                    : todo.urgent
+                      ? "bg-gradient-to-r from-white to-rose-50/40 border-rose-100"
+                      : "bg-gradient-to-r from-white to-indigo-50/40 border-indigo-100"}`}
               >
                 {loadingTodoIds.includes(todo.id) && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] rounded-xl flex items-center justify-center z-10">
-                    <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] rounded-md flex items-center justify-center z-10">
+                    <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
                   </div>
                 )}
                 
@@ -352,10 +360,12 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                   <button 
                     onClick={() => toggleComplete(todo.id)}
                     disabled={loadingTodoIds.includes(todo.id)}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                    className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm
                       ${todo.completed 
-                        ? "bg-emerald-100/50 text-emerald-600" 
-                        : "bg-blue-100/50 text-blue-600 hover:bg-blue-100"}`}
+                        ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-200" 
+                        : todo.urgent
+                          ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
+                          : "bg-indigo-100 text-indigo-600 hover:bg-indigo-200"}`}
                   >
                     {todo.completed ? (
                       <CheckCircle className="w-4 h-4" />
@@ -364,11 +374,11 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                     )}
                   </button>
                   <div className="flex-1">
-                    <p className={`text-gray-800 text-sm font-medium flex items-center gap-2
-                      ${todo.completed ? "line-through text-gray-500" : ""}`}>
+                    <p className={`text-slate-800 text-sm font-medium flex items-center gap-2
+                      ${todo.completed ? "line-through text-slate-500" : ""}`}>
                       {todo.text}
                       {todo.urgent && !todo.completed && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-rose-100/50 text-rose-600 text-xs">
+                        <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-600 text-xs border border-rose-200 shadow-sm">
                           Urgent
                         </span>
                       )}
@@ -377,23 +387,23 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                   <button 
                     onClick={() => handleDeleteTodo(todo.id)}
                     disabled={loadingTodoIds.includes(todo.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-100"
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-red-100 hover:text-red-600"
                   >
-                    <X className="w-4 h-4 text-gray-400" />
+                    <X className="w-4 h-4 text-slate-400 group-hover:text-red-500" />
                   </button>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 ml-11">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 ml-9">
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="w-3 h-3 text-amber-500" />
                     <span>{todo.time}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                    <Calendar className="w-3 h-3 text-emerald-500" />
                     <span>{todo.date}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span>•</span>
-                    <MapPin className="w-3 h-3" />
+                    <span className="text-slate-300">•</span>
+                    <MapPin className="w-3 h-3 text-blue-500" />
                     <span>{todo.location}</span>
                   </div>
                 </div>
