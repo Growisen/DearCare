@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import Loader from '@/components/loader'
+import Loader from '@/components/Loader'
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal'
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal'
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList'

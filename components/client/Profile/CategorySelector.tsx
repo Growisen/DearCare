@@ -18,6 +18,32 @@ const CategorySelector = ({
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Get category-specific colors
+  const getCategoryColors = (category: string) => {
+    switch (category) {
+      case 'DearCare LLP':
+        return {
+          bg: isOpen ? 'bg-blue-200' : 'bg-blue-100',
+          border: isOpen ? 'border-blue-300' : 'border-blue-200',
+          text: 'text-blue-700'
+        };
+      case 'Tata HomeNursing':
+        return {
+          bg: isOpen ? 'bg-green-200' : 'bg-green-100',
+          border: isOpen ? 'border-green-300' : 'border-green-200',
+          text: 'text-green-700'
+        };
+      default:
+        return {
+          bg: isOpen ? 'bg-gray-200' : 'bg-gray-100',
+          border: isOpen ? 'border-gray-300' : 'border-gray-200',
+          text: 'text-gray-700'
+        };
+    }
+  };
+
+  const categoryColors = getCategoryColors(currentCategory);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -47,10 +73,10 @@ const CategorySelector = ({
 
   return (
     <div className="relative inline-flex" ref={dropdownRef}>
-      <span className={`inline-flex items-center px-3 py-1 ${isOpen ? 'bg-blue-200' : 'bg-blue-100'} text-sm rounded text-blue-700 border ${isOpen ? 'border-blue-300' : 'border-blue-200'} group transition-colors`}>
+      <span className={`inline-flex items-center px-3 py-1 ${categoryColors.bg} text-sm rounded ${categoryColors.text} border ${categoryColors.border} group transition-colors`}>
         {isLoading ? (
           <span className="flex items-center">
-            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg className={`animate-spin -ml-1 mr-2 h-4 w-4 ${categoryColors.text}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -80,25 +106,31 @@ const CategorySelector = ({
       {isOpen && (
         <div className="absolute top-full left-0 mt-1 w-36 bg-white shadow-lg rounded-md border border-gray-200 z-10 overflow-hidden">
           <div className="py-1">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                disabled={isLoading}
-                className={`
-                  block w-full text-left px-4 py-2 text-sm transition-colors
-                  ${currentCategory === category 
-                    ? 'bg-blue-50 text-blue-700 font-medium' 
-                    : 'text-gray-700 hover:bg-gray-50'}
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                `}
-              >
-                {category}
-                {currentCategory === category && (
-                  <span className="ml-2 text-blue-600">✓</span>
-                )}
-              </button>
-            ))}
+            {categories.map((category) => {
+              const catColors = getCategoryColors(category);
+              return (
+                <button
+                  key={category}
+                  onClick={() => handleCategoryChange(category)}
+                  disabled={isLoading}
+                  className={`
+                    block w-full text-left px-4 py-2 text-sm transition-colors
+                    ${currentCategory === category 
+                      ? `${catColors.bg} ${catColors.text} font-medium` 
+                      : `text-gray-700 hover:bg-gray-50 hover:${catColors.text}`}
+                    ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                    border-l-4 ${currentCategory === category ? 
+                      (category === 'DearCare LLP' ? 'border-blue-500' : 'border-green-500') : 
+                      'border-transparent'}
+                  `}
+                >
+                  {category}
+                  {currentCategory === category && (
+                    <span className={`ml-2 ${catColors.text}`}>✓</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

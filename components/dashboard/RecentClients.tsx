@@ -2,8 +2,14 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Users, Search, Download, Mail, Phone, Eye, Clock } from "lucide-react"
 import { Client } from "../../types/client.types"
-import { getClients } from "../../app/actions/client-actions"
 import Link from "next/link"
+import { serviceOptions } from "@/utils/constants"
+import { getServiceLabel } from "@/utils/formatters"
+
+
+interface RecentClientsProps {
+  clientsData?: Client[];
+}
 
 const getStatusStyles = (status: Client['status']) => {
   const styles = {
@@ -26,45 +32,29 @@ const statusIcons = {
 
 const formatStatus = (status: string) => status.replace("_", " ").charAt(0).toUpperCase() + status.slice(1).replace("_", " ")
 
-export default function RecentClients() {
+export default function RecentClients({ clientsData }: RecentClientsProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [clients, setClients] = useState<Client[]>([])
+  const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null)
 
   // Fetch recent pending clients
   useEffect(() => {
-    async function loadRecentClients() {
-      setIsLoading(true)
-      setError(null)
-      
-      try {
-        // Get first page of pending clients, limit to 5
-        const result = await getClients("pending", "", 1, 5)
-        
-        if (result.success && result.clients) {
-          const typedClients = result.clients.map(client => ({
-            ...client,
-            service: client.service || "Not specified",
-            email: client.email || "No email provided",
-            phone: client.phone || "No phone provided",
-            location: client.location || "No location specified",
-            status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
-          }))
-          setClients(typedClients)
-        } else {
-          setError(result.error || "Failed to load clients")
-        }
-      } catch (err) {
-        setError("An unexpected error occurred")
-        console.error(err)
-      } finally {
-        setIsLoading(false)
-      }
+    if (clientsData) {
+      const typedClients = clientsData.map(client => ({
+        ...client,
+        service: client.service || "Not specified",
+        email: client.email || "No email provided",
+        phone: client.phone || "No phone provided",
+        location: client.location || "No location specified",
+        status: client.status as "pending" | "under_review" | "approved" | "rejected" | "assigned"
+      }));
+      setClients(typedClients);
+      setIsLoading(false);
     }
+  }, [clientsData]);
 
-    loadRecentClients()
-  }, [])
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -87,7 +77,7 @@ export default function RecentClients() {
   }
 
   return (
-    <Card className="p-6 bg-white/50 backdrop-blur-sm border border-gray-100/20 rounded-xl">
+    <Card className="p-6 bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl hover:shadow-md transition-all duration-300">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -160,7 +150,7 @@ export default function RecentClients() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-600">{client.requestDate}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{client.service}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600"> {getServiceLabel(serviceOptions, client.service || "")}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyles(client.status)}`}>
                           <StatusIcon className="w-3.5 h-3.5" />

@@ -25,7 +25,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-300">
-      <div className="bg-white w-full md:w-11/12 lg:w-4/5 xl:max-w-5xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl border border-gray-100">
+      <div className="bg-white w-full md:w-11/12 lg:w-4/5 xl:max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900">Add New Client</h2>

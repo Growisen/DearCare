@@ -30,32 +30,10 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    // IMPORTANT: Do not add code between client creation and session management
-    let user = null
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session) {
-        const { data } = await Promise.race([
-          supabase.auth.getUser(),
-          new Promise<{data: {user: null}}>((_, reject) => 
-            setTimeout(() => reject(new Error('Auth request timed out')), 10000)
-          )
-        ]);
-        user = data?.user
-      } else if (request.cookies.has('sb-refresh-token')) {
-        try {
-          const { data: refreshData } = await supabase.auth.refreshSession()
-          user = refreshData.user
-        } catch (refreshError) {
-          console.error('Session refresh failed:', refreshError)
-          supabaseResponse.cookies.delete('sb-access-token')
-          supabaseResponse.cookies.delete('sb-refresh-token')
-        }
-      }
-    } catch (error) {
-      console.error('Auth error in middleware:', error)
-    }
+    // IMPORTANT: DO NOT add code between client creation and getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     
     // Define public routes that don't require authentication
     const pathname = request.nextUrl.pathname
@@ -73,14 +51,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Check admin role for all authenticated routes
+    // Check admin role for authenticated routes
     if (user && !isPublicRoute && (!user.user_metadata?.role || user.user_metadata.role !== 'admin')) {
       // Sign out users without admin privileges
       await supabase.auth.signOut()
       supabaseResponse.cookies.delete('sb-access-token')
       supabaseResponse.cookies.delete('sb-refresh-token')
       
-      // Redirect to signin page with access denied message
       const redirectUrl = new URL('/signin', request.url)
       redirectUrl.searchParams.set('error', 'Access denied: Admin privileges required')
       return NextResponse.redirect(redirectUrl)

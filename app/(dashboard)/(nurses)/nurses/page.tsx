@@ -8,7 +8,7 @@ import NurseTable from "../../../../components/nurse/NurseTable"
 import NurseCard from "../../../../components/nurse/NurseCard"
 import {  NurseBasicInfo,NurseBasicDetails } from "@/types/staff.types"
 import { fetchBasicDetails } from "@/app/actions/add-nurse"
-import Loader from "@/components/loader"
+import Loader from "@/components/Loader"
 import { exportNurseData } from '@/app/actions/add-nurse';
 import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';

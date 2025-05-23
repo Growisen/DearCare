@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Calendar, User, AlarmClock, Clock, Check } from 'lucide-react'
+import { X, Calendar, User, AlarmClock, Clock, Check, AlertTriangle } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { LeaveRequest, LeaveRequestStatus } from '@/types/leave.types'
 
@@ -58,6 +58,7 @@ export default function LeaveRequestModal({
 }: LeaveRequestModalProps) {
   const [rejectionReason, setRejectionReason] = useState('')
   const [isRejecting, setIsRejecting] = useState(false)
+  const [isApproving, setIsApproving] = useState(false)
   
   if (!isOpen || !leaveRequest) return null
 
@@ -84,20 +85,31 @@ export default function LeaveRequestModal({
     }
   }
 
+  const handleApprove = () => {
+    if (onApprove) {
+      onApprove(leaveRequest.id);
+      setIsApproving(false);
+      onClose();
+    }
+  }
+  
+  const resetAndClose = () => {
+    setIsRejecting(false);
+    setIsApproving(false);
+    setRejectionReason('');
+    onClose();
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">
-            {isRejecting ? "Reject Leave Request" : "Leave Request Details"}
+            {isRejecting ? "Reject Leave Request" : isApproving ? "Approve Leave Request" : "Leave Request Details"}
           </h2>
           <button 
-            onClick={() => {
-              setIsRejecting(false);
-              setRejectionReason('');
-              onClose();
-            }}
+            onClick={resetAndClose}
             className="text-gray-500 hover:text-gray-700 transition"
           >
             <X className="w-5 h-5" />
@@ -132,6 +144,40 @@ export default function LeaveRequestModal({
                 }`}
               >
                 Reject
+              </button>
+            </div>
+          </div>
+        ) : isApproving ? (
+          <div className="px-6 py-4 space-y-4">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4 border border-green-100">
+                <Check className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-base font-medium text-gray-900 mb-2">
+                Confirm Leave Approval
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                Are you sure you want to approve this leave request for <span className="font-medium">{leaveRequest.nurseName}</span>?
+              </p>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-md px-4 py-3 mt-2 flex items-start gap-2 text-left w-full">
+                <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-yellow-700">
+                  This action cannot be undone. The employee will be notified upon approval.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => setIsApproving(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleApprove}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium transition"
+              >
+                Confirm Approval
               </button>
             </div>
           </div>
@@ -215,10 +261,7 @@ export default function LeaveRequestModal({
               {isPending && onApprove && onReject && (
                 <>
                   <button 
-                    onClick={() => {
-                      onApprove(leaveRequest.id)
-                      onClose()
-                    }}
+                    onClick={() => setIsApproving(true)}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium transition"
                   >
                     Approve
