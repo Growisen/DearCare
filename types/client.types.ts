@@ -471,3 +471,15 @@ export interface AssessmentData {
   family_members: FamilyMember[];
   recorder_info: RecorderInfo;
 }
+
+
+export interface ClientFile {
+  id: string;
+  client_id: string;
+  name: string;
+  type: string;
+  storage_path: string;
+  url: string;
+  uploaded_at: string;
+  tag?: string
+}

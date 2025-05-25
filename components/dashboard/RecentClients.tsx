@@ -182,7 +182,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
                             {formatStatus(client.status)}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-600 mt-1">{client.service}</p>
+                        <p className="text-sm text-slate-600 mt-1">{getServiceLabel(serviceOptions, client.service || "")}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm">

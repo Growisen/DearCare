@@ -86,10 +86,10 @@ const CategorySelector = ({
           <>
             {currentCategory}
             <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(!isOpen);
-              }}
+              // onClick={(e) => {
+              //   e.stopPropagation();
+              //   setIsOpen(!isOpen);
+              // }}
               className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Edit category"
               title="Edit category"
