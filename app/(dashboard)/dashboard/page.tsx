@@ -12,7 +12,6 @@ export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState("")
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   // Timer for clock
   useEffect(() => {
@@ -30,11 +29,8 @@ export default function DashboardPage() {
         if (result.success && result.data) {
           setDashboardData(result.data)
         } else {
-          setError(result.error || "Failed to load dashboard data")
+          throw new Error(result.error || "Failed to load dashboard data")
         }
-      } catch (err) {
-        setError("An unexpected error occurred")
-        console.error(err)
       } finally {
         setIsLoading(false)
       }
@@ -50,24 +46,6 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
           <span className="text-lg font-medium text-gray-700">Loading dashboard...</span>
-        </div>
-      </div>
-    )
-  }
-
-  // Show error state if any
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-5 rounded-lg max-w-lg">
-          <h3 className="text-lg font-medium mb-2">Error Loading Dashboard</h3>
-          <p>{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     )

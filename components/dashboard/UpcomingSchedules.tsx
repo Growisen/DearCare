@@ -5,7 +5,8 @@ import { Card } from "../ui/card"
 import { Calendar, CheckCircle, Circle, Clock, MapPin, Plus, X, Loader2 } from "lucide-react"
 import { addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
 import toast from 'react-hot-toast';
-// import Link from "next/link"
+import ConfirmationModal from "../common/ConfirmationModal"
+import ModalPortal from "../ui/ModalPortal"
 
 interface UpcomingSchedulesProps {
   todosData?: Todo[];
@@ -24,6 +25,11 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingTodoIds, setLoadingTodoIds] = useState<string[]>([]);
   const [isAddingTodo, setIsAddingTodo] = useState(false);
+  
+  // Added for delete confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [todoToDelete, setTodoToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Format date values
   const today = new Date().toISOString().split('T')[0];
@@ -173,14 +179,23 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
     }
   };
 
-  const handleDeleteTodo = async (id: string) => {
+  const confirmDeleteTodo = (id: string) => {
+    setTodoToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteTodo = async () => {
+    if (!todoToDelete) return;
+    
     try {
-      setLoadingTodoIds(prev => [...prev, id]);
+      setIsDeleting(true);
+      setLoadingTodoIds(prev => [...prev, todoToDelete]);
       
-      const result = await deleteTodo(id);
+      const result = await deleteTodo(todoToDelete);
       
       if (result.success) {
-        setTodos(todos.filter(todo => todo.id !== id));
+        setTodos(todos.filter(todo => todo.id !== todoToDelete));
+        toast.success("Task deleted successfully");
       } else {
         toast.error(result.error || "Failed to delete task");
       }
@@ -188,8 +203,16 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
       console.error("Error deleting todo:", error);
       toast.error("Failed to delete your task. Please try again.");
     } finally {
-      setLoadingTodoIds(prev => prev.filter(todoId => todoId !== id));
+      setIsDeleting(false);
+      setLoadingTodoIds(prev => prev.filter(todoId => todoId !== todoToDelete));
+      setShowDeleteModal(false);
+      setTodoToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setTodoToDelete(null);
   };
 
   const resetForm = () => {
@@ -385,7 +408,7 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                     </p>
                   </div>
                   <button 
-                    onClick={() => handleDeleteTodo(todo.id)}
+                    onClick={() => confirmDeleteTodo(todo.id)} 
                     disabled={loadingTodoIds.includes(todo.id)}
                     className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-red-100 hover:text-red-600"
                   >
@@ -411,6 +434,23 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
             ))
           )}
         </div>
+      )}
+      
+      {/* Add delete confirmation modal */}
+      {showDeleteModal && (
+        <ModalPortal>
+          <ConfirmationModal
+            isOpen={showDeleteModal}
+            title="Delete Task"
+            message="Are you sure you want to delete this task? This action cannot be undone."
+            onConfirm={handleDeleteTodo}
+            onCancel={cancelDelete}
+            confirmButtonText="Delete"
+            cancelButtonText="Cancel" 
+            confirmButtonColor="red"
+            isLoading={isDeleting}
+          />
+        </ModalPortal>
       )}
     </Card>
   )
