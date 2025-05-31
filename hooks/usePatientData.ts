@@ -98,6 +98,7 @@ export const usePatientData = (id: string) => {
             foodsToAvoid: assessmentData.foods_to_avoid || '',
             patientPosition: assessmentData.patient_position || '',
             feedingMethod: assessmentData.feeding_method || '',
+            updatedAt: assessmentData.updated_at || '',
             familyMembers: assessmentData.family_members || [],
             equipment: assessmentData.equipment || {},
             environment: assessmentData.environment || {},

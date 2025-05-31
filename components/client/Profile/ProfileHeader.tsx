@@ -94,7 +94,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   
             {/* Additional Info */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start mt-3 gap-2">
-              <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
+              {/* <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
                 <svg
                   className="mr-1"
                   xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +111,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
                 {patient.location}
-              </span>
+              </span> */}
               <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
                 Reg.No: {patient.registrationNumber || "Not Available"}
               </span>

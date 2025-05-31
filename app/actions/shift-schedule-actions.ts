@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './auth';
 import { updateNurseStatus } from './add-nurse';
+import { getClientProfileUrl } from '@/utils/formatters';
 
 export interface ShiftAssignment {
   nurseId: string;
@@ -225,39 +226,151 @@ export async function getNurseAssignments(clientId: string): Promise<{
 }
 
 
-export async function getAllNurseAssignments(): Promise<{
+export interface NurseAssignmentData {
+  id: number;
+  nurse_id: number;
+  client_id: string;
+  start_date: string;
+  end_date: string;
+  shift_start_time: string;
+  shift_end_time: string;
+  status: 'active' | 'completed' | 'cancelled';
+  assigned_type: string;
+  nurses?: {
+    first_name: string;
+    last_name: string;
+  };
+  client_type?: string;
+  client_name?: string;
+  client_profile_url?: string;
+}
+
+export async function getAllNurseAssignments(
+  page: number = 1, 
+  pageSize: number = 10,
+  filterStatus: 'all' | 'active' | 'completed' | 'cancelled' = 'all',
+  searchQuery: string = ''
+): Promise<{
   success: boolean;
   data?: NurseAssignmentData[];
+  count?: number;
   error?: string;
+  noResults?: boolean;
 }> {
   try {
     const supabase = await createSupabaseServerClient();
-    
-    const { data, error } = await supabase
+
+    let query = supabase
       .from('nurse_client')
-      .select('*');
+      .select(`
+        *,
+        nurses(first_name, last_name),
+        clients(
+          id,
+          client_type,
+          individual_clients(requestor_name),
+          organization_clients(organization_name)
+        )
+      `, { count: 'exact' });
+
+    if (filterStatus !== 'all') {
+      query = query.eq('status', filterStatus);
+    }
+
+    // Improved search query handling
+    if (searchQuery) {
+      try {
+        // You can expand this to search across multiple fields
+        query = query.or(`nurse_id.eq.${parseInt(searchQuery) || 0}`);
+      } catch (searchError) {
+        console.error('Search query error:', searchError);
+        return {
+          success: false,
+          error: 'Invalid search query format',
+          data: [],
+          count: 0
+        };
+      }
+    }
     
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await query
+      .range(from, to)
+      .order('id', { ascending: false });
+
     if (error) {
-      console.error('Error fetching all nurse assignments:', error);
+      console.error('Error fetching nurse assignments:', error);
       return {
         success: false,
         error: error.message
       };
     }
-    
+
+    // Check for no results when search was applied
+    if (searchQuery && (!data || data.length === 0)) {
+      return {
+        success: true,
+        data: [],
+        count: 0,
+        noResults: true,
+        error: `No results found for search: "${searchQuery}"`
+      };
+    }
+
+    const processedData = data?.map(item => {
+      let clientName = '';
+      const clientType = item.clients?.client_type || '';
+      
+      if (item.clients?.client_type === 'individual') {
+        const individualClient = item.clients.individual_clients;
+        
+        if (individualClient) {
+          if (Array.isArray(individualClient) && individualClient.length > 0) {
+            clientName = individualClient[0].requestor_name || '';
+          } else if (typeof individualClient === 'object') {
+            clientName = individualClient.requestor_name || '';
+          }
+        }
+      } 
+
+      else if (item.clients?.client_type === 'organization') {
+        const organizationClient = item.clients.organization_clients;
+        
+        if (organizationClient) {
+          if (Array.isArray(organizationClient) && organizationClient.length > 0) {
+            clientName = organizationClient[0].organization_name || '';
+          } else if (typeof organizationClient === 'object') {
+            clientName = organizationClient.organization_name || '';
+          }
+        }
+      }
+
+      const clientProfileUrl = getClientProfileUrl(item.client_id, clientType);
+      
+      return {
+        ...item,
+        client_type: clientType,
+        client_name: clientName,
+        client_profile_url: clientProfileUrl,
+        clients: undefined,
+      };
+    });
+
     return {
       success: true,
-      data: data as NurseAssignmentData[]
+      data: processedData as NurseAssignmentData[],
+      count: count || 0
     };
   } catch (error) {
-    console.error('Unexpected error fetching all nurse assignments:', error);
+    console.error('Unexpected error fetching nurse assignments:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch nurse assignments'
     };
   }
 }
-
 
 export async function updateNurseAssignment(
   assignmentId: number,
