@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
 import { fetchStaffAttendance, AttendanceRecord } from '@/app/actions/attendance-actions'
-import { getLocationName } from '@/utils/geocoding'
 
 import { AttendanceHeader } from '@/components/staff/attendance/AttendanceHeader'
 import { AttendanceTable } from '@/components/staff/attendance/AttendanceTable'
@@ -20,7 +19,6 @@ export default function StaffAttendancePage() {
   // State for filters
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [searchTerm, setSearchTerm] = useState('')
-  const [resolvedLocations, setResolvedLocations] = useState<Record<number, string>>({})
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -79,39 +77,6 @@ export default function StaffAttendancePage() {
     setFilteredData(paginatedData);
   }, [attendanceData, searchTerm, currentPage, pageSize]);
   
-  // Resolve locations
-  useEffect(() => {
-    async function resolveLocations() {
-      if (!attendanceData.length) return;
-      
-      const locations: Record<number, string> = {};
-      
-      for (const record of attendanceData) {
-        try {
-          if (record.location && typeof record.location === 'string') {
-            // If it looks like JSON coordinates
-            if (record.location.includes('latitude')) {
-              const coords = JSON.parse(record.location);
-              const locationName = await getLocationName(coords);
-              locations[record.id] = locationName;
-            } else {
-              locations[record.id] = record.location;
-            }
-          }
-        } catch (error) {
-          console.error(`Failed to resolve location for record ${record.id}:`, error);
-          locations[record.id] = record.location || 'Unknown';
-        }
-      }
-      
-      setResolvedLocations(locations);
-    }
-    
-    if (!loading && !error) {
-      resolveLocations();
-    }
-  }, [attendanceData, loading, error]);
-  
   // Handle date change
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
@@ -167,7 +132,6 @@ export default function StaffAttendancePage() {
             record.shiftStart || 'N/A',
             record.shiftEnd || 'N/A',
             record.hoursWorked || 'N/A',
-            resolvedLocations[record.id] ? `"${resolvedLocations[record.id]}"` : 'Unknown',
             record.status
           ].join(','))
       ].join('\n');
@@ -221,7 +185,6 @@ export default function StaffAttendancePage() {
           <>
             <AttendanceTable
               attendanceData={filteredData}
-              resolvedLocations={resolvedLocations}
             />
             
             <PaginationControls
