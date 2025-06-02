@@ -1,47 +1,37 @@
 import React from "react"
-import { Search, X, Plus, Download } from "lucide-react"
+import { Search, X, Download } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { ClientStatus } from "@/types/client.types"
 
-type ClientHeader = {
-  onAddClient: () => void
+type AssignmentHeaderProps = {
   onExport: () => void
   isExporting: boolean
+  selectedStatus: 'all' | 'active' | 'completed' | 'cancelled'
   searchInput: string
   setSearchInput: (value: string) => void
-  selectedStatus: string
-  handleStatusChange: (status: ClientStatus) => void
-  handleSearch: () => void
+  handleStatusChange: (status: 'all' | 'active' | 'completed' | 'cancelled') => void
+  handleSearch: (e: React.FormEvent) => void
   handleResetFilters: () => void
 }
 
-export function ClientHeader({ 
-  onAddClient, 
-  onExport, 
-  isExporting, 
-  searchInput, 
-  setSearchInput, 
-  selectedStatus, 
-  handleStatusChange, 
+export function AssignmentHeader({
+  onExport,
+  isExporting,
+  selectedStatus,
+  searchInput,
+  setSearchInput,
+  handleStatusChange,
   handleSearch,
   handleResetFilters
-}: ClientHeader) {
+}: AssignmentHeaderProps) {
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
       {/* Header with title and action buttons */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div>
-          <h1 className="text-lg font-semibold text-gray-800">Client Requests</h1>
-          <p className="text-xs text-gray-500">Manage and review client service requests</p>
+          <h1 className="text-lg font-semibold text-gray-800">Nurse Assignments</h1>
+          <p className="text-xs text-gray-500">Manage and view all nurse scheduling assignments</p>
         </div>
         <div className="flex gap-2">
-          <button 
-            onClick={onAddClient}
-            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
-          >
-            <Plus size={16} />
-            Add
-          </button>
           <button 
             onClick={onExport}
             disabled={isExporting}
@@ -71,11 +61,11 @@ export function ClientHeader({
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name, contact or location..."
+            placeholder="Search by Nurse ID..."
             className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as React.FormEvent)}
           />
           {searchInput && (
             <button 
@@ -90,7 +80,7 @@ export function ClientHeader({
             </button>
           )}
           <button
-            onClick={handleSearch}
+            onClick={(e) => handleSearch(e as React.FormEvent)}
             className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
           >
             Search
@@ -102,24 +92,24 @@ export function ClientHeader({
           <span className="text-xs font-medium text-gray-600 whitespace-nowrap hidden sm:inline">Status:</span>
           {/* Desktop view - compact pill buttons */}
           <div className="hidden sm:flex gap-1.5 items-center">
-            {["all", "pending", "approved", "under_review", "rejected"].map((status) => (
+            {['all', 'active', 'completed', 'cancelled'].map((status) => (
               <button
                 key={status}
-                onClick={() => handleStatusChange(status as ClientStatus)}
+                onClick={() => handleStatusChange(status as 'all' | 'active' | 'completed' | 'cancelled')}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   selectedStatus === status
                     ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                 }`}
               >
-                {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+                {status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
             ))}
           </div>
           {/* Mobile view - compact dropdown */}
           <select
             value={selectedStatus}
-            onChange={(e) => handleStatusChange(e.target.value as ClientStatus)}
+            onChange={(e) => handleStatusChange(e.target.value as 'all' | 'active' | 'completed' | 'cancelled')}
             className="sm:hidden w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
             style={{ 
               backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
@@ -129,12 +119,10 @@ export function ClientHeader({
               paddingRight: `2rem`
             }}
           >
-            <option value="all">All Clients</option>
-            {["approved", "pending", "under_review", "rejected"].map((status) => (
-              <option key={status} value={status}>
-                {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
-              </option>
-            ))}
+            <option value="all">All Assignments</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>

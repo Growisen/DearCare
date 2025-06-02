@@ -41,6 +41,14 @@ export default function StatusManagement({ complaint, updateComplaint }: StatusM
         ...complaint,
         status: status,
         lastUpdated: formattedDate,
+        statusHistory: [
+          ...(complaint.statusHistory || []),
+          {
+            status: status,
+            timestamp: currentDate,
+            notes: status === "resolved" ? resolution : undefined
+          }
+        ]
       };
       
       if (status === "resolved" && complaint.status !== "resolved") {

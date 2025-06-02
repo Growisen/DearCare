@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import InfoField from './InfoField';
 import { Json, FamilyMember, LabInvestigations, RecorderInfo } from '@/types/client.types';
 import { equipmentCategories } from '@/utils/constants';
+import { formatDate } from '@/utils/formatters';
 
 interface MedicalInfoProps {
   assessment: {
@@ -26,6 +27,7 @@ interface MedicalInfoProps {
     otherSocialHistory?: string;
     feedingMethod?: string;
     currentStatus?: string;
+    updatedAt?: string;
     lab_investigations?: LabInvestigations;
     equipment?: Json | Record<string, boolean>;
     environment?: Json | Record<string, boolean>;
@@ -334,6 +336,12 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
               <div className="flex items-center">
                 <span className="text-sm font-medium text-gray-600 w-20">Role:</span>
                 <span className="text-sm text-gray-800">{assessment.recorderInfo.recorderRole || "Not provided"}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-600 w-20">Updated:</span>
+                <span className="text-sm text-gray-800">
+                  {assessment.updatedAt ? formatDate(assessment.updatedAt) : "Not available"}
+                </span>
               </div>
             </div>
           ) : (
