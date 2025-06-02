@@ -491,7 +491,7 @@ export async function getProfileUrl(
     let url = '';
     switch (entityType) {
       case 'nurse':
-        url = `/nurses/${id}/profile`;
+        url = `/nurses/${id}`;
         break;
       case 'organization':
         url = `/client-profile/organization-client/${id}`;

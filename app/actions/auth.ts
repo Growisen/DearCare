@@ -58,10 +58,18 @@ export async function signIn(formData: FormData) {
     return { error: "Access denied: Admin privileges required", success: false }
   }
   
-  console.log(user)
-  
-  return { error: null, success: true }
+  return { 
+    error: null, 
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.user_metadata.role,
+      name: user.user_metadata.name || user.email
+    }
+  }
 }
+
 
 export async function signUp(formData: FormData) {
   const email = formData.get('email') as string

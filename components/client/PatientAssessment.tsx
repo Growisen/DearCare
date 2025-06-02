@@ -3,6 +3,8 @@ import { getPatientAssessment, savePatientAssessment } from '../../app/actions/c
 import { AssessmentData } from '@/types/client.types';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import { usePatientAssessmentForm, getDefaultFormData } from '@/hooks/usePatientAssessment';
+import { useUserData } from "@/hooks/useUserData";
+
 
 interface PatientAssessmentProps {
   clientId: string;
@@ -15,7 +17,10 @@ interface PatientAssessmentProps {
 export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const { userData } = useUserData();
+
+  console.log("userData", userData);
+
   const {
     formData,
     setFormData,
@@ -42,7 +47,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
           const assessmentData = result.assessment as AssessmentData;
           const environment = assessmentData.environment || {};
           const labInvestigations = assessmentData.lab_investigations || {};
-          
+
           setFormData({
             // Personal Details
             guardianOccupation: assessmentData.guardian_occupation || '',
@@ -134,6 +139,22 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             feedingMethod: assessmentData.feeding_method || '',
 
             familyMembers: assessmentData.family_members || [],
+
+            recorderInfo: assessmentData.recorder_info ? {
+              recorderId: assessmentData.recorder_info.recorderId || '',
+              recorderName: assessmentData.recorder_info.recorderName || '',
+              recorderRole: assessmentData.recorder_info.recorderRole || '',
+              familyRelationship: assessmentData.recorder_info.familyRelationship || '',
+              recorderTimestamp: assessmentData.recorder_info.recorderTimestamp || '',
+              nurseRegistrationNumber: assessmentData.recorder_info.nurseRegistrationNumber || ''
+            } : {
+              recorderId: '',
+              recorderName: '',
+              recorderRole: '',
+              familyRelationship: '',
+              recorderTimestamp: '',
+              nurseRegistrationNumber: ''
+            }
           });
 
           setLoading(false);
@@ -155,9 +176,21 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     e.preventDefault();
     
     try {
+
+      const assessmentDataWithRecorder = {
+        ...formData,
+        recorderInfo: {
+          recorderId: userData?.id || '',
+          recorderName: userData.name,
+          recorderRole: userData.role,
+          familyRelationship: '',
+          recorderTimestamp: new Date().toISOString(),
+        }
+      };
+
       const response = await savePatientAssessment({
         clientId,
-        assessmentData: formData
+        assessmentData: assessmentDataWithRecorder
       });
           
       if (response.success) {

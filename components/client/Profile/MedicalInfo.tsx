@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import InfoField from './InfoField';
-import { Json, FamilyMember, LabInvestigations } from '@/types/client.types';
+import { Json, FamilyMember, LabInvestigations, RecorderInfo } from '@/types/client.types';
 import { equipmentCategories } from '@/utils/constants';
+import { formatDate } from '@/utils/formatters';
 
 interface MedicalInfoProps {
   assessment: {
@@ -26,18 +27,18 @@ interface MedicalInfoProps {
     otherSocialHistory?: string;
     feedingMethod?: string;
     currentStatus?: string;
+    updatedAt?: string;
     lab_investigations?: LabInvestigations;
     equipment?: Json | Record<string, boolean>;
     environment?: Json | Record<string, boolean>;
     familyMembers: Array<FamilyMember>;
-    [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined | LabInvestigations;
+    recorderInfo: RecorderInfo;
+    [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined | LabInvestigations | RecorderInfo;
   };
 }
 
 const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-
-  console.log('MedicalInfo assessment:', assessment.lab_investigations);
 
   const toggleSection = (sectionName: string) => {
     if (expandedSection === sectionName) {
@@ -318,6 +319,34 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
               <p className="text-sm text-gray-500">No equipment details recorded</p>
             )}
           </div>
+        </div>
+      )
+    },
+    {
+      id: 'recorder-info',
+      title: 'Recorded By',
+      content: (
+        <div className="p-3 bg-gray-50 rounded-md border border-gray-100">
+          {assessment?.recorderInfo ? (
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-600 w-20">Name:</span>
+                <span className="text-sm text-gray-800">{assessment.recorderInfo.recorderName || "Not provided"}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-600 w-20">Role:</span>
+                <span className="text-sm text-gray-800">{assessment.recorderInfo.recorderRole || "Not provided"}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-600 w-20">Updated:</span>
+                <span className="text-sm text-gray-800">
+                  {assessment.updatedAt ? formatDate(assessment.updatedAt) : "Not available"}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">No recorder information available</p>
+          )}
         </div>
       )
     }

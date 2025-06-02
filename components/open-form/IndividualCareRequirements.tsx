@@ -67,7 +67,7 @@ export const IndividualCareRequirements = ({ formData, handleInputChange, formEr
             ))}
           </select>
         </div>
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="careDuration">
             Care Duration <span className="text-red-500">*</span>
           </label>
@@ -85,7 +85,7 @@ export const IndividualCareRequirements = ({ formData, handleInputChange, formEr
             <option value="night">Night Care</option>
             <option value="weekly">Weekly Visits</option>
           </select>
-        </div>
+        </div> */}
         <InputField 
           label="Start Date"
           type="date" 

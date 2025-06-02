@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Nurse } from '@/types/staff.types';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
+import ModalPortal from '@/components/ui/ModalPortal';
+import { formatDate } from '@/utils/formatters';
 
 interface NurseAssignment {
   id?: number;
@@ -27,9 +30,29 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   onEndAssignment,
   onDeleteAssignment,
 }) => {
-  console.log(nurses)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<number | string | null>(null);
 
+  console.log(nurses)
   console.log("assignment", assignments)
+
+  const handleDeleteClick = (id: number | string) => {
+    setAssignmentToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (assignmentToDelete !== null) {
+      onDeleteAssignment(assignmentToDelete);
+      setIsDeleteModalOpen(false);
+      setAssignmentToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setAssignmentToDelete(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -49,9 +72,9 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                 </h3>
                 <div className="mt-1 text-sm text-gray-600">
                   <p>Shift: {assignment.shiftType}</p>
-                  <p>Start Date: {new Date(assignment.startDate).toLocaleDateString()}</p>
+                  <p>Start Date: {formatDate(assignment.startDate)}</p>
                   {assignment.endDate && (
-                    <p>End Date: {new Date(assignment.endDate).toLocaleDateString()}</p>
+                    <p>End Date: {formatDate(assignment.endDate)}</p>
                   )}
                   <span
                     className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${
@@ -84,7 +107,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   </>
                 )}
                 <button
-                  onClick={() => onDeleteAssignment(assignment.id || assignment.nurseId)}
+                  onClick={() => handleDeleteClick(assignment.id || assignment.nurseId)}
                   className="text-gray-600 hover:text-gray-800 text-sm font-medium"
                 >
                   Delete
@@ -97,6 +120,18 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
       {assignments.length === 0 && (
         <p className="text-gray-500 text-center py-4">No nurse assignments found</p>
       )}
+
+      <ModalPortal>
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          title="Delete Assignment"
+          message="Are you sure you want to delete this nurse assignment? This action cannot be undone."
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+          confirmButtonText="Delete"
+          confirmButtonColor="red"
+        />
+      </ModalPortal>
     </div>
   );
 };

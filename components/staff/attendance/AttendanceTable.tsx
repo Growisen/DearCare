@@ -5,12 +5,10 @@ import LocationMap from "@/components/staff/attendance/LocationMap"
 
 type AttendanceTableProps = {
   attendanceData: AttendanceRecord[]
-  resolvedLocations: Record<number, string>
 }
 
-const AttendanceTableRow = memo(({ record, locationName }: { 
+const AttendanceTableRow = memo(({ record }: { 
   record: AttendanceRecord, 
-  locationName: string
 }) => {
   return (
     <tr className="hover:bg-gray-50">
@@ -42,26 +40,17 @@ const AttendanceTableRow = memo(({ record, locationName }: {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{record.hoursWorked || "N/A"}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-        {locationName ? (
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center">
-              <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-              <span>{locationName}</span>
-            </div>
-            {record.location && (
-              <div className="ml-6 w-56">
-                <LocationMap location={record.location} />
-              </div>
-            )}
-          </div>
-        ) : record.location ? (
+        <div className="flex flex-col space-y-2">
           <div className="flex items-center">
             <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-            <span>Resolving location...</span>
+            <span>{record.location}</span>
           </div>
-        ) : (
-          "N/A"
-        )}
+          {record.location && (
+            <div className="ml-6 w-56">
+              <LocationMap location={record.location} />
+            </div>
+          )}
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -78,9 +67,8 @@ const AttendanceTableRow = memo(({ record, locationName }: {
 
 AttendanceTableRow.displayName = 'AttendanceTableRow';
 
-const AttendanceMobileCard = memo(({ record, locationName }: { 
+const AttendanceMobileCard = memo(({ record }: { 
   record: AttendanceRecord, 
-  locationName: string
 }) => {
   return (
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
@@ -106,7 +94,14 @@ const AttendanceMobileCard = memo(({ record, locationName }: {
         <p className="text-gray-500">Hours Worked:</p>
         <p className="text-gray-800">{record.hoursWorked || "N/A"}</p>
         <p className="text-gray-500">Location:</p>
-        <p className="text-gray-800 break-all">{locationName || "Resolving location..."}</p>
+        <div className="space-y-2">
+          <p className="text-gray-800 break-all">{record.location || "Resolving location..."}</p>
+          {record.location && (
+            <div className="w-full">
+              <LocationMap location={record.location} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -116,7 +111,6 @@ AttendanceMobileCard.displayName = 'AttendanceMobileCard';
 
 export const AttendanceTable = memo(function AttendanceTable({ 
   attendanceData, 
-  resolvedLocations 
 }: AttendanceTableProps) {
   return (
     <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
@@ -140,7 +134,6 @@ export const AttendanceTable = memo(function AttendanceTable({
                 <AttendanceTableRow 
                   key={record.id} 
                   record={record}
-                  locationName={resolvedLocations[record.id] || ""}
                 />
               ))
             ) : (
@@ -161,7 +154,6 @@ export const AttendanceTable = memo(function AttendanceTable({
             <AttendanceMobileCard
               key={record.id}
               record={record}
-              locationName={resolvedLocations[record.id] || ""}
             />
           ))
         ) : (

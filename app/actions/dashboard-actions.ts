@@ -69,7 +69,7 @@ export async function fetchDashboardData(): Promise<{
     ] = await Promise.all([
 
       Promise.all([
-        supabase.from('nurses').select('count').eq('status', 'unassigned').single(),
+        supabase.from('nurses').select('count').neq('status', 'leave').single(),
         supabase.from('nurse_client').select('count').single(),
         supabase.from('clients').select('count').eq('status', 'pending').single(),
         supabase.from('clients').select('count').eq('status', 'approved').single()

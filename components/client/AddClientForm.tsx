@@ -100,7 +100,7 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
       {/* Care Requirements */}
       {clientType === 'individual' ? (
         <div className="mb-8 border-b border-gray-200 pb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Care Requirements</h2>
+          {/* <h2 className="text-lg font-medium text-gray-900 mb-4">Care Requirements</h2> */}
           
           <IndividualCareRequirements 
             formData={formData}

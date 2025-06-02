@@ -51,6 +51,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
 
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSaving]);
   
   const triggerSave = useCallback(() => {

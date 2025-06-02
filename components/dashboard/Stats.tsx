@@ -15,10 +15,10 @@ interface StatsProps {
 
 export default function Stats({ statsData }: StatsProps) {
   const [stats, setStats] = useState<Stat[]>([
-    { title: "Active Nurses", value: 0, icon: Users, trend: "0%", trendUp: true, bgColor: "bg-blue-100/30", iconColor: "text-blue-500" },
-    { title: "Current Assignments", value: 0, icon: Calendar, trend: "0%", trendUp: true, bgColor: "bg-emerald-100/30", iconColor: "text-emerald-500" },
-    { title: "Open Requests", value: 0, icon: Activity, trend: "0%", trendUp: true, bgColor: "bg-amber-100/30", iconColor: "text-amber-500" },
-    { title: "Approved Clients", value: 0, icon: Building2, trend: "0%", trendUp: true, bgColor: "bg-purple-100/30", iconColor: "text-purple-500" },
+    { title: "Active Nurses", value: 0, icon: Users, trend: "0%", trendUp: true, bgColor: "bg-blue-100", iconColor: "text-blue-600" },
+    { title: "Current Assignments", value: 0, icon: Calendar, trend: "0%", trendUp: true, bgColor: "bg-emerald-100", iconColor: "text-emerald-600" },
+    { title: "Open Requests", value: 0, icon: Activity, trend: "0%", trendUp: true, bgColor: "bg-amber-100", iconColor: "text-amber-600" },
+    { title: "Approved Clients", value: 0, icon: Building2, trend: "0%", trendUp: true, bgColor: "bg-purple-100", iconColor: "text-purple-600" },
   ]);
   const [isLoading, setIsLoading] = useState(!statsData);
 
@@ -44,22 +44,26 @@ export default function Stats({ statsData }: StatsProps) {
   return (
     <>
       {stats.map((stat) => (
-        <Card key={stat.title} className="p-4 group hover:shadow-md transition-all duration-300 bg-white/90 backdrop-blur-sm border border-gray-100 hover:border-gray-200 rounded-xl shadow-sm hover:translate-y-[-2px]">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center transition-transform group-hover:scale-105 mb-2 sm:mb-0`}>
-              <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
+        <Card 
+          key={stat.title} 
+          className="p-3 bg-white border border-slate-200 shadow-sm rounded-md h-full flex flex-col justify-center"
+        >
+          <div className="flex items-center gap-2.5 w-full">
+            <div className={`min-w-8 w-8 h-8 rounded-md ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
+              <stat.icon className={`w-4 h-4 ${stat.iconColor}`} />
             </div>
-            <div className="flex-1 w-full text-center sm:text-left">
-              <h3 className="text-xs font-medium text-gray-600 truncate">{stat.title}</h3>
-              <div className="flex items-center justify-center sm:justify-start gap-2">
-                <span className="text-xl font-bold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xs xs:text-sm font-medium text-slate-800 truncate">{stat.title}</h3>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base xs:text-lg font-semibold text-slate-900 whitespace-nowrap">
                   {isLoading ? (
                     <span className="animate-pulse">...</span>
                   ) : (
                     <CountUp isCounting end={stat.value} duration={2} />
                   )}
                 </span>
-                {/* <span className={`text-xs flex items-center gap-0.5 ${stat.trendUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {/* Uncomment if you want to show trend
+                <span className={`text-xs flex items-center gap-0.5 ${stat.trendUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                   <TrendingUp className={`w-3 h-3 ${!stat.trendUp && 'rotate-180'}`} />
                   {stat.trend}
                 </span> */}

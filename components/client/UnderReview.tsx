@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
 import RejectModal from './RejectModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface InputFieldProps {
   label: string;
@@ -53,6 +54,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
 );
 
 export function UnderReviewContent({ clientId, clientType, onClose, onStatusChange }: UnderReviewContentProps) {
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -104,10 +106,21 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
             hasSupportiveEnv: formData.hasSupportiveEnv
           }
         };
+
+        const assessmentDataWithRecorder = {
+          ...formattedData,
+          recorderInfo: {
+            recorderId: user?.id || '',
+            recorderName: 'Admin',
+            recorderRole: 'Admin',
+            familyRelationship: '',
+            recorderTimestamp: new Date().toISOString(),
+          }
+        };
         
         const assessmentResult = await savePatientAssessment({
           clientId,
-          assessmentData: formattedData
+          assessmentData: assessmentDataWithRecorder
         });
         
         if (!assessmentResult.success) {
