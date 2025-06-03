@@ -170,6 +170,7 @@ export interface NurseDocuments {
   };
   status: 'assigned' | 'unassigned' | 'leave';
   experience: number | null;
+  regno: string | null;
   rating: number;
   contact: {
     email: string | null;

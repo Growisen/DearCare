@@ -110,6 +110,37 @@ export interface SimplifiedNurseDetails {
 
 import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo, Nurse, NurseBasicDetails } from '@/types/staff.types'
 import { createSupabaseServerClient } from './auth'
+import { SupabaseClient } from '@supabase/supabase-js'
+
+
+async function generateNurseRegNo(
+  supabase: SupabaseClient, 
+  admittedType: 'Tata_Homenursing' | 'Dearcare_Llp'
+): Promise<string> {
+  const currentYear = new Date().getFullYear();
+  const prefix = admittedType === 'Tata_Homenursing' ? 'TH' : 'DC';
+  
+  // Get current timestamp in milliseconds and take last 4 digits
+  const timestamp = new Date().getTime();
+  const uniqueSequence = String(timestamp % 10000).padStart(4, '0');
+  
+  // Format: PREFIX + YEAR + TIMESTAMP_SEQUENCE
+  const nurseRegNo = `${prefix}${currentYear}${uniqueSequence}`;
+
+  // Verify uniqueness
+  const { data: existingNurse } = await supabase
+    .from('nurses')
+    .select('nurse_reg_no')
+    .eq('nurse_reg_no', nurseRegNo)
+    .single();
+
+  // If a collision occurs (extremely rare), try again with new timestamp
+  if (existingNurse) {
+    return generateNurseRegNo(supabase, admittedType);
+  }
+
+  return nurseRegNo;
+}
 
 
 export async function createNurse(
@@ -125,7 +156,7 @@ export async function createNurse(
     
     // 1. Upload nurse profile image if exists
     const supabase = await createSupabaseServerClient()
-
+    const nurseRegNo = await generateNurseRegNo(supabase, nurseData.admitted_type);
     // // Verify authentication first
     // const { data: { session } } = await supabase.auth.getSession();
     // if (!session) {
@@ -188,7 +219,7 @@ export async function createNurse(
         religion: nurseData.religion,
         mother_tongue: nurseData.mother_tongue,
         noc_status: nurseData.noc_status,
-        nurse_reg_no: nurseData.nurse_reg_no,
+        nurse_reg_no: nurseRegNo,
         admitted_type: nurseData.admitted_type,
         created_at: new Date().toISOString()
       })
@@ -523,7 +554,9 @@ export async function fetchBasicDetails(
         email,
         phone_number,
         experience,
-        status
+        status,
+        nurse_reg_no
+        
       `)
       .order('first_name')
       .range(start, end)
@@ -539,6 +572,7 @@ export async function fetchBasicDetails(
       },
       status: nurse.status || 'unassigned',
       experience: nurse.experience,
+      regno: nurse.nurse_reg_no || null,
       rating: 0,
       contact: {
         email: nurse.email,
@@ -934,5 +968,4 @@ export async function updateNurseStatus(
     };
   }
 }
-
 

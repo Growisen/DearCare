@@ -224,12 +224,6 @@ const StepContent = {
       <FormLayout>
         <Fields.Input label="First Name" placeholder="Enter first name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
         <Fields.Input label="Last Name" placeholder="Enter last name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-           <Fields.Input 
-          label="Nurse Registration Number" 
-          placeholder="Enter registration number" 
-          value={formData.nurse_reg_no} 
-          onChange={(e) => setFormData({ ...formData, nurse_reg_no: e.target.value })} 
-        />
         <Fields.Select 
           label="Admitted Type" 
           options={FORM_CONFIG.options.admittedTypes} 
