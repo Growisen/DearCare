@@ -47,6 +47,7 @@ const NurseTable = ({
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr className="text-left">
             <th className="py-4 px-6 font-semibold text-gray-700">Nurse Name</th>
+            <th className="py-4 px-6 font-semibold text-gray-700">Reg No</th>
             <th className="py-4 px-6 font-semibold text-gray-700">Status</th>
             <th className="py-4 px-6 font-semibold text-gray-700">Experience</th>
             <th className="py-4 px-6 font-semibold text-gray-700">Rating</th>
@@ -61,6 +62,9 @@ const NurseTable = ({
               <tr key={nurse.nurse_id} className="hover:bg-gray-50/50">
                 <td className="py-4 px-6 text-gray-900 font-medium">
                   {`${nurse.name.first || ""} ${nurse.name.last || ""}`}
+                </td>
+                <td className="py-4 px-6 text-gray-700">
+                  {nurse.regno || 'N/A'}
                 </td>
                 <td className="py-4 px-6">
                   <span
