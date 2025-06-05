@@ -33,8 +33,19 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<number | string | null>(null);
 
-  console.log(nurses)
-  console.log("assignment", assignments)
+  const getDisplayStatus = (assignment: NurseAssignment) => {
+    if (assignment.status === 'cancelled') return 'cancelled';
+    
+    if (assignment.endDate) {
+      const endDate = new Date(assignment.endDate);
+      const currentDate = new Date();
+      if (endDate < currentDate) {
+        return 'completed';
+      }
+    }
+    
+    return 'active';
+  };
 
   const handleDeleteClick = (id: number | string) => {
     setAssignmentToDelete(id);
@@ -60,6 +71,8 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
         const nurse = nurses.find((n) => n._id === assignment.nurseId || n._id === assignment.nurseId.toString());
         if (!nurse) return null;
 
+        const displayStatus = getDisplayStatus(assignment);
+
         return (
           <div
             key={`${assignment.nurseId}-${assignment.startDate}`}
@@ -78,19 +91,19 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   )}
                   <span
                     className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${
-                      assignment.status === 'active'
+                      displayStatus === 'active'
                         ? 'bg-green-100 text-green-800'
-                        : assignment.status === 'completed'
+                        : displayStatus === 'completed'
                         ? 'bg-gray-100 text-gray-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+                    {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
                   </span>
                 </div>
               </div>
               <div className="space-x-2">
-                {assignment.status === 'active' && (
+                {displayStatus === 'active' && (
                   <>
                     <button
                       onClick={() => onEditAssignment(assignment)}

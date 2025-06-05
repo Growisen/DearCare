@@ -1515,7 +1515,7 @@ async function generateRegistrationNumber(
   const supabase = await createSupabaseAdminClient();
   const currentYear = new Date().getFullYear() % 100;
   
-  const categoryPrefix = clientCategory === 'DearCare LLP' ? 'DC' : 'TL';
+  const categoryPrefix = clientCategory === 'DearCare LLP' ? 'DC' : 'TH';
 
   let typeCode;
   switch (clientType) {
