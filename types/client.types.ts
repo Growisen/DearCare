@@ -332,6 +332,8 @@ export interface NurseAssignment {
   shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
   shiftType?: 'day' | 'night' | '24h';
+  nurse_first_name?: string;
+  nurse_last_name?: string;
 }
 
 

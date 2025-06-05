@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getNurseAssignments, updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/shift-schedule-actions';
-import { listNurses } from '@/app/actions/add-nurse';
+import { listNursesWithAssignments } from '@/app/actions/add-nurse';
 import { NurseAssignment } from '@/types/client.types';
 import { Nurse } from '@/types/staff.types';
 import toast from 'react-hot-toast';
@@ -14,6 +14,17 @@ export const useNurseAssignments = (clientId: string) => {
   const [showNurseList, setShowNurseList] = useState(false);
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  
+  // New pagination and filtering state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalNurses, setTotalNurses] = useState(0);
+  const [filters, setFilters] = useState<{
+    status?: string;
+    city?: string;
+    serviceType?: string;
+  }>({});
 
   const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {
     if (!startTime || !endTime) return 'day';
@@ -33,15 +44,24 @@ export const useNurseAssignments = (clientId: string) => {
   const fetchNurses = async () => {
     setIsLoadingNurses(true);
     try {
-      const response = await listNurses();
+      const response = await listNursesWithAssignments(
+        { page: currentPage, pageSize },
+        filters
+      );
+      
       if (response.data) {
         setNurses(response.data);
+        setTotalPages(response.totalPages || 1);
+        setTotalNurses(response.totalCount || 0);
+        return response.data;
       } else {
         toast.error(response.error || 'Failed to fetch nurses');
+        return [];
       }
     } catch (error) {
       console.error('Error fetching nurses:', error);
       toast.error('Error loading nurses');
+      return [];
     } finally {
       setIsLoadingNurses(false);
     }
@@ -50,6 +70,8 @@ export const useNurseAssignments = (clientId: string) => {
   const fetchAssignments = async () => {
     try {
       const assignmentsResponse = await getNurseAssignments(clientId);
+
+      console.log("d", assignmentsResponse)
 
       if (assignmentsResponse.success && assignmentsResponse.data) {
         const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({
@@ -60,7 +82,9 @@ export const useNurseAssignments = (clientId: string) => {
           shiftStart: assignment.shift_start_time,
           shiftEnd: assignment.shift_end_time,
           status: assignment.status || 'active',
-          shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time)
+          shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time),
+          nurse_first_name: assignment.nurses?.first_name,
+          nurse_last_name: assignment.nurses?.last_name
         }));
         
         setNurseAssignments(transformedAssignments);
@@ -68,6 +92,36 @@ export const useNurseAssignments = (clientId: string) => {
     } catch (error) {
       console.error('Error fetching nurse assignments:', error);
     }
+  };
+
+  // Modified to only fetch assignments on initial load
+  const refetch = async () => {
+    try {
+      await fetchAssignments();
+    } catch (error) {
+      console.error('Error refetching nurse assignments data:', error);
+      toast.error('Failed to refresh nurse assignments data');
+    }
+  };
+
+  // New handler for opening the nurse list modal
+  const handleOpenNurseList = async () => {
+    setIsLoadingNurses(true);
+    setShowNurseList(true);
+  };
+
+  // New method to change page
+  const changePage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // New method to update filters
+  const updateFilters = (newFilters: typeof filters) => {
+    setFilters(prev => ({
+      ...prev,
+      ...newFilters
+    }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleAssignNurse = async (nurseId: string) => {
@@ -146,9 +200,14 @@ export const useNurseAssignments = (clientId: string) => {
   };
 
   useEffect(() => {
-    fetchNurses();
     fetchAssignments();
-  }, [clientId]);
+  }, [clientId]); 
+  
+  useEffect(() => {
+    if (showNurseList) {
+      fetchNurses();
+    }
+  }, [currentPage, pageSize, filters, showNurseList]);
 
   return {
     nurseAssignments,
@@ -159,6 +218,14 @@ export const useNurseAssignments = (clientId: string) => {
     showNurseList,
     selectedNurse,
     showConfirmation,
+    // New pagination properties
+    currentPage,
+    totalPages,
+    totalNurses,
+    pageSize,
+    // New filter properties
+    filters,
+    // Existing methods
     setShowNurseList,
     setSelectedNurse,
     setShowConfirmation,
@@ -167,6 +234,12 @@ export const useNurseAssignments = (clientId: string) => {
     handleUpdateAssignment,
     handleDeleteAssignment,
     setShowEditModal,
-    setEditingAssignment
+    setEditingAssignment,
+    // New methods
+    changePage,
+    updateFilters,
+    setPageSize,
+    refetch,
+    handleOpenNurseList
   };
 };

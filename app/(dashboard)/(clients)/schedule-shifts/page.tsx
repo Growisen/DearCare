@@ -134,6 +134,9 @@ const ScheduleShiftsContent = () => {
         const result = await scheduleNurseShifts(shifts, clientId);
         
         if (result.success) {
+          if (window.opener && !window.opener.closed && typeof window.opener.onNurseAssignmentComplete === 'function') {
+            window.opener.onNurseAssignmentComplete();
+          }
           alert('Shifts scheduled successfully!');
           window.close();
         } else {

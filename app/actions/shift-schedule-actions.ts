@@ -201,7 +201,10 @@ export async function getNurseAssignments(clientId: string): Promise<{
     
     const { data, error } = await supabase
       .from('nurse_client')
-      .select('*')
+      .select(`
+        *,
+        nurses:nurse_id(first_name, last_name)
+      `)
       .eq('client_id', clientId);
     
     if (error) {
@@ -212,9 +215,16 @@ export async function getNurseAssignments(clientId: string): Promise<{
       };
     }
     
+    const formattedData = data?.map(item => ({
+      ...item,
+      nurse_first_name: item.nurses?.first_name || '',
+      nurse_last_name: item.nurses?.last_name || '',
+    }));
+
+    
     return {
       success: true,
-      data: data as NurseAssignmentData[]
+      data: formattedData as NurseAssignmentData[]
     };
   } catch (error) {
     console.error('Unexpected error fetching nurse assignments:', error);

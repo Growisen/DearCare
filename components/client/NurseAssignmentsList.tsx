@@ -13,11 +13,13 @@ interface NurseAssignment {
   shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
   shiftType?: 'day' | 'night' | '24h';
+  nurse_first_name?: string;
+  nurse_last_name?: string;
 }
 
 interface NurseAssignmentsListProps {
   assignments: NurseAssignment[];
-  nurses: Nurse[];
+  nurses?: Nurse[]; // Make this optional since we may not need it anymore
   onEditAssignment: (assignment: NurseAssignment) => void;
   onEndAssignment: (assignmentId: string) => void;
   onDeleteAssignment: (assignmentId: number | string) => void;
@@ -25,7 +27,7 @@ interface NurseAssignmentsListProps {
 
 const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   assignments,
-  nurses,
+  nurses = [], // Default to empty array
   onEditAssignment,
   onEndAssignment,
   onDeleteAssignment,
@@ -68,8 +70,23 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   return (
     <div className="space-y-4">
       {assignments.map((assignment) => {
-        const nurse = nurses.find((n) => n._id === assignment.nurseId || n._id === assignment.nurseId.toString());
-        if (!nurse) return null;
+        // Try to get nurse name from the assignment first, fall back to nurses array if needed
+        let firstName = assignment.nurse_first_name;
+        let lastName = assignment.nurse_last_name;
+        
+        // Fallback to the nurses array if needed
+        if (!firstName && !lastName && nurses.length > 0) {
+          const nurse = nurses.find((n) => 
+            n._id === assignment.nurseId || n._id === assignment.nurseId.toString()
+          );
+          if (nurse) {
+            firstName = nurse.firstName;
+            lastName = nurse.lastName;
+          }
+        }
+        
+        // Skip rendering if we don't have nurse name data
+        if (!firstName && !lastName) return null;
 
         const displayStatus = getDisplayStatus(assignment);
 
@@ -81,7 +98,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium text-gray-900">
-                  {nurse.firstName} {nurse.lastName}
+                  {firstName} {lastName}
                 </h3>
                 <div className="mt-1 text-sm text-gray-600">
                   <p>Shift: {assignment.shiftType}</p>
