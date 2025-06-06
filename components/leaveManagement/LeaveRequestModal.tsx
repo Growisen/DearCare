@@ -38,7 +38,6 @@ const StatusBadge = ({ status }: { status: LeaveRequestStatus | string }) => {
     }
   }
 
-  // Display status with first letter capitalized
   const displayStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
   return (
@@ -64,17 +63,19 @@ export default function LeaveRequestModal({
 
   const isPending = leaveRequest.status === 'pending'
   
-  // Format the days display correctly
   const daysText = leaveRequest.days === 1 
     ? '1 day' 
     : leaveRequest.days < 1 
       ? `${leaveRequest.days} day` 
       : `${leaveRequest.days} days`;
   
-  // Parse ISO date strings to Date objects
   const startDate = parseISO(leaveRequest.startDate)
   const endDate = parseISO(leaveRequest.endDate)
   const appliedDate = parseISO(leaveRequest.appliedOn)
+  
+  const isLeaveExpired = new Date() > endDate
+  
+  const allowActions = isPending && (!isLeaveExpired)
 
   const handleReject = () => {
     if (onReject) {
@@ -258,7 +259,7 @@ export default function LeaveRequestModal({
               >
                 Close
               </button>
-              {isPending && onApprove && onReject && (
+              {allowActions && onApprove && onReject ? (
                 <>
                   <button 
                     onClick={() => setIsApproving(true)}
@@ -273,7 +274,12 @@ export default function LeaveRequestModal({
                     Reject
                   </button>
                 </>
-              )}
+              ) : isPending && isLeaveExpired ? (
+                <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-md border border-amber-100">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  <span className="text-sm font-medium">Leave period has ended</span>
+                </div>
+              ) : null}
             </div>
           </>
         )}

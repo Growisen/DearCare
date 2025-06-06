@@ -167,16 +167,6 @@ export async function updateLeaveRequestStatus(
   try {
     const supabase = await createSupabaseServerClient()
     
-    const { data: leaveData, error: leaveError } = await supabase
-      .from('nurse_leave_requests')
-      .select('nurse_id')
-      .eq('id', requestId)
-      .single()
-    
-    if (leaveError) {
-      throw new Error(`Failed to fetch leave request details: ${leaveError.message}`)
-    }
-    
     const updateData: { 
       status: 'approved' | 'rejected',
       rejection_reason?: string 
@@ -198,19 +188,6 @@ export async function updateLeaveRequestStatus(
       throw new Error(`Failed to update leave request: ${error.message}`)
     }
     
-    // If the leave is approved, update the nurse status to 'leave'
-    if (newStatus === 'approved' && leaveData?.nurse_id) {
-      const { error: nurseError } = await supabase
-        .from('nurses')
-        .update({ status: 'leave' })
-        .eq('nurse_id', leaveData.nurse_id)
-      
-      if (nurseError) {
-        console.error('Error updating nurse status:', nurseError)
-        throw new Error(`Failed to update nurse status: ${nurseError.message}`)
-      }
-    }
-    
     revalidatePath('/leave-requests')
     
     return { success: true }
@@ -222,7 +199,6 @@ export async function updateLeaveRequestStatus(
     }
   }
 }
-
 
 // Helper functions to format enum values for display
 function formatLeaveType(type: string): string {
