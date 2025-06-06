@@ -29,19 +29,66 @@ async function getAuthenticatedClient() {
   return { supabase, userId };
 }
 
-export async function fetchComplaints(): Promise<{
+export async function fetchComplaints(
+  page: number = 1,
+  pageSize: number = 10,
+  status?: ComplaintStatus | 'all',
+  source?: ComplaintSource | 'all',
+  searchQuery?: string
+): Promise<{
     success: boolean;
     data?: Complaint[];
+    pagination?: {
+      totalCount: number;
+      currentPage: number;
+      pageSize: number;
+      totalPages: number;
+    };
     error?: string;
   }> {
     try {
       const { supabase } = await getAuthenticatedClient();
       
-      // Fetch all complaints first
-      const { data: complaintsData, error: complaintsError } = await supabase
+      // Build the base queries for count and data
+      let countQuery = supabase
         .from('dearcare_complaints')
-        .select('*')
-        .order('submission_date', { ascending: false });
+        .select('id', { count: 'exact', head: true });
+        
+      let dataQuery = supabase
+        .from('dearcare_complaints')
+        .select('*');
+      
+      // Apply status filter if provided
+      if (status && status !== 'all') {
+        countQuery = countQuery.eq('status', status);
+        dataQuery = dataQuery.eq('status', status);
+      }
+      
+      // Apply source filter if provided
+      if (source && source !== 'all') {
+        countQuery = countQuery.eq('source', source);
+        dataQuery = dataQuery.eq('source', source);
+      }
+      
+      // Apply search filter if provided
+      if (searchQuery && searchQuery.trim() !== '') {
+        const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+        
+        countQuery = countQuery.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
+        dataQuery = dataQuery.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
+      }
+      
+      // Get total count first
+      const { count, error: countError } = await countQuery;
+      
+      if (countError) {
+        throw new Error(`Failed to count complaints: ${countError.message}`);
+      }
+      
+      // Then fetch the paginated data
+      const { data: complaintsData, error: complaintsError } = await dataQuery
+        .order('submission_date', { ascending: false })
+        .range((page - 1) * pageSize, (page * pageSize) - 1);
         
       if (complaintsError) {
         throw new Error(complaintsError.message);
@@ -53,9 +100,7 @@ export async function fetchComplaints(): Promise<{
           let submitterName = '';
           
           if (record.submitter_id) {
-
             if (record.source === 'client') {
-                
                 const { data: clientTypeData, error: clientTypeError } = await supabase
                     .from('clients')
                     .select('client_type')
@@ -64,7 +109,6 @@ export async function fetchComplaints(): Promise<{
                     
                 if (!clientTypeError && clientTypeData) {
                     if (clientTypeData.client_type === 'individual') {
-                    
                         const { data: individualData, error: individualError } = await supabase
                             .from('individual_clients')
                             .select('requestor_name')
@@ -75,7 +119,6 @@ export async function fetchComplaints(): Promise<{
                             submitterName = `${individualData.requestor_name}`;
                         }
                     } else if (clientTypeData.client_type === 'organization') {
-
                         const { data: orgData, error: orgError } = await supabase
                         .from('organization_clients')
                         .select('organization_name')
@@ -87,9 +130,7 @@ export async function fetchComplaints(): Promise<{
                         }
                     }
                 }
-            }
-
-            else if (record.source === 'nurse') {
+            } else if (record.source === 'nurse') {
               const { data: nurseData, error: nurseError } = await supabase
                 .from('nurses')
                 .select('first_name, last_name')
@@ -118,7 +159,13 @@ export async function fetchComplaints(): Promise<{
       
       return { 
         success: true, 
-        data: complaints 
+        data: complaints,
+        pagination: {
+          totalCount: count || 0,
+          currentPage: page,
+          pageSize: pageSize,
+          totalPages: Math.ceil((count || 0) / pageSize)
+        }
       };
     } catch (error) {
       console.error('Error fetching complaints:', error);

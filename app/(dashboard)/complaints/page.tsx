@@ -7,6 +7,7 @@ import { PaginationControls } from "@/components/client/clients/PaginationContro
 import { ErrorState } from "@/components/client/clients/ErrorState"
 import { Complaint } from "@/types/complaint.types"
 import { useComplaints } from "@/hooks/useComplaints"
+import { LoadingState } from "@/components/Loader"
 
 export default function ComplaintsPage() {
   const { 
@@ -37,19 +38,9 @@ export default function ComplaintsPage() {
     // Search functionality is already handled by the hook
   };
   
-  
   const handleViewComplaint = (complaint: Complaint) => {
     window.open(`/complaints/${complaint.id}`, "_blank");
   };
-  
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-48 bg-gray-50 rounded-xl border border-gray-200 animate-pulse"></div>
-        <div className="h-96 bg-gray-50 rounded-xl border border-gray-200 animate-pulse"></div>
-      </div>
-    );
-  }
   
   if (error) {
     return <ErrorState error={error} onRetry={refreshComplaints} />;
@@ -71,21 +62,27 @@ export default function ComplaintsPage() {
       />
       
       <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-        <ComplaintTable 
-          complaints={complaints}
-          onViewComplaint={handleViewComplaint}
-        />
-        
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalCount={totalCount}
-          pageSize={pageSize}
-          itemsLength={itemsLength}
-          onPageChange={goToPage}
-          onPreviousPage={goToPreviousPage}
-          onNextPage={goToNextPage}
-        />
+        {loading ? (
+          <LoadingState message="Loading complaints..." description="Please wait while we fetch the complaints data" />
+        ) : (
+          <>
+            <ComplaintTable 
+              complaints={complaints}
+              onViewComplaint={handleViewComplaint}
+            />
+            
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              itemsLength={itemsLength}
+              onPageChange={goToPage}
+              onPreviousPage={goToPreviousPage}
+              onNextPage={goToNextPage}
+            />
+          </>
+        )}
       </div>
     </div>
   );

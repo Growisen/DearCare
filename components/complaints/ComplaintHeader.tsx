@@ -73,7 +73,7 @@ export function ComplaintHeader({
               <button 
                 onClick={() => {
                   setSearchInput("")
-                  handleResetFilters()
+                  // Don't call handleResetFilters here to avoid resetting status and source filters
                 }}
                 className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                 aria-label="Clear search"
@@ -129,6 +129,17 @@ export function ComplaintHeader({
                 ))}
               </div>
             </div>
+            
+            {/* Add Reset All Filters button in desktop view */}
+            {(selectedStatus !== "all" || selectedSource !== "all" || searchInput) && (
+              <button
+                onClick={handleResetFilters}
+                className="px-2.5 py-1.5 rounded text-xs font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 flex items-center gap-1"
+              >
+                <X className="h-3 w-3" />
+                Reset All
+              </button>
+            )}
           </div>
         </div>
 
@@ -176,6 +187,17 @@ export function ComplaintHeader({
               <option value="nurse">Nurses</option>
             </select>
           </div>
+          
+          {/* Add Reset All Filters button in mobile view */}
+          {(selectedStatus !== "all" || selectedSource !== "all" || searchInput) && (
+            <button
+              onClick={handleResetFilters}
+              className="mt-1 py-1.5 rounded text-xs font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 flex items-center justify-center gap-1"
+            >
+              <X className="h-3 w-3" />
+              Reset All Filters
+            </button>
+          )}
         </div>
       </div>
     </div>
