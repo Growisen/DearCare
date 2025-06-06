@@ -190,6 +190,7 @@ export interface DetailedClientIndividual {
 }
 
 export interface DetailedClientOrganization {
+  registration_number?: string;
   client_type: 'organization' | 'hospital' | 'carehome';
   details?: {
     organization_name?: string;
@@ -332,6 +333,8 @@ export interface NurseAssignment {
   shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
   shiftType?: 'day' | 'night' | '24h';
+  nurse_first_name?: string;
+  nurse_last_name?: string;
 }
 
 

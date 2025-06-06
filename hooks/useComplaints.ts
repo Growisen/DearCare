@@ -1,145 +1,145 @@
-"use client"
+import { useState, useEffect, useCallback } from 'react';
+import { fetchComplaints, exportComplaintsToCSV } from '@/app/actions/complaints-actions';
+import { Complaint, ComplaintStatus, ComplaintSource } from '@/types/complaint.types';
 
-import { useState, useEffect, useCallback } from 'react'
-import { fetchComplaints, exportComplaintsToCSV } from '@/app/actions/complaints-actions'
-import { Complaint, ComplaintStatus, ComplaintSource } from '@/types/complaint.types'
-
-export function useComplaints(pageSize: number = 10) {
+export const useComplaints = () => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchInput, setSearchInput] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus | "all">("all");
-  const [selectedSource, setSelectedSource] = useState<ComplaintSource | "all">("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isExporting, setIsExporting] = useState(false);
+  const [searchInput, setSearchInput] = useState<string>('');
+  const [debouncedSearchInput, setDebouncedSearchInput] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus | 'all'>('all');
+  const [selectedSource, setSelectedSource] = useState<ComplaintSource | 'all'>('all');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [pageSize] = useState<number>(10);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
   
-  // Fetch complaints from the database
-  const loadComplaints = useCallback(async () => {
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchInput(searchInput);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+  
+  const fetchComplaintsData = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const result = await fetchComplaints();
-
-      console.log("Fetched complaints:", result.data);
+      const response = await fetchComplaints(
+        currentPage,
+        pageSize,
+        selectedStatus === 'all' ? undefined : selectedStatus,
+        selectedSource === 'all' ? undefined : selectedSource,
+        debouncedSearchInput
+      );
       
-      if (!result.success || !result.data) {
-        throw new Error(result.error || "Failed to fetch complaints");
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch complaints');
       }
       
-      setComplaints(result.data);
+      setComplaints(response.data || []);
+      if (response.pagination) {
+        setTotalPages(response.pagination.totalPages);
+        setTotalCount(response.pagination.totalCount);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load complaints. Please try again later.");
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, pageSize, selectedStatus, selectedSource, debouncedSearchInput]);
   
-  // Initial data fetch
   useEffect(() => {
-    loadComplaints();
-  }, [loadComplaints]);
+    fetchComplaintsData();
+  }, [fetchComplaintsData]);
   
-  // Apply filters whenever filter state changes
+  // Reset to first page when filters change
   useEffect(() => {
-    let result = [...complaints];
-    
-    // Filter by status
-    if (selectedStatus !== "all") {
-      result = result.filter(complaint => complaint.status === selectedStatus);
-    }
-    
-    // Filter by source (client/nurse)
-    if (selectedSource !== "all") {
-      result = result.filter(complaint => complaint.source === selectedSource);
-    }
-    
-    // Filter by search input
-    if (searchInput) {
-      const searchTerm = searchInput.toLowerCase();
-      result = result.filter(
-        complaint =>
-          complaint.title.toLowerCase().includes(searchTerm) ||
-          complaint.submitterName?.toLowerCase().includes(searchTerm) ||
-          complaint.description.toLowerCase().includes(searchTerm)
-      );
-    }
-    
-    setFilteredComplaints(result);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [complaints, selectedStatus, selectedSource, searchInput]);
+    setCurrentPage(1);
+  }, [selectedStatus, selectedSource, debouncedSearchInput]);
   
-  // Calculate pagination values
-  const totalPages = Math.max(1, Math.ceil(filteredComplaints.length / pageSize));
-  
-  const paginatedComplaints = filteredComplaints.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-  
-  // Status filter handler
-  const handleStatusChange = (status: ComplaintStatus | "all") => {
+  const handleStatusChange = (status: ComplaintStatus | 'all') => {
     setSelectedStatus(status);
   };
   
-  // Source filter handler
-  const handleSourceChange = (source: ComplaintSource | "all") => {
+  const handleSourceChange = (source: ComplaintSource | 'all') => {
     setSelectedSource(source);
   };
   
-  // Reset filters
   const handleResetFilters = () => {
-    setSearchInput("");
-    setSelectedStatus("all");
-    setSelectedSource("all");
+    setSelectedStatus('all');
+    setSelectedSource('all');
+    setSearchInput('');
   };
   
-  // Export complaints
   const handleExport = async () => {
     setIsExporting(true);
     
     try {
-      const result = await exportComplaintsToCSV();
+      const response = await exportComplaintsToCSV();
       
-      if (!result.success || !result.data) {
-        throw new Error(result.error || "Failed to export complaints");
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to export complaints');
       }
       
-      // Create and download the CSV file
-      const blob = new Blob([result.data], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `complaints_export_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Create a blob from the CSV data
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8' });
       
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Set filename
+      const date = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `complaints-export-${date}.csv`);
+      
+      // Append to the document temporarily
+      document.body.appendChild(link);
+      
+      // Trigger the download
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Export failed:", err);
-      alert("Failed to export complaints. Please try again.");
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setIsExporting(false);
     }
   };
   
-  // Pagination handlers
   const goToPage = (page: number) => {
     setCurrentPage(page);
   };
   
   const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
   
   const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  const refreshComplaints = () => {
+    setCurrentPage(1);
+    fetchComplaintsData();
   };
   
   return {
-    complaints: paginatedComplaints,
+    complaints,
     loading,
     error,
     searchInput,
@@ -149,9 +149,9 @@ export function useComplaints(pageSize: number = 10) {
     currentPage,
     isExporting,
     totalPages,
-    totalCount: filteredComplaints.length,
+    totalCount,
     pageSize,
-    itemsLength: paginatedComplaints.length,
+    itemsLength: complaints.length,
     handleStatusChange,
     handleSourceChange,
     handleResetFilters,
@@ -159,6 +159,6 @@ export function useComplaints(pageSize: number = 10) {
     goToPage,
     goToPreviousPage,
     goToNextPage,
-    refreshComplaints: loadComplaints
+    refreshComplaints
   };
-}
+};

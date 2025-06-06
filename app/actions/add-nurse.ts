@@ -969,3 +969,371 @@ export async function updateNurseStatus(
   }
 }
 
+export async function listNursesWithAssignments(
+  paginationParams?: { page: number; pageSize: number },
+  filterParams?: { status?: string; city?: string; admittedType?: string }
+): Promise<{ 
+  data: Nurse[] | null, 
+  error: string | null,
+  totalCount?: number,
+  totalPages?: number
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return { data: null, error: 'Not authenticated' };
+    }
+
+    const page = paginationParams?.page || 1;
+    const pageSize = paginationParams?.pageSize || 25;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize - 1;
+
+    let nursesQuery = supabase
+      .from('nurses')
+      .select(`
+        nurse_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        experience,
+        city,
+        admitted_type
+      `);
+
+    if (filterParams?.city) {
+      nursesQuery = nursesQuery.like('city', filterParams.city);
+    }
+    if (filterParams?.admittedType) {
+      nursesQuery = nursesQuery.eq('admitted_type', filterParams.admittedType);
+    }
+
+    const { count, error: countError } = await supabase
+      .from('nurses')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) throw countError;
+    const totalCount = count;
+
+
+    const { data: nursesData, error: nursesError } = await nursesQuery
+      .order('first_name')
+      .range(start, end);
+
+    if (nursesError) throw nursesError;
+
+    const nurseIds = nursesData.map(nurse => nurse.nurse_id);
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    const { data: leaveData, error: leaveError } = await supabase
+      .from('nurse_leave_requests')
+      .select(`
+        id,
+        nurse_id,
+        start_date,
+        end_date,
+        reason
+      `)
+      .in('nurse_id', nurseIds)
+      .eq('status', 'approved')
+      .gte('end_date', currentDate)
+
+    console.log("leave", leaveData)
+
+
+    if (leaveError) throw leaveError;
+
+    const leaveByNurseId = new Map();
+    for (const leave of leaveData) {
+      leaveByNurseId.set(leave.nurse_id, leave);
+    }
+
+    const { data: assignmentsData, error: assignmentsError } = await supabase
+      .from('nurse_client')
+      .select(`
+        nurse_id,
+        client_id,
+        start_date,
+        end_date,
+        shift_start_time,
+        shift_end_time,
+        clients(client_type)
+      `)
+      .in('nurse_id', nurseIds)
+      .or(`end_date.is.null,end_date.gte.${currentDate}`);
+
+    if (assignmentsError) throw assignmentsError;
+
+    const assignmentsByNurseId = new Map();
+    for (const assignment of assignmentsData) {
+      if (!assignmentsByNurseId.has(assignment.nurse_id)) {
+        assignmentsByNurseId.set(assignment.nurse_id, []);
+      }
+      assignmentsByNurseId.get(assignment.nurse_id).push(assignment);
+    }
+
+    let transformedData: Nurse[] = nursesData.map(nurse => {
+      const nurseLeave = leaveByNurseId.get(nurse.nurse_id);
+      const nurseAssignments = assignmentsByNurseId.get(nurse.nurse_id) || [];
+      
+      let nurseStatus: Nurse['status'] = 'unassigned';
+      let assignment = null;
+      let leaveInfo = null;
+      
+      if (nurseLeave) {
+        nurseStatus = 'leave';
+        leaveInfo = {
+          startDate: nurseLeave.start_date,
+          endDate: nurseLeave.end_date,
+          reason: nurseLeave.reason
+        };
+      } 
+
+      else if (nurseAssignments.length > 0) {
+        nurseStatus = 'assigned';
+        const currentAssignment = nurseAssignments[0]; 
+        
+        assignment = {
+          startDate: currentAssignment.start_date,
+          endDate: currentAssignment.end_date,
+          shiftType: currentAssignment.shift_start_time && currentAssignment.shift_end_time ? 
+            determineShiftType(currentAssignment.shift_start_time, currentAssignment.shift_end_time) : 
+            'day',
+          clientId: currentAssignment.client_id,
+          clientType: currentAssignment.clients?.client_type
+        };
+      }
+
+      return {
+        _id: nurse.nurse_id.toString(),
+        firstName: nurse.first_name || '',
+        lastName: nurse.last_name || '',
+        email: nurse.email || '',
+        phoneNumber: nurse.phone_number || '',
+        experience: nurse.experience || 0,
+        salaryPerHour: 0,
+        salaryCap: 0,
+        gender: '',
+        dob: '',
+        status: nurseStatus,
+        assignment: assignment,
+        leaveInfo: leaveInfo,
+        location: nurse.city || '',
+        rating: 3,
+        preferredLocations: [],
+        reviews: []
+      };
+    });
+
+    if (filterParams?.status) {
+      transformedData = transformedData.filter(nurse => nurse.status === filterParams.status);
+    }
+    
+    const adjustedCount = filterParams?.status ? transformedData.length : totalCount;
+    
+    const totalPages = Math.ceil((adjustedCount || 0) / pageSize);
+
+    return { 
+      data: transformedData, 
+      error: null,
+      totalCount: adjustedCount || 0,
+      totalPages
+    };
+  } catch (error) {
+    console.error('Error fetching nurses with assignments:', error);
+    return { 
+      data: null, 
+      error: error instanceof Error ? error.message : 'Failed to fetch nurses with assignments' 
+    };
+  }
+}
+// export async function listNursesWithAssignments(
+//   paginationParams?: { page: number; pageSize: number },
+//   filterParams?: { status?: string; city?: string; admittedType?: string }
+// ): Promise<{ 
+//   data: Nurse[] | null, 
+//   error: string | null,
+//   totalCount?: number,
+//   totalPages?: number
+// }> {
+//   try {
+//     const supabase = await createSupabaseServerClient();
+
+//     const { data: { session } } = await supabase.auth.getSession();
+//     if (!session) {
+//       return { data: null, error: 'Not authenticated' };
+//     }
+
+//     const page = paginationParams?.page || 1;
+//     const pageSize = paginationParams?.pageSize || 25;
+//     const start = (page - 1) * pageSize;
+//     const end = start + pageSize - 1;
+
+//     let nursesQuery = supabase
+//       .from('nurses')
+//       .select(`
+//         nurse_id,
+//         first_name,
+//         last_name,
+//         email,
+//         phone_number,
+//         experience,
+//         service_type,
+//         created_at,
+//         status,
+//         gender,
+//         date_of_birth,
+//         address,
+//         city,
+//         taluk,
+//         state,
+//         pin_code,
+//         languages,
+//         shift_pattern,
+//         category,
+//         marital_status,
+//         religion,
+//         mother_tongue,
+//         admitted_type
+//       `);
+
+//     if (filterParams?.status) {
+//       nursesQuery = nursesQuery.eq('status', filterParams.status);
+//     }
+//     if (filterParams?.city) {
+//       nursesQuery = nursesQuery.eq('city', filterParams.city);
+//     }
+//     if (filterParams?.admittedType) {
+//       nursesQuery = nursesQuery.eq('admitted_type', filterParams.admittedType);
+//     }
+
+//     const { count, error: countError } = await supabase
+//       .from('nurses')
+//       .select('*', { count: 'exact', head: true });
+    
+//     if (countError) throw countError;
+//     const totalCount = count;
+
+//     const { data: nursesData, error: nursesError } = await nursesQuery
+//       .order('first_name')
+//       .range(start, end);
+
+//     if (nursesError) throw nursesError;
+
+//     const nurseIds = nursesData.map(nurse => nurse.nurse_id);
+
+//     const currentDate = new Date().toISOString().split('T')[0]; 
+
+//     const { data: assignmentsData, error: assignmentsError } = await supabase
+//       .from('nurse_client')
+//       .select(`
+//         id,
+//         nurse_id,
+//         client_id,
+//         start_date,
+//         end_date,
+//         shift_start_time,
+//         shift_end_time,
+//         salary_hour,
+//         clients(client_type)
+//       `)
+//       .in('nurse_id', nurseIds)
+//       .or(`end_date.is.null,end_date.gte.${currentDate}`);
+
+//     if (assignmentsError) throw assignmentsError;
+
+//     const assignmentsByNurseId = new Map();
+//     for (const assignment of assignmentsData) {
+//       if (!assignmentsByNurseId.has(assignment.nurse_id)) {
+//         assignmentsByNurseId.set(assignment.nurse_id, []);
+//       }
+//       assignmentsByNurseId.get(assignment.nurse_id).push(assignment);
+//     }
+
+//     const transformedData: Nurse[] = nursesData.map(nurse => {
+//       const nurseAssignments = assignmentsByNurseId.get(nurse.nurse_id) || [];
+      
+//       let nurseStatus: Nurse['status'] = nurse.status || 'pending';
+//       let assignment = null;
+      
+//       if (nurseAssignments.length > 0) {
+//         nurseStatus = 'assigned';
+//         const currentAssignment = nurseAssignments[0]; 
+        
+//         assignment = {
+//           startDate: currentAssignment.start_date,
+//           endDate: currentAssignment.end_date,
+//           shiftType: currentAssignment.shift_start_time && currentAssignment.shift_end_time ? 
+//             determineShiftType(currentAssignment.shift_start_time, currentAssignment.shift_end_time) : 
+//             'day',
+//           clientId: currentAssignment.client_id,
+//           clientType: currentAssignment.clients?.client_type
+//         };
+//       }
+
+//       return {
+//         _id: nurse.nurse_id.toString(),
+//         firstName: nurse.first_name || '',
+//         lastName: nurse.last_name || '',
+//         email: nurse.email || '',
+//         phoneNumber: nurse.phone_number || '',
+//         gender: nurse.gender || '',
+//         dateOfBirth: nurse.date_of_birth || '',
+//         address: nurse.address || '',
+//         city: nurse.city || '',
+//         state: nurse.state || '',
+//         pinCode: nurse.pin_code?.toString() || '',
+//         languages: nurse.languages || [],
+//         experience: nurse.experience || 0,
+//         salaryCap: 0,
+//         salaryPerHour: 0,
+//         status: nurseStatus,
+//         assignment: assignment,
+//         location: nurse.city || '',
+//         dob: nurse.date_of_birth || '',
+//         preferredLocations: [],
+//         hiringDate: nurse.created_at,
+//         rating: 3,
+//         reviews: [],
+//         serviceType: nurse.service_type || '',
+//         shiftPattern: nurse.shift_pattern || '',
+//         category: nurse.category || '',
+//         maritalStatus: nurse.marital_status || '',
+//         religion: nurse.religion || '',
+//         motherTongue: nurse.mother_tongue || '',
+//         taluk: nurse.taluk || ''
+//       };
+//     });
+
+//     const totalPages = Math.ceil((totalCount || 0) / pageSize);
+
+//     return { 
+//       data: transformedData, 
+//       error: null,
+//       totalCount: totalCount || 0,
+//       totalPages
+//     };
+//   } catch (error) {
+//     console.error('Error fetching nurses with assignments:', error);
+//     return { 
+//       data: null, 
+//       error: error instanceof Error ? error.message : 'Failed to fetch nurses with assignments' 
+//     };
+//   }
+// }
+
+function determineShiftType(startTime: string, endTime: string): 'day' | 'night' | '24h' {
+  const startHour = parseInt(startTime.split(':')[0]);
+  const endHour = parseInt(endTime.split(':')[0]);
+  
+  if (endHour - startHour >= 12 || (startHour > endHour && startHour - endHour <= 12)) {
+    return '24h';
+  } else if (startHour >= 6 && startHour < 18) {
+    return 'day';
+  } else {
+    return 'night';
+  }
+}

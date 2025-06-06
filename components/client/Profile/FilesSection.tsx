@@ -38,6 +38,8 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
       setShowErrors(true);
       const timer = setTimeout(() => {
         setShowErrors(false);
+        // Clear error messages after display timeout
+        setFileErrors({});
       }, ERROR_DISPLAY_DURATION);
       
       return () => clearTimeout(timer);

@@ -4,6 +4,13 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/Loader';
+
+declare global {
+  interface Window {
+    onNurseAssignmentComplete: (() => void) | null;
+  }
+}
+
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList';
@@ -25,6 +32,20 @@ import { useClientFiles } from '@/hooks/useClientFiles';
 const PatientProfilePage = () => {
   const params = useParams();
   const id = params.id as string;
+
+
+  React.useEffect(() => {
+    window.onNurseAssignmentComplete = () => {
+      setShowNurseList(false);
+      if (refetch) {
+        refetch();
+      }
+    };
+    
+    return () => {
+      window.onNurseAssignmentComplete = null;
+    };
+  });
   
   // Use our custom hooks
   const {
@@ -43,20 +64,27 @@ const PatientProfilePage = () => {
   const {
     nurseAssignments,
     nurses,
+    isLoadingNurses,
+    currentPage,
+    totalPages,
+    changePage,
+    filters,
+    updateFilters,
     editingAssignment,
     showEditModal,
     showNurseList,
     selectedNurse,
     showConfirmation,
     setShowNurseList,
-    setSelectedNurse,
+    handleOpenNurseList,
     setShowConfirmation,
     handleAssignNurse,
     handleEditAssignment,
     handleUpdateAssignment,
     handleDeleteAssignment,
     setShowEditModal,
-    setEditingAssignment
+    setEditingAssignment,
+    refetch
   } = useNurseAssignments(id);
 
   const {
@@ -209,7 +237,7 @@ const PatientProfilePage = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-gray-800">Nurse Assignments</h2>
                   <button
-                    onClick={() => setShowNurseList(true)}
+                    onClick={handleOpenNurseList}
                     className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
                   >
                     Assign New Nurse
@@ -233,7 +261,7 @@ const PatientProfilePage = () => {
       </div>
 
       {/* Modals */}
-      <NurseListModal 
+      {/* <NurseListModal 
         isOpen={showNurseList}
         nurses={nurses}
         clientId={id}
@@ -246,6 +274,21 @@ const PatientProfilePage = () => {
           }
         }}
         onViewProfile={() => {}}
+      /> */}
+
+      <NurseListModal
+        isOpen={showNurseList}
+        nurses={nurses}
+        clientId={id}
+        onClose={() => setShowNurseList(false)}
+        onAssignNurse={handleAssignNurse}
+        onViewProfile={() => {}}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={changePage}
+        onFilterChange={updateFilters}
+        filters={filters}
+        isLoading={isLoadingNurses}
       />
 
       <ConfirmationModal 
