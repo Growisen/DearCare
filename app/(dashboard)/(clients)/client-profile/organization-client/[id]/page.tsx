@@ -211,6 +211,11 @@ const OrganizationClientProfile = () => {
     pincode: client?.details?.organization_pincode
   })
 
+  const staffSummary = {
+    total: client.staffRequirements.reduce((sum, staff) => sum + staff.count, 0),
+    assigned: nurseAssignments.length
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-[95%] mx-auto py-4">
@@ -471,7 +476,59 @@ const OrganizationClientProfile = () => {
           {/* Staff Requirements Tab */}
           {activeTab === 'requirements' && (
             <div className="space-y-6">
-              {/* Same as before - Requirements content */}
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Staff Requirements
+                </h2>
+                {client.staffRequirements && client.staffRequirements.length > 0 ? (
+                  <div className="space-y-4">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs text-gray-500">
+                          <th className="pb-2">Staff Type</th>
+                          <th className="pb-2">Count</th>
+                          <th className="pb-2">Shift</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {client.staffRequirements.map((req, idx) => (
+                          <tr key={idx}>
+                            <td className="py-2 text-gray-900">{formatValue(req.staff_type)}</td>
+                            <td className="py-2 text-gray-900">{req.count || 0}</td>
+                            <td className="py-2 text-gray-900">{formatValue(req.shift_type)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-600">
+                        Start Date: {client.details.start_date 
+                          ? new Date(client.details.start_date).toLocaleDateString() 
+                          : 'Not specified'}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No staff requirements specified</p>
+                )}
+              </div>
+
+              {/* Staff Statistics */}
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                  Staff Statistics
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-3xl font-bold text-blue-600">{staffSummary.total}</p>
+                    <p className="text-xs text-gray-500">Required</p>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-3xl font-bold text-green-600">{staffSummary.assigned}</p>
+                    <p className="text-xs text-gray-500">Assigned</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

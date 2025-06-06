@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Nurse } from '@/types/staff.types';
 import NurseCard from './NurseCard';
 import { formatDate } from '@/utils/formatters';
@@ -53,6 +53,12 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
   const [cityFilter, setCityFilter] = useState(filters.city || '');
   const [admittedTypeFilter, setAdmittedTypeFilter] = useState(filters.admittedType || '');
   
+  useEffect(() => {
+    setStatusFilter(filters.status || '');
+    setCityFilter(filters.city || '');
+    setAdmittedTypeFilter(filters.admittedType || '');
+  }, [filters]);
+  
   if (!isOpen) return null;
 
   // const handleNurseSelection = (nurseId: string) => {
@@ -85,7 +91,11 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
     setStatusFilter('');
     setCityFilter('');
     setAdmittedTypeFilter('');
-    onFilterChange({});
+    onFilterChange({
+      status: undefined,
+      city: undefined,
+      admittedType: undefined
+    });
   };
 
   const renderPagination = () => {
@@ -137,7 +147,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2">
-      <div className="bg-white w-full max-w-6xl max-h-[95vh] overflow-y-auto relative rounded-lg shadow-xl">
+      <div className="bg-white w-full max-w-6xl max-h-[95vh] overflow-y-auto relative shadow-xl">
         {/* Header with title and action buttons */}
         <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
           <div className="flex items-center justify-between p-4">
@@ -168,57 +178,71 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
             </div>
           </div>
 
-          {/* Filters section - Removed search input */}
-          <div className="bg-gray-50 p-3 grid gap-3 grid-cols-1 md:grid-cols-[auto_auto]">
-            {/* Filter dropdowns */}
-            <div className="grid grid-cols-3 gap-2">
-              <select 
-                value={statusFilter} 
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Statuses</option>
-                <option value="assigned">Assigned</option>
-                <option value="unassigned">Available</option>
-                <option value="leave">On Leave</option>
-              </select>
+          {/* Redesigned Filters section for better responsiveness */}
+          <div className="bg-gray-50 p-3">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Filter controls - stack vertically on mobile, horizontally on larger screens */}
+              <div className="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label htmlFor="statusFilter" className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                  <select 
+                    id="statusFilter"
+                    value={statusFilter} 
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">All</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="unassigned">Available</option>
+                    <option value="leave">On Leave</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="admittedTypeFilter" className="block text-xs font-medium text-gray-700 mb-1">Dearcare/Tata HomeNursing</label>
+                  <select 
+                    id="admittedTypeFilter"
+                    value={admittedTypeFilter} 
+                    onChange={(e) => setAdmittedTypeFilter(e.target.value)}
+                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">All</option>
+                    <option value="Dearcare_Llp">Dearcare LLP</option>
+                    <option value="Tata_Homenursing">Tata HomeNursing</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="cityFilter" className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                  <input 
+                    id="cityFilter"
+                    type="text" 
+                    value={cityFilter} 
+                    onChange={(e) => setCityFilter(e.target.value)}
+                    placeholder="Enter city name" 
+                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
               
-              <select 
-                value={admittedTypeFilter} 
-                onChange={(e) => setAdmittedTypeFilter(e.target.value)}
-                className="border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Types</option>
-                <option value="Dearcare_Llp">Dearcare LLP</option>
-                <option value="Tata_Homenursing">Tata HomeNursing</option>
-              </select>
-              
-              <input 
-                type="text" 
-                value={cityFilter} 
-                onChange={(e) => setCityFilter(e.target.value)}
-                placeholder="City..." 
-                className="border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            {/* Action buttons */}
-            <div className="flex gap-2 items-center justify-end">
-              <button 
-                onClick={applyFilters}
-                className="px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
-              >
-                Apply Filters
-              </button>
+              {/* Action buttons - aligned to end on desktop, full width on mobile */}
+              <div className="flex flex-col sm:flex-row gap-2 md:items-end md:self-end mt-3 md:mt-0">
                 <button 
-                onClick={clearFilters}
-                disabled={!statusFilter && !cityFilter && !admittedTypeFilter}
-                className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 
-                transition-colors disabled:opacity-40 disabled:text-gray-400 disabled:border-gray-200
-                disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  onClick={applyFilters}
+                  className="px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
                 >
-                Clear
+                  Apply Filters
                 </button>
+                <button 
+                  onClick={clearFilters}
+                  disabled={!statusFilter && !cityFilter && !admittedTypeFilter}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 
+                  transition-colors disabled:opacity-40 disabled:text-gray-400 disabled:border-gray-200
+                  disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-gray-400 w-full sm:w-auto"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           </div>
         </div>
