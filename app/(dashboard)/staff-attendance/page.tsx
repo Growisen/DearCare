@@ -26,22 +26,33 @@ export default function StaffAttendancePage() {
   const [totalPages, setTotalPages] = useState(1)
   const [isExporting, setIsExporting] = useState(false)
   
-  // Fetch data when selectedDate changes
   useEffect(() => {
     loadAttendanceData();
-  }, [selectedDate]);
+  }, [selectedDate, currentPage]); // Add currentPage dependency
   
   const loadAttendanceData = async () => {
     setLoading(true);
     try {
       const date = new Date(selectedDate);
       const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const result = await fetchStaffAttendance(formattedDate);
-
+      const result = await fetchStaffAttendance(
+        formattedDate, 
+        currentPage, 
+        pageSize,
+        true
+      );
+  
       console.log('Attendance data:', result.data);
+      console.log('Pagination info:', result.pagination);
       
       if (result.success) {
         setAttendanceData(result.data);
+        
+        // Use server pagination information
+        if (result.pagination) {
+          setTotalPages(result.pagination.totalPages);
+        }
+        
         setError(null);
       } else {
         setError(result.error || 'Failed to load attendance data');
@@ -55,35 +66,29 @@ export default function StaffAttendancePage() {
     }
   };
   
-  // Filter data and handle pagination
   useEffect(() => {
-    // Only filter by search term now
     const filtered = attendanceData.filter(record => 
       searchTerm === '' || 
       record.nurseName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
-    setTotalPages(Math.max(1, Math.ceil(filtered.length / pageSize)));
+    setFilteredData(filtered);
     
-    // Reset to first page when filters change
-    if (currentPage > Math.max(1, Math.ceil(filtered.length / pageSize))) {
+    if (filtered.length === 0 && searchTerm !== '') {
       setCurrentPage(1);
     }
-    
-    // Get current page data
-    const startIndex = (currentPage - 1) * pageSize;
-    const paginatedData = filtered.slice(startIndex, startIndex + pageSize);
-    
-    setFilteredData(paginatedData);
-  }, [attendanceData, searchTerm, currentPage, pageSize]);
+  }, [attendanceData, searchTerm]);
   
-  // Handle date change
+  const handleSearchChange = (newSearchTerm: string) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1);
+  };
+  
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
-    setCurrentPage(1); // Reset to first page when date changes
+    setCurrentPage(1);
   };
 
-  // Pagination handlers
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -100,20 +105,16 @@ export default function StaffAttendancePage() {
     }
   };
 
-  // Reset filters
   const handleResetFilters = () => {
     setSearchTerm('');
     setCurrentPage(1);
   };
 
-  // Export data
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      // Simulate export delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Create CSV content
       const headers = ["Nurse Name", "Date", "Scheduled Start", "Scheduled End", 
                        "Actual Start", "Actual End", "Hours Worked", "Location", "Status"];
       
@@ -159,7 +160,7 @@ export default function StaffAttendancePage() {
         selectedDate={selectedDate}
         handleDateChange={handleDateChange}
         searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        setSearchTerm={handleSearchChange}
         onExport={handleExport}
         isExporting={isExporting}
       />
@@ -190,10 +191,7 @@ export default function StaffAttendancePage() {
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
-              totalCount={attendanceData.filter(record => 
-                searchTerm === '' || 
-                record.nurseName.toLowerCase().includes(searchTerm.toLowerCase())
-              ).length}
+              totalCount={filteredData.length}
               pageSize={pageSize}
               itemsLength={filteredData.length}
               onPageChange={handlePageChange}

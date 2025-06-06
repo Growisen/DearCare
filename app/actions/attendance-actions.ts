@@ -13,6 +13,7 @@ export type AttendanceRecord = {
   hoursWorked: number | string;
   status: string;
   location: string | null;
+  nurseId: number | null;
 }
 
 interface Nurse {
@@ -59,147 +60,292 @@ function convertTo12HourFormat(time24: string | null): string {
   }
 }
 
-export async function fetchStaffAttendance(date?: string): Promise<{ success: boolean; data: AttendanceRecord[]; error?: string }> {
+// export async function fetchStaffAttendance(date?: string): Promise<{ success: boolean; data: AttendanceRecord[]; error?: string }> {
+//   try {
+//     const supabase = await createSupabaseServerClient();
+    
+//     const targetDate = date || new Date().toISOString().split('T')[0];
+    
+//     // Improved query with better joins
+//     const { data, error } = await supabase
+//       .from('attendence_individual')
+//       .select(`
+//           id,
+//           date,
+//           start_time,
+//           end_time,
+//           total_hours,
+//           location,
+//           nurse_client:assigned_id (
+//             id,
+//             nurse_id,
+//             shift_start_time,
+//             shift_end_time,
+//             nurse:nurse_id (
+//                 nurse_id,
+//                 first_name,
+//                 last_name
+//             )
+//           )
+//       `)
+//       .eq('date', targetDate);
+    
+//     if (error) throw new Error(error.message);
+    
+    
+//     const formattedData: AttendanceRecord[] = (data as RawAttendanceRecord[]).map(record => {
+//       const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
+//       const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
+      
+
+//       let nurseClient = null;
+//       if (record.nurse_client) {
+//         if (Array.isArray(record.nurse_client)) {
+
+//           nurseClient = record.nurse_client.length > 0 ? record.nurse_client[0] : null;
+//         } else {
+
+//           nurseClient = record.nurse_client;
+//         }
+//       }
+      
+//       const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
+//       const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
+
+//       let status = 'Absent';
+//       if (record.start_time) {
+//           status = 'Present';
+
+//           if (nurseClient?.shift_start_time && record.start_time) {
+//             const expectedMinutes = parseInt(nurseClient.shift_start_time.split(':')[0]) * 60 + parseInt(nurseClient.shift_start_time.split(':')[1]);
+//             const actualMinutes = parseInt(record.start_time.split(':')[0]) * 60 + parseInt(record.start_time.split(':')[1]);
+
+//             if (actualMinutes > expectedMinutes + 15) {
+//                 status = 'Late';
+//             }
+//           }
+//       }
+
+//       let nurse = null;
+//       if (nurseClient?.nurse) {
+//         if (Array.isArray(nurseClient.nurse)) {
+
+//           nurse = nurseClient.nurse.length > 0 ? nurseClient.nurse[0] : null;
+//         } else {
+
+//           nurse = nurseClient.nurse;
+//         }
+//       }
+        
+//       const nurseName = nurse?.first_name && nurse?.last_name
+//         ? `${nurse.first_name} ${nurse.last_name}`
+//         : 'Unknown Nurse';
+
+//             let hoursWorked: number | string = 0;
+//       if (record.total_hours) {
+//           if (record.total_hours.includes(':')) {
+//               const [hours, minutes] = record.total_hours.split(':').map(Number);
+              
+//               // Format based on whether there are hours or just minutes
+//               if (hours === 0) {
+//                   hoursWorked = `${minutes} min`;
+//               } else {
+//                   hoursWorked = `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
+//               }
+//           } else {
+//               const numHours = parseFloat(record.total_hours);
+//               hoursWorked = `${numHours}h`;
+//           }
+//       } else if (record.start_time && record.end_time) {
+//           const start = new Date(`1970-01-01T${record.start_time}`);
+//           const end = new Date(`1970-01-01T${record.end_time}`);
+//           const totalHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+          
+//           // Calculate hours and minutes
+//           const hours = Math.floor(totalHours);
+//           const minutes = Math.round((totalHours - hours) * 60);
+          
+//           if (hours === 0) {
+//               hoursWorked = `${minutes} min`;
+//           } else {
+//               hoursWorked = `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
+//           }
+//       }
+
+
+//       let locationInfo = record.location;
+//       try {
+//         if (record.location && typeof record.location === 'string' && 
+//             (record.location.startsWith('{') || record.location.startsWith('['))) {
+//           const locationObj = JSON.parse(record.location);
+//           locationInfo = `${locationObj.latitude}, ${locationObj.longitude}`;
+//         }
+//       } catch (e) {
+//         console.error("Error parsing location data:", e);
+//       }
+
+//       return {
+//           id: record.id,
+//           nurseName,
+//           date: record.date,
+//           shiftStart: actualStart,
+//           shiftEnd: actualEnd,
+//           scheduledStart,
+//           scheduledEnd,
+//           hoursWorked, 
+//           status,
+//           location: locationInfo
+//       };
+//     });
+    
+//     return {
+//       success: true,
+//       data: formattedData
+//     };
+//   } catch (error) {
+//     console.error('Error fetching attendance records:', error);
+//     return {
+//       success: false,
+//       data: [],
+//       error: error instanceof Error ? error.message : 'An unknown error occurred'
+//     };
+//   }
+// }
+
+
+interface RawAttendanceRecord {
+  id: number;
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+  total_hours: string | null;
+  location: string | null;
+  assigned_id: number | null;
+  nurse_client: NurseClient | NurseClient[] | null;
+}
+
+export async function fetchStaffAttendance(
+  date?: string,
+  page: number = 1,
+  pageSize: number = 50,
+  includeAbsent: boolean = true
+): Promise<{ 
+  success: boolean; 
+  data: AttendanceRecord[]; 
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalRecords: number;
+    pageSize: number;
+  };
+  error?: string 
+}> {
   try {
     const supabase = await createSupabaseServerClient();
-    
     const targetDate = date || new Date().toISOString().split('T')[0];
     
-    // Improved query with better joins
-    const { data, error } = await supabase
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    
+    const attendanceQuery = supabase
       .from('attendence_individual')
       .select(`
+        id,
+        date,
+        start_time,
+        end_time,
+        total_hours,
+        location,
+        assigned_id,
+        nurse_client:assigned_id (
           id,
-          date,
-          start_time,
-          end_time,
-          total_hours,
-          location,
-          nurse_client:assigned_id (
-            id,
+          nurse_id,
+          shift_start_time,
+          shift_end_time,
+          nurse:nurse_id (
             nurse_id,
-            shift_start_time,
-            shift_end_time,
-            nurse:nurse_id (
-                nurse_id,
-                first_name,
-                last_name
-            )
+            first_name,
+            last_name
           )
-      `)
+        )
+      `, { count: 'exact' })
       .eq('date', targetDate);
     
-    if (error) throw new Error(error.message);
+    if (!includeAbsent) {
+      attendanceQuery.range(from, to);
+    }
     
+    const { data: attendanceData, error: attendanceError, count: attendanceCount } = await attendanceQuery;
     
-    const formattedData: AttendanceRecord[] = (data as RawAttendanceRecord[]).map(record => {
-      const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
-      const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
-      
-
-      let nurseClient = null;
-      if (record.nurse_client) {
-        if (Array.isArray(record.nurse_client)) {
-
-          nurseClient = record.nurse_client.length > 0 ? record.nurse_client[0] : null;
-        } else {
-
-          nurseClient = record.nurse_client;
-        }
-      }
-      
-      const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
-      const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
-
-      let status = 'Absent';
-      if (record.start_time) {
-          status = 'Present';
-
-          if (nurseClient?.shift_start_time && record.start_time) {
-            const expectedMinutes = parseInt(nurseClient.shift_start_time.split(':')[0]) * 60 + parseInt(nurseClient.shift_start_time.split(':')[1]);
-            const actualMinutes = parseInt(record.start_time.split(':')[0]) * 60 + parseInt(record.start_time.split(':')[1]);
-
-            if (actualMinutes > expectedMinutes + 15) {
-                status = 'Late';
-            }
-          }
-      }
-
-      let nurse = null;
-      if (nurseClient?.nurse) {
-        if (Array.isArray(nurseClient.nurse)) {
-
-          nurse = nurseClient.nurse.length > 0 ? nurseClient.nurse[0] : null;
-        } else {
-
-          nurse = nurseClient.nurse;
-        }
-      }
-        
-      const nurseName = nurse?.first_name && nurse?.last_name
-        ? `${nurse.first_name} ${nurse.last_name}`
-        : 'Unknown Nurse';
-
-            let hoursWorked: number | string = 0;
-      if (record.total_hours) {
-          if (record.total_hours.includes(':')) {
-              const [hours, minutes] = record.total_hours.split(':').map(Number);
-              
-              // Format based on whether there are hours or just minutes
-              if (hours === 0) {
-                  hoursWorked = `${minutes} min`;
-              } else {
-                  hoursWorked = `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
-              }
-          } else {
-              const numHours = parseFloat(record.total_hours);
-              hoursWorked = `${numHours}h`;
-          }
-      } else if (record.start_time && record.end_time) {
-          const start = new Date(`1970-01-01T${record.start_time}`);
-          const end = new Date(`1970-01-01T${record.end_time}`);
-          const totalHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-          
-          // Calculate hours and minutes
-          const hours = Math.floor(totalHours);
-          const minutes = Math.round((totalHours - hours) * 60);
-          
-          if (hours === 0) {
-              hoursWorked = `${minutes} min`;
-          } else {
-              hoursWorked = `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
-          }
-      }
-
-
-      let locationInfo = record.location;
-      try {
-        if (record.location && typeof record.location === 'string' && 
-            (record.location.startsWith('{') || record.location.startsWith('['))) {
-          const locationObj = JSON.parse(record.location);
-          locationInfo = `${locationObj.latitude}, ${locationObj.longitude}`;
-        }
-      } catch (e) {
-        console.error("Error parsing location data:", e);
-      }
-
-      return {
-          id: record.id,
-          nurseName,
-          date: record.date,
-          shiftStart: actualStart,
-          shiftEnd: actualEnd,
-          scheduledStart,
-          scheduledEnd,
-          hoursWorked, 
-          status,
-          location: locationInfo
-      };
+    if (attendanceError) throw new Error(attendanceError.message);
+    
+    const presentAssignmentIds = new Set((attendanceData as RawAttendanceRecord[])
+      .map(record => record.assigned_id)
+      .filter(id => id !== null));
+    
+    const formattedAttendanceData: AttendanceRecord[] = (attendanceData as RawAttendanceRecord[]).map(record => {
+      return processAttendanceRecord(record);
     });
+    
+    let absentRecords: AttendanceRecord[] = [];
+    
+    if (includeAbsent) {
+      const { data: scheduledNurses, error: scheduledError } = await supabase
+        .from('nurse_client')
+        .select(`
+          id,
+          nurse_id,
+          shift_start_time,
+          shift_end_time,
+          start_date,
+          end_date,
+          nurse:nurse_id (
+            nurse_id,
+            first_name,
+            last_name
+          )
+        `, { count: 'exact' })
+        .lte('start_date', targetDate)
+        .gte('end_date', targetDate);
+      
+      if (scheduledError) throw new Error(scheduledError.message);
+      
+      if (scheduledNurses) {
+        absentRecords = await Promise.all(scheduledNurses
+          .filter(assignment => !presentAssignmentIds.has(assignment.id))
+          .map(assignment => processAbsentNurse(assignment, targetDate))
+        );
+      }
+    }
+    
+    let allRecords = [...formattedAttendanceData];
+    if (includeAbsent) {
+      allRecords = [...formattedAttendanceData, ...absentRecords];
+      
+      const totalRecords = allRecords.length;
+      allRecords = allRecords.slice(from, from + pageSize);
+      
+      return {
+        success: true,
+        data: allRecords,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalRecords / pageSize),
+          totalRecords,
+          pageSize
+        }
+      };
+    }
     
     return {
       success: true,
-      data: formattedData
+      data: formattedAttendanceData,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil((attendanceCount || 0) / pageSize),
+        totalRecords: attendanceCount || 0,
+        pageSize
+      }
     };
   } catch (error) {
     console.error('Error fetching attendance records:', error);
@@ -208,5 +354,184 @@ export async function fetchStaffAttendance(date?: string): Promise<{ success: bo
       data: [],
       error: error instanceof Error ? error.message : 'An unknown error occurred'
     };
+  }
+}
+
+function processAttendanceRecord(record: RawAttendanceRecord): AttendanceRecord {
+  const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
+  const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
+  
+  let nurseClient = null;
+  if (record.nurse_client) {
+    nurseClient = Array.isArray(record.nurse_client) 
+      ? (record.nurse_client.length > 0 ? record.nurse_client[0] : null)
+      : record.nurse_client;
+  }
+  
+  const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
+  const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
+
+  let status = 'Absent';
+  if (record.start_time) {
+    status = 'Present';
+    
+    if (nurseClient?.shift_start_time && record.start_time) {
+      const expectedMinutes = parseInt(nurseClient.shift_start_time.split(':')[0]) * 60 
+        + parseInt(nurseClient.shift_start_time.split(':')[1]);
+      const actualMinutes = parseInt(record.start_time.split(':')[0]) * 60 
+        + parseInt(record.start_time.split(':')[1]);
+      
+      if (actualMinutes > expectedMinutes + 15) {
+        status = 'Late';
+      }
+    }
+  }
+
+  let nurse = null;
+  if (nurseClient?.nurse) {
+    nurse = Array.isArray(nurseClient.nurse)
+      ? (nurseClient.nurse.length > 0 ? nurseClient.nurse[0] : null)
+      : nurseClient.nurse;
+  }
+    
+  const nurseName = nurse?.first_name && nurse?.last_name
+    ? `${nurse.first_name} ${nurse.last_name}`
+    : 'Unknown Nurse';
+
+  const hoursWorked = calculateHoursWorked(record);
+
+  const locationInfo = parseLocation(record.location);
+
+  return {
+    id: record.id,
+    nurseName,
+    date: record.date,
+    shiftStart: actualStart,
+    shiftEnd: actualEnd,
+    scheduledStart,
+    scheduledEnd,
+    hoursWorked, 
+    status,
+    location: locationInfo,
+    nurseId: nurse?.nurse_id || null
+  };
+}
+
+interface NurseAssignment {
+  id: number;
+  nurse_id: number;
+  shift_start_time: string;
+  shift_end_time: string;
+  start_date: string;
+  end_date: string;
+  nurse: Nurse | Nurse[];
+}
+
+async function processAbsentNurse(assignment: NurseAssignment, targetDate: string): Promise<AttendanceRecord> {
+  let nurse = null;
+  if (assignment.nurse) {
+    nurse = Array.isArray(assignment.nurse)
+      ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
+      : assignment.nurse;
+  }
+  
+  const nurseId = nurse?.nurse_id || null;
+  const nurseName = nurse?.first_name && nurse?.last_name
+    ? `${nurse.first_name} ${nurse.last_name}`
+    : 'Unknown Nurse';
+  
+  const scheduledStart = assignment.shift_start_time ? convertTo12HourFormat(assignment.shift_start_time) : '';
+  const scheduledEnd = assignment.shift_end_time ? convertTo12HourFormat(assignment.shift_end_time) : '';
+  
+  let status = 'Absent';
+  if (nurseId) {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase
+      .from('nurse_leave_requests')
+      .select('leave_type')
+      .eq('nurse_id', nurseId)
+      .eq('status', 'approved')
+      .lte('start_date', targetDate)
+      .gte('end_date', targetDate)
+      .limit(1);
+    
+    if (data && data.length > 0) {
+      status = `On Leave (${formatLeaveType(data[0].leave_type)})`;
+    }
+  }
+  
+  return {
+    id: -assignment.id,
+    nurseName,
+    date: targetDate,
+    shiftStart: '',
+    shiftEnd: '',
+    scheduledStart,
+    scheduledEnd,
+    hoursWorked: 0,
+    status: status,
+    location: null,
+    nurseId
+  };
+}
+
+function formatLeaveType(type: string): string {
+  const mapping: Record<string, string> = {
+    'sick': 'Sick Leave',
+    'annual': 'Annual Leave',
+    'personal': 'Personal Leave',
+    'casual': 'Casual Leave',
+    'maternity': 'Maternity Leave',
+    'paternity': 'Paternity Leave',
+    'unpaid': 'Unpaid Leave'
+  }
+  return mapping[type] || type;
+}
+
+function calculateHoursWorked(record: RawAttendanceRecord): number | string {
+  if (!record.total_hours && (!record.start_time || !record.end_time)) {
+    return 0;
+  }
+  
+  if (record.total_hours) {
+    if (record.total_hours.includes(':')) {
+      const [hours, minutes] = record.total_hours.split(':').map(Number);
+      if (hours === 0) {
+        return `${minutes} min`;
+      } else {
+        return `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
+      }
+    } else {
+      const numHours = parseFloat(record.total_hours);
+      return `${numHours}h`;
+    }
+  }
+  
+  const start = new Date(`1970-01-01T${record.start_time}`);
+  const end = new Date(`1970-01-01T${record.end_time}`);
+  const totalHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  
+  const hours = Math.floor(totalHours);
+  const minutes = Math.round((totalHours - hours) * 60);
+  
+  if (hours === 0) {
+    return `${minutes} min`;
+  } else {
+    return `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
+  }
+}
+
+function parseLocation(location: string | null): string | null {
+  if (!location) return null;
+  
+  try {
+    if (typeof location === 'string' && (location.startsWith('{') || location.startsWith('['))) {
+      const locationObj = JSON.parse(location);
+      return `${locationObj.latitude}, ${locationObj.longitude}`;
+    }
+    return location;
+  } catch (e) {
+    console.error("Error parsing location data:", e);
+    return location;
   }
 }
