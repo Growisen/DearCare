@@ -160,7 +160,7 @@ export async function fetchDashboardData(): Promise<{
     const totalStaff = attendanceData.total || 0;
     const presentStaff = attendanceData.present || 0;
     const onLeaveStaff = attendanceData.onLeave || 0;
-    const absentStaff = 0;
+    const absentStaff = totalStaff - presentStaff - onLeaveStaff;
     const presentPercentage = totalStaff > 0 ? Math.round((presentStaff / totalStaff) * 100) : 0;
 
     const totalComplaints = parseInt(String(totalComplaintsResult.data?.count)) || 0;
