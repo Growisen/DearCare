@@ -190,6 +190,7 @@ export interface DetailedClientIndividual {
 }
 
 export interface DetailedClientOrganization {
+  registration_number?: string;
   client_type: 'organization' | 'hospital' | 'carehome';
   details?: {
     organization_name?: string;
