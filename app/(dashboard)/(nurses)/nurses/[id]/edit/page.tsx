@@ -116,6 +116,7 @@ const DocumentIcon = React.memo(({ type }: { type: string }) => {
     </span>
   );
 });
+DocumentIcon.displayName = 'DocumentIcon';
 
 const FileTypeIcon = React.memo(({ fileName }: { fileName: string }) => {
   const ext = fileName.split('.').pop()?.toLowerCase();
@@ -123,6 +124,7 @@ const FileTypeIcon = React.memo(({ fileName }: { fileName: string }) => {
   if (['jpg', 'jpeg', 'png'].includes(ext || '')) return IconCollection.fileIcons.image;
   return IconCollection.fileIcons.default;
 });
+FileTypeIcon.displayName = 'FileTypeIcon';
 
 // Optimized DocumentUploader component with cleaner rendering logic
 const DocumentUploader = React.memo(({ 
@@ -207,6 +209,7 @@ const DocumentUploader = React.memo(({
     </div>
   );
 });
+DocumentUploader.displayName = 'DocumentUploader';
 
 // Main component
 const EditNurseProfilePage: React.FC = () => {
@@ -344,11 +347,11 @@ const EditNurseProfilePage: React.FC = () => {
       
       // Create section if it doesn't exist
       const createSection = (sectionName: string) => {
-        const defaults: Record<string, any> = {
+        const defaults: Record<string, unknown> = {
           health: { health_status: null, disability: null, source: null },
           references: { referer_name: null, phone_number: null, relation: null, description: null, family_references: [] }
         };
-        return { ...defaults[sectionName], [field]: processValue() };
+        return { ...(defaults[sectionName] || {}), [field]: processValue() };
       };
       
       return {
