@@ -75,6 +75,7 @@ export const clientTypeOptions = [
 
 export const relationOptions = [
   { value: '', label: 'Select relation' },
+  { value: 'self', label: 'Self' },
   { value: 'son', label: 'Son' },
   { value: 'daughter', label: 'Daughter' },
   { value: 'spouse', label: 'Spouse' },

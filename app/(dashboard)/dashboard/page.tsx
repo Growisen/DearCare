@@ -5,38 +5,18 @@ import RecentActivities from "@/components/dashboard/RecentActivities"
 import Stats from "@/components/dashboard/Stats"
 import UpcomingSchedules from "@/components/dashboard/UpcomingSchedules"
 import RecentClients from "@/components/dashboard/RecentClients"
-import { fetchDashboardData, DashboardData } from "@/app/actions/dashboard-actions"
 import { Loader2 } from "lucide-react"
+import { useDashboardData } from "@/hooks/useDashboardData"
 
 export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState("")
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: result, isLoading, error } = useDashboardData()
+  const dashboardData = result?.success ? result.data : null
 
   // Timer for clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date().toLocaleTimeString()), 1000)
     return () => clearInterval(timer)
-  }, [])
-
-  // Fetch all dashboard data at once
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setIsLoading(true)
-        const result = await fetchDashboardData()
-        
-        if (result.success && result.data) {
-          setDashboardData(result.data)
-        } else {
-          throw new Error(result.error || "Failed to load dashboard data")
-        }
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadDashboardData()
   }, [])
 
   // Show loading state
@@ -46,6 +26,19 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
           <span className="text-lg font-medium text-gray-700">Loading dashboard...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error || (result && !result.success)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600">
+            {error instanceof Error ? error.message : result?.error || "Failed to load dashboard data"}
+          </p>
         </div>
       </div>
     )
