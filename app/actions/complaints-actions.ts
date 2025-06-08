@@ -337,11 +337,10 @@ export async function fetchComplaintById(complaintId: string): Promise<{
     let supportingMedia = [];
     if (complaint.media_files && Array.isArray(complaint.media_files)) {
       supportingMedia = complaint.media_files.map((file: MediaFile) => ({
-        id: file.url.split('/').pop() || '',
-        url: file.url,
-        fileName: file.name,
-        fileType: file.type,
-        uploadDate: formatDate(complaint.submission_date)
+        id: file.url ? file.url.split('/').pop() || '' : '',
+        url: file.url || '',
+        fileName: file.name || '',
+        fileType: file.type || '',
       }));
     }
     

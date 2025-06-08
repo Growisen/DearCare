@@ -6,6 +6,7 @@ import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
 import RejectModal from './RejectModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface InputFieldProps {
   label: string;
@@ -55,6 +56,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
 
 export function UnderReviewContent({ clientId, clientType, onClose, onStatusChange }: UnderReviewContentProps) {
   const { user } = useAuth();
+  const { invalidateDashboardCache } = useDashboardData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -133,6 +135,8 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       if (!statusResult.success) {
         throw new Error(statusResult.error || 'Failed to update client status');
       }
+
+      invalidateDashboardCache();
       
       toast.success('Client approved successfully!');
 
@@ -167,6 +171,8 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       if (!result.success) {
         throw new Error(result.error || 'Failed to reject client');
       }
+
+      invalidateDashboardCache();
       
       toast.success('Client rejected successfully');
       
