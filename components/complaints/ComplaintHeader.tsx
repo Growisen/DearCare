@@ -131,15 +131,18 @@ export function ComplaintHeader({
             </div>
             
             {/* Add Reset All Filters button in desktop view */}
-            {(selectedStatus !== "all" || selectedSource !== "all" || searchInput) && (
-              <button
-                onClick={handleResetFilters}
-                className="px-2.5 py-1.5 rounded text-xs font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 flex items-center gap-1"
-              >
-                <X className="h-3 w-3" />
-                Reset All
-              </button>
-            )}
+            <button
+              onClick={handleResetFilters}
+              disabled={selectedStatus === "all" && selectedSource === "all" && !searchInput}
+              className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors border flex items-center gap-1 ${
+                selectedStatus === "all" && selectedSource === "all" && !searchInput
+                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+              }`}
+            >
+              <X className="h-3 w-3" />
+              Reset All
+            </button>
           </div>
         </div>
 
@@ -189,15 +192,18 @@ export function ComplaintHeader({
           </div>
           
           {/* Add Reset All Filters button in mobile view */}
-          {(selectedStatus !== "all" || selectedSource !== "all" || searchInput) && (
-            <button
-              onClick={handleResetFilters}
-              className="mt-1 py-1.5 rounded text-xs font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 flex items-center justify-center gap-1"
-            >
-              <X className="h-3 w-3" />
-              Reset All Filters
-            </button>
-          )}
+          <button
+            onClick={handleResetFilters}
+            disabled={selectedStatus === "all" && selectedSource === "all" && !searchInput}
+            className={`mt-1 py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
+              selectedStatus === "all" && selectedSource === "all" && !searchInput
+                ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+            }`}
+          >
+            <X className="h-3 w-3" />
+            Reset All Filters
+          </button>
         </div>
       </div>
     </div>

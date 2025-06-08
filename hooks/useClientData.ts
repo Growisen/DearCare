@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getClients } from "@/app/actions/client-actions"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Client, ClientFilters, ClientStatus } from '@/types/client.types'
 
 export function useClientData() {
+  const queryClient = useQueryClient();
   const [searchInput, setSearchInput] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<ClientFilters>("pending")
   const [searchQuery, setSearchQuery] = useState("")
@@ -39,6 +40,10 @@ export function useClientData() {
     refetchOnWindowFocus: true,
     refetchInterval: 1000 * 60 * 10, // 10 minutes
   });
+
+  const invalidateClientCache = () => {
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+  };
 
   // Process the data
   const clients = data?.success && data?.clients 
@@ -102,6 +107,7 @@ export function useClientData() {
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
-    refreshData
+    refreshData,
+    invalidateClientCache
   }
 }

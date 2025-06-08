@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { updateClientStatus } from '../../app/actions/client-actions';
 import { Client } from '../../types/client.types';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";
 
@@ -11,6 +12,7 @@ type PendingContentProps = {
 };
 
 export function PendingContent({ client, onStatusChange }: PendingContentProps) {
+  const { invalidateDashboardCache } = useDashboardData();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +24,7 @@ export function PendingContent({ client, onStatusChange }: PendingContentProps) 
       const result = await updateClientStatus(client.id, 'under_review');
       
       if (result.success) {
+        invalidateDashboardCache();
         // Pass the new status for optimistic update
         if (onStatusChange) {
           onStatusChange('under_review');
