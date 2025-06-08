@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from '@/contexts/AuthContext'
 import { NetworkProvider } from '@/contexts/NetworkContext'
 import { Toaster } from 'react-hot-toast';
+import { Providers } from "./providers";
 
 export default function RootLayout({
   children,
@@ -15,7 +16,9 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <NetworkProvider>
-            {children}
+            <Providers>
+              {children}
+            </Providers>
             <Toaster 
               position="top-right"
               toastOptions={{

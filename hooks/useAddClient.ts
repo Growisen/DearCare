@@ -130,8 +130,8 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         return value === '' ? 'Please select a gender option' : '';
       case 'serviceRequired':
         return value === '' ? 'Please select a required service' : '';
-      case 'careDuration':
-        return value === '' ? 'Please select a care duration' : '';
+      // case 'careDuration':
+      //   return value === '' ? 'Please select a care duration' : '';
       case 'dutyPeriod':
         return value === '' ? 'Please select a duty period' : '';
       case 'dutyPeriodReason':
@@ -180,7 +180,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     const individualRequired = [
       'requestorName', 'requestorPhone', 'requestorEmail',
       'relationToPatient', 'patientName', 'patientAge', 'patientGender',
-      'serviceRequired', 'careDuration', 'startDate',
+      'serviceRequired', 'startDate',
       'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
       'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict'
     ];
@@ -299,7 +299,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       ...(clientType === 'individual' 
         ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
            'patientName', 'patientAge', 'patientGender', 
-           'serviceRequired', 'careDuration', 'startDate',
+           'serviceRequired', 'startDate',
            'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
            'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
         : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
@@ -392,6 +392,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     // Validate form before submission
     if (!validateForm()) {
       toast.error("Please correct the errors in the form");
+      console.log(formErrors)
       return;
     }
 
