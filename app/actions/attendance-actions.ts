@@ -41,6 +41,16 @@ interface RawAttendanceRecord {
   nurse_client: NurseClient | NurseClient[] | null;
 }
 
+export interface AssignmentAttendanceDetails {
+  id?: number;
+  checked_in: boolean;
+  check_in_time?: string;
+  check_out_time?: string;
+  location?: string | null;
+  total_hours?: string | null;
+}
+
+
 // Convert 24-hour format to 12-hour format
 function convertTo12HourFormat(time24: string | null): string {
   if (!time24) return '';
@@ -533,5 +543,205 @@ function parseLocation(location: string | null): string | null {
   } catch (e) {
     console.error("Error parsing location data:", e);
     return location;
+  }
+}
+
+export async function getTodayAttendanceForAssignment(
+  assignmentId: number
+): Promise<{
+  success: boolean;
+  data?: AssignmentAttendanceDetails;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+      .from('attendence_individual')
+      .select('id, start_time, end_time, total_hours, location')
+      .eq('date', today)
+      .eq('assigned_id', assignmentId)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching assignment attendance:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+    
+    if (!data) {
+      return {
+        success: true,
+        data: {
+          checked_in: false
+        }
+      };
+    }
+    
+    return {
+      success: true,
+      data: {
+        id: data.id,
+        checked_in: !!data.start_time,
+        check_in_time: data.start_time || undefined,
+        check_out_time: data.end_time || undefined,
+        location: data.location,
+        total_hours: data.total_hours
+      }
+    };
+  } catch (error) {
+    console.error('Error checking attendance status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error checking attendance status'
+    };
+  }
+}
+
+
+export async function adminCheckInNurse(
+  assignmentId: number,
+  // nurseId: number
+): Promise<{ 
+  success: boolean; 
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    
+    const { data: existingRecord, error: checkError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('date', today)
+      .eq('assigned_id', assignmentId)
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error('Error checking existing attendance:', checkError);
+      return {
+        success: false,
+        error: checkError.message
+      };
+    }
+    
+    if (existingRecord) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: currentTime,
+          // admin_action_notes: `Admin check-in at ${currentTime}`
+        })
+        .eq('id', existingRecord.id);
+      
+      if (updateError) {
+        return {
+          success: false,
+          error: updateError.message
+        };
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert({
+          date: today,
+          start_time: currentTime,
+          // nurse_id: nurseId,
+          assigned_id: assignmentId,
+          // admin_action_notes: `Admin check-in at ${currentTime}`
+        });
+      
+      if (insertError) {
+        return {
+          success: false,
+          error: insertError.message
+        };
+      }
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('Error during admin check-in:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+export async function adminCheckOutNurse(
+  attendanceId: number
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    
+    // Fetch the attendance record to get check-in time
+    const { data: attendance, error: fetchError } = await supabase
+      .from('attendence_individual')
+      .select('start_time')
+      .eq('id', attendanceId)
+      .single();
+    
+    if (fetchError || !attendance) {
+      return {
+        success: false,
+        error: fetchError?.message || 'Attendance record not found'
+      };
+    }
+    
+    // Calculate hours worked
+    let totalHours = '0:00';
+    if (attendance.start_time) {
+      const [startHours, startMinutes] = attendance.start_time.split(':').map(Number);
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      
+      const [endHours, endMinutes] = currentTime.split(':').map(Number);
+      const endTotalMinutes = endHours * 60 + endMinutes;
+      
+      const diffMinutes = endTotalMinutes - startTotalMinutes;
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      
+      totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    // Update the attendance record with check-out time and total hours
+    const { error: updateError } = await supabase
+      .from('attendence_individual')
+      .update({
+        end_time: currentTime,
+        total_hours: totalHours,
+        // admin_action_notes: (attendance.admin_action_notes || '') + ` | Admin check-out at ${currentTime}`
+      })
+      .eq('id', attendanceId);
+    
+    if (updateError) {
+      return {
+        success: false,
+        error: updateError.message
+      };
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('Error during admin check-out:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
   }
 }
