@@ -25,9 +25,7 @@ interface ShiftData {
 }
 
 // Create a separate component that uses useSearchParams
-const ScheduleShiftsContent = () => {
-  console.log('ScheduleShiftsPage rendering');
-  
+const ScheduleShiftsContent = () => {  
   const searchParams = useSearchParams();
   const nurseIds = useMemo(() => {
     console.log('Recalculating nurseIds');

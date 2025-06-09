@@ -4,8 +4,10 @@ import { listNursesWithAssignments } from '@/app/actions/add-nurse';
 import { NurseAssignment } from '@/types/client.types';
 import { Nurse } from '@/types/staff.types';
 import toast from 'react-hot-toast';
+import { useDashboardData } from './useDashboardData';
 
 export const useNurseAssignments = (clientId: string) => {
+  const { invalidateDashboardCache } = useDashboardData();
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
@@ -70,8 +72,6 @@ export const useNurseAssignments = (clientId: string) => {
   const fetchAssignments = async () => {
     try {
       const assignmentsResponse = await getNurseAssignments(clientId);
-
-      console.log("d", assignmentsResponse)
 
       if (assignmentsResponse.success && assignmentsResponse.data) {
         const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({
@@ -161,6 +161,7 @@ export const useNurseAssignments = (clientId: string) => {
       const result = await updateNurseAssignment(updatedAssignment.id, updates);
       
       if (result.success) {
+        invalidateDashboardCache()
         setNurseAssignments(prevAssignments => 
           prevAssignments.map(assignment => 
             assignment.id === updatedAssignment.id ? updatedAssignment : assignment
@@ -186,6 +187,7 @@ export const useNurseAssignments = (clientId: string) => {
       const result = await deleteNurseAssignment(numericId);
       
       if (result.success) {
+        invalidateDashboardCache()
         setNurseAssignments(prevAssignments => 
           prevAssignments.filter(assignment => assignment.id !== numericId)
         );
