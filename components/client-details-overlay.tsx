@@ -8,6 +8,7 @@ import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization, ClientStatus } from '../types/client.types';
 import { getClientDetails, deleteClient } from '../app/actions/client-actions';
 import Image from 'next/image';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
@@ -22,6 +23,7 @@ export function ClientDetailsOverlay({
   onClose,
   onStatusChange 
 }: ClientDetailsProps & { onStatusChange?: () => void }) {
+  const { invalidateDashboardCache } = useDashboardData()
   const [detailedClient, setDetailedClient] = useState<DetailedClient | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentClientStatus, setCurrentClientStatus] = useState<ClientStatus>(client.status);
@@ -72,6 +74,7 @@ export function ClientDetailsOverlay({
     try {
       const result = await deleteClient(client.id);
       if (result.success) {
+        invalidateDashboardCache()
         toast.success('Client deleted successfully');
         if (onClose) onClose();
         if (onStatusChange) onStatusChange();

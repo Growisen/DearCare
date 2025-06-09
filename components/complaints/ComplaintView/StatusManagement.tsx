@@ -4,6 +4,8 @@ import { statusOptions } from "@/types/complaint.types";
 import { updateComplaintStatus } from "@/app/actions/complaints-actions";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { useComplaints } from '@/hooks/useComplaints';
 
 interface StatusManagementProps {
   complaint: Complaint;
@@ -12,6 +14,8 @@ interface StatusManagementProps {
 
 export default function StatusManagement({ complaint, updateComplaint }: StatusManagementProps) {
   const router = useRouter();
+  const { invalidateDashboardCache } = useDashboardData();
+  const { invalidateComplaintsCache } = useComplaints();
   const [status, setStatus] = useState<ComplaintStatus>(complaint.status);
   const [resolution, setResolution] = useState("");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -33,6 +37,9 @@ export default function StatusManagement({ complaint, updateComplaint }: StatusM
       if (!result.success) {
         throw new Error(result.error || "Failed to update status");
       }
+
+      invalidateDashboardCache();
+      invalidateComplaintsCache();
       
       const currentDate = new Date().toISOString();
       const formattedDate = currentDate.split('T')[0];

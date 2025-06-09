@@ -28,6 +28,7 @@ export default function ComplaintsPage() {
     handleSourceChange,
     handleResetFilters,
     handleExport,
+    triggerSearch,
     goToPage,
     goToPreviousPage,
     goToNextPage,
@@ -35,7 +36,7 @@ export default function ComplaintsPage() {
   } = useComplaints();
 
   const handleSearch = () => {
-    // Search functionality is already handled by the hook
+    triggerSearch();
   };
   
   const handleViewComplaint = (complaint: Complaint) => {

@@ -1,88 +1,62 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchComplaints, exportComplaintsToCSV } from '@/app/actions/complaints-actions';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Complaint, ComplaintStatus, ComplaintSource } from '@/types/complaint.types';
 
 export const useComplaints = () => {
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [searchInput, setSearchInput] = useState<string>('');
-  const [debouncedSearchInput, setDebouncedSearchInput] = useState<string>('');
+  const [activeSearchTerm, setActiveSearchTerm] = useState<string>(''); // This replaces debouncedSearchInput
   const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus | 'all'>('all');
   const [selectedSource, setSelectedSource] = useState<ComplaintSource | 'all'>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize] = useState<number>(10);
-  const [isExporting, setIsExporting] = useState<boolean>(false);
   
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchInput(searchInput);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-  
-  const fetchComplaintsData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetchComplaints(
-        currentPage,
-        pageSize,
-        selectedStatus === 'all' ? undefined : selectedStatus,
-        selectedSource === 'all' ? undefined : selectedSource,
-        debouncedSearchInput
-      );
-      
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch complaints');
-      }
-      
-      setComplaints(response.data || []);
-      if (response.pagination) {
-        setTotalPages(response.pagination.totalPages);
-        setTotalCount(response.pagination.totalCount);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, pageSize, selectedStatus, selectedSource, debouncedSearchInput]);
-  
-  useEffect(() => {
-    fetchComplaintsData();
-  }, [fetchComplaintsData]);
-  
-  // Reset to first page when filters change
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedStatus, selectedSource, debouncedSearchInput]);
+  }, [selectedStatus, selectedSource, activeSearchTerm]);
   
-  const handleStatusChange = (status: ComplaintStatus | 'all') => {
-    setSelectedStatus(status);
-  };
+  // React Query for fetching complaints with caching
+  const { 
+    data: queryResult, 
+    isLoading: loading, 
+    error: queryError, 
+    refetch 
+  } = useQuery({
+    queryKey: [
+      'complaints', 
+      currentPage, 
+      pageSize, 
+      selectedStatus, 
+      selectedSource, 
+      activeSearchTerm 
+    ],
+    queryFn: () => fetchComplaints(
+      currentPage,
+      pageSize,
+      selectedStatus === 'all' ? undefined : selectedStatus,
+      selectedSource === 'all' ? undefined : selectedSource,
+      activeSearchTerm 
+    ),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 10, // 10 minutes
+  });
   
-  const handleSourceChange = (source: ComplaintSource | 'all') => {
-    setSelectedSource(source);
-  };
+  // Process query results
+  const complaints = queryResult?.success ? queryResult.data || [] : [];
+  const totalPages = queryResult?.pagination?.totalPages || 1;
+  const totalCount = queryResult?.pagination?.totalCount || 0;
+  const error = queryError 
+    ? (queryError instanceof Error ? queryError.message : 'An unknown error occurred') 
+    : queryResult?.success === false ? queryResult.error : null;
   
-  const handleResetFilters = () => {
-    setSelectedStatus('all');
-    setSelectedSource('all');
-    setSearchInput('');
-  };
-  
-  const handleExport = async () => {
-    setIsExporting(true);
-    
-    try {
-      const response = await exportComplaintsToCSV();
-      
+  // Export mutation
+  const { mutate: exportMutation, isPending: isExporting } = useMutation({
+    mutationFn: exportComplaintsToCSV,
+    onSuccess: (response) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to export complaints');
       }
@@ -110,11 +84,30 @@ export const useComplaints = () => {
       // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setIsExporting(false);
     }
+  });
+
+  const triggerSearch = () => {
+    setActiveSearchTerm(searchInput);
+  };
+  
+  const handleStatusChange = (status: ComplaintStatus | 'all') => {
+    setSelectedStatus(status);
+  };
+  
+  const handleSourceChange = (source: ComplaintSource | 'all') => {
+    setSelectedSource(source);
+  };
+  
+  const handleResetFilters = () => {
+    setSelectedStatus('all');
+    setSelectedSource('all');
+    setSearchInput('');
+    setActiveSearchTerm(''); // Also clear the active search term
+  };
+  
+  const handleExport = () => {
+    exportMutation();
   };
   
   const goToPage = (page: number) => {
@@ -135,7 +128,11 @@ export const useComplaints = () => {
   
   const refreshComplaints = () => {
     setCurrentPage(1);
-    fetchComplaintsData();
+    refetch();
+  };
+
+  const invalidateComplaintsCache = () => {
+    queryClient.invalidateQueries({ queryKey: ['complaints'] });
   };
   
   return {
@@ -156,9 +153,11 @@ export const useComplaints = () => {
     handleSourceChange,
     handleResetFilters,
     handleExport,
+    triggerSearch,
     goToPage,
     goToPreviousPage,
     goToNextPage,
-    refreshComplaints
+    refreshComplaints,
+    invalidateComplaintsCache
   };
 };

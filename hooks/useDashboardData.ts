@@ -1,10 +1,12 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { fetchDashboardData, DashboardData } from "@/app/actions/dashboard-actions"
 
 export function useDashboardData() {
-  return useQuery<{
+  const queryClient = useQueryClient();
+  
+  const queryResult = useQuery<{
     success: boolean;
     data?: DashboardData;
     error?: string;
@@ -16,5 +18,14 @@ export function useDashboardData() {
     refetchInterval: 1000 * 60 * 10,
     select: (data) => data,
     throwOnError: false,
-  })
+  });
+
+  const invalidateDashboardCache = () => {
+    queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+  };
+
+  return {
+    ...queryResult,
+    invalidateDashboardCache
+  };
 }

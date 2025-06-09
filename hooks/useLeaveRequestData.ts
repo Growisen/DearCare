@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { getLeaveRequests } from '@/app/actions/leave-management'
 import { toast } from 'react-hot-toast'
-import { LeaveRequest, LeaveRequestStatus } from '@/types/leave.types'
+import { LeaveRequestStatus } from '@/types/leave.types'
+import { useQuery } from "@tanstack/react-query"
 
 export function useLeaveRequestData() {
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<{startDate: string | null, endDate: string | null}>({
@@ -13,64 +12,80 @@ export function useLeaveRequestData() {
     endDate: null
   })
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [processingRequestIds, setProcessingRequestIds] = useState<Set<string>>(new Set())
   
-  const totalPages = Math.ceil(totalCount / pageSize)
+  // Convert statusFilter to proper LeaveRequestStatus
+  const getStatusFilter = (): LeaveRequestStatus | null => {
+    if (statusFilter && statusFilter !== 'All') {
+      const lowercaseStatus = statusFilter.toLowerCase() as LeaveRequestStatus
+      if (lowercaseStatus === 'pending' || lowercaseStatus === 'approved' || lowercaseStatus === 'rejected') {
+        return lowercaseStatus
+      }
+    }
+    return null
+  }
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [statusFilter, searchTerm, dateRange.startDate, dateRange.endDate])
+
+  // Use React Query for data fetching and caching
+  const { 
+    data, 
+    isLoading, 
+    refetch 
+  } = useQuery({
+    queryKey: [
+      'leaveRequests', 
+      getStatusFilter(), 
+      searchTerm, 
+      dateRange.startDate,
+      dateRange.endDate,
+      currentPage,
+      pageSize
+    ],
+    queryFn: async () => {
+      try {
+        const result = await getLeaveRequests(
+          getStatusFilter(),
+          searchTerm,
+          dateRange.startDate,
+          dateRange.endDate,
+          currentPage,
+          pageSize
+        )
+        
+        if (!result.success) {
+          toast.error(result.error || 'Failed to fetch leave requests')
+          return { leaveRequests: [], totalCount: 0 }
+        }
+        
+        return { 
+          leaveRequests: result.leaveRequests || [], 
+          totalCount: result.totalCount || 0 
+        }
+      } catch (error) {
+        console.error('Error fetching leave requests:', error)
+        toast.error('An error occurred while fetching leave requests')
+        return { leaveRequests: [], totalCount: 0 }
+      }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 10, // 10 minutes
+  })
+
+  const leaveRequests = data?.leaveRequests || []
+  const totalCount = data?.totalCount || 0
+  const totalPages = Math.ceil(totalCount / pageSize)
+  
   const clearAllFilters = () => {
     setSearchTerm('')
     setStatusFilter(null)
     setDateRange({startDate: null, endDate: null})
   }
-
-  const fetchLeaveRequests = async () => {
-    setIsLoading(true)
-    try {
-      let status: LeaveRequestStatus | null = null
-      
-      if (statusFilter && statusFilter !== 'All') {
-        const lowercaseStatus = statusFilter.toLowerCase() as LeaveRequestStatus
-        if (lowercaseStatus === 'pending' || lowercaseStatus === 'approved' || lowercaseStatus === 'rejected') {
-          status = lowercaseStatus
-        }
-      }
-        
-      const result = await getLeaveRequests(
-        status, 
-        searchTerm,
-        dateRange.startDate,
-        dateRange.endDate,
-        currentPage,
-        pageSize
-      )
-  
-      if (result.success) {
-        setLeaveRequests(result.leaveRequests || [])
-        setTotalCount(result.totalCount || 0)
-      } else {
-        toast.error(result.error || 'Failed to fetch leave requests')
-        setLeaveRequests([])
-        setTotalCount(0)
-      }
-    } catch (error) {
-      console.error('Error fetching leave requests:', error)
-      toast.error('An error occurred while fetching leave requests')
-      setLeaveRequests([])
-      setTotalCount(0)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [statusFilter, searchTerm, dateRange.startDate, dateRange.endDate])
-  
-  useEffect(() => {
-    fetchLeaveRequests()
-  }, [currentPage, pageSize, statusFilter, searchTerm, dateRange.startDate, dateRange.endDate])
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return
@@ -107,7 +122,7 @@ export function useLeaveRequestData() {
     processingRequestIds,
     setProcessingRequestIds,
     clearAllFilters,
-    fetchLeaveRequests,
+    fetchLeaveRequests: refetch,
     handlePageChange,
     handlePreviousPage,
     handleNextPage
