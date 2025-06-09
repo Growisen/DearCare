@@ -7,25 +7,16 @@ import { Complaint, ComplaintStatus, ComplaintSource } from '@/types/complaint.t
 export const useComplaints = () => {
   const queryClient = useQueryClient();
   const [searchInput, setSearchInput] = useState<string>('');
-  const [debouncedSearchInput, setDebouncedSearchInput] = useState<string>('');
+  const [activeSearchTerm, setActiveSearchTerm] = useState<string>(''); // This replaces debouncedSearchInput
   const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus | 'all'>('all');
   const [selectedSource, setSelectedSource] = useState<ComplaintSource | 'all'>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
   
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchInput(searchInput);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-  
-  // Reset to first page when filters change
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedStatus, selectedSource, debouncedSearchInput]);
+  }, [selectedStatus, selectedSource, activeSearchTerm]);
   
   // React Query for fetching complaints with caching
   const { 
@@ -40,14 +31,14 @@ export const useComplaints = () => {
       pageSize, 
       selectedStatus, 
       selectedSource, 
-      debouncedSearchInput
+      activeSearchTerm 
     ],
     queryFn: () => fetchComplaints(
       currentPage,
       pageSize,
       selectedStatus === 'all' ? undefined : selectedStatus,
       selectedSource === 'all' ? undefined : selectedSource,
-      debouncedSearchInput
+      activeSearchTerm 
     ),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: true,
@@ -95,6 +86,10 @@ export const useComplaints = () => {
       window.URL.revokeObjectURL(url);
     }
   });
+
+  const triggerSearch = () => {
+    setActiveSearchTerm(searchInput);
+  };
   
   const handleStatusChange = (status: ComplaintStatus | 'all') => {
     setSelectedStatus(status);
@@ -108,6 +103,7 @@ export const useComplaints = () => {
     setSelectedStatus('all');
     setSelectedSource('all');
     setSearchInput('');
+    setActiveSearchTerm(''); // Also clear the active search term
   };
   
   const handleExport = () => {
@@ -157,6 +153,7 @@ export const useComplaints = () => {
     handleSourceChange,
     handleResetFilters,
     handleExport,
+    triggerSearch,
     goToPage,
     goToPreviousPage,
     goToNextPage,

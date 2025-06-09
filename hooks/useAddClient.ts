@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { ClientCategory, FormData, StaffRequirement, ClientType } from '@/types/client.types';
 import { toast } from 'react-hot-toast';
 import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface FormErrors {
   [key: string]: string;
@@ -13,6 +14,7 @@ interface UseClientFormProps {
 }
 
 export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProps = {}) => {
+  const { invalidateDashboardCache } = useDashboardData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientType, setClientType] = useState<ClientType>(
     initialData.clientType || 'individual'
@@ -459,6 +461,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         throw new Error(result.error || 'Failed to add client');
       }
 
+      invalidateDashboardCache();
       setIsSuccess(true);
       toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client added successfully!`);
       
