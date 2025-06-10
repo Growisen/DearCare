@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Complaint, statusOptions, ComplaintStatus } from "@/types/complaint.types";
 
 interface ComplaintHeaderProps {
@@ -36,9 +35,12 @@ export default function ComplaintHeader({ complaint }: ComplaintHeaderProps) {
             </span>
           </div>
         </div>
-        <Link href="/complaints" className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border rounded-md">
-          Back to List
-        </Link>
+        <button 
+          onClick={() => window.close()} 
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border rounded-md cursor-pointer"
+        >
+          Close Window
+        </button>
       </div>
     </div>
   );

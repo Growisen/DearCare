@@ -92,6 +92,7 @@ export async function fetchDashboardData(): Promise<{
             requestor_email,
             requestor_phone,
             patient_name,
+            requestor_name,
             service_required,
             start_date
           ),
@@ -143,7 +144,7 @@ export async function fetchDashboardData(): Promise<{
       return {
         id: record.id,
         name: isIndividual 
-          ? individualData?.patient_name || "Unknown" 
+          ? individualData?.requestor_name || "Unknown" 
           : organizationData?.organization_name || "Unknown",
         requestDate: isIndividual
           ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]

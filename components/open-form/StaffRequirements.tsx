@@ -114,7 +114,14 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
   };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(formData.staffRequirements, e.target.value);
+    const selectedDate = e.target.value;
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    if (selectedDate >= currentDate) {
+      onChange(formData.staffRequirements, selectedDate);
+    } else {
+      onChange(formData.staffRequirements, currentDate);
+    }
   };
 
   return (
@@ -193,6 +200,7 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
           type="date"
           value={formData.staffReqStartDate || ''}
           onChange={handleStartDateChange}
+          min={new Date().toISOString().split('T')[0]}
           className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>

@@ -24,7 +24,8 @@ export function useExportClients(selectedStatus: ClientFilters, searchQuery: str
         'Client Type', 'Status', 'Created Date', 'Notes',
         'Requestor Name', 'Requestor Phone', 'Requestor Email',
         'Patient Name', 'Patient Age', 'Patient Gender',
-        'Address', 'Service Required', 'Start Date',
+        'Requestor Address', 'Requestor District', 'Requestor City', 
+        'Requestor Pincode', 'Service Required', 'Start Date',
         'Care Duration', 'Relation to Patient'
       ];
       
@@ -33,7 +34,9 @@ export function useExportClients(selectedStatus: ClientFilters, searchQuery: str
         'Organization Name', 'Organization Type',
         'Contact Person', 'Contact Role',
         'Contact Phone', 'Contact Email',
-        'Organization Address', 'Start Date'
+        'Organization Address', 'Organization State',
+        'Organization District', 'Organization City',
+        'Organization Pincode', 'Start Date'
       ];
       
       const individualRows = individualClients.map(client => [
@@ -47,7 +50,10 @@ export function useExportClients(selectedStatus: ClientFilters, searchQuery: str
         client.patient_name?.replace(/,/g, ' ') || '',
         client.patient_age?.toString() || '',
         client.patient_gender?.replace(/,/g, ' ') || '',
-        client.complete_address?.replace(/,/g, ' ') || '',
+        client.requestor_address?.replace(/,/g, ' ') || '',
+        client.requestor_district?.replace(/,/g, ' ') || '',
+        client.requestor_city?.replace(/,/g, ' ') || '',
+        client.requestor_pincode?.replace(/,/g, ' ') || '',
         client.service_required?.replace(/,/g, ' ') || '',
         client.start_date ? new Date(client.start_date).toISOString().split('T')[0] : '',
         client.care_duration?.replace(/,/g, ' ') || '',
@@ -66,6 +72,10 @@ export function useExportClients(selectedStatus: ClientFilters, searchQuery: str
         client.contact_phone?.replace(/,/g, ' ') || '',
         client.contact_email?.replace(/,/g, ' ') || '',
         client.organization_address?.replace(/,/g, ' ') || '',
+        client.organization_state?.replace(/,/g, ' ') || '',
+        client.organization_district?.replace(/,/g, ' ') || '',
+        client.organization_city?.replace(/,/g, ' ') || '',
+        client.organization_pincode?.replace(/,/g, ' ') || '',
         client.start_date ? new Date(client.start_date).toISOString().split('T')[0] : ''
       ]);
       

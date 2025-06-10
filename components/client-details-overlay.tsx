@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { X, Trash2, Mail, Phone, Briefcase, Calendar, MapPin, User } from 'lucide-react';
 import { ApprovedContent } from '../components/client/ApprovedContent';
 import { UnderReviewContent } from '../components/client/UnderReview';
@@ -410,7 +411,7 @@ export function ClientDetailsOverlay({
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-50 rounded-full">
                 <MapPin className="w-5 h-5 text-blue-500" />
               </div>
@@ -418,7 +419,7 @@ export function ClientDetailsOverlay({
                 <p className="text-xs text-gray-500">Location</p>
                 <p className="text-sm font-medium text-gray-800">{client.location || 'Not specified'}</p>
               </div>
-            </div>
+            </div> */}
             
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-50 rounded-full">
