@@ -48,6 +48,8 @@ export interface AssignmentAttendanceDetails {
   check_out_time?: string;
   location?: string | null;
   total_hours?: string | null;
+  on_leave?: boolean;
+  leave_type?: string;
 }
 
 
@@ -557,6 +559,24 @@ export async function getTodayAttendanceForAssignment(
     const supabase = await createSupabaseServerClient();
     const today = new Date().toISOString().split('T')[0];
     
+    // First, get the nurse ID associated with this assignment
+    const { data: assignmentData, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select('nurse_id')
+      .eq('id', assignmentId)
+      .single();
+    
+    if (assignmentError) {
+      console.error('Error fetching nurse assignment:', assignmentError);
+      return {
+        success: false,
+        error: assignmentError.message
+      };
+    }
+    
+    const nurseId = assignmentData?.nurse_id;
+    
+    // Check if there's an attendance record for today
     const { data, error } = await supabase
       .from('attendence_individual')
       .select('id, start_time, end_time, total_hours, location')
@@ -572,11 +592,35 @@ export async function getTodayAttendanceForAssignment(
       };
     }
     
+    // Check if the nurse is on approved leave for today
+    let onLeave = false;
+    let leaveType = '';
+    
+    if (nurseId) {
+      const { data: leaveData, error: leaveError } = await supabase
+        .from('nurse_leave_requests')
+        .select('leave_type')
+        .eq('nurse_id', nurseId)
+        .eq('status', 'approved')
+        .lte('start_date', today)
+        .gte('end_date', today)
+        .maybeSingle();
+      
+      if (leaveError) {
+        console.error('Error checking leave status:', leaveError);
+      } else if (leaveData) {
+        onLeave = true;
+        leaveType = formatLeaveType(leaveData.leave_type);
+      }
+    }
+    
     if (!data) {
       return {
         success: true,
         data: {
-          checked_in: false
+          checked_in: false,
+          on_leave: onLeave,
+          leave_type: leaveType || undefined
         }
       };
     }
@@ -589,7 +633,9 @@ export async function getTodayAttendanceForAssignment(
         check_in_time: data.start_time || undefined,
         check_out_time: data.end_time || undefined,
         location: data.location,
-        total_hours: data.total_hours
+        total_hours: data.total_hours,
+        on_leave: onLeave,
+        leave_type: leaveType || undefined
       }
     };
   } catch (error) {
@@ -600,7 +646,6 @@ export async function getTodayAttendanceForAssignment(
     };
   }
 }
-
 
 export async function adminCheckInNurse(
   assignmentId: number,

@@ -226,6 +226,16 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
                       <p className="font-medium">Loading attendance data...</p>
                     </div>
                   </div>
+                ) : attendanceDetails?.on_leave ? (
+                  <div className="flex items-center text-purple-700">
+                    <CalendarIcon className="h-5 w-5 mr-2" />
+                    <div>
+                      <p className="font-medium">Nurse is on approved leave</p>
+                      <p className="text-sm text-purple-700">
+                        Leave type: {attendanceDetails.leave_type}
+                      </p>
+                    </div>
+                  </div>
                 ) : checkInStatus ? (
                   <div className="flex flex-col">
                     <div className="flex items-center text-green-700">
