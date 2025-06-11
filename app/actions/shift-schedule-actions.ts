@@ -258,7 +258,7 @@ export interface NurseAssignmentData {
 export async function getAllNurseAssignments(
   page: number = 1, 
   pageSize: number = 10,
-  filterStatus: 'all' | 'active' | 'completed' | 'cancelled' = 'all',
+  filterStatus: 'all' | 'active' | 'upcoming' | 'completed' = 'all',
   searchQuery: string = ''
 ): Promise<{
   success: boolean;
@@ -269,6 +269,7 @@ export async function getAllNurseAssignments(
 }> {
   try {
     const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
 
     let query = supabase
       .from('nurse_client')
@@ -284,13 +285,23 @@ export async function getAllNurseAssignments(
       `, { count: 'exact' });
 
     if (filterStatus !== 'all') {
-      query = query.eq('status', filterStatus);
+      switch (filterStatus) {
+        case 'active':
+          query = query
+            .lte('start_date', today)
+            .gte('end_date', today);
+          break;
+        case 'upcoming':
+          query = query.gt('start_date', today);
+          break;
+        case 'completed':
+          query = query.lt('end_date', today);
+          break;
+      }
     }
 
-    // Improved search query handling
     if (searchQuery) {
       try {
-        // You can expand this to search across multiple fields
         query = query.or(`nurse_id.eq.${parseInt(searchQuery) || 0}`);
       } catch (searchError) {
         console.error('Search query error:', searchError);
@@ -318,7 +329,6 @@ export async function getAllNurseAssignments(
       };
     }
 
-    // Check for no results when search was applied
     if (searchQuery && (!data || data.length === 0)) {
       return {
         success: true,
@@ -330,6 +340,18 @@ export async function getAllNurseAssignments(
     }
 
     const processedData = data?.map(item => {
+      let computedStatus: 'active' | 'upcoming' | 'completed';
+      const startDate = item.start_date;
+      const endDate = item.end_date;
+      
+      if (startDate > today) {
+        computedStatus = 'upcoming';
+      } else if (endDate < today) {
+        computedStatus = 'completed';
+      } else {
+        computedStatus = 'active';
+      }
+
       let clientName = '';
       const clientType = item.clients?.client_type || '';
       
@@ -344,7 +366,6 @@ export async function getAllNurseAssignments(
           }
         }
       } 
-
       else if (item.clients?.client_type === 'organization') {
         const organizationClient = item.clients.organization_clients;
         
@@ -361,6 +382,7 @@ export async function getAllNurseAssignments(
       
       return {
         ...item,
+        status: computedStatus,
         client_type: clientType,
         client_name: clientName,
         client_profile_url: clientProfileUrl,

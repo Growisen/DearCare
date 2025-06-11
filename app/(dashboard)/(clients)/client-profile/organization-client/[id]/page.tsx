@@ -17,6 +17,7 @@ import { ClientCategory } from '@/types/client.types'
 import { useNurseAssignments } from '@/hooks/useNurseAssignments'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useTabManagement } from '@/hooks/useTabManagement'
+import { useAssignmentData } from '@/hooks/useAssignmentData'
 
 // Updated interface to match the Supabase data structure
 interface OrganizationClientData {
@@ -52,6 +53,7 @@ interface OrganizationClientData {
 
 const OrganizationClientProfile = () => {
   const { invalidateDashboardCache } = useDashboardData()
+  const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams()
   const id = params.id as string
   const [client, setClient] = useState<OrganizationClientData | null>(null)
@@ -99,6 +101,7 @@ const OrganizationClientProfile = () => {
   useEffect(() => {
     window.onNurseAssignmentComplete = () => {
       invalidateDashboardCache()
+      invalidateAssignmentsCache()
       setShowNurseList(false);
       if (refetch) {
         refetch();
@@ -191,6 +194,7 @@ const OrganizationClientProfile = () => {
     try {
       const result = await deleteClient(id as string)
       if (result.success) {
+        invalidateDashboardCache()
         toast.success('Organization deleted successfully')
         window.location.href = '/clients'
       } else {
