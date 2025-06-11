@@ -680,6 +680,7 @@ export async function adminCheckInNurse(
         .from('attendence_individual')
         .update({
           start_time: currentTime,
+          is_admin_action: true
           // admin_action_notes: `Admin check-in at ${currentTime}`
         })
         .eq('id', existingRecord.id);
@@ -698,6 +699,7 @@ export async function adminCheckInNurse(
           start_time: currentTime,
           // nurse_id: nurseId,
           assigned_id: assignmentId,
+          is_admin_action: true
           // admin_action_notes: `Admin check-in at ${currentTime}`
         });
       
@@ -768,6 +770,7 @@ export async function adminCheckOutNurse(
       .update({
         end_time: currentTime,
         total_hours: totalHours,
+        is_admin_action: true,
         // admin_action_notes: (attendance.admin_action_notes || '') + ` | Admin check-out at ${currentTime}`
       })
       .eq('id', attendanceId);
