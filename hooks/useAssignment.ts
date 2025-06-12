@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAssignmentById } from '../app/actions/shift-schedule-actions';
 import { getAttendanceRecords } from '../app/actions/attendance-actions';
 import { differenceInMonths, parseISO } from 'date-fns';
@@ -73,58 +74,56 @@ export interface AttendanceRecord {
   isAdminAction?:boolean;
 }
 
+const calculateDuration = (startDate: string, endDate: string): string => {
+  try {
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    const months = differenceInMonths(end, start);
+    
+    return months <= 0 ? 'Less than a month' : 
+           months === 1 ? '1 month' : 
+           `${months} months`;
+  } catch (error) {
+    console.error('Error calculating duration:', error);
+    return 'Unknown duration';
+  }
+};
+
+const calculateWeeklyHours = (startTime: string, endTime: string): string => {
+  try {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    let hoursPerDay = endHour - startHour;
+    let minutesPerDay = endMinute - startMinute;
+    
+    if (minutesPerDay < 0) {
+      hoursPerDay--;
+      minutesPerDay += 60;
+    }
+    
+    const dailyHours = hoursPerDay + (minutesPerDay / 60);
+    const weeklyHours = dailyHours * 5;
+    
+    return `${weeklyHours.toFixed(1)} hours`;
+  } catch {
+    return '40 hours';
+  }
+};
+
 export function useAssignment(id: string) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [assignmentDetails, setAssignmentDetails] = useState<FormattedAssignmentDetails | null>(null);
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
-  const [recordsCount, setRecordsCount] = useState(0);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
-  const [tableLoading, setTableLoading] = useState(false);
   const pageSize = 10;
 
-  const calculateDuration = (startDate: string, endDate: string): string => {
-    try {
-      const start = parseISO(startDate);
-      const end = parseISO(endDate);
-      const months = differenceInMonths(end, start);
-      
-      return months <= 0 ? 'Less than a month' : 
-             months === 1 ? '1 month' : 
-             `${months} months`;
-    } catch (error) {
-      console.error('Error calculating duration:', error);
-      return 'Unknown duration';
-    }
-  };
-
-  const calculateWeeklyHours = (startTime: string, endTime: string): string => {
-    try {
-      const [startHour, startMinute] = startTime.split(':').map(Number);
-      const [endHour, endMinute] = endTime.split(':').map(Number);
-      
-      let hoursPerDay = endHour - startHour;
-      let minutesPerDay = endMinute - startMinute;
-      
-      if (minutesPerDay < 0) {
-        hoursPerDay--;
-        minutesPerDay += 60;
-      }
-      
-      const dailyHours = hoursPerDay + (minutesPerDay / 60);
-      const weeklyHours = dailyHours * 5;
-      
-      return `${weeklyHours.toFixed(1)} hours`;
-    } catch {
-      return '40 hours';
-    }
-  };
-
-  const fetchAssignmentDetails = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
+  const { 
+    data: assignmentData, 
+    isLoading: assignmentLoading, 
+    error: assignmentError,
+    refetch: refetchAssignment
+  } = useQuery({
+    queryKey: ['assignment', id],
+    queryFn: async () => {
       const assignmentId = parseInt(id, 10);
       
       if (isNaN(assignmentId)) {
@@ -138,8 +137,6 @@ export function useAssignment(id: string) {
       }
       
       const data = response.data;
-
-      console.log("dddsd", data)
       
       const formatted: FormattedAssignmentDetails = {
         id: data.id,
@@ -178,62 +175,68 @@ export function useAssignment(id: string) {
         formatted.clientDetails.clientProfileUrl = profileUrlResponse.url;
       }
       
-      setAssignmentDetails(formatted);
+      return formatted;
+    },
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 15, // 15 minutes
+  });
 
-      console.log("jkj", formatted)
-      
-      await fetchAttendanceRecords(assignmentId, 1);
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAttendanceRecords = async (assignmentId: number, page: number) => {
-    setTableLoading(true);
-    
-    try {
-      const response: ApiResponse<AttendanceRecord[]> = await getAttendanceRecords(assignmentId, page, pageSize);
-      
-      if (response.success && response.data) {
-        setAttendanceRecords(response.data);
-        if (response.count !== undefined) setRecordsCount(response.count);
-        setCurrentPage(page);
-      } else {
-        console.error('Error fetching attendance records:', response.error);
+  const { 
+    data: attendanceData,
+    isLoading: tableLoading,
+    refetch: refetchAttendance
+  } = useQuery({
+    queryKey: ['attendance', id, currentPage, pageSize],
+    queryFn: async () => {
+      const assignmentId = parseInt(id, 10);
+      if (isNaN(assignmentId)) {
+        throw new Error('Invalid assignment ID');
       }
-    } catch (error) {
-      console.error('Failed to fetch attendance records:', error);
-    } finally {
-      setTableLoading(false);
-    }
+      
+      const response = await getAttendanceRecords(assignmentId, currentPage, pageSize);
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch attendance records');
+      }
+      
+      return response;
+    },
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 10, // 10 minutes
+    enabled: !!assignmentData, // Only fetch attendance after assignment details are loaded
+  });
+
+  const assignmentDetails = assignmentData;
+  const attendanceRecords = attendanceData?.data || [];
+  const recordsCount = attendanceData?.count || 0;
+
+  const invalidateAssignmentCache = () => {
+    queryClient.invalidateQueries({ queryKey: ['assignment', id] });
+    queryClient.invalidateQueries({ queryKey: ['attendance', id] });
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      const newPage = currentPage - 1;
-      const assignmentId = parseInt(id, 10);
-      fetchAttendanceRecords(assignmentId, newPage);
+      setCurrentPage(currentPage - 1);
     }
   };
 
   const handleNextPage = () => {
     if (currentPage * pageSize < recordsCount) {
-      const newPage = currentPage + 1;
-      const assignmentId = parseInt(id, 10);
-      fetchAttendanceRecords(assignmentId, newPage);
+      setCurrentPage(currentPage + 1);
     }
   };
 
-  useEffect(() => {
-    fetchAssignmentDetails();
-  }, [id]);
+  const refreshData = () => {
+    refetchAssignment();
+    refetchAttendance();
+  };
 
   return {
-    loading,
-    error,
+    loading: assignmentLoading,
+    error: assignmentError ? (assignmentError instanceof Error ? assignmentError.message : 'An unknown error occurred') : null,
     assignmentDetails,
     attendanceRecords,
     recordsCount,
@@ -241,6 +244,8 @@ export function useAssignment(id: string) {
     pageSize,
     handlePreviousPage,
     handleNextPage,
-    tableLoading
+    tableLoading,
+    refreshData,
+    invalidateAssignmentCache
   };
 }
