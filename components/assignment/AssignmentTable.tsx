@@ -1,22 +1,19 @@
-import React, { memo } from "react"
+import React, { memo, useState } from "react"
 import { CalendarIcon, ClockIcon, UserIcon } from "@heroicons/react/24/outline"
-import { CheckCircle, Clock, AlertCircle, Building } from "lucide-react"
+import { Building, Eye } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { NurseAssignmentData } from "@/app/actions/shift-schedule-actions"
+import { AssignmentDetailsOverlay } from "./AssignmentDetailsOverlay"
 
 type AssignmentTableProps = {
   assignments: NurseAssignmentData[]
 }
 
-const AssignmentTableRow = memo(({ assignment, statusColors, statusIcons }: {
+const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
   assignment: NurseAssignmentData,
-  statusColors: Record<string, string>,
-  statusIcons: Record<string, React.FC<{ className?: string }>>
+  onViewDetails: (assignment: NurseAssignmentData) => void
 }) => {
-  const status = assignment.status || 'unknown';
-  const StatusIcon = statusIcons[status] || statusIcons.default;
-  
   function formatTime(timeString: string) {
     try {
       const [hours, minutes] = timeString.split(':').map(Number)
@@ -83,24 +80,23 @@ const AssignmentTableRow = memo(({ assignment, statusColors, statusIcons }: {
         </div>
       </td>
       <td className="py-4 px-6">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
-          <StatusIcon className="w-3.5 h-3.5" />
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
+        <button
+          onClick={() => onViewDetails(assignment)}
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          View Details
+        </button>
       </td>
     </tr>
   );
 });
 AssignmentTableRow.displayName = 'AssignmentTableRow';
 
-const AssignmentMobileCard = memo(({ assignment, statusColors, statusIcons }: {
+const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
   assignment: NurseAssignmentData,
-  statusColors: Record<string, string>,
-  statusIcons: Record<string, React.FC<{ className?: string }>>
+  onViewDetails: (assignment: NurseAssignmentData) => void
 }) => {
-  const status = assignment.status || 'unknown';
-  const StatusIcon = statusIcons[status] || statusIcons.default;
-  
   function formatTime(timeString: string) {
     try {
       const [hours, minutes] = timeString.split(':').map(Number)
@@ -130,10 +126,13 @@ const AssignmentMobileCard = memo(({ assignment, statusColors, statusIcons }: {
             <p className="text-xs text-gray-500">ID: {assignment.nurse_id}</p>
           </div>
         </div>
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
-          <StatusIcon className="w-3.5 h-3.5" />
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
+        <button
+          onClick={() => onViewDetails(assignment)}
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          Details
+        </button>
       </div>
       
       <div className="space-y-3 text-sm bg-white border border-gray-200 p-3 rounded-lg">
@@ -181,71 +180,86 @@ const AssignmentMobileCard = memo(({ assignment, statusColors, statusIcons }: {
 AssignmentMobileCard.displayName = 'AssignmentMobileCard';
 
 export const AssignmentTable = memo(function AssignmentTable({ assignments }: AssignmentTableProps) {
-  const statusColors: Record<string, string> = {
-    active: "bg-green-50 text-green-700 border border-green-200",
-    completed: "bg-gray-50 text-gray-700 border border-gray-200",
-    cancelled: "bg-red-50 text-red-700 border border-red-200",
-    default: "bg-gray-50 text-gray-600 border border-gray-200"
-  }
+  const [selectedAssignment, setSelectedAssignment] = useState<NurseAssignmentData | null>(null);
 
-  const statusIcons: Record<string, React.FC<{ className?: string }>> = {
-    active: CheckCircle,
-    completed: CheckCircle,
-    cancelled: AlertCircle,
-    default: Clock
-  }
+  // // We'll keep statusColors and statusIcons in case you need them elsewhere
+  // const statusColors: Record<string, string> = {
+  //   active: "bg-green-50 text-green-700 border border-green-200",
+  //   completed: "bg-gray-50 text-gray-700 border border-gray-200",
+  //   cancelled: "bg-red-50 text-red-700 border border-red-200",
+  //   default: "bg-gray-50 text-gray-600 border border-gray-200"
+  // }
+
+  // const statusIcons: Record<string, React.FC<{ className?: string }>> = {
+  //   active: CheckCircle,
+  //   completed: CheckCircle,
+  //   cancelled: AlertCircle,
+  //   default: Clock
+  // }
+  
+  const handleViewDetails = (assignment: NurseAssignmentData) => {
+    setSelectedAssignment(assignment);
+  };
 
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-      {/* Desktop Table */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-100 border-b border-gray-200">
-            <tr className="text-left">
-              <th className="py-4 px-6 font-medium text-gray-700">Nurse ID</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Client</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Schedule</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {assignments.length > 0 ? (
-              assignments.map((assignment) => (
-                <AssignmentTableRow
-                  key={assignment.id}
-                  assignment={assignment}
-                  statusColors={statusColors}
-                  statusIcons={statusIcons}
-                />
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-500">
-                  No assignments found
-                </td>
+    <>
+      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+        {/* Desktop Table */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-100 border-b border-gray-200">
+              <tr className="text-left">
+                <th className="py-4 px-6 font-medium text-gray-700">Nurse ID</th>
+                <th className="py-4 px-6 font-medium text-gray-700">Client</th>
+                <th className="py-4 px-6 font-medium text-gray-700">Schedule</th>
+                <th className="py-4 px-6 font-medium text-gray-700">Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {assignments.length > 0 ? (
+                assignments.map((assignment) => (
+                  <AssignmentTableRow
+                    key={assignment.id}
+                    assignment={assignment}
+                    onViewDetails={handleViewDetails}
+                  />
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-gray-500">
+                    No assignments found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Mobile Cards */}
-      <div className="sm:hidden bg-white">
-        {assignments.length > 0 ? (
-          assignments.map((assignment) => (
-            <AssignmentMobileCard
-              key={assignment.id}
-              assignment={assignment}
-              statusColors={statusColors}
-              statusIcons={statusIcons}
-            />
-          ))
-        ) : (
-          <div className="p-8 text-center text-gray-500">
-            No assignments found
-          </div>
-        )}
+        {/* Mobile Cards */}
+        <div className="sm:hidden bg-white">
+          {assignments.length > 0 ? (
+            assignments.map((assignment) => (
+              <AssignmentMobileCard
+                key={assignment.id}
+                assignment={assignment}
+                onViewDetails={handleViewDetails}
+              />
+            ))
+          ) : (
+            <div className="p-8 text-center text-gray-500">
+              No assignments found
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      
+      {/* Assignment Details Overlay */}
+      {selectedAssignment && (
+        <AssignmentDetailsOverlay
+          assignment={selectedAssignment}
+          onClose={() => setSelectedAssignment(null)}
+        />
+      )}
+    </>
   )
 });

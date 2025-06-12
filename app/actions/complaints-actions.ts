@@ -25,8 +25,10 @@ async function getAuthenticatedClient() {
   if (!userId) {
     throw new Error("User not authenticated");
   }
+
+  const web_user_id = user.user_metadata.user_id
   
-  return { supabase, userId };
+  return { supabase, userId: web_user_id };
 }
 
 export async function fetchComplaints(
@@ -354,8 +356,26 @@ export async function fetchComplaintById(complaintId: string): Promise<{
       .single();
         
     if (resolutionData) {
+      let resolverInfo = null;
+      
+      if (resolutionData.resolved_by) {
+        const { data: resolverData } = await supabase
+          .from('dearcare_web_users')
+          .select('full_name, role')
+          .eq('id', resolutionData.resolved_by)
+          .single();
+          
+        if (resolverData) {
+          resolverInfo = {
+            id: resolutionData.resolved_by,
+            name: resolverData.full_name,
+            role: resolverData.role
+          };
+        }
+      }
+      
       resolutionDetails = {
-        resolvedBy: resolutionData.resolved_by || "",
+        resolvedBy: resolverInfo || resolutionData.resolved_by || "",
         resolutionDate: formatDate(resolutionData.resolution_date) || "",
         resolutionNotes: resolutionData.resolution_notes || "",
       };

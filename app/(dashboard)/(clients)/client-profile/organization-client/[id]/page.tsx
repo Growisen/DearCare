@@ -15,6 +15,9 @@ import ImageViewer from '@/components/common/ImageViewer'
 import { createMapLink } from '@/utils/mapUtils'
 import { ClientCategory } from '@/types/client.types'
 import { useNurseAssignments } from '@/hooks/useNurseAssignments'
+import { useDashboardData } from '@/hooks/useDashboardData'
+import { useTabManagement } from '@/hooks/useTabManagement'
+import { useAssignmentData } from '@/hooks/useAssignmentData'
 
 // Updated interface to match the Supabase data structure
 interface OrganizationClientData {
@@ -49,6 +52,8 @@ interface OrganizationClientData {
 }
 
 const OrganizationClientProfile = () => {
+  const { invalidateDashboardCache } = useDashboardData()
+  const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams()
   const id = params.id as string
   const [client, setClient] = useState<OrganizationClientData | null>(null)
@@ -57,7 +62,7 @@ const OrganizationClientProfile = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-  const [activeTab, setActiveTab] = useState<'details' | 'requirements' | 'assignments'>('details')
+  // const [activeTab, setActiveTab] = useState<'details' | 'requirements' | 'assignments'>('details')
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   
   // Use the hook to manage nurse assignments
@@ -82,13 +87,31 @@ const OrganizationClientProfile = () => {
     setShowEditModal,
     setEditingAssignment,
     changePage,
-    updateFilters
+    updateFilters,
+    refetch
   } = useNurseAssignments(id)
+
+  const { activeTab, handleTabChange } = useTabManagement(id);
 
   // Utility function to handle undefined/null values
   const formatValue = (value: string | undefined | null, defaultText = 'Not specified'): string => {
     return value ? value.trim() : defaultText
   }
+
+  useEffect(() => {
+    window.onNurseAssignmentComplete = () => {
+      invalidateDashboardCache()
+      invalidateAssignmentsCache()
+      setShowNurseList(false);
+      if (refetch) {
+        refetch();
+      }
+    };
+    
+    return () => {
+      window.onNurseAssignmentComplete = null;
+    };
+  });
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -171,6 +194,7 @@ const OrganizationClientProfile = () => {
     try {
       const result = await deleteClient(id as string)
       if (result.success) {
+        invalidateDashboardCache()
         toast.success('Organization deleted successfully')
         window.location.href = '/clients'
       } else {
@@ -303,9 +327,9 @@ const OrganizationClientProfile = () => {
           <div className="border-b border-gray-200 px-4 sm:px-6">
             <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide whitespace-nowrap">
               <button
-                onClick={() => setActiveTab('details')}
+                onClick={() => handleTabChange('profile')}
                 className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 ${
-                  activeTab === 'details'
+                  activeTab === 'profile'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
@@ -313,7 +337,7 @@ const OrganizationClientProfile = () => {
                 <span className="inline-block">Organization Details</span>
               </button>
               <button
-                onClick={() => setActiveTab('requirements')}
+                onClick={() => handleTabChange('requirements')}
                 className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 ${
                   activeTab === 'requirements'
                     ? 'border-blue-500 text-blue-600'
@@ -324,7 +348,7 @@ const OrganizationClientProfile = () => {
               </button>
               {status === 'approved' && (
                 <button
-                  onClick={() => setActiveTab('assignments')}
+                  onClick={() => handleTabChange('assignments')}
                   className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 ${
                     activeTab === 'assignments'
                       ? 'border-blue-500 text-blue-600'
@@ -341,7 +365,7 @@ const OrganizationClientProfile = () => {
         {/* Main Content - Details and Requirements tabs remain the same */}
         <div className="p-4 sm:p-6">
           {/* Organization Details Tab */}
-          {activeTab === 'details' && (
+          {activeTab === 'profile' && (
             <div className="space-y-6">
               {/* Same as before - Details content */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

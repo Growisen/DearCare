@@ -19,7 +19,7 @@ interface PersonalInfoProps {
 export default function PersonalInfo({ formData, handleInputChange }: PersonalInfoProps) {
   return (
     <div className="bg-white border border-gray-200 p-4 rounded-lg">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Assesment</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Assessment</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

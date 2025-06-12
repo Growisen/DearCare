@@ -4,7 +4,11 @@ export type ComplaintPriority = "low" | "medium" | "high" | "urgent";
 export type ComplaintCategory = "Billing" | "Scheduling" | "Care Quality" | "Communication" | "Medical Care" | "Safety" | "Other";
 export type ComplaintFilters = ComplaintStatus | "all";
 export type Resolution = {
-  resolvedBy?: string,
+  resolvedBy: string | {
+    id: string;
+    name: string;
+    role: string;
+  };
   resolutionDate?: string,
   resolutionNotes?: string,
 }

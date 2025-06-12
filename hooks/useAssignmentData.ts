@@ -1,59 +1,111 @@
-import { useState, useEffect } from 'react'
+"use client"
+
+import { useState } from 'react'
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getAllNurseAssignments, NurseAssignmentData } from '../app/actions/shift-schedule-actions'
 
+function convertToCSV(assignments: NurseAssignmentData[]): string {
+  const headers = [
+    'ID',
+    'Nurse ID',
+    'Nurse Name',
+    'Client ID',
+    'Client Name',
+    'Client Type',
+    'Start Date',
+    'End Date',
+    'Shift Start',
+    'Shift End',
+    'Status',
+    'Assignment Type'
+  ];
+  
+  const csvRows = [];
+  
+  csvRows.push(headers.join(','));
+  
+  for (const assignment of assignments) {
+    const nurseName = assignment.nurses 
+      ? `${assignment.nurses.first_name || ''} ${assignment.nurses.last_name || ''}`.trim() 
+      : '';
+      
+    const values = [
+      assignment.id,
+      assignment.nurse_id,
+      nurseName,
+      assignment.client_id,
+      assignment.client_name || '',
+      assignment.client_type || '',
+      assignment.start_date,
+      assignment.end_date,
+      assignment.shift_start_time,
+      assignment.shift_end_time,
+      assignment.status,
+      assignment.assigned_type
+    ];
+    
+    const escapedValues = values.map(val => {
+      if (val === null || val === undefined) return '';
+      const strVal = String(val);
+      return strVal.includes(',') ? `"${strVal}"` : strVal;
+    });
+    
+    csvRows.push(escapedValues.join(','));
+  }
+  
+  return csvRows.join('\n');
+}
+
+function downloadCSV(csvContent: string, fileName: string): void {
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', fileName);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export function useAssignmentData() {
-  const [assignments, setAssignments] = useState<NurseAssignmentData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'cancelled'>('all')
+  const queryClient = useQueryClient();
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'upcoming'>('all')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
   const pageSize = 10
-  const [totalCount, setTotalCount] = useState(0)
   const [isExporting, setIsExporting] = useState(false)
 
-  useEffect(() => {
-    fetchAssignments()
-  }, [filterStatus, searchQuery, currentPage])
+  const { 
+    data, 
+    isLoading: loading, 
+    error: queryError,
+    refetch 
+  } = useQuery({
+    queryKey: ['assignments', filterStatus, searchQuery, dateFilter, currentPage, pageSize],
+    queryFn: () => getAllNurseAssignments(currentPage, pageSize, filterStatus, searchQuery, dateFilter),
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 10, // 10 minutes
+  });
 
-  async function fetchAssignments() {
-    setLoading(true)
-    try {
-      // Use the updated server-side pagination API
-      const response = await getAllNurseAssignments(
-        currentPage,
-        pageSize,
-        filterStatus,
-        searchQuery
-      )
-      
-      if (response.success) {
-        setAssignments(response.data || [])
-        
-        if (response.count !== undefined) {
-          setTotalCount(response.count)
-          setTotalPages(Math.max(1, Math.ceil(response.count / pageSize)))
-        }
-        
-        // Handle "no results" scenario
-        if (response.noResults) {
-          setError(`No matches found for "${searchQuery}". Please try a different search term.`)
-        } else {
-          setError(null)
-        }
-      } else {
-        setError(response.error || 'Failed to load assignments')
-        setAssignments([])
-      }
-    } catch (err) {
-      setError('Unexpected error occurred while fetching assignments')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const assignments = data?.success ? (data?.data || []) : [];
+  const totalPages = data?.count !== undefined ? Math.max(1, Math.ceil(data.count / pageSize)) : 1;
+  const totalCount = data?.count || 0;
+  
+  const error = queryError 
+    ? 'Unexpected error occurred while fetching assignments' 
+    : (data?.noResults 
+        ? `No matches found for "${searchQuery}". Please try a different search term.` 
+        : (data?.success ? null : (data?.error || 'Failed to load assignments')));
+
+  const invalidateAssignmentsCache = () => {
+    queryClient.invalidateQueries({ queryKey: ['assignments'] });
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,7 +113,7 @@ export function useAssignmentData() {
     setCurrentPage(1)
   }
 
-  const handleStatusChange = (status: 'all' | 'active' | 'completed' | 'cancelled') => {
+  const handleStatusChange = (status: 'all' | 'active' | 'completed' | 'upcoming') => {
     setFilterStatus(status)
     setCurrentPage(1)
   }
@@ -78,24 +130,44 @@ export function useAssignmentData() {
     setCurrentPage(prev => Math.min(totalPages, prev + 1))
   }
 
+  const handleDateFilterChange = (date: string) => {
+    setDateFilter(date)
+    setCurrentPage(1)
+  }
+
   const handleResetFilters = () => {
     setSearchInput('')
     setSearchQuery('')
     setFilterStatus('all')
+    setDateFilter('')
     setCurrentPage(1)
   }
 
-  const refreshData = () => {
-    fetchAssignments()
-  }
+  const refreshData = () => refetch();
 
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      // Implement export functionality here
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log('Export assignments with filters:', { filterStatus, searchQuery })
-      // Actual export logic would go here
+      const response = await getAllNurseAssignments(
+        1,
+        10000,
+        filterStatus,
+        searchQuery,
+        dateFilter
+      );
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to export assignments data');
+      }
+      
+      const csvContent = convertToCSV(response.data);
+      
+      const date = new Date().toISOString().split('T')[0];
+      const fileName = `nurse_assignments_${date}.csv`;
+      
+      downloadCSV(csvContent, fileName);
+      
+      console.log(`Exported ${response.data.length} assignments successfully`);
     } catch (error) {
       console.error('Export failed:', error)
     } finally {
@@ -111,6 +183,7 @@ export function useAssignmentData() {
     searchInput,
     setSearchInput,
     searchQuery,
+    dateFilter,
     currentPage,
     totalPages,
     totalCount,
@@ -118,11 +191,13 @@ export function useAssignmentData() {
     isExporting,
     handleSearch,
     handleStatusChange,
+    handleDateFilterChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
     handleResetFilters,
     refreshData,
-    handleExport
+    handleExport,
+    invalidateAssignmentsCache
   }
 }

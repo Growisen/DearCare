@@ -18,6 +18,7 @@ export default function AssignmentsPage() {
     filterStatus,
     searchInput,
     setSearchInput,
+    dateFilter,
     currentPage,
     totalPages,
     totalCount,
@@ -25,6 +26,7 @@ export default function AssignmentsPage() {
     isExporting,
     handleSearch,
     handleStatusChange,
+    handleDateFilterChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
@@ -41,10 +43,13 @@ export default function AssignmentsPage() {
         selectedStatus={filterStatus}
         searchInput={searchInput}
         setSearchInput={setSearchInput}
+        dateFilter={dateFilter}
         handleStatusChange={handleStatusChange}
         handleSearch={handleSearch}
+        handleDateFilterChange={handleDateFilterChange}
         handleResetFilters={handleResetFilters}
       />
+
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
         {loading ? (

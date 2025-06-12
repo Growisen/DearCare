@@ -28,14 +28,20 @@ import { useNurseAssignments } from '@/hooks/useNurseAssignments';
 import { useTabManagement } from '@/hooks/useTabManagement';
 import { useModalManagement } from '@/hooks/useModalManagement';
 import { useClientFiles } from '@/hooks/useClientFiles';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { useAssignmentData } from '@/hooks/useAssignmentData';
 
 const PatientProfilePage = () => {
+  const { invalidateDashboardCache } = useDashboardData()
+  const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams();
   const id = params.id as string;
 
 
   React.useEffect(() => {
     window.onNurseAssignmentComplete = () => {
+      invalidateDashboardCache()
+      invalidateAssignmentsCache()
       setShowNurseList(false);
       if (refetch) {
         refetch();

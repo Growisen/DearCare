@@ -40,7 +40,7 @@ export const useComplaints = () => {
       selectedSource === 'all' ? undefined : selectedSource,
       activeSearchTerm 
     ),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: true,
     refetchInterval: 1000 * 60 * 10, // 10 minutes
   });

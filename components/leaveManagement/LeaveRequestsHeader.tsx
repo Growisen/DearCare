@@ -1,5 +1,5 @@
 import React from "react"
-import { Search, X, Download, Calendar } from "lucide-react"
+import { Search, X, Download, Calendar, RefreshCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type LeaveRequestsHeaderProps = {
@@ -31,6 +31,9 @@ export function LeaveRequestsHeader({
   handleResetFilters,
   statuses
 }: LeaveRequestsHeaderProps) {
+  
+  const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate
+
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
       {/* Header with title and action buttons */}
@@ -72,7 +75,7 @@ export function LeaveRequestsHeader({
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search by name, ID, leave type..."
-            className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400"
+            className="pl-9 pr-16 py-1 h-9 bg-white text-sm text-gray-800 border-gray-200 focus-visible:ring-blue-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -134,6 +137,17 @@ export function LeaveRequestsHeader({
                 {status}
               </button>
             ))}
+            
+            {hasActiveFilters && (
+              <button
+                onClick={handleResetFilters}
+                className="ml-2 px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
+                title="Reset all filters"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Reset
+              </button>
+            )}
           </div>
           
           {/* Mobile view - compact select dropdowns */}
@@ -157,25 +171,38 @@ export function LeaveRequestsHeader({
                 />
               </div>
             </div>
-            <select
-              value={statusFilter || 'All'}
-              onChange={(e) => setStatusFilter(e.target.value === 'All' ? null : e.target.value)}
-              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: `right 0.5rem center`,
-                backgroundRepeat: `no-repeat`,
-                backgroundSize: `1.5em 1.5em`,
-                paddingRight: `2rem`
-              }}
-            >
-              <option value="All">All Statuses</option>
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-2">
+              <select
+                value={statusFilter || 'All'}
+                onChange={(e) => setStatusFilter(e.target.value === 'All' ? null : e.target.value)}
+                className="flex-1 rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+                style={{ 
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: `right 0.5rem center`,
+                  backgroundRepeat: `no-repeat`,
+                  backgroundSize: `1.5em 1.5em`,
+                  paddingRight: `2rem`
+                }}
+              >
+                <option value="All">All Statuses</option>
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+              
+              {/* Mobile Reset Button */}
+              {hasActiveFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1 whitespace-nowrap"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Reset
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
