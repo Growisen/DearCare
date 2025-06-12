@@ -259,7 +259,8 @@ export async function getAllNurseAssignments(
   page: number = 1, 
   pageSize: number = 10,
   filterStatus: 'all' | 'active' | 'upcoming' | 'completed' = 'all',
-  searchQuery: string = ''
+  searchQuery: string = '',
+  dateFilter: string = ''
 ): Promise<{
   success: boolean;
   data?: NurseAssignmentData[];
@@ -298,6 +299,13 @@ export async function getAllNurseAssignments(
           query = query.lt('end_date', today);
           break;
       }
+    }
+
+    // Apply date filter if provided
+    if (dateFilter) {
+      query = query
+        .lte('start_date', dateFilter)
+        .gte('end_date', dateFilter);
     }
 
     if (searchQuery) {
@@ -577,6 +585,114 @@ export async function deleteNurseAssignment(
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to delete nurse assignment'
+    };
+  }
+}
+
+
+export async function getAssignmentById(
+  assignmentId: number
+): Promise<{
+  success: boolean;
+  data?: NurseAssignmentData;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    const { data, error } = await supabase
+      .from('nurse_client')
+      .select(`
+        *,
+        nurses(first_name, last_name, phone_number, email),
+        clients(
+          id,
+          client_type,
+          individual_clients(requestor_name, requestor_address, requestor_phone),
+          organization_clients(organization_name, organization_address, contact_person_name)
+        )
+      `)
+      .eq('id', assignmentId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching assignment:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+    
+    if (!data) {
+      return {
+        success: false,
+        error: 'Assignment not found'
+      };
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    let computedStatus: 'active' | 'upcoming' | 'completed';
+    
+    if (data.start_date > today) {
+      computedStatus = 'upcoming';
+    } else if (data.end_date < today) {
+      computedStatus = 'completed';
+    } else {
+      computedStatus = 'active';
+    }
+    
+    let clientName = '', address = '', contactPerson = '';
+    const clientType = data.clients?.client_type || '';
+    const clientId = data.client_id || data.clients?.id || '';
+    
+    if (clientType === 'individual') {
+      const individualClient = data.clients.individual_clients;
+      if (individualClient) {
+        if (Array.isArray(individualClient) && individualClient.length > 0) {
+          clientName = individualClient[0].requestor_name || '';
+          address = individualClient[0].address || '';
+          contactPerson = individualClient[0].contact_person || '';
+        } else if (typeof individualClient === 'object') {
+          clientName = individualClient.requestor_name || '';
+          address = individualClient.address || '';
+          contactPerson = individualClient.contact_person || '';
+        }
+      }
+    } else if (clientType === 'organization') {
+      const organizationClient = data.clients.organization_clients;
+      if (organizationClient) {
+        if (Array.isArray(organizationClient) && organizationClient.length > 0) {
+          clientName = organizationClient[0].organization_name || '';
+          address = organizationClient[0].address || '';
+          contactPerson = organizationClient[0].contact_person || '';
+        } else if (typeof organizationClient === 'object') {
+          clientName = organizationClient.organization_name || '';
+          address = organizationClient.address || '';
+          contactPerson = organizationClient.contact_person || '';
+        }
+      }
+    }
+    
+    return {
+      success: true,
+      data: {
+        ...data,
+        status: computedStatus,
+        client_id: clientId,
+        client_type: clientType,
+        client_name: clientName,
+        client_address: address,
+        client_contact: contactPerson,
+        nurse_full_name: `${data.nurses?.first_name || ''} ${data.nurses?.last_name || ''}`.trim(),
+        nurse_phone: data.nurses?.phone || '',
+        nurse_email: data.nurses?.email || ''
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching assignment details:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch assignment details'
     };
   }
 }

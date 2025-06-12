@@ -25,7 +25,7 @@ export function PaginationControls({
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-5 px-6 border-t border-gray-200 bg-gray-50">
       <div className="text-sm text-gray-600">
         Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}-
-        {Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span>
+        {Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> records
       </div>
       <div className="flex items-center gap-2">
         <button

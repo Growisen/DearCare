@@ -1,11 +1,13 @@
 import { NurseAssignmentData } from "@/app/actions/shift-schedule-actions"
 import { AssignmentAttendanceDetails, getTodayAttendanceForAssignment } from "@/app/actions/attendance-actions"
 import { format, isBefore, parseISO } from "date-fns"
-import { CalendarIcon, ClockIcon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { CalendarIcon, ClockIcon, UserIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
 import { AlertCircle, Building, CheckCircle } from "lucide-react"
 import { useEffect, useState } from "react"
+import Link from "next/link"
 
 import { adminCheckInNurse, adminCheckOutNurse } from "@/app/actions/attendance-actions" 
+ 
 import ConfirmationModal from "@/components/common/ConfirmationModal"
 import { useDashboardData } from "@/hooks/useDashboardData"
 
@@ -356,7 +358,15 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
           </div>
         </div>
         
-        <div className="border-t p-4 flex justify-end">
+        <div className="border-t p-4 flex justify-between">
+          <Link 
+            target="_blank"
+            href={`/assignments/${assignment.id}`} 
+            className="px-4 py-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
+          >
+            <DocumentTextIcon className="h-5 w-5" />
+            View Complete Details
+          </Link>
           <button
             onClick={onClose}
             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md font-medium"

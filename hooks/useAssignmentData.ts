@@ -75,6 +75,7 @@ export function useAssignmentData() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'upcoming'>('all')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
   const [isExporting, setIsExporting] = useState(false)
@@ -85,8 +86,8 @@ export function useAssignmentData() {
     error: queryError,
     refetch 
   } = useQuery({
-    queryKey: ['assignments', filterStatus, searchQuery, currentPage, pageSize],
-    queryFn: () => getAllNurseAssignments(currentPage, pageSize, filterStatus, searchQuery),
+    queryKey: ['assignments', filterStatus, searchQuery, dateFilter, currentPage, pageSize],
+    queryFn: () => getAllNurseAssignments(currentPage, pageSize, filterStatus, searchQuery, dateFilter),
     staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: true,
     refetchInterval: 1000 * 60 * 10, // 10 minutes
@@ -129,10 +130,16 @@ export function useAssignmentData() {
     setCurrentPage(prev => Math.min(totalPages, prev + 1))
   }
 
+  const handleDateFilterChange = (date: string) => {
+    setDateFilter(date)
+    setCurrentPage(1)
+  }
+
   const handleResetFilters = () => {
     setSearchInput('')
     setSearchQuery('')
     setFilterStatus('all')
+    setDateFilter('')
     setCurrentPage(1)
   }
 
@@ -145,7 +152,8 @@ export function useAssignmentData() {
         1,
         10000,
         filterStatus,
-        searchQuery
+        searchQuery,
+        dateFilter
       );
       
       if (!response.success || !response.data) {
@@ -175,6 +183,7 @@ export function useAssignmentData() {
     searchInput,
     setSearchInput,
     searchQuery,
+    dateFilter,
     currentPage,
     totalPages,
     totalCount,
@@ -182,6 +191,7 @@ export function useAssignmentData() {
     isExporting,
     handleSearch,
     handleStatusChange,
+    handleDateFilterChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
