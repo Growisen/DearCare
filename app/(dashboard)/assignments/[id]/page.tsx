@@ -240,6 +240,16 @@ export default function AssignmentDetailsPage() {
             
             {tableLoading ? (
               <AttendanceTableSkeleton />
+            ) : attendanceRecords.length === 0 ? (
+              <div className="py-12 text-center">
+                <div className="bg-slate-50 border border-slate-200 rounded-lg px-6 py-8 max-w-md mx-auto">
+                  <CalendarIcon className="h-12 w-12 mx-auto text-slate-400" />
+                  <h3 className="mt-4 text-lg font-medium text-slate-700">No attendance records</h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    There are no attendance records available for this assignment yet.
+                  </p>
+                </div>
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
@@ -313,16 +323,18 @@ export default function AssignmentDetailsPage() {
             )}
             
             <div className="mt-4">
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={recordsCount}
-                pageSize={pageSize}
-                itemsLength={attendanceRecords.length}
-                onPageChange={handlePageChange}
-                onPreviousPage={handlePreviousPage}
-                onNextPage={handleNextPage}
-              />
+              {attendanceRecords.length > 0 && (
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalCount={recordsCount}
+                  pageSize={pageSize}
+                  itemsLength={attendanceRecords.length}
+                  onPageChange={handlePageChange}
+                  onPreviousPage={handlePreviousPage}
+                  onNextPage={handleNextPage}
+                />
+              )}
             </div>
         </div>
       </div>
