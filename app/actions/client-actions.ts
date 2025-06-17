@@ -1874,3 +1874,75 @@ export async function updateIndividualClientProfile(
     };
   }
 }
+
+/**
+ * Updates organization client details
+ */
+export async function updateOrganizationDetails(
+  clientId: string,
+  updatedData: {
+    details: {
+      organization_name: string;
+      contact_person_name: string;
+      contact_person_role: string;
+      contact_email: string;
+      contact_phone: string;
+      organization_address: string;
+      organization_state: string;
+      organization_district: string;
+      organization_city: string;
+      organization_pincode: string;
+    },
+    general_notes?: string;
+  }
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    if (updatedData.general_notes !== undefined) {
+      const { error: clientUpdateError } = await supabase
+        .from('clients')
+        .update({ general_notes: updatedData.general_notes })
+        .eq('id', clientId);
+      
+      if (clientUpdateError) {
+        console.error('Error updating client general notes:', clientUpdateError);
+        return { success: false, error: clientUpdateError.message };
+      }
+    }
+    
+    const { data, error } = await supabase
+      .from('organization_clients')
+      .update({
+        organization_name: updatedData.details.organization_name,
+        contact_person_name: updatedData.details.contact_person_name,
+        contact_person_role: updatedData.details.contact_person_role,
+        contact_email: updatedData.details.contact_email,
+        contact_phone: updatedData.details.contact_phone,
+        organization_address: updatedData.details.organization_address,
+        organization_state: updatedData.details.organization_state,
+        organization_district: updatedData.details.organization_district,
+        organization_city: updatedData.details.organization_city,
+        organization_pincode: updatedData.details.organization_pincode
+      })
+      .eq('client_id', clientId)
+      .select();
+    
+    if (error) {
+      console.error('Error updating organization details:', error);
+      return { success: false, error: error.message };
+    }
+    
+    revalidatePath(`/clients/${clientId}`);
+    revalidatePath(`/client-profile/organization-client/${clientId}`);
+    
+    return { success: true, data };
+    
+  } catch (error) {
+    console.error('Error in updateOrganizationDetails:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
+  }
+}
