@@ -85,13 +85,23 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
           required
         />
         <InputField 
-          label="Pincode" 
-          placeholder="Enter your pincode" 
-          id="requestorPincode" 
-          value={formData.requestorPincode} 
+          label="State" 
+          placeholder="Enter your State" 
+          id="requestorState" 
+          value={formData.requestorState} 
           onChange={handleInputChange}
-          onBlur={() => handleBlur('requestorPincode')}
-          error={formErrors.requestorPincode}
+          onBlur={() => handleBlur('requestorState')}
+          error={formErrors.requestorState}
+          required
+        />
+        <InputField 
+          label="District" 
+          placeholder="Enter your district" 
+          id="requestorDistrict" 
+          value={formData.requestorDistrict} 
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('requestorDistrict')}
+          error={formErrors.requestorDistrict}
           required
         />
         <InputField 
@@ -105,13 +115,13 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
           required
         />
         <InputField 
-          label="District" 
-          placeholder="Enter your district" 
-          id="requestorDistrict" 
-          value={formData.requestorDistrict} 
+          label="Pincode" 
+          placeholder="Enter your pincode" 
+          id="requestorPincode" 
+          value={formData.requestorPincode} 
           onChange={handleInputChange}
-          onBlur={() => handleBlur('requestorDistrict')}
-          error={formErrors.requestorDistrict}
+          onBlur={() => handleBlur('requestorPincode')}
+          error={formErrors.requestorPincode}
           required
         />
         <InputField 

@@ -37,6 +37,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     requestorJobDetails: '',
     requestorEmergencyPhone: '',
     requestorPincode: '',
+    requestorState: '',
     requestorDistrict: '',
     requestorCity: '',
     patientName: '',
@@ -46,6 +47,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     patientAddress: '',
     patientPincode: '',
     patientDistrict: '',
+    patientState: '',
     patientCity: '',
     requestorProfilePic: null,
     patientProfilePic: null,
@@ -105,10 +107,12 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     requestorPincode: 'Your pincode',
     requestorCity: 'Your city',
     requestorDistrict: 'Your district',
+    requestorState: 'Your State',
     patientAddress: 'Patient address',
     patientPincode: 'Patient pincode',
     patientCity: 'Patient city',
     patientDistrict: 'Patient district',
+    patientState: 'Patient State',
     requestorJobDetails: 'Your job details',
     requestorEmergencyPhone: 'Emergency contact number'
   };
@@ -195,7 +199,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     // ];
     const individualRequired = [
       'requestorName', 'requestorPhone', 'requestorEmail',
-      'serviceRequired', 'startDate',
+      'serviceRequired', 'startDate', 'requestorState',
       'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
     ];
     
@@ -223,9 +227,9 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       
       // If addresses are synced and a requestor address field changes, update corresponding patient field
       if (isSameAddress && 
-          ['requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict'].includes(id)) {
+          ['requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict', 'requestorState'].includes(id)) {
         const patientField = id.replace('requestor', 'patient');
-        (newState[patientField as keyof Pick<FormData, 'patientAddress' | 'patientPincode' | 'patientCity' | 'patientDistrict'>]) = value;
+        (newState[patientField as keyof Pick<FormData, 'patientAddress' | 'patientPincode' | 'patientCity' | 'patientDistrict' | 'patientState'>]) = value;
       }
       
       return newState;
@@ -324,7 +328,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       ...commonRequired,
       ...(clientType === 'individual' 
         ? ['requestorName', 'requestorPhone', 'requestorEmail', 
-           'serviceRequired', 'startDate',
+           'serviceRequired', 'startDate', 'requestorState',
            'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict']
         : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
            'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
@@ -387,7 +391,8 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         patientAddress: formData.requestorAddress,
         patientPincode: formData.requestorPincode,
         patientCity: formData.requestorCity,
-        patientDistrict: formData.requestorDistrict
+        patientDistrict: formData.requestorDistrict,
+        patientState: formData.requestorState
       }));
       
       setFormErrors(prev => ({
@@ -395,7 +400,8 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         patientAddress: '',
         patientPincode: '',
         patientCity: '',
-        patientDistrict: ''
+        patientDistrict: '',
+        patientState: ''
       }));
     } else {
       setFormData(prev => ({
@@ -403,7 +409,8 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         patientAddress: '',
         patientPincode: '',
         patientCity: '',
-        patientDistrict: ''
+        patientDistrict: '',
+        patientState: ''
       }));
     }
   };
@@ -440,6 +447,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
           requestorEmergencyPhone: formData.requestorEmergencyPhone,
           requestorPincode: formData.requestorPincode,
           requestorDistrict: formData.requestorDistrict,
+          requestorState: formData.requestorState,
           requestorCity: formData.requestorCity,
           patientName: formData.patientName,
           patientAge: formData.patientAge,
@@ -448,6 +456,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
           patientAddress: formData.patientAddress,
           patientPincode: formData.patientPincode,
           patientDistrict: formData.patientDistrict,
+          patientState: formData.patientState,
           patientCity: formData.patientCity,     
           serviceRequired: formData.serviceRequired,
           careDuration: formData.careDuration,

@@ -119,7 +119,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         patient_address: formData.patientAddress,
         patient_pincode: formData.patientPincode,
         patient_district: formData.patientDistrict,
-        patient_city: formData.patientCity,     
+        patient_city: formData.patientCity,   
+        patient_state: formData.patientState || null,  
         preferred_caregiver_gender: formData.preferredCaregiverGender || null,
         relation_to_patient: formData.relationToPatient || 'other',
         requestor_email: formData.requestorEmail,
@@ -135,6 +136,7 @@ export async function addIndividualClient(formData: IndividualFormData) {
         requestor_pincode: formData.requestorPincode || null,
         requestor_district: formData.requestorDistrict || null,
         requestor_city: formData.requestorCity || null,
+        requestor_state: formData.requestorState || null,
       });
     
     if (individualError) {
@@ -1732,6 +1734,143 @@ export async function getClientFiles(clientId: string): Promise<{success: boolea
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
       data: []
+    };
+  }
+}
+
+interface IndividualClientUpdateProfileData {
+  patient_name: string;
+  patient_phone: string;
+  patient_age: number | null;
+  patient_gender: string;
+  patient_address: string;
+  patient_city: string;
+  patient_district: string;
+  patient_pincode: string;
+  requestor_name: string;
+  requestor_phone: string;
+  requestor_email: string;
+  requestor_address: string;
+  requestor_city: string;
+  requestor_district: string;
+  requestor_pincode: string;
+  patient_profile_pic?: string | null;
+  requestor_profile_pic?: string | null;
+}
+
+/**
+ * Updates a client's profile information
+ */
+export async function updateIndividualClientProfile(
+  clientId: string,
+  profileData: {
+    patientFirstName: string;
+    patientLastName: string;
+    patientPhone: string;
+    patientAge: string;
+    patientGender: string;
+    patientAddress: string;
+    patientCity: string;
+    patientDistrict: string;
+    patientState: string;
+    patientPincode: string;
+    patientProfilePic: File | null;
+    
+    requestorName: string;
+    requestorPhone: string;
+    requestorEmail: string;
+    requestorAddress: string;
+    requestorCity: string;
+    requestorDistrict: string;
+    requestorState: string;
+    requestorPincode: string;
+    requestorProfilePic: File | null;
+  }
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('client_type')
+      .eq('id', clientId)
+      .single();
+
+    if (clientError) {
+      return { success: false, error: clientError.message };
+    }
+
+    if (client.client_type !== 'individual') {
+      return { success: false, error: 'Only individual clients can be updated with this function' };
+    }
+
+    let patientProfilePicPath: string | null = null;
+    let requestorProfilePicPath: string | null = null;
+    
+    if (profileData.patientProfilePic) {
+      patientProfilePicPath = await uploadProfilePicture(
+        profileData.patientProfilePic, 
+        clientId, 
+        'patient'
+      );
+    }
+    
+    if (profileData.requestorProfilePic) {
+      requestorProfilePicPath = await uploadProfilePicture(
+        profileData.requestorProfilePic, 
+        clientId, 
+        'requestor'
+      );
+    }
+  
+    const updateData: IndividualClientUpdateProfileData = {
+      patient_name: `${profileData.patientFirstName} ${profileData.patientLastName}`.trim(),
+      patient_phone: profileData.patientPhone,
+      patient_age: profileData.patientAge ? parseInt(profileData.patientAge) : null,
+      patient_gender: profileData.patientGender,
+      patient_address: profileData.patientAddress,
+      patient_city: profileData.patientCity,
+      patient_district: profileData.patientDistrict,
+      patient_pincode: profileData.patientPincode,
+      
+      requestor_name: profileData.requestorName,
+      requestor_phone: profileData.requestorPhone,
+      requestor_email: profileData.requestorEmail,
+      requestor_address: profileData.requestorAddress,
+      requestor_city: profileData.requestorCity,
+      requestor_district: profileData.requestorDistrict, 
+      requestor_pincode: profileData.requestorPincode,
+    };
+
+    if (patientProfilePicPath) {
+      updateData.patient_profile_pic = patientProfilePicPath;
+    }
+    
+    if (requestorProfilePicPath) {
+      updateData.requestor_profile_pic = requestorProfilePicPath;
+    }
+
+    const { data, error } = await supabase
+      .from('individual_clients')
+      .update(updateData)
+      .eq('client_id', clientId)
+      .select();
+
+    if (error) {
+      console.error('Error updating client profile:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath(`/client-profile/${clientId}`);
+    revalidatePath('/clients');
+
+    return { success: true, data };
+    
+  } catch (error) {
+    console.error('Error updating client profile:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
     };
   }
 }

@@ -94,16 +94,27 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onBlur={() => handleBlur('patientAddress')}
           error={formErrors.patientAddress}
         />
+
+        <InputField 
+          label="State" 
+          placeholder="Enter patient's state" 
+          id="patientState" 
+          value={formData.patientState} 
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('patientState')}
+          error={formErrors.patientState}
+        />
         
         <InputField 
-          label="Pincode" 
-          placeholder="Enter patient's pincode" 
-          id="patientPincode" 
-          value={formData.patientPincode} 
+          label="District" 
+          placeholder="Enter patient's district" 
+          id="patientDistrict" 
+          value={formData.patientDistrict} 
           onChange={handleInputChange}
-          onBlur={() => handleBlur('patientPincode')}
-          error={formErrors.patientPincode}
+          onBlur={() => handleBlur('patientDistrict')}
+          error={formErrors.patientDistrict}
         />
+
         <InputField 
           label="City" 
           placeholder="Enter patient's city" 
@@ -113,14 +124,15 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onBlur={() => handleBlur('patientCity')}
           error={formErrors.patientCity}
         />
+
         <InputField 
-          label="District" 
-          placeholder="Enter patient's district" 
-          id="patientDistrict" 
-          value={formData.patientDistrict} 
+          label="Pincode" 
+          placeholder="Enter patient's pincode" 
+          id="patientPincode" 
+          value={formData.patientPincode} 
           onChange={handleInputChange}
-          onBlur={() => handleBlur('patientDistrict')}
-          error={formErrors.patientDistrict}
+          onBlur={() => handleBlur('patientPincode')}
+          error={formErrors.patientPincode}
         />
         
         <div className="md:col-span-2">
