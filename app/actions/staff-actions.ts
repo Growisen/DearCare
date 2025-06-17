@@ -4,10 +4,40 @@ import { createSupabaseServerClient } from './auth'
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { StaffRole, StaffOrganization } from '@/types/dearCareStaff.types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Uploads a profile picture to Supabase storage
  */
+
+async function generateStaffRegNo(
+  supabase: SupabaseClient, 
+  admittedType: 'Tata HomeNursing' | 'DearCare LLP'
+): Promise<string> {
+  const currentYear = new Date().getFullYear();
+  const prefix = admittedType === 'Tata HomeNursing' ? 'STATH' : 'STADC';
+  
+  // Get current timestamp in milliseconds and take last 4 digits
+  const timestamp = new Date().getTime();
+  const uniqueSequence = String(timestamp % 10000).padStart(4, '0');
+  
+  // Format: PREFIX + YEAR + TIMESTAMP_SEQUENCE
+  const staffRegNo = `${prefix}${currentYear}${uniqueSequence}`;
+
+  // Verify uniqueness
+  const { data: existingStaff } = await supabase
+    .from('dearcare_staff')
+    .select('reg_no')
+    .eq('reg_no', staffRegNo)
+    .single();
+
+  // If a collision occurs (extremely rare), try again with new timestamp
+  if (existingStaff) {
+    return generateStaffRegNo(supabase, admittedType);
+  }
+
+  return staffRegNo;
+}
 async function uploadProfilePicture(file: File, staffId: string): Promise<string | null> {
   try {
     if (!file) return null;
@@ -86,7 +116,7 @@ export interface StaffFormData {
 export async function createStaff(formData: StaffFormData) {
   try {
     const supabase = await createSupabaseServerClient();
-    
+    const staffid=await generateStaffRegNo(supabase, formData.organization);
     const { data: existingStaff, error: checkError } = await supabase
       .from('dearcare_staff')
       .select('id')
@@ -113,7 +143,8 @@ export async function createStaff(formData: StaffFormData) {
       district: formData.district,
       state: formData.state,
       pincode: formData.pincode,
-      organization: formData.organization
+      organization: formData.organization,
+      reg_no: staffid
     };
     
     const { data: staffData, error: staffError } = await supabase
