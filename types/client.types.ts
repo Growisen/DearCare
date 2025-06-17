@@ -196,6 +196,7 @@ export interface DetailedClientIndividual {
 export interface DetailedClientOrganization {
   registration_number?: string;
   client_type: 'organization' | 'hospital' | 'carehome';
+  client_category?: ClientCategory;
   details?: {
     client_id?: string;
     organization_name?: string;

@@ -404,7 +404,8 @@ export async function getClients(
   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
   searchQuery?: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
+  category?: ClientCategory | 'all'
 ) {
   try {
     const supabase = await createSupabaseServerClient()
@@ -413,6 +414,7 @@ export async function getClients(
        id,
           client_type,
           status,
+          client_category,
           created_at,
           individual_clients:individual_clients(
             requestor_email,
@@ -440,6 +442,11 @@ export async function getClients(
     if (status && status !== "all") {
       countQuery.eq('status', status)
       dataQuery.eq('status', status)
+    }
+
+    if (category && category !== "all") {
+      countQuery.eq('client_category', category)
+      dataQuery.eq('client_category', category)
     }
 
     if (searchQuery && searchQuery.trim() !== '') {

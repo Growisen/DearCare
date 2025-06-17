@@ -27,6 +27,9 @@ export default function ClientsPage() {
     setSearchQuery,
     selectedStatus,
     setSelectedStatus,
+    selectedCategory,
+    setSelectedCategory,
+    handleCategoryChange,
     handleSearch,
     handleStatusChange,
     currentPage,
@@ -54,6 +57,7 @@ export default function ClientsPage() {
     try {
       setSearchInput("");
       setSelectedStatus("all")
+      setSelectedCategory("all");
       
       setSearchQuery(""); 
       
@@ -75,6 +79,8 @@ export default function ClientsPage() {
           setSearchInput={setSearchInput}
           handleStatusChange={handleStatusChange}
           handleSearch={handleSearch}
+          selectedCategory={selectedCategory}
+          handleCategoryChange={handleCategoryChange}
           handleResetFilters={handleResetFilters}
         />
 

@@ -394,9 +394,20 @@ export function ClientDetailsOverlay({
         {/* Summary Card */}
         <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              {isIndividual ? 'Patient Request' : 'Organization Request'}
-            </h3>
+            <div className="flex items-center space-x-3">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {isIndividual ? 'Patient Request' : 'Organization Request'}
+              </h3>
+              {detailedClient.client_category && (
+                <span className={`px-3 py-1 text-sm font-medium rounded-md ${
+                  detailedClient.client_category === 'DearCare LLP' 
+                    ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                    : 'bg-green-100 text-green-700 border border-green-200'
+                }`}>
+                  {detailedClient.client_category}
+                </span>
+              )}
+            </div>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${
               currentClientStatus === 'approved' ? 'bg-green-100 text-green-800' : 
               currentClientStatus === 'under_review' ? 'bg-yellow-100 text-yellow-800' :

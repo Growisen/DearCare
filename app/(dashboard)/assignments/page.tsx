@@ -19,6 +19,7 @@ export default function AssignmentsPage() {
     searchInput,
     setSearchInput,
     dateFilter,
+    categoryFilter,
     currentPage,
     totalPages,
     totalCount,
@@ -27,6 +28,7 @@ export default function AssignmentsPage() {
     handleSearch,
     handleStatusChange,
     handleDateFilterChange,
+    handleCategoryChange, 
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
@@ -48,6 +50,8 @@ export default function AssignmentsPage() {
         handleSearch={handleSearch}
         handleDateFilterChange={handleDateFilterChange}
         handleResetFilters={handleResetFilters}
+        selectedCategory={categoryFilter}
+        handleCategoryChange={handleCategoryChange}
       />
 
 
