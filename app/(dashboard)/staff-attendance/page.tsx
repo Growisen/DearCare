@@ -113,31 +113,76 @@ export default function StaffAttendancePage() {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const date = new Date(selectedDate);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+      const batchSize = 500;
+      let allRecords: AttendanceRecord[] = [];
+      let currentPage = 1;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const batchResult = await fetchStaffAttendance(
+          formattedDate,
+          currentPage,
+          batchSize,
+          true
+        );
+        
+        if (!batchResult.success) {
+          throw new Error(batchResult.error || 'Failed to export data');
+        }
+        
+        allRecords = [...allRecords, ...batchResult.data];
+        
+        if (!batchResult.pagination || 
+            currentPage >= batchResult.pagination.totalPages || 
+            batchResult.data.length < batchSize) {
+          hasMore = false;
+        } else {
+          currentPage++;
+        }
+      }
+      
+      const filteredRecords = searchTerm ? 
+        allRecords.filter(record => record.nurseName.toLowerCase().includes(searchTerm.toLowerCase())) : 
+        allRecords;
       
       const headers = ["Nurse Name", "Date", "Scheduled Start", "Scheduled End", 
                        "Actual Start", "Actual End", "Hours Worked", "Location", "Status"];
       
-      const csvContent = [
-        headers.join(','),
-        ...attendanceData
-          .filter(record => 
-            searchTerm === '' || 
-            record.nurseName.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map(record => [
-            `"${record.nurseName}"`,
-            record.date,
-            record.scheduledStart || 'N/A',
-            record.scheduledEnd || 'N/A',
-            record.shiftStart || 'N/A',
-            record.shiftEnd || 'N/A',
-            record.hoursWorked || 'N/A',
-            record.status
-          ].join(','))
-      ].join('\n');
+      const csvRows = [headers.join(',')];
       
-      // Create download link
+      const chunkSize = 100;
+      for (let i = 0; i < filteredRecords.length; i += chunkSize) {
+        const chunk = filteredRecords.slice(i, i + chunkSize);
+        
+        chunk.forEach(record => {
+          let locationValue = 'N/A';
+          if (record.location) {
+            const [lat, lng] = record.location.split(',').map(coord => parseFloat(coord.trim()));
+            if (!isNaN(lat) && !isNaN(lng)) {
+              locationValue = `https://www.google.com/maps?q=${lat},${lng}`;
+            } else {
+              locationValue = record.location;
+            }
+          }
+          
+          csvRows.push([
+            `"${record.nurseName}"`,
+            `"${record.date}"`,
+            `"${record.scheduledStart || 'N/A'}"`,
+            `"${record.scheduledEnd || 'N/A'}"`,
+            `"${record.shiftStart || 'N/A'}"`,
+            `"${record.shiftEnd || 'N/A'}"`,
+            `"${record.hoursWorked || 'N/A'}"`,
+            `"${locationValue}"`,
+            `"${record.status}"`
+          ].join(','));
+        });
+      }
+      
+      const csvContent = csvRows.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -146,6 +191,7 @@ export default function StaffAttendancePage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
     } catch (error) {
       console.error('Error exporting data:', error);
@@ -153,7 +199,6 @@ export default function StaffAttendancePage() {
       setIsExporting(false);
     }
   };
-
   return (
     <div className="space-y-5 sm:space-y-7">
       <AttendanceHeader 

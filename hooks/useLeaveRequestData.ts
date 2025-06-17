@@ -5,7 +5,8 @@ import { LeaveRequestStatus } from '@/types/leave.types'
 import { useQuery } from "@tanstack/react-query"
 
 export function useLeaveRequestData() {
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<{startDate: string | null, endDate: string | null}>({
     startDate: null,
@@ -15,7 +16,6 @@ export function useLeaveRequestData() {
   const [pageSize, setPageSize] = useState(10)
   const [processingRequestIds, setProcessingRequestIds] = useState<Set<string>>(new Set())
   
-  // Convert statusFilter to proper LeaveRequestStatus
   const getStatusFilter = (): LeaveRequestStatus | null => {
     if (statusFilter && statusFilter !== 'All') {
       const lowercaseStatus = statusFilter.toLowerCase() as LeaveRequestStatus
@@ -26,10 +26,10 @@ export function useLeaveRequestData() {
     return null
   }
 
-  // Reset to first page when filters change
+
   useEffect(() => {
     setCurrentPage(1)
-  }, [statusFilter, searchTerm, dateRange.startDate, dateRange.endDate])
+  }, [statusFilter, appliedSearchTerm, dateRange.startDate, dateRange.endDate])
 
   // Use React Query for data fetching and caching
   const { 
@@ -40,7 +40,7 @@ export function useLeaveRequestData() {
     queryKey: [
       'leaveRequests', 
       getStatusFilter(), 
-      searchTerm, 
+      appliedSearchTerm,
       dateRange.startDate,
       dateRange.endDate,
       currentPage,
@@ -50,7 +50,7 @@ export function useLeaveRequestData() {
       try {
         const result = await getLeaveRequests(
           getStatusFilter(),
-          searchTerm,
+          appliedSearchTerm,
           dateRange.startDate,
           dateRange.endDate,
           currentPage,
@@ -81,8 +81,15 @@ export function useLeaveRequestData() {
   const totalCount = data?.totalCount || 0
   const totalPages = Math.ceil(totalCount / pageSize)
   
+  // Apply search when search button is clicked
+  const applySearch = () => {
+    setAppliedSearchTerm(searchInput)
+    setCurrentPage(1)
+  }
+  
   const clearAllFilters = () => {
-    setSearchTerm('')
+    setSearchInput('')
+    setAppliedSearchTerm('')
     setStatusFilter(null)
     setDateRange({startDate: null, endDate: null})
   }
@@ -107,8 +114,9 @@ export function useLeaveRequestData() {
   return {
     leaveRequests,
     isLoading,
-    searchTerm,
-    setSearchTerm,
+    searchTerm: searchInput,
+    setSearchTerm: setSearchInput,
+    applySearch,
     statusFilter, 
     setStatusFilter,
     dateRange,

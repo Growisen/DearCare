@@ -115,27 +115,58 @@ export function ClientHeader({
                 {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
               </button>
             ))}
+            
+            {/* Reset button for desktop */}
+            <button
+              onClick={handleResetFilters}
+              disabled={selectedStatus === "all" && !searchInput}
+              className={`ml-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
+                selectedStatus === "all" && !searchInput
+                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+              }`}
+            >
+              <X className="h-3 w-3" />
+              Reset All
+            </button>
           </div>
-          {/* Mobile view - compact dropdown */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => handleStatusChange(e.target.value as ClientStatus)}
-            className="sm:hidden w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: `right 0.5rem center`,
-              backgroundRepeat: `no-repeat`,
-              backgroundSize: `1.5em 1.5em`,
-              paddingRight: `2rem`
-            }}
-          >
-            <option value="all">All Clients</option>
-            {["approved", "pending", "under_review", "rejected"].map((status) => (
-              <option key={status} value={status}>
-                {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
-              </option>
-            ))}
-          </select>
+          
+          {/* Mobile view - status dropdown and reset button */}
+          <div className="sm:hidden w-full flex flex-col gap-2">
+            <select
+              value={selectedStatus}
+              onChange={(e) => handleStatusChange(e.target.value as ClientStatus)}
+              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+              style={{ 
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: `right 0.5rem center`,
+                backgroundRepeat: `no-repeat`,
+                backgroundSize: `1.5em 1.5em`,
+                paddingRight: `2rem`
+              }}
+            >
+              <option value="all">All Clients</option>
+              {["approved", "pending", "under_review", "rejected"].map((status) => (
+                <option key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+                </option>
+              ))}
+            </select>
+            
+            {/* Reset button for mobile */}
+            <button
+              onClick={handleResetFilters}
+              disabled={selectedStatus === "all" && !searchInput}
+              className={`py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
+                selectedStatus === "all" && !searchInput
+                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+              }`}
+            >
+              <X className="h-3 w-3" />
+              Reset All Filters
+            </button>
+          </div>
         </div>
       </div>
     </div>

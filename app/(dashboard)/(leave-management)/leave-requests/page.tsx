@@ -11,6 +11,7 @@ import { LeaveRequestsHeader } from '@/components/leaveManagement/LeaveRequestsH
 import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTable'
 import { PaginationControls } from '@/components/leaveManagement/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
+import { exportLeaveRequests } from '@/app/actions/leave-management'
 
 export default function LeaveRequestsPage() {
   // Custom hook for managing leave request data
@@ -19,6 +20,7 @@ export default function LeaveRequestsPage() {
     isLoading,
     searchTerm,
     setSearchTerm,
+    applySearch,
     statusFilter,
     setStatusFilter,
     dateRange,
@@ -35,6 +37,7 @@ export default function LeaveRequestsPage() {
     fetchLeaveRequests,
     handlePageChange
   } = useLeaveRequestData()
+
 
   // Local state
   const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null)
@@ -125,8 +128,7 @@ export default function LeaveRequestsPage() {
   }
 
   const handleSearch = () => {
-    setCurrentPage(1)
-    fetchLeaveRequests()
+    applySearch()
   }
 
   const handleResetFilters = () => {
@@ -137,10 +139,50 @@ export default function LeaveRequestsPage() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      // Simulated export function
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Leave requests exported successfully')
-    } catch {
+      // Get the current status filter value in the correct format
+      const currentStatus = statusFilter && statusFilter !== 'All' 
+        ? statusFilter.toLowerCase() as 'pending' | 'approved' | 'rejected' 
+        : null
+  
+      // Call our export function with current filters
+      const result = await exportLeaveRequests(
+        currentStatus,
+        searchTerm,
+        dateRange.startDate,
+        dateRange.endDate
+      )
+  
+      if (!result.success) {
+        toast.error(result.error || 'Failed to export leave requests')
+        return
+      }
+  
+      if (result.recordCount === 0) {
+        toast.error('No data to export based on current filters')
+        return
+      }
+  
+      // Create blob from the CSV data
+      const csvData = result.csvData || '';
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
+      
+      // Create download link and trigger download
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      
+      // Set filename with current date
+      const date = new Date().toISOString().split('T')[0]
+      link.setAttribute('href', url)
+      link.setAttribute('download', `leave_requests_${date}.csv`)
+      link.style.visibility = 'hidden'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      toast.success(`${result.recordCount} leave requests exported successfully`)
+    } catch (error) {
+      console.error('Export error:', error)
       toast.error('Failed to export leave requests')
     } finally {
       setIsExporting(false)

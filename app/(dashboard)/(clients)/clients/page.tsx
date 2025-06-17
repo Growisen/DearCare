@@ -26,6 +26,7 @@ export default function ClientsPage() {
     searchQuery,
     setSearchQuery,
     selectedStatus,
+    setSelectedStatus,
     handleSearch,
     handleStatusChange,
     currentPage,
@@ -50,9 +51,9 @@ export default function ClientsPage() {
   }
 
   const handleResetFilters = () => {
-    console.log("handleResetFilters called");
     try {
       setSearchInput("");
+      setSelectedStatus("all")
       
       setSearchQuery(""); 
       

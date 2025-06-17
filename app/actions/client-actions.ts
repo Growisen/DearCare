@@ -416,6 +416,7 @@ export async function getClients(
             requestor_email,
             requestor_phone,
             patient_name,
+            requestor_name,
             service_required,
             start_date
           ),
@@ -514,7 +515,7 @@ export async function getClients(
       return {
         id: record.id,
         name: isIndividual 
-          ? (individualData?.patient_name || "Unknown") 
+          ? (individualData?.requestor_name || "Unknown") 
           : (organizationData?.organization_name || "Unknown"),
         requestDate: isIndividual
           ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
@@ -1265,6 +1266,7 @@ export async function exportClients(
     let query = supabase
       .from('clients')
       .select(`
+        id,
         client_type,
         status,
         created_at,
@@ -1276,7 +1278,10 @@ export async function exportClients(
           patient_name,
           patient_age,
           patient_gender,
-          complete_address,
+          requestor_address,
+          requestor_city,
+          requestor_district,
+          requestor_pincode,
           service_required,
           start_date,
           care_duration,
@@ -1290,6 +1295,10 @@ export async function exportClients(
           contact_phone,
           contact_email,
           organization_address,
+          organization_state,
+          organization_district,
+          organization_city,
+          organization_pincode,
           start_date
         )
       `)
@@ -1379,7 +1388,10 @@ export async function exportClients(
         status: record.status,
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
-        location: isIndividual ? individualData?.complete_address : organizationData?.organization_address,
+        requestor_address: isIndividual ? individualData?.requestor_address : organizationData?.organization_address,
+        organization_state: organizationData?.organization_state,
+        requestor_district: isIndividual ? individualData?.requestor_district : organizationData?.organization_district,
+        requestor_city: isIndividual ? individualData?.requestor_city : organizationData?.organization_city,
         description: record.general_notes || undefined
       }
     })

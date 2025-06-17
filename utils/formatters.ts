@@ -23,3 +23,27 @@ export function getClientProfileUrl(clientId: string, clientType: string): strin
       return `/clients/${clientId}`;
   }
 }
+
+
+export function format12HourTime(time24: string | null): string {
+  if (!time24) return '';
+  
+  try {
+    const [hoursStr, minutesStr] = time24.split(':');
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+    
+    if (isNaN(hours) || isNaN(minutes)) {
+      return '';
+    }
+    
+    const period = hours >= 12 ? 'PM' : 'AM';
+
+    const hours12 = hours % 12 || 12;
+  
+    return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+  } catch (error) {
+    console.error('Error converting time format:', error);
+    return '';
+  }
+}

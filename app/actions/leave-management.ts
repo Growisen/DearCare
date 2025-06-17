@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './auth'
 import { revalidatePath } from 'next/cache'
+import { formatDate } from '@/utils/formatters'
 
 export type LeaveRequest = {
   id: string
@@ -193,6 +194,150 @@ export async function updateLeaveRequestStatus(
     return { success: true }
   } catch (error: unknown) {
     console.error('Error updating leave request status:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    }
+  }
+}
+
+/**
+ * Exports leave requests as CSV data based on filters
+ */
+export async function exportLeaveRequests(
+  status?: 'pending' | 'approved' | 'rejected' | null,
+  searchQuery?: string,
+  startDate?: string | null,
+  endDate?: string | null
+) {
+  try {
+    const supabase = await createSupabaseServerClient()
+    
+    let query = supabase
+      .from('nurse_leave_requests')
+      .select(`
+        id,
+        nurse_id,
+        leave_type,
+        leave_mode,
+        start_date,
+        end_date,
+        days,
+        reason,
+        status,
+        rejection_reason,
+        applied_on
+      `)
+      .order('applied_on', { ascending: false })
+    
+    if (status) {
+      query = query.eq('status', status)
+    }
+    
+    if (startDate) {
+      query = query.gte('applied_on', startDate)
+    }
+    
+    if (endDate) {
+      query = query.lte('applied_on', endDate)
+    }
+    
+    const { data: leaveData, error: leaveError } = await query
+    
+    if (leaveError) {
+      console.error('Error fetching leave requests for export:', leaveError)
+      return { success: false, error: leaveError.message }
+    }
+
+    if (!leaveData || leaveData.length === 0) {
+      return { success: true, csvData: '', message: 'No data to export' }
+    }
+    
+    const nurseIds = [...new Set(leaveData.map(item => item.nurse_id))]
+    
+    const { data: nursesData, error: nursesError } = await supabase
+      .from('nurses')
+      .select('nurse_id, first_name, last_name')
+      .in('nurse_id', nurseIds)
+    
+    if (nursesError) {
+      console.error('Error fetching nurses for export:', nursesError)
+    }
+    
+    const nurseMap = new Map()
+    if (nursesData) {
+      nursesData.forEach(nurse => {
+        nurseMap.set(nurse.nurse_id, 
+          `${nurse.first_name || ''} ${nurse.last_name || ''}`.trim())
+      })
+    }
+    
+    // Transform the data
+    const leaveRequests = leaveData.map(item => ({
+      id: item.id,
+      nurseId: String(item.nurse_id),
+      nurseName: nurseMap.get(item.nurse_id) || 'Unknown',
+      leaveType: formatLeaveType(item.leave_type),
+      leaveMode: formatLeaveMode(item.leave_mode),
+      startDate: item.start_date,
+      endDate: item.end_date,
+      days: item.days,
+      reason: item.reason || '',
+      status: item.status,
+      appliedOn: item.applied_on,
+      rejectionReason: item.rejection_reason || ''
+    }))
+    
+    // Filter by search query if provided
+    const filteredRequests = searchQuery ? 
+      leaveRequests.filter(request => 
+        request.nurseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.nurseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.leaveType.toLowerCase().includes(searchQuery.toLowerCase())
+      ) : 
+      leaveRequests
+    
+    // Generate CSV content
+    const headers = [
+      'Nurse ID', 
+      'Nurse Name', 
+      'Leave Type', 
+      'Leave Mode', 
+      'Start Date', 
+      'End Date', 
+      'Days', 
+      'Reason', 
+      'Status', 
+      'Applied On', 
+      'Rejection Reason'
+    ]
+    
+    const csvRows = [
+      headers.join(','),
+      ...filteredRequests.map(row => [
+        row.nurseId,
+        `"${row.nurseName}"`, // Quotes to handle names with commas
+        formatLeaveType(`"${row.leaveType}"`),
+        formatLeaveMode(`"${row.leaveMode}"`),
+        formatDate(row.startDate),
+        formatDate(row.endDate),
+        row.days,
+        `"${row.reason.replace(/"/g, '""')}"`, // Escape quotes in CSV
+        row.status,
+        formatDate(row.appliedOn),
+        `"${row.rejectionReason?.replace(/"/g, '""') || ''}"`
+      ].join(','))
+    ]
+    
+    const csvData = csvRows.join('\n')
+    
+    return { 
+      success: true, 
+      csvData,
+      recordCount: filteredRequests.length
+    }
+  } catch (error: unknown) {
+    console.error('Error in exportLeaveRequests:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
