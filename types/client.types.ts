@@ -197,6 +197,7 @@ export interface DetailedClientOrganization {
   registration_number?: string;
   client_type: 'organization' | 'hospital' | 'carehome';
   details?: {
+    client_id?: string;
     organization_name?: string;
     organization_type?: string;
     contact_person_name?: string;
