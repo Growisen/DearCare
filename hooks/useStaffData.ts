@@ -14,7 +14,7 @@ export function useStaffData() {
   const [totalCount, setTotalCount] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(10);
-  const debouncedSearchTerm = searchInput;
+  
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -85,13 +85,6 @@ export function useStaffData() {
   const handleNextPage = useCallback(() => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   }, [totalPages]);
-  
-  useEffect(() => {
-    if (debouncedSearchTerm !== searchQuery) {
-      setSearchQuery(debouncedSearchTerm);
-      setCurrentPage(1);
-    }
-  }, [debouncedSearchTerm, searchQuery]);
   
   useEffect(() => {
     fetchData();

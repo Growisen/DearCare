@@ -53,7 +53,8 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
         />
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="relationToPatient">
-            Relation to Patient <span className="text-red-500">*</span>
+            Relation to Patient 
+            {/* <span className="text-red-500">*</span> */}
           </label>
           <select 
             id="relationToPatient" 
@@ -61,7 +62,6 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
             onChange={handleInputChange}
             onBlur={() => handleBlur('relationToPatient')} 
             className={`w-full border ${formErrors.relationToPatient ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-            required
           >
             {relationOptions.map(option => (
               <option key={option.value} value={option.value}>

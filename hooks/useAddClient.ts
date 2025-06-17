@@ -179,12 +179,24 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       return true;
     }
 
+    // const individualRequired = [
+    //   'requestorName', 'requestorPhone', 'requestorEmail',
+    //   'relationToPatient', 'patientName', 'patientAge', 'patientGender',
+    //   'serviceRequired', 'startDate',
+    //   'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+    //   'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict'
+    // ];
+    
+    // const organizationRequired = [
+    //   'organizationName', 'organizationType', 'contactPersonName', 
+    //   'contactPersonRole', 'contactPhone', 'contactEmail', 
+    //   'organizationState', 'organizationDistrict', 'organizationCity',
+    //   'organizationAddress', 'organizationPincode', 'staffReqStartDate'
+    // ];
     const individualRequired = [
       'requestorName', 'requestorPhone', 'requestorEmail',
-      'relationToPatient', 'patientName', 'patientAge', 'patientGender',
       'serviceRequired', 'startDate',
       'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
-      'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict'
     ];
     
     const organizationRequired = [
@@ -296,14 +308,24 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       isValid = false;
     }
     
+    // const requiredFields = [
+    //   ...commonRequired,
+    //   ...(clientType === 'individual' 
+    //     ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
+    //        'patientName', 'patientAge', 'patientGender', 
+    //        'serviceRequired', 'startDate',
+    //        'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+    //        'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
+    //     : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
+    //        'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
+    //         'organizationAddress', 'organizationPincode', 'staffReqStartDate'])
+    // ];
     const requiredFields = [
       ...commonRequired,
       ...(clientType === 'individual' 
-        ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
-           'patientName', 'patientAge', 'patientGender', 
+        ? ['requestorName', 'requestorPhone', 'requestorEmail', 
            'serviceRequired', 'startDate',
-           'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
-           'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
+           'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict']
         : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
            'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
             'organizationAddress', 'organizationPincode', 'staffReqStartDate'])
