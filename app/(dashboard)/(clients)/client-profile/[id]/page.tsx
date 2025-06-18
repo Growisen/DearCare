@@ -4,6 +4,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/Loader';
+import EditProfileModal from '@/components/client/Profile/EditProfileModal';
 
 declare global {
   interface Window {
@@ -61,9 +62,12 @@ const PatientProfilePage = () => {
     status,
     isEditing,
     handleEdit,
+    isEditingProfile,
     handleSave,
     handleCancel,
     handleCategoryChange,
+    handleEditProfile,
+    handleCloseProfileEdit,
     handleDeleteClient
   } = usePatientData(id);
 
@@ -148,6 +152,7 @@ const PatientProfilePage = () => {
             handleCategoryChange={handleCategoryChange}
             setShowNurseList={setShowNurseList}
             onDelete={() => setShowDeleteConfirmation(true)}
+            onEditProfile={handleEditProfile}
           />
 
           {/* Tabs Navigation */}
@@ -203,6 +208,13 @@ const PatientProfilePage = () => {
           
           {/* Main Content */}
           <div className="p-3 sm:p-4 md:p-6">
+            <EditProfileModal 
+              isOpen={isEditingProfile}
+              onClose={handleCloseProfileEdit}
+              patient={patient}
+              onSave={handleSave}
+            />
+
             <EditPatientModal
               isEditing={isEditing}
               clientId={id}

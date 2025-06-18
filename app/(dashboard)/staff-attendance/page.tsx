@@ -24,6 +24,7 @@ export default function StaffAttendancePage() {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
   const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const [isExporting, setIsExporting] = useState(false)
   
   useEffect(() => {
@@ -51,12 +52,14 @@ export default function StaffAttendancePage() {
         // Use server pagination information
         if (result.pagination) {
           setTotalPages(result.pagination.totalPages);
+          setTotalCount(result.pagination.totalRecords); 
         }
         
         setError(null);
       } else {
         setError(result.error || 'Failed to load attendance data');
         setAttendanceData([]);
+        setTotalCount(0);
       }
     } catch {
       setError('An error occurred while fetching attendance data');
@@ -236,7 +239,7 @@ export default function StaffAttendancePage() {
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
-              totalCount={filteredData.length}
+              totalCount={totalCount}
               pageSize={pageSize}
               itemsLength={filteredData.length}
               onPageChange={handlePageChange}

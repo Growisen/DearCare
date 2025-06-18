@@ -25,6 +25,7 @@ interface ProfileHeaderProps {
   handleCategoryChange: (category: ClientCategory) => Promise<void>;
   setShowNurseList: (show: boolean) => void;
   onDelete: () => void;
+  onEditProfile?: () => void;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -34,7 +35,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   handleSave,
   handleCancel,
   handleCategoryChange,
-  onDelete
+  onDelete,
+  onEditProfile
 }) => {
 
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
@@ -94,24 +96,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   
             {/* Additional Info */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start mt-3 gap-2">
-              {/* <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
-                <svg
-                  className="mr-1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                {patient.location}
-              </span> */}
               <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
                 Reg.No: {patient.registrationNumber || "Not Available"}
               </span>
@@ -127,6 +111,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto mt-3 md:mt-0">
           {!isEditing ? (
             <>
+              {onEditProfile && (
+                <button
+                  onClick={onEditProfile}
+                  className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                  </svg>
+                  Edit Profile
+                </button>
+              )}
+              
               <button
                 onClick={handleEdit}
                 className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center"

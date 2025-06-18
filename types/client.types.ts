@@ -86,6 +86,7 @@ export interface IndividualFormData extends BaseFormData {
   requestorEmergencyPhone: string;
   requestorPincode: string;
   requestorDistrict: string;
+  requestorState: string;
   requestorCity: string;
   relationToPatient: RelationToPatient;
   patientName: string;
@@ -95,6 +96,7 @@ export interface IndividualFormData extends BaseFormData {
   patientAddress: string,  
   patientPincode: string, 
   patientDistrict: string, 
+  patientState: string;
   patientCity: string, 
   serviceRequired: string;
   careDuration: string;
@@ -162,6 +164,7 @@ export interface DetailedClientIndividual {
     patient_gender?: string;
     patient_phone?: string;
     patient_address?: string;
+    patient_state?: string;
     patient_city?: string;
     patient_district?: string;
     patient_pincode?: string;
@@ -170,6 +173,7 @@ export interface DetailedClientIndividual {
     requestor_address?: string;
     requestor_city?: string;
     requestor_district?: string;
+    requestor_state?: string;
     requestor_pincode?: string;
     requestor_name?: string;
     relation_to_patient?: string;
@@ -192,7 +196,9 @@ export interface DetailedClientIndividual {
 export interface DetailedClientOrganization {
   registration_number?: string;
   client_type: 'organization' | 'hospital' | 'carehome';
+  client_category?: ClientCategory;
   details?: {
+    client_id?: string;
     organization_name?: string;
     organization_type?: string;
     contact_person_name?: string;
@@ -355,6 +361,7 @@ export interface Patient {
   address: {
     fullAddress: string;
     city: string;
+    state?: string;
     district: string;
     pincode: string;
   };
@@ -368,6 +375,7 @@ export interface Patient {
     jobDetails?: string;
     address?: {
       fullAddress: string;
+      state?: string;
       city: string;
       district: string;
       pincode: string;

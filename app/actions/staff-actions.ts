@@ -38,6 +38,7 @@ async function generateStaffRegNo(
 
   return staffRegNo;
 }
+
 async function uploadProfilePicture(file: File, staffId: string): Promise<string | null> {
   try {
     if (!file) return null;
@@ -229,6 +230,7 @@ export async function getStaff(
     
     const staff = data.map(record => ({
       id: record.id,
+      registrationNumber: record.reg_no,
       name: record.name,
       email: record.email,
       phone: record.phone,
@@ -278,9 +280,7 @@ export async function getStaffById(staffId: string) {
     const { data: staff, error } = await supabase
       .from('dearcare_staff')
       .select(`
-        *,
-        staff_certifications (*),
-        staff_skills (*)
+        *
       `)
       .eq('id', staffId)
       .single();

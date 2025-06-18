@@ -11,6 +11,7 @@ export const usePatientData = (id: string) => {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const fetchPatientData = async () => {
     if (!id) return;
@@ -172,6 +173,14 @@ export const usePatientData = (id: string) => {
     }
   };
 
+  const handleEditProfile = () => {
+    setIsEditingProfile(true);
+  };
+
+  const handleCloseProfileEdit = () => {
+    setIsEditingProfile(false);
+  };
+
   useEffect(() => {
     fetchPatientData();
   }, [id]);
@@ -182,10 +191,13 @@ export const usePatientData = (id: string) => {
     error,
     status,
     isEditing,
+    isEditingProfile,
     handleEdit,
     handleSave,
     handleCancel,
     handleCategoryChange,
+    handleEditProfile,
+    handleCloseProfileEdit,
     handleDeleteClient,
   };
 };

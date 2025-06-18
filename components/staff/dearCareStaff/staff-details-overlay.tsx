@@ -18,6 +18,7 @@ type StaffDetailsOverlayProps = {
 };
 
 export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOverlayProps) {
+  console.log("ss", staff);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updatedStaff, setUpdatedStaff] = useState<Staff>(staff);
   const [isEditing, setIsEditing] = useState(false);

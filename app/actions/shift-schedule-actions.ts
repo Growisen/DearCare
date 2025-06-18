@@ -260,7 +260,8 @@ export async function getAllNurseAssignments(
   pageSize: number = 10,
   filterStatus: 'all' | 'active' | 'upcoming' | 'completed' = 'all',
   searchQuery: string = '',
-  dateFilter: string = ''
+  dateFilter: string = '',
+  categoryFilter?: string,
 ): Promise<{
   success: boolean;
   data?: NurseAssignmentData[];
@@ -277,9 +278,10 @@ export async function getAllNurseAssignments(
       .select(`
         *,
         nurses(first_name, last_name),
-        clients(
+        clients!inner(
           id,
           client_type,
+          client_category,
           individual_clients(requestor_name),
           organization_clients(organization_name)
         )
@@ -306,6 +308,10 @@ export async function getAllNurseAssignments(
       query = query
         .lte('start_date', dateFilter)
         .gte('end_date', dateFilter);
+    }
+
+    if (categoryFilter && categoryFilter !== "all") {
+      query = query.eq('clients.client_category', categoryFilter);
     }
 
     if (searchQuery) {
