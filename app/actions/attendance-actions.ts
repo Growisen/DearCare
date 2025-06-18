@@ -958,3 +958,89 @@ export async function getAttendanceRecords(
     };
   }
 }
+
+export interface MarkAttendanceParams {
+  assignmentId: number;
+  date: string; // 'YYYY-MM-DD'
+  checkIn: string; // 'HH:mm'
+  checkOut: string; // 'HH:mm'
+  isAdminAction?: boolean;
+}
+
+export async function markAttendance({
+  assignmentId,
+  date,
+  checkIn,
+  checkOut,
+  isAdminAction = false,
+}: MarkAttendanceParams): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('assigned_id', assignmentId)
+      .eq('date', date)
+      .maybeSingle();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      return { success: false, message: fetchError.message };
+    }
+
+    let totalHours: string | null = null;
+    if (checkIn && checkOut) {
+      const [inH, inM] = checkIn.split(':').map(Number);
+      const [outH, outM] = checkOut.split(':').map(Number);
+      const inMinutes = inH * 60 + inM;
+      const outMinutes = outH * 60 + outM;
+      const diff = outMinutes - inMinutes;
+      if (diff > 0) {
+        const hours = Math.floor(diff / 60);
+        const minutes = diff % 60;
+        totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+      }
+    }
+
+    if (existing) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: checkIn,
+          end_time: checkOut,
+          is_admin_action: isAdminAction,
+          total_hours: totalHours,
+        })
+        .eq('id', existing.id);
+
+      if (updateError) {
+        return { success: false, message: updateError.message };
+      }
+      return { success: true, message: 'Attendance updated successfully' };
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert([{
+          assigned_id: assignmentId,
+          date,
+          start_time: checkIn,
+          end_time: checkOut,
+          is_admin_action: isAdminAction,
+          total_hours: totalHours,
+        }]);
+
+      if (insertError) {
+        return { success: false, message: insertError.message };
+      }
+      return { success: true, message: 'Attendance marked successfully' };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to mark attendance',
+    };
+  }
+}
