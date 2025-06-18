@@ -53,7 +53,8 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
         />
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="relationToPatient">
-            Relation to Patient <span className="text-red-500">*</span>
+            Relation to Patient 
+            {/* <span className="text-red-500">*</span> */}
           </label>
           <select 
             id="relationToPatient" 
@@ -61,7 +62,6 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
             onChange={handleInputChange}
             onBlur={() => handleBlur('relationToPatient')} 
             className={`w-full border ${formErrors.relationToPatient ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-            required
           >
             {relationOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -85,13 +85,23 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
           required
         />
         <InputField 
-          label="Pincode" 
-          placeholder="Enter your pincode" 
-          id="requestorPincode" 
-          value={formData.requestorPincode} 
+          label="State" 
+          placeholder="Enter your State" 
+          id="requestorState" 
+          value={formData.requestorState} 
           onChange={handleInputChange}
-          onBlur={() => handleBlur('requestorPincode')}
-          error={formErrors.requestorPincode}
+          onBlur={() => handleBlur('requestorState')}
+          error={formErrors.requestorState}
+          required
+        />
+        <InputField 
+          label="District" 
+          placeholder="Enter your district" 
+          id="requestorDistrict" 
+          value={formData.requestorDistrict} 
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('requestorDistrict')}
+          error={formErrors.requestorDistrict}
           required
         />
         <InputField 
@@ -105,13 +115,13 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
           required
         />
         <InputField 
-          label="District" 
-          placeholder="Enter your district" 
-          id="requestorDistrict" 
-          value={formData.requestorDistrict} 
+          label="Pincode" 
+          placeholder="Enter your pincode" 
+          id="requestorPincode" 
+          value={formData.requestorPincode} 
           onChange={handleInputChange}
-          onBlur={() => handleBlur('requestorDistrict')}
-          error={formErrors.requestorDistrict}
+          onBlur={() => handleBlur('requestorPincode')}
+          error={formErrors.requestorPincode}
           required
         />
         <InputField 

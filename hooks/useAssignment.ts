@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAssignmentById } from '../app/actions/shift-schedule-actions';
-import { getAttendanceRecords } from '../app/actions/attendance-actions';
+import { getAttendanceRecords, markAttendance } from '../app/actions/attendance-actions';
 import { differenceInMonths, parseISO } from 'date-fns';
 import { format12HourTime } from '@/utils/formatters';
 import { getProfileUrl } from '@/app/actions/complaints-actions';
+import toast from 'react-hot-toast';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -115,6 +116,12 @@ export function useAssignment(id: string) {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceError, setAttendanceError] = useState<string | null>(null);
 
   const { 
     data: assignmentData, 
@@ -229,10 +236,57 @@ export function useAssignment(id: string) {
     }
   };
 
-  const refreshData = () => {
+  const refreshData = useCallback(() => {
     refetchAssignment();
     refetchAttendance();
-  };
+  }, [refetchAssignment, refetchAttendance]);
+
+
+  const openModal = useCallback((record: AttendanceRecord) => {
+    setSelectedRecord(record);
+    setCheckIn('');
+    setCheckOut('');
+    setModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalOpen(false);
+    setSelectedRecord(null);
+    setCheckIn('');
+    setCheckOut('');
+    setAttendanceError(null);
+  }, []);
+
+  const handleMarkAttendance = useCallback(async () => {
+    if (!selectedRecord) return;
+    setAttendanceLoading(true);
+    setAttendanceError(null);
+    try {
+      if (assignmentDetails) {
+        const res = await markAttendance({
+          assignmentId: assignmentDetails.id,
+          date: selectedRecord.date,
+          checkIn,
+          checkOut,
+          isAdminAction: true,
+        });
+
+        if (!res.success) {
+          setAttendanceError(res.message);
+          setAttendanceLoading(false);
+          return;
+        }
+        closeModal();
+        toast.success('Attendance marked successfully!');
+      }
+      
+      refreshData();
+    } catch {
+      setAttendanceError('Failed to mark attendance');
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }, [selectedRecord, checkIn, checkOut, assignmentDetails?.id, closeModal, refreshData]);
 
   return {
     loading: assignmentLoading,
@@ -246,6 +300,17 @@ export function useAssignment(id: string) {
     handleNextPage,
     tableLoading,
     refreshData,
-    invalidateAssignmentCache
+    invalidateAssignmentCache,
+    modalOpen,
+    openModal,
+    closeModal,
+    selectedRecord,
+    checkIn,
+    setCheckIn,
+    checkOut,
+    setCheckOut,
+    attendanceLoading,
+    attendanceError,
+    handleMarkAttendance,
   };
 }

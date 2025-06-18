@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Loader from '@/components/Loader'
 import NurseListModal from '@/components/client/ApprovedContent/NurseListModal'
@@ -8,7 +8,7 @@ import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationM
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList'
 import Link from 'next/link'
 import CategorySelector from '@/components/client/Profile/CategorySelector'
-import { updateClientCategory, getOrganizationClientDetails, getClientStatus, deleteClient } from '@/app/actions/client-actions'
+import { updateClientCategory, deleteClient, updateOrganizationDetails } from '@/app/actions/client-actions'
 import EditAssignmentModal from '@/components/client/EditAssignmentModal'
 import toast from 'react-hot-toast'
 import ImageViewer from '@/components/common/ImageViewer'
@@ -18,37 +18,20 @@ import { useNurseAssignments } from '@/hooks/useNurseAssignments'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useTabManagement } from '@/hooks/useTabManagement'
 import { useAssignmentData } from '@/hooks/useAssignmentData'
+import EditOrganizationDetailsModal from '@/components/client/EditOrganizationDetailsModal'
+import { useOrganizationClient } from '@/hooks/useOrganizationClient'
 
-// Updated interface to match the Supabase data structure
-interface OrganizationClientData {
-  id: string
-  client_type: string
-  client_category: ClientCategory
-  status: string
-  created_at: string
-  general_notes?: string
-  details: {
-    organization_name: string
-    organization_type: string
-    contact_person_name: string
-    contact_person_role: string
-    contact_email: string
-    contact_phone: string
-    organization_address: string
-    organization_state: string
-    organization_district: string
-    organization_city: string
-    organization_pincode: string
-    start_date?: string
-    registration_number?: string
-  }
-  staffRequirements: Array<{
-    id: string
-    client_id: string
-    staff_type: string
-    count: number
-    shift_type: string
-  }>
+interface UpdateOrganizationClientData {
+  organization_name: string
+  contact_person_name: string
+  contact_person_role: string
+  contact_email: string
+  contact_phone: string
+  organization_address: string
+  organization_state: string
+  organization_district: string
+  organization_city: string
+  organization_pincode: string
 }
 
 const OrganizationClientProfile = () => {
@@ -56,22 +39,26 @@ const OrganizationClientProfile = () => {
   const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams()
   const id = params.id as string
-  const [client, setClient] = useState<OrganizationClientData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [status, setStatus] = useState<string | null>(null)
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-  // const [activeTab, setActiveTab] = useState<'details' | 'requirements' | 'assignments'>('details')
-  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   
-  // Use the hook to manage nurse assignments
+  const {
+    client,
+    loading,
+    error,
+    status,
+    fetchClientData,
+    updateClientData
+  } = useOrganizationClient(id)
+  
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  
   const {
     nurseAssignments,
     nurses,
     isLoadingNurses,
     editingAssignment,
-    showEditModal,
+    showEditModal: showNurseEditModal,
     showNurseList,
     selectedNurse,
     showConfirmation,
@@ -84,7 +71,7 @@ const OrganizationClientProfile = () => {
     handleEditAssignment,
     handleUpdateAssignment,
     handleDeleteAssignment,
-    setShowEditModal,
+    setShowEditModal: setShowNurseEditModal,
     setEditingAssignment,
     changePage,
     updateFilters,
@@ -93,7 +80,6 @@ const OrganizationClientProfile = () => {
 
   const { activeTab, handleTabChange } = useTabManagement(id);
 
-  // Utility function to handle undefined/null values
   const formatValue = (value: string | undefined | null, defaultText = 'Not specified'): string => {
     return value ? value.trim() : defaultText
   }
@@ -111,82 +97,47 @@ const OrganizationClientProfile = () => {
     return () => {
       window.onNurseAssignmentComplete = null;
     };
-  });
+  }, []);
 
-  useEffect(() => {
-    const fetchClientData = async () => {
-      try {
-        const statusResult = await getClientStatus(id)
-        if (statusResult.success) {
-          setStatus(statusResult.status)
-        }
-        setLoading(true)
-        const result = await getOrganizationClientDetails(id)
-        
-        if (!result.success) {
-          setError(result.error || 'Failed to load organization details')
-          return
-        }
-        
-        setClient(result.client as OrganizationClientData)
-      } catch (err) {
-        setError('Failed to load organization details')
-        console.error(err)
-      } finally {
-        setLoading(false)
+  const handleSave = async (updatedData: { details: UpdateOrganizationClientData, general_notes?: string }) => {
+    try {
+      const result = await updateOrganizationDetails(id, updatedData);
+      
+      if (result.success) {
+        fetchClientData();
+        refetch();
+        toast.success('Organization details updated successfully');
+        setShowEditModal(false);
+      } else {
+        toast.error(`Failed to update details: ${result.error}`);
       }
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      toast.error('Failed to update organization details');
     }
-
-    if (id) {
-      fetchClientData()
-    }
-  }, [id])
-
-  const handleSave = async () => {
-    // TODO: Add API call to save organization data
-    setIsEditing(false)
-  }
-
-  const handleCancel = () => {
-    setIsEditing(false)
-    // TODO: Reset any edited data to original state
-  }
+  };
 
   const handleCategoryChange = async (newCategory: ClientCategory) => {
     try {
-      setClient(currentClient => {
-        if (!currentClient) return null
-        return {
-          ...currentClient,
+      if (client) {
+        const updatedClient = {
+          ...client,
           client_category: newCategory
-        }
-      })
+        };
+        updateClientData(updatedClient);
+      }
       
       const result = await updateClientCategory(id as string, newCategory)
       
       if (!result.success) {
-        setClient(currentClient => {
-          if (!currentClient) return null
-          return {
-            ...currentClient,
-            client_category: currentClient.client_category
-          }
-        })
-        
+        fetchClientData();
         console.error('Failed to update category:', result.error)
       } else {
         console.log(`Category successfully updated to ${newCategory}`)
       }
     } catch (error) {
       console.error('Failed to update category:', error)
-      
-      setClient(currentClient => {
-        if (!currentClient) return null
-        return {
-          ...currentClient,
-          client_category: currentClient.client_category
-        }
-      })
+      fetchClientData();
     }
   }
 
@@ -225,7 +176,6 @@ const OrganizationClientProfile = () => {
       </div>
     )
   }
-
 
   const organizationMapLink = createMapLink({
     fullAddress: client?.details?.organization_address,
@@ -294,31 +244,18 @@ const OrganizationClientProfile = () => {
               </div>
               {/* Action buttons */}
               <div className="flex flex-wrap items-center gap-3">
-                {isEditing ? (
-                  <>
-                    <button 
-                      onClick={handleSave}
-                      className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
-                    >
-                      Save Changes
-                    </button>
-                    <button 
-                      onClick={handleCancel}
-                      className="px-4 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button 
-                      onClick={() => setShowDeleteConfirmation(true)}
-                      className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
-                    >
-                      Delete Organization
-                    </button>
-                  </>
-                )}
+                <button 
+                  onClick={() => setShowEditModal(true)}
+                  className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                >
+                  Edit Organization
+                </button>
+                <button 
+                  onClick={() => setShowDeleteConfirmation(true)}
+                  className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+                >
+                  Delete Organization
+                </button>
               </div>
             </div>
           </div>
@@ -628,11 +565,11 @@ const OrganizationClientProfile = () => {
       />
 
       <EditAssignmentModal
-        isOpen={showEditModal}
+        isOpen={showNurseEditModal}
         assignment={editingAssignment}
         nurse={editingAssignment ? nurses.find(n => n._id === editingAssignment.nurseId) : null}
         onClose={() => {
-          setShowEditModal(false);
+          setShowNurseEditModal(false);
           setEditingAssignment(null);
         }}
         onSave={handleUpdateAssignment}
@@ -654,6 +591,16 @@ const OrganizationClientProfile = () => {
         onCancel={() => setShowDeleteConfirmation(false)}
         confirmText="Delete Organization"
         confirmButtonClassName="bg-red-600 hover:bg-red-700"
+      />
+
+      <EditOrganizationDetailsModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSave={handleSave}
+        organizationData={client ? {
+          details: client.details,
+          general_notes: client.general_notes
+        } : null}
       />
     </div>
   )

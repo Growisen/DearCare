@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getClients } from "@/app/actions/client-actions"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Client, ClientFilters, ClientStatus } from '@/types/client.types'
+import { Client, ClientFilters, ClientStatus, ClientCategory } from '@/types/client.types'
 
 export function useClientData() {
   const queryClient = useQueryClient();
@@ -16,12 +16,17 @@ export function useClientData() {
   const [currentPage, setCurrentPage] = useState(1)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(10)
+  const [selectedCategory, setSelectedCategory] = useState<ClientCategory | "all">("all");
 
   // Load status from localStorage after initial render
   useEffect(() => {
-    const saved = localStorage.getItem('clientsPageStatus');
-    if (saved && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(saved)) {
-      setSelectedStatus(saved as ClientFilters);
+    const savedStatus = localStorage.getItem('clientsPageStatus');
+    if (savedStatus && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(savedStatus)) {
+      setSelectedStatus(savedStatus as ClientFilters);
+    }
+    const savedCategory = localStorage.getItem('clientsPageCategory');
+    if (savedCategory && (["DearCare LLP", "Tata HomeNursing", "all"].includes(savedCategory))) {
+      setSelectedCategory(savedCategory as ClientCategory | "all");
     }
     setIsStatusLoaded(true);
   }, []);
@@ -33,9 +38,9 @@ export function useClientData() {
     error, 
     refetch 
   } = useQuery({
-    queryKey: ['clients', selectedStatus, searchQuery, currentPage, pageSize],
-    queryFn: () => getClients(selectedStatus, searchQuery, currentPage, pageSize),
-    enabled: isStatusLoaded,
+    queryKey: ['clients', selectedStatus, searchQuery, currentPage, pageSize, selectedCategory],
+    queryFn: () => getClients(selectedStatus, searchQuery, currentPage, pageSize, selectedCategory),
+    enabled: isStatusLoaded && !!selectedStatus,
     staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: true,
     refetchInterval: 1000 * 60 * 10, // 10 minutes
@@ -70,6 +75,12 @@ export function useClientData() {
     localStorage.setItem('clientsPageStatus', status);
   }
 
+  const handleCategoryChange = (category: ClientCategory | "all") => {
+    setSelectedCategory(category);
+    localStorage.setItem('clientsPageCategory', category);
+    setCurrentPage(1);
+  };
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
@@ -90,7 +101,7 @@ export function useClientData() {
 
   return {
     clients,
-    isLoading,
+    isLoading: isLoading || !isStatusLoaded,
     error: error ? "An unexpected error occurred" : (data?.success ? null : (data?.error || "Failed to load clients")),
     searchInput,
     setSearchInput,
@@ -98,6 +109,9 @@ export function useClientData() {
     setSearchQuery,
     selectedStatus,
     setSelectedStatus,
+    selectedCategory,
+    setSelectedCategory,
+    handleCategoryChange,
     handleSearch,
     handleStatusChange,
     currentPage,

@@ -28,7 +28,6 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onChange={handleInputChange}
           onBlur={() => handleBlur('patientName')}
           error={formErrors.patientName}
-          required
         />
         <InputField 
           label="Patient's Age" 
@@ -39,7 +38,6 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onChange={handleInputChange}
           onBlur={() => handleBlur('patientAge')}
           error={formErrors.patientAge}
-          required
         />
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="patientGender">
@@ -70,7 +68,6 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onChange={handleInputChange}
           onBlur={() => handleBlur('patientPhone')}
           error={formErrors.patientPhone}
-          required
         />
 
         <div className="md:col-span-2 mb-4">
@@ -96,29 +93,18 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onChange={handleInputChange}
           onBlur={() => handleBlur('patientAddress')}
           error={formErrors.patientAddress}
-          required
+        />
+
+        <InputField 
+          label="State" 
+          placeholder="Enter patient's state" 
+          id="patientState" 
+          value={formData.patientState} 
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('patientState')}
+          error={formErrors.patientState}
         />
         
-        <InputField 
-          label="Pincode" 
-          placeholder="Enter patient's pincode" 
-          id="patientPincode" 
-          value={formData.patientPincode} 
-          onChange={handleInputChange}
-          onBlur={() => handleBlur('patientPincode')}
-          error={formErrors.patientPincode}
-          required
-        />
-        <InputField 
-          label="City" 
-          placeholder="Enter patient's city" 
-          id="patientCity" 
-          value={formData.patientCity} 
-          onChange={handleInputChange}
-          onBlur={() => handleBlur('patientCity')}
-          error={formErrors.patientCity}
-          required
-        />
         <InputField 
           label="District" 
           placeholder="Enter patient's district" 
@@ -127,7 +113,26 @@ export const PatientInfoForm = ({ formData, handleInputChange, handleProfileImag
           onChange={handleInputChange}
           onBlur={() => handleBlur('patientDistrict')}
           error={formErrors.patientDistrict}
-          required
+        />
+
+        <InputField 
+          label="City" 
+          placeholder="Enter patient's city" 
+          id="patientCity" 
+          value={formData.patientCity} 
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('patientCity')}
+          error={formErrors.patientCity}
+        />
+
+        <InputField 
+          label="Pincode" 
+          placeholder="Enter patient's pincode" 
+          id="patientPincode" 
+          value={formData.patientPincode} 
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('patientPincode')}
+          error={formErrors.patientPincode}
         />
         
         <div className="md:col-span-2">

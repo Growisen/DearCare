@@ -13,6 +13,8 @@ type AssignmentHeaderProps = {
   handleSearch: (e: React.FormEvent) => void
   handleDateFilterChange: (date: string) => void
   handleResetFilters: () => void
+  selectedCategory: string
+  handleCategoryChange: (category: string) => void
 }
 
 export function AssignmentHeader({
@@ -25,7 +27,9 @@ export function AssignmentHeader({
   handleStatusChange,
   handleSearch,
   handleDateFilterChange,
-  handleResetFilters
+  handleResetFilters,
+  selectedCategory,
+  handleCategoryChange
 }: AssignmentHeaderProps) {
   
   // Function to set today's date
@@ -80,136 +84,171 @@ export function AssignmentHeader({
       </div>
 
       {/* Search and filters section */}
-      <div className="p-3 bg-gray-50 grid gap-2 grid-cols-1 sm:grid-cols-[1fr_auto]">
-        {/* Search input */}
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search by Nurse ID..."
-            className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as React.FormEvent)}
-          />
-          {searchInput && (
-            <button 
-              onClick={() => {
-                setSearchInput("")
-                handleResetFilters()
-              }}
-              className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
-              aria-label="Clear search"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-          <button
-            onClick={(e) => handleSearch(e as React.FormEvent)}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
-          >
-            Search
-          </button>
-        </div>
-
-        <div className="flex flex-wrap sm:flex-nowrap gap-2">
-          {/* Date filter */}
-          <div className="w-full sm:w-auto relative flex flex-wrap gap-2 items-center">
-            <div className="relative flex items-center">
-              <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <div className="p-3 bg-gray-50">
+        <div className="flex flex-col gap-3">
+          {/* First row: Search and Date */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            {/* Search input */}
+            <div className="relative w-full sm:max-w-2xl">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                type="date"
-                placeholder="Filter by date"
-                className="pl-9 pr-8 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
-                value={dateFilter}
-                onChange={(e) => handleDateFilterChange(e.target.value)}
+                placeholder="Search by Nurse ID..."
+                className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as React.FormEvent)}
               />
-              {dateFilter && (
+              {searchInput && (
                 <button 
-                  onClick={() => handleDateFilterChange('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 z-10 rounded-full hover:bg-gray-100"
-                  aria-label="Clear date filter"
+                  onClick={() => {
+                    setSearchInput("")
+                    handleResetFilters()
+                  }}
+                  className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                  aria-label="Clear search"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
+              <button
+                onClick={(e) => handleSearch(e as React.FormEvent)}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
+              >
+                Search
+              </button>
             </div>
-            <button
-              onClick={setTodayDate}
-              className={`text-xs py-1 px-2 rounded-md transition-colors font-medium flex items-center justify-center h-9 whitespace-nowrap ${
-                isTodaySelected() ? buttonStyles.selected : buttonStyles.unselected
-              }`}
-            >
-              <Calendar className={`h-3 w-3 mr-1 ${isTodaySelected() ? "text-blue-600" : ""}`} />
-              Today
-            </button>
+            {/* Date filter */}
+            <div className="flex gap-2 items-center w-full sm:w-auto">
+              <div className="relative flex items-center w-full sm:w-auto">
+                <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="date"
+                  placeholder="Filter by date"
+                  className="pl-9 pr-8 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800 w-full sm:w-auto"
+                  value={dateFilter}
+                  onChange={(e) => handleDateFilterChange(e.target.value)}
+                />
+                {dateFilter && (
+                  <button 
+                    onClick={() => handleDateFilterChange('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 z-10 rounded-full hover:bg-gray-100"
+                    aria-label="Clear date filter"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={setTodayDate}
+                className={`text-xs py-1 px-2 rounded-md transition-colors font-medium flex items-center justify-center h-9 whitespace-nowrap ${
+                  isTodaySelected() ? buttonStyles.selected : buttonStyles.unselected
+                }`}
+              >
+                <Calendar className={`h-3 w-3 mr-1 ${isTodaySelected() ? "text-blue-600" : ""}`} />
+                Today
+              </button>
+            </div>
           </div>
-
-          {/* Status filters */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600 whitespace-nowrap hidden sm:inline">Status:</span>
-            {/* Desktop view - compact pill buttons */}
-            <div className="hidden sm:flex gap-1.5 items-center">
-              {['all', 'active', 'completed', 'upcoming'].map((status) => (
+          {/* Second row: Category and Status */}
+          <div className="hidden sm:flex flex-col sm:flex-row gap-6">
+            {/* Category filter */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
+              <div className="flex gap-1.5 items-center flex-wrap">
+                {["all", "DearCare LLP", "Tata HomeNursing"].map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryChange(category)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      selectedCategory === category
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                    }`}
+                  >
+                    {category === "all" ? "All Categories" : category}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Status filters */}
+            <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-8">
+              <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
+              <div className="flex gap-1.5 items-center flex-wrap">
+                {['all', 'active', 'completed', 'upcoming'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => handleStatusChange(status as 'all' | 'active' | 'completed' | 'upcoming')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      selectedStatus === status ? buttonStyles.selected : buttonStyles.unselected
+                    }`}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+                {/* Reset button */}
                 <button
-                  key={status}
-                  onClick={() => handleStatusChange(status as 'all' | 'active' | 'completed' | 'upcoming')}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    selectedStatus === status ? buttonStyles.selected : buttonStyles.unselected
+                  onClick={handleResetFilters}
+                  disabled={selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
+                    selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter
+                      ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
                   }`}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  <X className="h-3 w-3" />
+                  Reset All
                 </button>
-              ))}
-              
-              {/* Reset button for desktop view */}
-              <button
-                onClick={handleResetFilters}
-                disabled={selectedStatus === 'all' && !searchInput && !dateFilter}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
-                  selectedStatus === 'all' && !searchInput && !dateFilter
-                    ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
-                }`}
-              >
-                <X className="h-3 w-3" />
-                Reset All
-              </button>
+              </div>
             </div>
-            
-            {/* Mobile view - compact dropdown */}
-            <div className="sm:hidden w-full">
-              <select
-                value={selectedStatus}
-                onChange={(e) => handleStatusChange(e.target.value as 'all' | 'active' | 'completed' | 'upcoming')}
-                className="w-full mb-2 rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-                style={{ 
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: `right 0.5rem center`,
-                  backgroundRepeat: `no-repeat`,
-                  backgroundSize: `1.5em 1.5em`,
-                  paddingRight: `2rem`
-                }}
-              >
-                <option value="all">All Assignments</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-                <option value="upcoming">Upcoming</option>
-              </select>
-              
-              {/* Reset button for mobile view */}
-              <button
-                onClick={handleResetFilters}
-                disabled={selectedStatus === 'all' && !searchInput && !dateFilter}
-                className={`w-full py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
-                  selectedStatus === 'all' && !searchInput && !dateFilter
-                    ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
-                }`}
-              >
-                <X className="h-3 w-3" />
-                Reset All Filters
-              </button>
-            </div>
+          </div>
+          {/* Mobile: Dropdowns for category and status */}
+          <div className="sm:hidden flex flex-col gap-2 w-full">
+            <select
+              value={selectedStatus}
+              onChange={(e) => handleStatusChange(e.target.value as 'all' | 'active' | 'completed' | 'upcoming')}
+              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+              style={{ 
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: `right 0.5rem center`,
+                backgroundRepeat: `no-repeat`,
+                backgroundSize: `1.5em 1.5em`,
+                paddingRight: `2rem`
+              }}
+            >
+              <option value="all">All Assignments</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+              <option value="upcoming">Upcoming</option>
+            </select>
+            <select
+              value={selectedCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+              style={{ 
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: `right 0.5rem center`,
+                backgroundRepeat: `no-repeat`,
+                backgroundSize: `1.5em 1.5em`,
+                paddingRight: `2rem`
+              }}
+            >
+              <option value="all">All Categories</option>
+              <option value="DearCare LLP">DearCare LLP</option>
+              <option value="Tata HomeNursing">Tata HomeNursing</option>
+            </select>
+            {/* Reset button for mobile view */}
+            <button
+              onClick={handleResetFilters}
+              disabled={selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
+                selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter
+                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+              }`}
+            >
+              <X className="h-3 w-3" />
+              Reset All Filters
+            </button>
           </div>
         </div>
       </div>

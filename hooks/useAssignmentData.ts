@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getAllNurseAssignments, NurseAssignmentData } from '../app/actions/shift-schedule-actions'
 
@@ -76,9 +76,32 @@ export function useAssignmentData() {
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFilter, setDateFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
   const [isExporting, setIsExporting] = useState(false)
+
+
+  const [isFiltersLoaded, setIsFiltersLoaded] = useState(false);
+
+  useEffect(() => {
+    const savedStatus = localStorage.getItem('assignmentsPageStatus');
+    if (savedStatus && ['all', 'active', 'completed', 'upcoming'].includes(savedStatus)) {
+      setFilterStatus(savedStatus as typeof filterStatus);
+    }
+    const savedCategory = localStorage.getItem('assignmentsPageCategory');
+    if (savedCategory) {
+      setCategoryFilter(savedCategory);
+    }
+    setIsFiltersLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('assignmentsPageStatus', filterStatus);
+  }, [filterStatus]);
+  useEffect(() => {
+    localStorage.setItem('assignmentsPageCategory', categoryFilter);
+  }, [categoryFilter]);
 
   const { 
     data, 
@@ -86,11 +109,12 @@ export function useAssignmentData() {
     error: queryError,
     refetch 
   } = useQuery({
-    queryKey: ['assignments', filterStatus, searchQuery, dateFilter, currentPage, pageSize],
-    queryFn: () => getAllNurseAssignments(currentPage, pageSize, filterStatus, searchQuery, dateFilter),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    queryKey: ['assignments', filterStatus, searchQuery, dateFilter, currentPage, pageSize, categoryFilter],
+    queryFn: () => getAllNurseAssignments(currentPage, pageSize, filterStatus, searchQuery, dateFilter, categoryFilter),
+    enabled: isFiltersLoaded,
+    staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 10, // 10 minutes
+    refetchInterval: 1000 * 60 * 10,
   });
 
   const assignments = data?.success ? (data?.data || []) : [];
@@ -135,10 +159,16 @@ export function useAssignmentData() {
     setCurrentPage(1)
   }
 
+  const handleCategoryChange = (category: string) => {
+    setCategoryFilter(category)
+    setCurrentPage(1)
+  }
+
   const handleResetFilters = () => {
     setSearchInput('')
     setSearchQuery('')
     setFilterStatus('all')
+    setCategoryFilter('all')
     setDateFilter('')
     setCurrentPage(1)
   }
@@ -175,6 +205,36 @@ export function useAssignmentData() {
     }
   }
 
+  if (!isFiltersLoaded) {
+    return {
+      assignments: [],
+      loading: true,
+      error: null,
+      filterStatus,
+      searchInput,
+      setSearchInput,
+      categoryFilter,
+      searchQuery,
+      dateFilter,
+      currentPage,
+      totalPages: 1,
+      totalCount: 0,
+      pageSize,
+      isExporting,
+      handleSearch: () => {},
+      handleStatusChange: () => {},
+      handleDateFilterChange: () => {},
+      handleCategoryChange: () => {},
+      handlePageChange: () => {},
+      handlePreviousPage: () => {},
+      handleNextPage: () => {},
+      handleResetFilters: () => {},
+      refreshData: () => {},
+      handleExport: () => {},
+      invalidateAssignmentsCache: () => {},
+    };
+  }
+
   return {
     assignments,
     loading,
@@ -182,6 +242,7 @@ export function useAssignmentData() {
     filterStatus,
     searchInput,
     setSearchInput,
+    categoryFilter,
     searchQuery,
     dateFilter,
     currentPage,
@@ -192,6 +253,7 @@ export function useAssignmentData() {
     handleSearch,
     handleStatusChange,
     handleDateFilterChange,
+    handleCategoryChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,

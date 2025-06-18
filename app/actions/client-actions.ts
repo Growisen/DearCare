@@ -119,7 +119,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         patient_address: formData.patientAddress,
         patient_pincode: formData.patientPincode,
         patient_district: formData.patientDistrict,
-        patient_city: formData.patientCity,     
+        patient_city: formData.patientCity,   
+        patient_state: formData.patientState || null,  
         preferred_caregiver_gender: formData.preferredCaregiverGender || null,
         relation_to_patient: formData.relationToPatient || 'other',
         requestor_email: formData.requestorEmail,
@@ -135,6 +136,7 @@ export async function addIndividualClient(formData: IndividualFormData) {
         requestor_pincode: formData.requestorPincode || null,
         requestor_district: formData.requestorDistrict || null,
         requestor_city: formData.requestorCity || null,
+        requestor_state: formData.requestorState || null,
       });
     
     if (individualError) {
@@ -402,7 +404,8 @@ export async function getClients(
   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
   searchQuery?: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
+  category?: ClientCategory | 'all'
 ) {
   try {
     const supabase = await createSupabaseServerClient()
@@ -411,6 +414,7 @@ export async function getClients(
        id,
           client_type,
           status,
+          client_category,
           created_at,
           individual_clients:individual_clients(
             requestor_email,
@@ -438,6 +442,11 @@ export async function getClients(
     if (status && status !== "all") {
       countQuery.eq('status', status)
       dataQuery.eq('status', status)
+    }
+
+    if (category && category !== "all") {
+      countQuery.eq('client_category', category)
+      dataQuery.eq('client_category', category)
     }
 
     if (searchQuery && searchQuery.trim() !== '') {
@@ -1732,6 +1741,262 @@ export async function getClientFiles(clientId: string): Promise<{success: boolea
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
       data: []
+    };
+  }
+}
+
+interface IndividualClientUpdateProfileData {
+  patient_name: string;
+  patient_phone: string;
+  patient_age: number | null;
+  patient_gender: string | null;
+  patient_address: string;
+  patient_city: string;
+  patient_district: string;
+  patient_pincode: string;
+  requestor_name: string;
+  requestor_phone: string;
+  requestor_email: string;
+  requestor_address: string;
+  requestor_city: string;
+  requestor_state: string;
+  requestor_district: string;
+  requestor_pincode: string;
+  patient_profile_pic?: string | null;
+  requestor_profile_pic?: string | null;
+  preferred_caregiver_gender?: string | null;
+  care_duration?: string | null;
+  service_required?: string | null;
+  start_date?: string | null;
+  relation_to_patient?: string | null;
+  requestor_emergency_phone?: string | null;
+  requestor_job_details?: string | null;
+}
+
+/**
+ * Updates a client's profile information
+ */
+export async function updateIndividualClientProfile(
+  clientId: string,
+  profileData: {
+    patientFirstName: string;
+    patientLastName: string;
+    patientPhone: string;
+    patientAge: string;
+    patientGender: string | null;
+    patientAddress: string;
+    patientCity: string;
+    patientDistrict: string;
+    patientState: string;
+    patientPincode: string;
+    patientProfilePic: File | null;
+
+    preferredCaregiverGender?: string | null;
+    careDuration?: string | null;
+    serviceRequired?: string | null;
+    startDate?: string | null;
+
+    requestorName: string;
+    requestorPhone: string;
+    requestorEmail: string;
+    requestorAddress: string;
+    requestorCity: string;
+    requestorDistrict: string;
+    requestorState: string;
+    requestorPincode: string;
+    requestorProfilePic: File | null;
+
+    relationToPatient?: string | null;
+    requestorEmergencyPhone?: string | null;
+    requestorJobDetails?: string | null;
+  }
+){
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('client_type')
+      .eq('id', clientId)
+      .single();
+
+    if (clientError) {
+      return { success: false, error: clientError.message };
+    }
+
+    if (client.client_type !== 'individual') {
+      return { success: false, error: 'Only individual clients can be updated with this function' };
+    }
+
+    let patientProfilePicPath: string | null = null;
+    let requestorProfilePicPath: string | null = null;
+    
+    if (profileData.patientProfilePic) {
+      patientProfilePicPath = await uploadProfilePicture(
+        profileData.patientProfilePic, 
+        clientId, 
+        'patient'
+      );
+    }
+    
+    if (profileData.requestorProfilePic) {
+      requestorProfilePicPath = await uploadProfilePicture(
+        profileData.requestorProfilePic, 
+        clientId, 
+        'requestor'
+      );
+    }
+
+    // Build updateData with only valid fields
+    const rawUpdateData: IndividualClientUpdateProfileData = {
+      patient_name: `${profileData.patientFirstName} ${profileData.patientLastName}`.trim(),
+      patient_phone: profileData.patientPhone,
+      patient_age: profileData.patientAge ? parseInt(profileData.patientAge) : null,
+      patient_gender: profileData.patientGender ?? null,
+      patient_address: profileData.patientAddress,
+      patient_city: profileData.patientCity,
+      patient_district: profileData.patientDistrict,
+      patient_pincode: profileData.patientPincode,
+
+      preferred_caregiver_gender: profileData.preferredCaregiverGender ?? null,
+      care_duration: profileData.careDuration ?? null,
+      service_required: profileData.serviceRequired ?? null,
+      start_date: profileData.startDate ?? null,
+
+      requestor_name: profileData.requestorName,
+      requestor_phone: profileData.requestorPhone,
+      requestor_email: profileData.requestorEmail,
+      requestor_address: profileData.requestorAddress,
+      requestor_city: profileData.requestorCity,
+      requestor_state: profileData.requestorState,
+      requestor_district: profileData.requestorDistrict,
+      requestor_pincode: profileData.requestorPincode,
+
+      relation_to_patient: profileData.relationToPatient ?? null,
+      requestor_emergency_phone: profileData.requestorEmergencyPhone ?? null,
+      requestor_job_details: profileData.requestorJobDetails ?? null,
+    };
+
+    if (patientProfilePicPath) {
+      rawUpdateData.patient_profile_pic = patientProfilePicPath;
+    }
+    if (requestorProfilePicPath) {
+      rawUpdateData.requestor_profile_pic = requestorProfilePicPath;
+    }
+
+    const updateData: Partial<IndividualClientUpdateProfileData> = {};
+    for (const [key, value] of Object.entries(rawUpdateData)) {
+      if (
+        value !== undefined &&
+        value !== null &&
+        (typeof value !== 'string' || value.trim() !== '')
+      ) {
+        const typedKey = key as keyof IndividualClientUpdateProfileData;
+        updateData[typedKey] = value;
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: 'No valid fields to update.' };
+    }
+
+    const { data, error } = await supabase
+      .from('individual_clients')
+      .update(updateData)
+      .eq('client_id', clientId)
+      .select();
+
+    if (error) {
+      console.error('Error updating client profile:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath(`/client-profile/${clientId}`);
+    revalidatePath('/clients');
+    return { 
+      success: true, 
+      data: Array.isArray(data) && data.length > 0 ? data[0] : data 
+    };
+    
+  } catch (error) {
+    console.error('Error updating client profile:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
+  }
+}
+
+/**
+ * Updates organization client details
+ */
+export async function updateOrganizationDetails(
+  clientId: string,
+  updatedData: {
+    details: {
+      organization_name: string;
+      contact_person_name: string;
+      contact_person_role: string;
+      contact_email: string;
+      contact_phone: string;
+      organization_address: string;
+      organization_state: string;
+      organization_district: string;
+      organization_city: string;
+      organization_pincode: string;
+    },
+    general_notes?: string;
+  }
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    if (updatedData.general_notes !== undefined) {
+      const { error: clientUpdateError } = await supabase
+        .from('clients')
+        .update({ general_notes: updatedData.general_notes })
+        .eq('id', clientId);
+      
+      if (clientUpdateError) {
+        console.error('Error updating client general notes:', clientUpdateError);
+        return { success: false, error: clientUpdateError.message };
+      }
+    }
+    
+    const { data, error } = await supabase
+      .from('organization_clients')
+      .update({
+        organization_name: updatedData.details.organization_name,
+        contact_person_name: updatedData.details.contact_person_name,
+        contact_person_role: updatedData.details.contact_person_role,
+        contact_email: updatedData.details.contact_email,
+        contact_phone: updatedData.details.contact_phone,
+        organization_address: updatedData.details.organization_address,
+        organization_state: updatedData.details.organization_state,
+        organization_district: updatedData.details.organization_district,
+        organization_city: updatedData.details.organization_city,
+        organization_pincode: updatedData.details.organization_pincode
+      })
+      .eq('client_id', clientId)
+      .select();
+    
+    if (error) {
+      console.error('Error updating organization details:', error);
+      return { success: false, error: error.message };
+    }
+    
+    const updatedRecord = Array.isArray(data) && data.length > 0 ? data[0] : data;
+    
+    revalidatePath(`/clients/${clientId}`);
+    revalidatePath(`/client-profile/organization-client/${clientId}`);
+    
+    return { success: true, data: updatedRecord };
+    
+  } catch (error) {
+    console.error('Error in updateOrganizationDetails:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
     };
   }
 }
