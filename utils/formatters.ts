@@ -47,3 +47,11 @@ export function format12HourTime(time24: string | null): string {
     return '';
   }
 }
+
+export const getRelationLabel = (
+  relationOptions: { value: string, label: string }[],
+  value: string
+): string => {
+  const option = relationOptions.find(opt => opt.value === value);
+  return option ? option.label : value;
+};
