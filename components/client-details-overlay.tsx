@@ -16,6 +16,8 @@ import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
 import { getServiceLabel } from '../utils/formatters';
 import ImageViewer from './common/ImageViewer';
 import ClientEditForm from './client/ClientEditFormOverlay';
+import { relationOptions } from '@/utils/constants';
+import { getRelationLabel } from '@/utils/formatters';
 
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
@@ -280,7 +282,7 @@ export function ClientDetailsOverlay({
             <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</h5>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <DetailItem label="Name" value={client.details?.requestor_name} />
-              <DetailItem label="Relation to Patient" value={client.details?.relation_to_patient} />
+              <DetailItem label="Relation to Patient" value={getRelationLabel(relationOptions, client.details?.relation_to_patient || '')} />
               <DetailItem label="Email" value={client.details?.requestor_email} />
               <DetailItem label="Phone" value={client.details?.requestor_phone} />
               <DetailItem label="Emergency Phone" value={client.details?.requestor_emergency_phone} />

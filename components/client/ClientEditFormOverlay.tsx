@@ -3,6 +3,7 @@ import { DetailedClientIndividual, DetailedClientOrganization } from '@/types/cl
 import { updateIndividualClientProfile, updateOrganizationDetails } from '@/app/actions/client-actions';
 import toast from 'react-hot-toast';
 import { dutyPeriodOptions, serviceOptions } from '@/utils/constants';
+import { relationOptions } from "@/utils/constants"
 
 interface ClientEditFormProps {
   client: DetailedClientIndividual | DetailedClientOrganization;
@@ -292,7 +293,15 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
               <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField label="Requestor Name" name="details.requestor_name" value={details.requestor_name} onChange={handleInputChange} />
-                <FormField label="Relation to Patient" name="details.relation_to_patient" value={details.relation_to_patient} onChange={handleInputChange} />
+                {/* Change Relation to Patient to a select field */}
+                <FormField
+                  label="Relation to Patient"
+                  name="details.relation_to_patient"
+                  type="select"
+                  value={details.relation_to_patient}
+                  onChange={handleInputChange}
+                  options={relationOptions}
+                />
                 <FormField label="Requestor Email" name="details.requestor_email" type="email" value={details.requestor_email} onChange={handleInputChange} />
                 <FormField label="Requestor Phone" name="details.requestor_phone" value={details.requestor_phone} onChange={handleInputChange} />
                 <FormField label="Emergency Phone" name="details.requestor_emergency_phone" value={details.requestor_emergency_phone} onChange={handleInputChange} />
