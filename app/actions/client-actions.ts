@@ -1749,7 +1749,7 @@ interface IndividualClientUpdateProfileData {
   patient_name: string;
   patient_phone: string;
   patient_age: number | null;
-  patient_gender: string;
+  patient_gender: string | null;
   patient_address: string;
   patient_city: string;
   patient_district: string;
@@ -1759,10 +1759,18 @@ interface IndividualClientUpdateProfileData {
   requestor_email: string;
   requestor_address: string;
   requestor_city: string;
+  requestor_state: string;
   requestor_district: string;
   requestor_pincode: string;
   patient_profile_pic?: string | null;
   requestor_profile_pic?: string | null;
+  preferred_caregiver_gender?: string | null;
+  care_duration?: string | null;
+  service_required?: string | null;
+  start_date?: string | null;
+  relation_to_patient?: string | null;
+  requestor_emergency_phone?: string | null;
+  requestor_job_details?: string | null;
 }
 
 /**
@@ -1775,14 +1783,19 @@ export async function updateIndividualClientProfile(
     patientLastName: string;
     patientPhone: string;
     patientAge: string;
-    patientGender: string;
+    patientGender: string | null;
     patientAddress: string;
     patientCity: string;
     patientDistrict: string;
     patientState: string;
     patientPincode: string;
     patientProfilePic: File | null;
-    
+
+    preferredCaregiverGender?: string | null;
+    careDuration?: string | null;
+    serviceRequired?: string | null;
+    startDate?: string | null;
+
     requestorName: string;
     requestorPhone: string;
     requestorEmail: string;
@@ -1792,8 +1805,12 @@ export async function updateIndividualClientProfile(
     requestorState: string;
     requestorPincode: string;
     requestorProfilePic: File | null;
+
+    relationToPatient?: string | null;
+    requestorEmergencyPhone?: string | null;
+    requestorJobDetails?: string | null;
   }
-) {
+){
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -1829,32 +1846,58 @@ export async function updateIndividualClientProfile(
         'requestor'
       );
     }
-  
-    const updateData: IndividualClientUpdateProfileData = {
+
+    // Build updateData with only valid fields
+    const rawUpdateData: IndividualClientUpdateProfileData = {
       patient_name: `${profileData.patientFirstName} ${profileData.patientLastName}`.trim(),
       patient_phone: profileData.patientPhone,
       patient_age: profileData.patientAge ? parseInt(profileData.patientAge) : null,
-      patient_gender: profileData.patientGender,
+      patient_gender: profileData.patientGender ?? null,
       patient_address: profileData.patientAddress,
       patient_city: profileData.patientCity,
       patient_district: profileData.patientDistrict,
       patient_pincode: profileData.patientPincode,
-      
+
+      preferred_caregiver_gender: profileData.preferredCaregiverGender ?? null,
+      care_duration: profileData.careDuration ?? null,
+      service_required: profileData.serviceRequired ?? null,
+      start_date: profileData.startDate ?? null,
+
       requestor_name: profileData.requestorName,
       requestor_phone: profileData.requestorPhone,
       requestor_email: profileData.requestorEmail,
       requestor_address: profileData.requestorAddress,
       requestor_city: profileData.requestorCity,
-      requestor_district: profileData.requestorDistrict, 
+      requestor_state: profileData.requestorState,
+      requestor_district: profileData.requestorDistrict,
       requestor_pincode: profileData.requestorPincode,
+
+      relation_to_patient: profileData.relationToPatient ?? null,
+      requestor_emergency_phone: profileData.requestorEmergencyPhone ?? null,
+      requestor_job_details: profileData.requestorJobDetails ?? null,
     };
 
     if (patientProfilePicPath) {
-      updateData.patient_profile_pic = patientProfilePicPath;
+      rawUpdateData.patient_profile_pic = patientProfilePicPath;
     }
-    
     if (requestorProfilePicPath) {
-      updateData.requestor_profile_pic = requestorProfilePicPath;
+      rawUpdateData.requestor_profile_pic = requestorProfilePicPath;
+    }
+
+    const updateData: Partial<IndividualClientUpdateProfileData> = {};
+    for (const [key, value] of Object.entries(rawUpdateData)) {
+      if (
+        value !== undefined &&
+        value !== null &&
+        (typeof value !== 'string' || value.trim() !== '')
+      ) {
+        const typedKey = key as keyof IndividualClientUpdateProfileData;
+        updateData[typedKey] = value;
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: 'No valid fields to update.' };
     }
 
     const { data, error } = await supabase
@@ -1870,8 +1913,10 @@ export async function updateIndividualClientProfile(
 
     revalidatePath(`/client-profile/${clientId}`);
     revalidatePath('/clients');
-
-    return { success: true, data };
+    return { 
+      success: true, 
+      data: Array.isArray(data) && data.length > 0 ? data[0] : data 
+    };
     
   } catch (error) {
     console.error('Error updating client profile:', error);
@@ -1940,10 +1985,12 @@ export async function updateOrganizationDetails(
       return { success: false, error: error.message };
     }
     
+    const updatedRecord = Array.isArray(data) && data.length > 0 ? data[0] : data;
+    
     revalidatePath(`/clients/${clientId}`);
     revalidatePath(`/client-profile/organization-client/${clientId}`);
     
-    return { success: true, data };
+    return { success: true, data: updatedRecord };
     
   } catch (error) {
     console.error('Error in updateOrganizationDetails:', error);
