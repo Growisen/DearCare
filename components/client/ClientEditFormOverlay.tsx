@@ -81,19 +81,24 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
         const details = individualFormData.details || {};
 
         if (client.details?.client_id){
-            result = await updateIndividualClientProfile(client.details?.client_id, {
+          result = await updateIndividualClientProfile(client.details?.client_id, {
             patientFirstName: details.patient_name?.split(' ')[0] || '',
             patientLastName: details.patient_name?.split(' ').slice(1).join(' ') || '',
             patientPhone: details.patient_phone || '',
             patientAge: details.patient_age?.toString() || '',
-            patientGender: details.patient_gender || '',
+            patientGender: details.patient_gender || null,
             patientAddress: details.patient_address || '',
             patientCity: details.patient_city || '',
             patientDistrict: details.patient_district || '',
             patientState: details.patient_state || '',
             patientPincode: details.patient_pincode || '',
             patientProfilePic: null, // File uploads would need to be handled separately
-            
+        
+            preferredCaregiverGender: details.preferred_caregiver_gender || null,
+            careDuration: details.care_duration || null,
+            serviceRequired: details.service_required || null,
+            startDate: details.start_date || null,
+        
             requestorName: details.requestor_name || '',
             requestorPhone: details.requestor_phone || '',
             requestorEmail: details.requestor_email || '',
@@ -102,8 +107,12 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             requestorDistrict: details.requestor_district || '',
             requestorState: details.requestor_state || '',
             requestorPincode: details.requestor_pincode || '',
-            requestorProfilePic: null // File uploads would need to be handled separately
-            });
+            requestorProfilePic: null, // File uploads would need to be handled separately
+        
+            relationToPatient: details.relation_to_patient || null,
+            requestorEmergencyPhone: details.requestor_emergency_phone || null,
+            requestorJobDetails: details.requestor_job_details || null,
+          });
         }
       } else {
         // For organization clients
@@ -131,7 +140,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       
       if (result?.success && result.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
         toast.success(`${isIndividual ? 'Individual' : 'Organization'} client updated successfully`);
-        onSave(result.data as DetailedClientIndividual | DetailedClientOrganization);
+        onSave({ ...result.data, id: client.details?.client_id } as DetailedClientIndividual | DetailedClientOrganization);
       } else {
         toast.error(`Failed to update client: ${result?.error || 'Unknown error'}`);
       }

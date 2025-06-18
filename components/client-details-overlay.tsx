@@ -9,6 +9,7 @@ import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, Detaile
 import { getClientDetails, deleteClient } from '../app/actions/client-actions';
 import Image from 'next/image';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useClientData } from '@/hooks/useClientData';
 import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
@@ -94,31 +95,47 @@ export function ClientDetailsOverlay({
   onStatusChange 
 }: ClientDetailsProps & { onStatusChange?: () => void }) {
   const { invalidateDashboardCache } = useDashboardData();
+  const { invalidateClientCache } = useClientData()
   const [detailedClient, setDetailedClient] = useState<DetailedClient | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentClientStatus, setCurrentClientStatus] = useState<ClientStatus>(client.status);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function fetchClientDetails() {
-      if (!client.id) return;
-      
-      setLoading(true);
-      const result = await getClientDetails(client.id);
-      
-      if (result.success && result.client && result.client.status) {
-        setRejectionReason(result.client.rejection_reason);
-        setDetailedClient(result.client as DetailedClient);
-        setCurrentClientStatus(result.client.status);
-      }
-      
-      setLoading(false);
+
+  async function fetchClientDetails() {
+    if (!client.id) return;
+    
+    setLoading(true);
+    const result = await getClientDetails(client.id);
+    
+    if (result.success && result.client && result.client.status) {
+      setRejectionReason(result.client.rejection_reason);
+      setDetailedClient(result.client as DetailedClient);
+      setCurrentClientStatus(result.client.status);
     }
     
+    setLoading(false);
+  }
+
+  useEffect(() => {
     fetchClientDetails();
   }, [client.id]);
+
+  const handleSaveEdit = async (updatedClient: DetailedClient) => {
+    setIsUpdating(true);
+    setIsEditMode(false);
+    
+    setDetailedClient(updatedClient);
+    invalidateClientCache()
+    invalidateDashboardCache()
+    
+    onClose()
+    
+    setIsUpdating(false);
+  };
 
   const handleStatusChange = async (newStatus?: ClientStatus) => {
     if (newStatus) {
@@ -366,8 +383,15 @@ export function ClientDetailsOverlay({
   );
 
   const renderDetailedInformation = () => {
-    if (loading) {
-      return <div className="p-4 text-gray-700 text-center">Loading client details...</div>;
+    if (loading || isUpdating) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="text-sm text-slate-600 mt-4">
+            {isUpdating ? 'Updating client information...' : 'Loading client details...'}
+          </p>
+        </div>
+      );
     }
     
     if (!detailedClient) {
@@ -378,10 +402,7 @@ export function ClientDetailsOverlay({
       return (
         <ClientEditForm 
           client={detailedClient}
-          onSave={(updatedClient) => {
-            setDetailedClient(updatedClient as DetailedClient);
-            setIsEditMode(false);
-          }}
+          onSave={handleSaveEdit}
           onCancel={() => setIsEditMode(false)}
         />
       );
