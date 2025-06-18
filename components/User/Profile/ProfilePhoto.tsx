@@ -43,12 +43,9 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
   };
 
   const handleRemovePhoto = () => {
-    // Here we would need to handle removal differently
-    // since we can't send null to onPhotoChange anymore
     setNewPhoto(null);
     setSelectedFile(null);
     setIsEditing(false);
-    // You may need to implement a separate removal handler in the parent component
   };
 
   const handleCancel = () => {
@@ -58,7 +55,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
   };
 
   return (
-    <div className="relative group w-full sm:w-auto flex flex-col items-center">
+    <div className="relative flex flex-col items-center">
       <input
         type="file"
         ref={fileInputRef}
@@ -69,77 +66,81 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
         disabled={isDisabled}
       />
 
-      <div className="mb-2 sm:mb-0 relative cursor-pointer" onClick={handlePhotoClick}>
+      <div className="mb-3 relative cursor-pointer" onClick={handlePhotoClick}>
         {isEditing && newPhoto ? (
-          <div className="rounded-full p-1 bg-gradient-to-r from-blue-500 to-blue-700 shadow-md">
+          <div className="rounded-full p-1 border-2 border-gray-200 shadow-md">
             <Image
               src={newPhoto}
               alt="New profile photo"
-              width={110}
-              height={110}
-              className="rounded-full border-2 border-white object-cover w-28 h-28"
+              width={120}
+              height={120}
+              className="rounded-full object-cover w-28 h-28"
             />
             <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
               <span className="text-white text-xs font-medium">Preview</span>
             </div>
           </div>
         ) : photo ? (
-          <div className="rounded-full p-1 bg-gradient-to-r from-blue-500 to-blue-700 shadow-md">
+          <div className="rounded-full p-1 border-2 border-gray-200 shadow-md">
             <Image
               src={photo}
               alt={name}
-              width={110}
-              height={110}
-              className="rounded-full border-2 border-white object-cover w-28 h-28"
+              width={120}
+              height={120}
+              className="rounded-full object-cover w-28 h-28"
             />
-            <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-white text-xs font-medium">Change photo</span>
-            </div>
+            {!isDisabled && (
+              <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-xs font-medium">Change photo</span>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="w-28 h-28 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-md transform transition-transform duration-300 group-hover:scale-105">
-            <User className="w-12 h-12" />
-            <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-white text-xs font-medium">Add photo</span>
-            </div>
+          <div className="w-28 h-28 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center shadow-sm">
+            <User className="w-12 h-12 text-gray-500" />
+            {!isDisabled && (
+              <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-xs font-medium">Add photo</span>
+              </div>
+            )}
           </div>
         )}
 
         {!isEditing && !isDisabled && (
-          <div className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-gray-100 cursor-pointer hover:bg-gray-50 transition-all duration-300">
-            <Edit2 className="w-4 h-4 text-blue-600" />
+          <div className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow border border-gray-200 cursor-pointer hover:bg-gray-50 transition-all duration-200">
+            <Edit2 className="w-3.5 h-3.5 text-gray-700" />
           </div>
         )}
       </div>
 
       {isEditing && (
-        <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
+        <div className="flex flex-wrap justify-center gap-2 mt-3 w-full">
           <button
             onClick={handleSavePhoto}
-            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm"
+            className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-md shadow-sm transition-colors flex items-center gap-1 text-xs"
             aria-label="Save photo"
             disabled={isDisabled}
           >
-            <Check className="w-4 h-4" />
+            <Check className="w-3.5 h-3.5" />
             <span>Save</span>
           </button>
           <button
             onClick={handleCancel}
-            className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors duration-200 flex items-center gap-1 text-sm"
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-1 text-xs"
             aria-label="Cancel photo edit"
             disabled={isDisabled}
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
             <span>Cancel</span>
           </button>
           {(photo || newPhoto) && (
             <button
               onClick={handleRemovePhoto}
-              className="mt-2 sm:mt-0 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors duration-200 flex items-center gap-1 text-sm w-full sm:w-auto"
+              className="mt-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-md transition-colors flex items-center gap-1 text-xs w-full"
               aria-label="Remove photo"
               disabled={isDisabled}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
               <span>Remove</span>
             </button>
           )}
