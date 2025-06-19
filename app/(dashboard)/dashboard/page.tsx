@@ -5,8 +5,8 @@ import RecentActivities from "@/components/dashboard/RecentActivities"
 import Stats from "@/components/dashboard/Stats"
 import UpcomingSchedules from "@/components/dashboard/UpcomingSchedules"
 import RecentClients from "@/components/dashboard/RecentClients"
-import { Loader2 } from "lucide-react"
 import { useDashboardData } from "@/hooks/useDashboardData"
+import Loader from '@/components/Loader';
 
 export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState("")
@@ -24,8 +24,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex items-center gap-2">
-          <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-          <span className="text-lg font-medium text-gray-700">Loading dashboard...</span>
+          <Loader message="Loading dashboard..."/>
         </div>
       </div>
     )

@@ -4,6 +4,7 @@ import ProfileImageUpload from '@/components/open-form/ProfileImageUpload';
 import { Patient } from '@/types/client.types';
 import toast from 'react-hot-toast';
 import { updateIndividualClientProfile } from "@/app/actions/client-actions";
+import { relationOptions } from "@/utils/constants"
 import {
   useNameValidation,
   usePhoneValidation,
@@ -37,6 +38,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     patientState: '',
     patientPincode: '',
     patientProfilePic: null as File | null,
+    preferredCaregiverGender: '', // NEW
     
     // Requestor details
     requestorName: '',
@@ -48,6 +50,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     requestorState: '',
     requestorPincode: '',
     requestorProfilePic: null as File | null,
+    relationToPatient: '', // NEW
+    requestorEmergencyPhone: '', // NEW
+    requestorJobDetails: '', // NEW
   });
 
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
@@ -84,6 +89,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         patientState: patient.address?.state || '',
         patientPincode: patient.address?.pincode || '',
         patientProfilePic: null,
+        preferredCaregiverGender: patient.serviceDetails.preferredCaregiverGender || '', // NEW
         
         requestorName: patient.requestor?.name || '',
         requestorPhone: patient.requestor?.phone || '',
@@ -94,6 +100,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         requestorState: patient.requestor?.address?.state || '',
         requestorPincode: patient.requestor?.address?.pincode || '',
         requestorProfilePic: null,
+        relationToPatient: patient.requestor?.relation || '', // NEW
+        requestorEmergencyPhone: patient.requestor?.emergencyPhone || '', // NEW
+        requestorJobDetails: patient.requestor?.jobDetails || '', // NEW
       });
     }
   }, [patient, isOpen]);
@@ -200,7 +209,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         patientState: formData.patientState,
         patientPincode: formData.patientPincode,
         patientProfilePic: formData.patientProfilePic,
-        
+        preferredCaregiverGender: formData.preferredCaregiverGender, // NEW
+
         requestorName: formData.requestorName,
         requestorPhone: formData.requestorPhone,
         requestorEmail: formData.requestorEmail,
@@ -210,6 +220,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         requestorState: formData.requestorState,
         requestorPincode: formData.requestorPincode,
         requestorProfilePic: formData.requestorProfilePic,
+        relationToPatient: formData.relationToPatient, // NEW
+        requestorEmergencyPhone: formData.requestorEmergencyPhone, // NEW
+        requestorJobDetails: formData.requestorJobDetails, // NEW
       };
       
       const result = await updateIndividualClientProfile(patient._id, profileData);
@@ -400,6 +413,43 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   error={formErrors.requestorPincode || requestorPincodeValidation.pincodeError}
                 />
                 
+                {/* Relation to Patient (select) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="relationToPatient">
+                    Relation to Patient
+                  </label>
+                  <select
+                    id="relationToPatient"
+                    value={formData.relationToPatient}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {relationOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <InputField 
+                  label="Emergency Phone"
+                  placeholder="Enter emergency phone"
+                  id="requestorEmergencyPhone"
+                  value={formData.requestorEmergencyPhone}
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur('requestorEmergencyPhone')}
+                  error={formErrors.requestorEmergencyPhone}
+                />
+                <InputField 
+                  label="Job Details"
+                  placeholder="Enter job details"
+                  id="requestorJobDetails"
+                  value={formData.requestorJobDetails}
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur('requestorJobDetails')}
+                  error={formErrors.requestorJobDetails}
+                />
+                
                 <div className="md:col-span-2">
                   <ProfileImageUpload
                     id="requestorProfilePic"
@@ -452,6 +502,23 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   {formErrors.patientGender && (
                     <p className="mt-1 text-sm text-red-600">{formErrors.patientGender}</p>
                   )}
+                </div>
+                {/* Preferred Caregiver Gender (select) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="preferredCaregiverGender">
+                    Preferred Caregiver Gender
+                  </label>
+                  <select
+                    id="preferredCaregiverGender"
+                    value={formData.preferredCaregiverGender}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select caregiver gender...</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="any">Any</option>
+                  </select>
                 </div>
                 <InputField 
                   label="Patient's Phone Number" 

@@ -358,7 +358,6 @@ export interface Patient {
   phoneNumber: string;
   clientCategory: ClientCategory;
   profileImage?: string | null;
-  serviceRequired?: string;
   address: {
     fullAddress: string;
     city: string;
@@ -389,6 +388,17 @@ export interface Patient {
   };
   assessments: PatientAssessmentDataForApprovedClients[];
   nurseAssignments?: NurseAssignment[];
+
+  serviceDetails: {
+    serviceRequired?: string;
+    status?: string | null;
+    startDate?: string;
+    serviceLocation?: string;
+    serviceFrequency?: string;
+    serviceHours?: string;
+    specialRequirements?: string;
+    preferredCaregiverGender?: string;
+  };
 }
 
 export interface ClientResponse {

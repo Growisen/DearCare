@@ -6,6 +6,7 @@ type LoaderProps = {
   centered?: boolean;
   className?: string;
   color?: "primary" | "secondary" | "success";
+  skeleton?: boolean; 
 }
 
 export default function Loader({
@@ -13,7 +14,8 @@ export default function Loader({
   size = "medium",
   centered = true,
   className = "",
-  color = "primary"
+  color = "primary",
+  skeleton = false
 }: LoaderProps) {
   // Size mappings
   const sizeClasses = {
@@ -21,56 +23,46 @@ export default function Loader({
     medium: "h-8 w-8",
     large: "h-14 w-14",
   };
-
-  // Border width based on size
-  const borderWidthClasses = {
-    small: "border-2",
-    medium: "border-2",
-    large: "border-3",
-  };
-
-  // Color mappings - using the matte finish colors
+  
+  // Color mappings for border colors
   const colorClasses = {
-    primary: "border-blue-600",
-    secondary: "border-gray-600",
-    success: "border-green-600"
+    primary: "border-blue-500",
+    secondary: "border-gray-500",
+    success: "border-green-500"
   };
   
-  const containerClasses = centered ? "flex flex-col items-center justify-center py-10" : "";
+  const containerClasses = centered ? "flex flex-col items-center justify-center py-8" : "";
+
+  if (skeleton) {
+    // Skeleton loader for client profile page
+    return (
+      <div className={`${containerClasses} ${className} w-full max-w-2xl mx-auto`}>
+        <div className="animate-pulse space-y-6 w-full">
+          <div className="flex items-center space-x-4">
+            <div className="rounded-full bg-gray-200 h-16 w-16" />
+            <div className="flex-1">
+              <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
+              <div className="h-4 bg-gray-200 rounded w-1/3" />
+            </div>
+          </div>
+          <div className="h-4 bg-gray-200 rounded w-1/3" />
+          <div className="h-4 bg-gray-200 rounded w-1/4" />
+          <div className="h-32 bg-gray-200 rounded w-full" />
+          <div className="flex space-x-2">
+            <div className="h-10 bg-gray-200 rounded w-24" />
+            <div className="h-10 bg-gray-200 rounded w-24" />
+            <div className="h-10 bg-gray-200 rounded w-24" />
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className={`${containerClasses} ${className}`}>
-      <div className={`relative ${sizeClasses[size]}`}>
-        {/* Static ring with matte look */}
-        <div 
-          className={`
-            absolute 
-            inset-0 
-            rounded-full 
-            border-solid
-            opacity-30
-            ${borderWidthClasses[size]}
-            ${colorClasses[color]}
-          `}
-        />
-        {/* Spinning ring - using animate-spin class from Tailwind */}
-        <div 
-          className={`
-            absolute 
-            inset-0 
-            rounded-full 
-            border-solid
-            border-t-transparent 
-            animate-spin
-            ${borderWidthClasses[size]}
-            ${colorClasses[color]}
-          `}
-        />
-      </div>
+      <div className={`inline-block animate-spin rounded-full border-t-2 border-b-2 ${sizeClasses[size]} ${colorClasses[color]}`}></div>
       {message && (
-        <div className="mt-4 flex flex-col items-center text-center">
-          <p className="text-gray-600 font-medium text-sm">{message}</p>
-        </div>
+        <p className="text-sm text-slate-600 mt-4">{message}</p>
       )}
     </div>
   )

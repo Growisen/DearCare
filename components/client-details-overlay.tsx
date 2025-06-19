@@ -249,6 +249,7 @@ export function ClientDetailsOverlay({
               <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
               <DetailItem label="City" value={client.details?.patient_city} />
               <DetailItem label="District" value={client.details?.patient_district} />
+              <DetailItem label="State" value={client.details?.patient_state} />
               <DetailItem label="Pincode" value={client.details?.patient_pincode} />
             </div>
           </div>
@@ -279,6 +280,7 @@ export function ClientDetailsOverlay({
                 <DetailItem label="Address" value={client.details?.requestor_address} />
                 <DetailItem label="City" value={client.details?.requestor_city} />
                 <DetailItem label="District" value={client.details?.requestor_district} />
+                <DetailItem label="State" value={client.details?.requestor_state} />
                 <DetailItem label="Pincode" value={client.details?.requestor_pincode} />
               </div>
             </div>
@@ -529,7 +531,7 @@ export function ClientDetailsOverlay({
           )}
         </div>
         
-        <div className="px-6 py-4 space-y-6 overflow-y-auto">
+        <div className="px-6 pt-4 space-y-6 overflow-y-auto">
           {renderDetailedInformation()}
           {!loading && detailedClient && !isEditMode && renderStatusSpecificContent()}
         </div>
