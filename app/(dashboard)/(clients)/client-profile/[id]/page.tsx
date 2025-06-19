@@ -108,7 +108,7 @@ const PatientProfilePage = () => {
   const { showDeleteConfirmation, setShowDeleteConfirmation } = useModalManagement();
 
   if (loading) {
-    return <Loader />;
+    return <Loader skeleton={true}/>;
   }
 
   if (error || !patient) {
@@ -225,11 +225,7 @@ const PatientProfilePage = () => {
             {/* Tab Content */}
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <ServiceDetailsSection 
-                  serviceRequired={patient.serviceRequired}
-                  status={status}
-                  serviceLocation={patient.location}
-                />
+                <ServiceDetailsSection serviceDetails={patient.serviceDetails} />
                 <PatientInfo patient={patient} />
               </div>
             )}

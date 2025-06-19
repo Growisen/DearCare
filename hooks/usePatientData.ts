@@ -43,12 +43,17 @@ export const usePatientData = (id: string) => {
             phoneNumber: clientData.details?.patient_phone || '',
             clientCategory: clientData.client_category || 'DearCare LLP',
             profileImage: clientData.details?.patient_profile_pic_url || '',
-            serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || '') ,
+            serviceDetails: {
+              serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || ''),
+              preferredCaregiverGender: clientData.details?.preferred_caregiver_gender || '',
+              startDate: clientData.details?.start_date,
+            },
             address: {
             fullAddress: clientData.details?.patient_address || '',
             city: clientData.details?.patient_city || '',
             district: clientData.details?.patient_district || '',
             pincode: clientData.details?.patient_pincode || '',
+            state: clientData.details?.patient_state || '',
             },
             requestor: {
             name: clientData.details?.requestor_name || '',
@@ -58,11 +63,13 @@ export const usePatientData = (id: string) => {
             profileImage: clientData.details?.requestor_profile_pic_url || '',
             emergencyPhone: clientData.details?.requestor_emergency_phone || '',
             jobDetails: clientData.details?.requestor_job_details || '',
+            
             address: {
                 fullAddress: clientData.details?.requestor_address || '',
                 city: clientData.details?.requestor_city || '',
                 district: clientData.details?.requestor_district || '',
                 pincode: clientData.details?.requestor_pincode || '',
+                state: clientData.details?.requestor_state || '',
             }
             },
             emergencyContact: {
