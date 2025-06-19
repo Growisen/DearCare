@@ -14,14 +14,12 @@ interface ClientEditFormProps {
 export default function ClientEditForm({ client, onSave, onCancel }: ClientEditFormProps) {
   const [formData, setFormData] = useState<DetailedClientIndividual | DetailedClientOrganization>(client);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Add refs to track input focus
   const activeElementRef = useRef<string | null>(null);
   const activeElementSelectionStart = useRef<number | null>(null);
   const activeElementSelectionEnd = useRef<number | null>(null);
 
   const isIndividual = client.client_type === 'individual';
 
-  // Save the active element reference before state update
   const saveActiveElementState = () => {
     if (document.activeElement instanceof HTMLInputElement || 
         document.activeElement instanceof HTMLTextAreaElement) {
@@ -31,13 +29,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     }
   };
 
-  // Restore focus to the previously active element after state update
   useEffect(() => {
     if (activeElementRef.current) {
       const element = document.getElementById(activeElementRef.current);
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
         element.focus();
-        // Restore cursor position if available
         if (activeElementSelectionStart.current !== null && activeElementSelectionEnd.current !== null) {
           element.selectionStart = activeElementSelectionStart.current;
           element.selectionEnd = activeElementSelectionEnd.current;
@@ -77,7 +73,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       let result;
       
       if (isIndividual) {
-        // For individual clients
         const individualFormData = formData as DetailedClientIndividual;
         const details = individualFormData.details || {};
 
@@ -93,7 +88,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             patientDistrict: details.patient_district || '',
             patientState: details.patient_state || '',
             patientPincode: details.patient_pincode || '',
-            patientProfilePic: null, // File uploads would need to be handled separately
+            patientProfilePic: null,
         
             preferredCaregiverGender: details.preferred_caregiver_gender || null,
             careDuration: details.care_duration || null,
@@ -108,7 +103,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             requestorDistrict: details.requestor_district || '',
             requestorState: details.requestor_state || '',
             requestorPincode: details.requestor_pincode || '',
-            requestorProfilePic: null, // File uploads would need to be handled separately
+            requestorProfilePic: null,
         
             relationToPatient: details.relation_to_patient || null,
             requestorEmergencyPhone: details.requestor_emergency_phone || null,
@@ -116,7 +111,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
           });
         }
       } else {
-        // For organization clients
         const orgFormData = formData as DetailedClientOrganization;
         const details = orgFormData.details || {};
         
@@ -172,12 +166,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     placeholder?: string;
     required?: boolean;
   }) => {
-    // Generate a unique ID for each input field based on the name
     const inputId = name.replace('.', '_');
     
     return (
       <div>
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-2">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -187,7 +180,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             name={name}
             value={value || ''}
             onChange={onChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 bg-white"
             required={required}
           >
             <option value="" className="text-gray-500">Select {label}</option>
@@ -205,7 +198,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             onChange={onChange}
             placeholder={placeholder}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 bg-white"
             required={required}
           />
         ) : (
@@ -216,7 +209,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             value={value || ''}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 bg-white"
             required={required}
           />
         )}
@@ -279,6 +272,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                 />
                 <FormField label="City" name="details.patient_city" value={details.patient_city} onChange={handleInputChange} />
                 <FormField label="District" name="details.patient_district" value={details.patient_district} onChange={handleInputChange} />
+                <FormField label="State" name="details.patient_state" value={details.patient_state} onChange={handleInputChange} />
                 <FormField label="Pincode" name="details.patient_pincode" value={details.patient_pincode} onChange={handleInputChange} />
               </div>
             </div>
@@ -292,8 +286,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             <div className="space-y-4">
               <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField label="Requestor Name" name="details.requestor_name" value={details.requestor_name} onChange={handleInputChange} />
-                {/* Change Relation to Patient to a select field */}
+                <FormField label="Requestor Name" name="details.requestor_name" value={details.requestor_name} onChange={handleInputChange} required />
                 <FormField
                   label="Relation to Patient"
                   name="details.relation_to_patient"
@@ -303,7 +296,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                   options={relationOptions}
                 />
                 <FormField label="Requestor Email" name="details.requestor_email" type="email" value={details.requestor_email} onChange={handleInputChange} />
-                <FormField label="Requestor Phone" name="details.requestor_phone" value={details.requestor_phone} onChange={handleInputChange} />
+                <FormField label="Requestor Phone" name="details.requestor_phone" value={details.requestor_phone} onChange={handleInputChange} required />
                 <FormField label="Emergency Phone" name="details.requestor_emergency_phone" value={details.requestor_emergency_phone} onChange={handleInputChange} />
                 <FormField label="Job Details" name="details.requestor_job_details" value={details.requestor_job_details} onChange={handleInputChange} />
               </div>
@@ -315,6 +308,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                 <FormField label="Address" name="details.requestor_address" type="textarea" value={details.requestor_address} onChange={handleInputChange} />
                 <FormField label="City" name="details.requestor_city" value={details.requestor_city} onChange={handleInputChange} />
                 <FormField label="District" name="details.requestor_district" value={details.requestor_district} onChange={handleInputChange} />
+                <FormField label="State" name="details.requestor_state" value={details.requestor_state} onChange={handleInputChange} />
                 <FormField label="Pincode" name="details.requestor_pincode" value={details.requestor_pincode} onChange={handleInputChange} />
               </div>
             </div>
@@ -340,15 +334,19 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
               value={individualClient.duty_period} 
               onChange={handleInputChange} 
               options={dutyPeriodOptions}
+              required
             />
             <FormField label="Start Date" name="details.start_date" type="date" value={details.start_date} onChange={handleInputChange} />
-            <FormField 
-              label="Period Reason" 
-              name="duty_period_reason" 
-              type="textarea" 
-              value={individualClient.duty_period_reason} 
-              onChange={handleInputChange}
-            />
+            <div className="md:col-span-3">
+              <FormField 
+                label="Period Reason" 
+                name="duty_period_reason" 
+                type="textarea" 
+                value={individualClient.duty_period_reason} 
+                onChange={handleInputChange}
+                placeholder="Please provide details about the care duration requirements..."
+              />
+            </div>
           </div>
         </div>
       </>
@@ -367,17 +365,17 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
           <div className="space-y-4">
             <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Organization Details</h5>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Organization Name" name="details.organization_name" value={details.organization_name} onChange={handleInputChange} />
+              <FormField label="Organization Name" name="details.organization_name" value={details.organization_name} onChange={handleInputChange} required />
             </div>
           </div>
           
           <div className="space-y-4">
             <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Person</h5>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Contact Person Name" name="details.contact_person_name" value={details.contact_person_name} onChange={handleInputChange} />
+              <FormField label="Contact Person Name" name="details.contact_person_name" value={details.contact_person_name} onChange={handleInputChange} required />
               <FormField label="Contact Person Role" name="details.contact_person_role" value={details.contact_person_role} onChange={handleInputChange} />
-              <FormField label="Contact Email" name="details.contact_email" type="email" value={details.contact_email} onChange={handleInputChange} />
-              <FormField label="Contact Phone" name="details.contact_phone" value={details.contact_phone} onChange={handleInputChange} />
+              <FormField label="Contact Email" name="details.contact_email" type="email" value={details.contact_email} onChange={handleInputChange} required />
+              <FormField label="Contact Phone" name="details.contact_phone" value={details.contact_phone} onChange={handleInputChange} required />
             </div>
           </div>
         </div>
@@ -386,11 +384,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
         <div>
           <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Organization Address</h5>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField label="Address" name="details.organization_address" type="textarea" value={details.organization_address} onChange={handleInputChange} />
-            <FormField label="City" name="details.organization_city" value={details.organization_city} onChange={handleInputChange} />
+            <FormField label="Address" name="details.organization_address" type="textarea" value={details.organization_address} onChange={handleInputChange} required />
+            <FormField label="City" name="details.organization_city" value={details.organization_city} onChange={handleInputChange} required />
             <FormField label="District" name="details.organization_district" value={details.organization_district} onChange={handleInputChange} />
-            <FormField label="State" name="details.organization_state" value={details.organization_state} onChange={handleInputChange} />
-            <FormField label="Pincode" name="details.organization_pincode" value={details.organization_pincode} onChange={handleInputChange} />
+            <FormField label="State" name="details.organization_state" value={details.organization_state} onChange={handleInputChange} required />
+            <FormField label="Pincode" name="details.organization_pincode" value={details.organization_pincode} onChange={handleInputChange} required />
           </div>
         </div>
       </div>
@@ -398,41 +396,51 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Client Type Specific Fields */}
-      {isIndividual ? renderIndividualForm() : renderOrganizationForm()}
+    <div className="relative flex flex-col h-full">
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-6 mb-0">
+        {/* Client Type Specific Fields */}
+        {isIndividual ? renderIndividualForm() : renderOrganizationForm()}
+        
+        {/* Notes Field */}
+        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-800 mb-2">Additional Notes</h4>
+          <FormField 
+            label="" 
+            name="general_notes" 
+            type="textarea" 
+            value={formData.general_notes} 
+            onChange={handleInputChange} 
+            placeholder="Add any additional notes or special requirements here..." 
+          />
+        </div>
+      </form>
       
-      {/* Notes Field */}
-      <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-800 mb-2">Notes</h4>
-        <FormField 
-          label="" 
-          name="general_notes" 
-          type="textarea" 
-          value={formData.general_notes} 
-          onChange={handleInputChange} 
-          placeholder="Add any additional notes here..." 
-        />
-      </div>
-      
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
+      {/* Fixed Footer with Form Actions */}
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex justify-end items-center space-x-4 z-10">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+          className="px-5 py-2.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
           disabled={isSubmitting}
         >
           Cancel
         </button>
         <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            const formElement = document.querySelector('form');
+            if (formElement) {
+              const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+              formElement.dispatchEvent(submitEvent);
+            }
+          }}
+          className="px-5 py-2.5 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
-    </form>
+    </div>
   );
 }

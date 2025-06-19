@@ -17,6 +17,7 @@ interface PatientInfoProps {
       city: string;
       district: string;
       pincode: string;
+      state?: string;
     };
     emergencyContact: {
       name: string;
@@ -31,6 +32,7 @@ interface PatientInfoProps {
       cityTown?: string;
       district?: string;
       pincode?: string;
+      state?: string;
       [key: string]: string | undefined | Json | LabInvestigations | RecorderInfo;
     }>;
     requestor: {
@@ -46,6 +48,7 @@ interface PatientInfoProps {
         city: string;
         district: string;
         pincode: string;
+        state?: string;
       };
     };
   };
@@ -104,6 +107,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <InfoField label="City" value={patient.address?.city} />
             <InfoField label="District" value={patient.address?.district} />
+            <InfoField label="State" value={patient.address?.state} />
           </div>
           <InfoField label="Pincode" value={patient.address?.pincode} />
           
@@ -211,6 +215,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <InfoField label="City" value={patient.requestor.address?.city} />
             <InfoField label="District" value={patient.requestor.address?.district} />
+            <InfoField label="State" value={patient.requestor.address?.state} />
           </div>
           <InfoField label="Pincode" value={patient.requestor.address?.pincode} />
           

@@ -2,6 +2,7 @@ import React, { memo } from 'react'
 import { format, parseISO } from 'date-fns'
 import { Eye, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { LeaveRequest } from '@/types/leave.types'
+import Loader from '../Loader'
 
 type LeaveRequestsTableProps = {
   leaveRequests: LeaveRequest[]
@@ -150,9 +151,7 @@ export function LeaveRequestsTable({
 
   if (isLoading) {
     return (
-      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden p-10 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-500 border-t-transparent"></div>
-      </div>
+      <Loader message="Loading Leave Requests..."/>
     )
   }
 
