@@ -14,14 +14,12 @@ interface ClientEditFormProps {
 export default function ClientEditForm({ client, onSave, onCancel }: ClientEditFormProps) {
   const [formData, setFormData] = useState<DetailedClientIndividual | DetailedClientOrganization>(client);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Add refs to track input focus
   const activeElementRef = useRef<string | null>(null);
   const activeElementSelectionStart = useRef<number | null>(null);
   const activeElementSelectionEnd = useRef<number | null>(null);
 
   const isIndividual = client.client_type === 'individual';
 
-  // Save the active element reference before state update
   const saveActiveElementState = () => {
     if (document.activeElement instanceof HTMLInputElement || 
         document.activeElement instanceof HTMLTextAreaElement) {
@@ -31,13 +29,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     }
   };
 
-  // Restore focus to the previously active element after state update
   useEffect(() => {
     if (activeElementRef.current) {
       const element = document.getElementById(activeElementRef.current);
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
         element.focus();
-        // Restore cursor position if available
         if (activeElementSelectionStart.current !== null && activeElementSelectionEnd.current !== null) {
           element.selectionStart = activeElementSelectionStart.current;
           element.selectionEnd = activeElementSelectionEnd.current;
@@ -77,7 +73,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       let result;
       
       if (isIndividual) {
-        // For individual clients
         const individualFormData = formData as DetailedClientIndividual;
         const details = individualFormData.details || {};
 
@@ -93,7 +88,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             patientDistrict: details.patient_district || '',
             patientState: details.patient_state || '',
             patientPincode: details.patient_pincode || '',
-            patientProfilePic: null, // File uploads would need to be handled separately
+            patientProfilePic: null,
         
             preferredCaregiverGender: details.preferred_caregiver_gender || null,
             careDuration: details.care_duration || null,
@@ -108,7 +103,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             requestorDistrict: details.requestor_district || '',
             requestorState: details.requestor_state || '',
             requestorPincode: details.requestor_pincode || '',
-            requestorProfilePic: null, // File uploads would need to be handled separately
+            requestorProfilePic: null,
         
             relationToPatient: details.relation_to_patient || null,
             requestorEmergencyPhone: details.requestor_emergency_phone || null,
@@ -116,7 +111,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
           });
         }
       } else {
-        // For organization clients
         const orgFormData = formData as DetailedClientOrganization;
         const details = orgFormData.details || {};
         
@@ -172,7 +166,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     placeholder?: string;
     required?: boolean;
   }) => {
-    // Generate a unique ID for each input field based on the name
     const inputId = name.replace('.', '_');
     
     return (

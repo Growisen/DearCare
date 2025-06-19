@@ -211,6 +211,7 @@ export interface DetailedClientOrganization {
     organization_pincode?: string;
     organization_address?: string;
     contract_duration?: string;
+    start_date?: string;
   };
   staffRequirements?: StaffRequirement[];
   general_notes?: string;

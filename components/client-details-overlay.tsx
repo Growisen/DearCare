@@ -134,7 +134,7 @@ export function ClientDetailsOverlay({
     invalidateClientCache()
     invalidateDashboardCache()
     
-    onClose()
+    await fetchClientDetails();
     
     setIsUpdating(false);
   };
@@ -449,27 +449,39 @@ export function ClientDetailsOverlay({
               </div>
               <div>
                 <p className="text-xs text-gray-500">Name</p>
-                <p className="text-sm font-medium text-gray-800">{client.name}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {isIndividual ? 
+                    detailedClient.details?.patient_name || "Unknown" : 
+                    detailedClient.details?.organization_name || "Unknown"}
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-50 rounded-full">
                 <Mail className="w-5 h-5 text-blue-500" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Email</p>
-                <p className="text-sm font-medium text-gray-800">{client.email}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {isIndividual ? 
+                    detailedClient.details?.requestor_email || "Not provided" : 
+                    detailedClient.details?.contact_email || "Not provided"}
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-50 rounded-full">
                 <Phone className="w-5 h-5 text-blue-500" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Phone</p>
-                <p className="text-sm font-medium text-gray-800">{client.phone || 'Not provided'}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {isIndividual ? 
+                    detailedClient.details?.requestor_phone || "Not provided" : 
+                    detailedClient.details?.contact_phone || "Not provided"}
+                </p>
               </div>
             </div>
 
@@ -480,18 +492,24 @@ export function ClientDetailsOverlay({
               <div>
                 <p className="text-xs text-gray-500">Service</p>
                 <p className="text-sm font-medium text-gray-800">
-                  {getServiceLabel(serviceOptions, client.service || 'Not specified')}
+                  {isIndividual 
+                    ? getServiceLabel(serviceOptions, detailedClient.details?.service_required || '') 
+                    : "Organization Care"}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-50 rounded-full">
                 <Calendar className="w-5 h-5 text-blue-500" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Request Date</p>
-                <p className="text-sm font-medium text-gray-800">{client.requestDate || 'Not specified'}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {isIndividual
+                    ? new Date(detailedClient.details?.start_date || detailedClient.created_at || new Date()).toISOString().split('T')[0]
+                    : new Date(detailedClient.details?.start_date || new Date()).toISOString().split('T')[0]}
+                </p>
               </div>
             </div>
           </div>
