@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { X, Trash2, Mail, Phone, Briefcase, Calendar, User } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { ApprovedContent } from '../components/client/ApprovedContent';
 import { UnderReviewContent } from '../components/client/UnderReview';
 import { PendingContent } from '../components/client/PendingContent';
@@ -28,11 +28,8 @@ function ProfileImage({ src, alt, size = "md" }: { src: string | null | undefine
     md: "w-16 h-16",
     lg: "w-20 h-20"
   };
-  
   const imageSize = size === "sm" ? 48 : size === "md" ? 64 : 80;
-  
   if (!src) return null;
-  
   return (
     <div className="flex flex-col items-center">
       <div 
@@ -50,7 +47,6 @@ function ProfileImage({ src, alt, size = "md" }: { src: string | null | undefine
           }}
         />
       </div>
-
       <ImageViewer
         src={src}
         alt={alt}
@@ -73,13 +69,11 @@ function DetailItem({
   const displayValue = value === null || value === undefined || value === '' 
     ? 'Not provided' 
     : value.toString();
-  
   const colSpanClasses = {
     1: '',
     2: 'sm:col-span-2',
     3: 'sm:col-span-3'
   };
-  
   return (
     <div className={`bg-gray-50 p-3 rounded-md h-full ${colSpanClasses[columns]}`}>
       <p className="text-xs font-medium text-gray-500">{label}</p>
@@ -89,7 +83,6 @@ function DetailItem({
     </div>
   );
 }
-
 
 export function ClientDetailsOverlay({ 
   client, 
@@ -106,19 +99,15 @@ export function ClientDetailsOverlay({
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-
   async function fetchClientDetails() {
     if (!client.id) return;
-    
     setLoading(true);
     const result = await getClientDetails(client.id);
-    
     if (result.success && result.client && result.client.status) {
       setRejectionReason(result.client.rejection_reason);
       setDetailedClient(result.client as DetailedClient);
       setCurrentClientStatus(result.client.status);
     }
-    
     setLoading(false);
   }
 
@@ -129,13 +118,10 @@ export function ClientDetailsOverlay({
   const handleSaveEdit = async (updatedClient: DetailedClient) => {
     setIsUpdating(true);
     setIsEditMode(false);
-    
     setDetailedClient(updatedClient);
     invalidateClientCache()
     invalidateDashboardCache()
-    
     await fetchClientDetails();
-    
     setIsUpdating(false);
   };
 
@@ -143,17 +129,14 @@ export function ClientDetailsOverlay({
     if (newStatus) {
       setCurrentClientStatus(newStatus);
     }
-  
     if (client.id) {
       setLoading(true);
       const result = await getClientDetails(client.id);
-      
       if (result.success && result.client && result.client.status) {
         setDetailedClient(result.client as DetailedClient);
         setCurrentClientStatus(result.client.status);
         if (onStatusChange) onStatusChange();
       }
-      
       setLoading(false);
     }
   };
@@ -161,7 +144,6 @@ export function ClientDetailsOverlay({
   const handleDeleteClient = async () => {
     try {
       const result = await deleteClient(client.id);
-      
       if (result.success) {
         invalidateDashboardCache();
         toast.success('Client deleted successfully');
@@ -171,8 +153,7 @@ export function ClientDetailsOverlay({
         toast.error(`Failed to delete client: ${result.error}`);
         setShowDeleteConfirmation(false);
       }
-    } catch (error) {
-      console.error('Error deleting client:', error);
+    } catch {
       toast.error('An error occurred while deleting the client');
       setShowDeleteConfirmation(false);
     }
@@ -395,11 +376,9 @@ export function ClientDetailsOverlay({
         </div>
       );
     }
-    
     if (!detailedClient) {
       return <div className="p-4 text-center text-gray-700">Could not load detailed information. Try sometime later.</div>;
     }
-
     if (isEditMode) {
       return (
         <ClientEditForm 
@@ -409,28 +388,22 @@ export function ClientDetailsOverlay({
         />
       );
     }
-    
     const isIndividual = detailedClient.client_type === 'individual';
-    
     return (
       <div className="space-y-6">
-        {/* Summary Card */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {isIndividual ? 'Patient Request' : 'Organization Request'}
-              </h3>
-              {detailedClient.client_category && (
-                <span className={`px-3 py-1 text-sm font-medium rounded-md ${
-                  detailedClient.client_category === 'DearCare LLP' 
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                    : 'bg-green-100 text-green-700 border border-green-200'
-                }`}>
-                  {detailedClient.client_category}
-                </span>
-              )}
-            </div>
+        <div className="flex flex-wrap items-center justify-between mb-2">
+          <div>
+            {detailedClient?.client_category && (
+              <span className={`px-3 py-1 text-sm font-medium rounded-md ${
+                detailedClient.client_category === 'DearCare LLP' 
+                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                  : 'bg-green-100 text-green-700 border border-green-200'
+              }`}>
+                {detailedClient.client_category}
+              </span>
+            )}
+          </div>
+          <div>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${
               currentClientStatus === 'approved' ? 'bg-green-100 text-green-800' : 
               currentClientStatus === 'under_review' ? 'bg-yellow-100 text-yellow-800' :
@@ -441,84 +414,9 @@ export function ClientDetailsOverlay({
               {currentClientStatus.replace('_', ' ').toUpperCase()}
             </span>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-full">
-                <User className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Name</p>
-                <p className="text-sm font-medium text-gray-800">
-                  {isIndividual ? 
-                    detailedClient.details?.patient_name || "Unknown" : 
-                    detailedClient.details?.organization_name || "Unknown"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-full">
-                <Mail className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Email</p>
-                <p className="text-sm font-medium text-gray-800">
-                  {isIndividual ? 
-                    detailedClient.details?.requestor_email || "Not provided" : 
-                    detailedClient.details?.contact_email || "Not provided"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-full">
-                <Phone className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Phone</p>
-                <p className="text-sm font-medium text-gray-800">
-                  {isIndividual ? 
-                    detailedClient.details?.requestor_phone || "Not provided" : 
-                    detailedClient.details?.contact_phone || "Not provided"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-full">
-                <Briefcase className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Service</p>
-                <p className="text-sm font-medium text-gray-800">
-                  {isIndividual 
-                    ? getServiceLabel(serviceOptions, detailedClient.details?.service_required || '') 
-                    : "Organization Care"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-full">
-                <Calendar className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Request Date</p>
-                <p className="text-sm font-medium text-gray-800">
-                  {isIndividual
-                    ? new Date(detailedClient.details?.start_date || detailedClient.created_at || new Date()).toISOString().split('T')[0]
-                    : new Date(detailedClient.details?.start_date || new Date()).toISOString().split('T')[0]}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-        
         {/* Detailed Information - Different layouts for Individual vs Organization */}
         {isIndividual ? renderIndividualDetails(detailedClient) : renderOrganizationDetails(detailedClient)}
-
-        {/* Notes Section */}
         <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
           <h4 className="text-sm font-semibold text-gray-800 mb-2">Notes</h4>
           <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
@@ -532,24 +430,26 @@ export function ClientDetailsOverlay({
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between relative">
           {isEditMode ? (
             <>
-              <h2 className="text-xl font-semibold text-gray-900">Edit Client Details</h2>
+              <div className="flex-1 flex items-center justify-center sm:justify-start">
+                <h2 className="text-xl font-semibold text-gray-900">Edit Client Details</h2>
+              </div>
               <button
                 onClick={() => setIsEditMode(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors absolute right-4 top-1/2 -translate-y-1/2"
               >
                 <X className="h-5 w-5 text-gray-500" />
               </button>
             </>
           ) : (
             <>
-              <div>
+              <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900">Request Details</h2>
                 <p className="text-sm text-gray-500">Registration Number: {detailedClient?.registration_number || "Not Available"}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 ml-auto">
                 {shouldShowProfileButton() && (
                   <Link 
                     href={isClientIndividual() ? `/client-profile/${client?.id}` : `/client-profile/organization-client/${client?.id}`} 
