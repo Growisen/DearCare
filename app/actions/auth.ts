@@ -38,7 +38,7 @@ export async function signIn(formData: FormData) {
   
   const supabase = await createSupabaseServerClient()
   
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -47,7 +47,7 @@ export async function signIn(formData: FormData) {
     return { error: error.message, success: false }
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = data.user
   
   if (!user) {
     return { error: "User not found", success: false }
