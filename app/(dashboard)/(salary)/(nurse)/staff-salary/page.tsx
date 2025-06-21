@@ -4,7 +4,7 @@ import { PaginationControls } from "@/components/client/clients/PaginationContro
 import { SalaryHeader } from "@/components/salary/SalaryHeader"
 import { SalaryTable } from "@/components/salary/SalaryTable"
 import { SalaryMobileCards } from "@/components/salary/SalaryMobileCards"
-import { useSalaryCalculation } from "@/app/hooks/useSalaryCalculation"
+import { useSalaryCalculation } from "@/hooks/useSalaryCalculation"
 
 const categories = ["all", "DearCare LLP", "Tata HomeNursing"]
 
