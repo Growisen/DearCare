@@ -51,113 +51,140 @@ export async function fetchComplaints(
     try {
       const { supabase } = await getAuthenticatedClient();
       
-      // Build the base queries for count and data
-      let countQuery = supabase
-        .from('dearcare_complaints')
-        .select('id', { count: 'exact', head: true });
-        
-      let dataQuery = supabase
-        .from('dearcare_complaints')
-        .select('*');
+      // Build base query
+      let query = supabase.from('dearcare_complaints').select('*', { count: 'exact' });
       
-      // Apply status filter if provided
+      // Apply filters
       if (status && status !== 'all') {
-        countQuery = countQuery.eq('status', status);
-        dataQuery = dataQuery.eq('status', status);
+        query = query.eq('status', status);
       }
       
-      // Apply source filter if provided
       if (source && source !== 'all') {
-        countQuery = countQuery.eq('source', source);
-        dataQuery = dataQuery.eq('source', source);
+        query = query.eq('source', source);
       }
       
-      // Apply search filter if provided
       if (searchQuery && searchQuery.trim() !== '') {
         const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
-        
-        countQuery = countQuery.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
-        dataQuery = dataQuery.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
+        query = query.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
       }
       
-      // Get total count first
-      const { count, error: countError } = await countQuery;
-      
-      if (countError) {
-        throw new Error(`Failed to count complaints: ${countError.message}`);
-      }
-      
-      // Then fetch the paginated data
-      const { data: complaintsData, error: complaintsError } = await dataQuery
+      // Get paginated data and count in a single query
+      const { data: complaintsData, count, error: complaintsError } = await query
         .order('submission_date', { ascending: false })
         .range((page - 1) * pageSize, (page * pageSize) - 1);
         
       if (complaintsError) {
         throw new Error(complaintsError.message);
       }
-  
-      // Process each complaint to fetch the submitter name based on source
-      const complaints: Complaint[] = await Promise.all(
-        complaintsData.map(async (record) => {
-          let submitterName = '';
+      
+      // Batch fetch submitter information
+      const clientIds = complaintsData
+        .filter(record => record.source === 'client' && record.submitter_id)
+        .map(record => record.submitter_id);
+        
+      const nurseIds = complaintsData
+        .filter(record => record.source === 'nurse' && record.submitter_id)
+        .map(record => record.submitter_id);
+      
+      // Get all client types in a single query if needed
+      const clientTypesMap = new Map();
+      if (clientIds.length > 0) {
+        const { data: clientsData } = await supabase
+          .from('clients')
+          .select('id, client_type')
+          .in('id', clientIds);
           
-          if (record.submitter_id) {
-            if (record.source === 'client') {
-                const { data: clientTypeData, error: clientTypeError } = await supabase
-                    .from('clients')
-                    .select('client_type')
-                    .eq('id', record.submitter_id)
-                    .single();
-                    
-                if (!clientTypeError && clientTypeData) {
-                    if (clientTypeData.client_type === 'individual') {
-                        const { data: individualData, error: individualError } = await supabase
-                            .from('individual_clients')
-                            .select('requestor_name')
-                            .eq('client_id', record.submitter_id)
-                            .single();
-                            
-                        if (!individualError && individualData) {
-                            submitterName = `${individualData.requestor_name}`;
-                        }
-                    } else if (clientTypeData.client_type === 'organization') {
-                        const { data: orgData, error: orgError } = await supabase
-                        .from('organization_clients')
-                        .select('organization_name')
-                        .eq('client_id', record.submitter_id)
-                        .single();
-                        
-                        if (!orgError && orgData) {
-                            submitterName = orgData.organization_name;
-                        }
-                    }
-                }
-            } else if (record.source === 'nurse') {
-              const { data: nurseData, error: nurseError } = await supabase
-                .from('nurses')
-                .select('first_name, last_name')
-                .eq('nurse_id', record.submitter_id)
-                .single();
-                
-              if (!nurseError && nurseData) {
-                submitterName = `${nurseData.first_name} ${nurseData.last_name}`;
-              }
+        if (clientsData) {
+          clientsData.forEach(client => {
+            clientTypesMap.set(client.id, client.client_type);
+          });
+        }
+      }
+      
+      // Get all individual clients in a single query
+      const individualClientsMap = new Map();
+      const individualClientIds = [...clientTypesMap.entries()]
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([id, type]) => type === 'individual')
+        .map(([id]) => id);
+        
+      if (individualClientIds.length > 0) {
+        const { data: individualData } = await supabase
+          .from('individual_clients')
+          .select('client_id, requestor_name')
+          .in('client_id', individualClientIds);
+          
+        if (individualData) {
+          individualData.forEach(client => {
+            individualClientsMap.set(client.client_id, client.requestor_name);
+          });
+        }
+      }
+      
+      // Get all organization clients in a single query
+      const orgClientsMap = new Map();
+      const orgClientIds = [...clientTypesMap.entries()]
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([id, type]) => type === 'organization')
+        .map(([id]) => id);
+        
+      if (orgClientIds.length > 0) {
+        const { data: orgData } = await supabase
+          .from('organization_clients')
+          .select('client_id, organization_name')
+          .in('client_id', orgClientIds);
+          
+        if (orgData) {
+          orgData.forEach(org => {
+            orgClientsMap.set(org.client_id, org.organization_name);
+          });
+        }
+      }
+      
+      // Get all nurses in a single query
+      const nursesMap = new Map();
+      if (nurseIds.length > 0) {
+        const { data: nursesData } = await supabase
+          .from('nurses')
+          .select('nurse_id, first_name, last_name')
+          .in('nurse_id', nurseIds);
+          
+        if (nursesData) {
+          nursesData.forEach(nurse => {
+            nursesMap.set(nurse.nurse_id, `${nurse.first_name} ${nurse.last_name}`);
+          });
+        }
+      }
+      
+      // Process complaints with the batch-loaded data
+      const complaints: Complaint[] = complaintsData.map(record => {
+        let submitterName = '';
+        
+        if (record.submitter_id) {
+          if (record.source === 'client') {
+            const clientType = clientTypesMap.get(record.submitter_id);
+            if (clientType === 'individual') {
+              submitterName = individualClientsMap.get(record.submitter_id) || '';
+            } else if (clientType === 'organization') {
+              submitterName = orgClientsMap.get(record.submitter_id) || '';
             }
+          } else if (record.source === 'nurse') {
+            submitterName = nursesMap.get(record.submitter_id) || '';
           }
-          
-          return {
-            id: record.id,
-            title: record.title,
-            description: record.description,
-            status: record.status as ComplaintStatus,
-            submitterName: submitterName,
-            submissionDate: formatDate(record.submission_date),
-            source: record.source as ComplaintSource,
-            lastUpdated: formatDate(record.last_updated),
-            submitterId: record.submitter_id 
-          };
-        })
-      );
+        }
+        
+        return {
+          id: record.id,
+          title: record.title,
+          description: record.description,
+          status: record.status as ComplaintStatus,
+          submitterName: submitterName,
+          submissionDate: formatDate(record.submission_date),
+          source: record.source as ComplaintSource,
+          lastUpdated: formatDate(record.last_updated),
+          submitterId: record.submitter_id
+        };
+      });
       
       return { 
         success: true, 
@@ -176,11 +203,11 @@ export async function fetchComplaints(
         error: error instanceof Error ? error.message : 'An unknown error occurred'
       };
     }
-  }
+}
 
 export async function exportComplaintsToCSV(): Promise<{
   success: boolean;
-  data?: string; // CSV data as string
+  data?: string;
   error?: string;
 }> {
   try {
