@@ -10,7 +10,7 @@ interface ServiceDetails {
   serviceFrequency?: string;
   serviceHours?: string;
   specialRequirements?: string;
-  preferredCareGiverGender?: string;
+  preferredCaregiverGender?: string;
 }
 
 interface ServiceDetailsSectionProps {
@@ -28,7 +28,7 @@ const ServiceDetailsSection: React.FC<ServiceDetailsSectionProps> = ({
     serviceFrequency,
     serviceHours,
     specialRequirements,
-    preferredCareGiverGender
+    preferredCaregiverGender
   } = serviceDetails || {};
 
   const getStatusDisplay = () => {
@@ -50,6 +50,8 @@ const ServiceDetailsSection: React.FC<ServiceDetailsSectionProps> = ({
       </span>
     );
   };
+
+  console.log(serviceDetails)
 
   return (
     <InfoSection title="Service Details">
@@ -85,7 +87,7 @@ const ServiceDetailsSection: React.FC<ServiceDetailsSectionProps> = ({
 
         <div>
           <p className="text-xs text-gray-500 font-medium">Preferred Care Giver Gender</p>
-          <p className="text-sm text-gray-700">{preferredCareGiverGender || 'Not specified'}</p>
+          <p className="text-sm text-gray-700">{preferredCaregiverGender || 'Not specified'}</p>
         </div>
 
         {specialRequirements && (

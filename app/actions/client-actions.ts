@@ -1277,59 +1277,69 @@ export async function deleteClient(clientId: string) {
       return { success: false, error: clientError.message };
     }
 
-    const deleteOperations = [];
+    const { data: clientFiles } = await supabase
+      .from('client_files')
+      .select('id, storage_path')
+      .eq('client_id', clientId);
+
+    if (clientFiles && clientFiles.length > 0) {
+      const filePaths = clientFiles.map(file => file.storage_path).filter(Boolean);
+      if (filePaths.length > 0) {
+        await supabase.storage.from('DearCare').remove(filePaths);
+      }
+      
+      await supabase
+        .from('client_files')
+        .delete()
+        .eq('client_id', clientId);
+    }
 
     const { data: nurseAssignments } = await supabase
       .from('nurse_client')
       .select('nurse_id')
       .eq('client_id', clientId);
 
-    deleteOperations.push(
-      supabase
-        .from('nurse_client')
-        .delete()
-        .eq('client_id', clientId)
-    );
-
-    deleteOperations.push(
-      supabase
-        .from('patient_assessments')
-        .delete()
-        .eq('client_id', clientId)
-    );
+    await supabase
+      .from('nurse_client')
+      .delete()
+      .eq('client_id', clientId);
+      
+    await supabase
+      .from('patient_assessments')
+      .delete()
+      .eq('client_id', clientId);
 
     if (client.client_type === 'individual') {
-      deleteOperations.push(
-        supabase
-          .from('individual_clients')
-          .delete()
-          .eq('client_id', clientId)
-      );
+      await supabase
+        .from('individual_clients')
+        .delete()
+        .eq('client_id', clientId);
     } else {
-
-      deleteOperations.push(
-        supabase
-          .from('staff_requirements')
-          .delete()
-          .eq('client_id', clientId)
-      );
+      await supabase
+        .from('staff_requirements')
+        .delete()
+        .eq('client_id', clientId);
+        
+      await supabase
+        .from('organization_clients')
+        .delete()
+        .eq('client_id', clientId);
       
-      deleteOperations.push(
-        supabase
-          .from('organization_clients')
-          .delete()
-          .eq('client_id', clientId)
-      );
+      await supabase
+      .from('otp')
+      .delete()
+      .eq('client_id', clientId);
     }
 
-    deleteOperations.push(
-      supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId)
-    );
+    const { error: deleteError } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', clientId);
 
-    await Promise.all(deleteOperations);
+    if (deleteError) {
+      console.error('Error deleting client record:', deleteError);
+      return { success: false, error: deleteError.message };
+    }
 
     if (nurseAssignments && nurseAssignments.length > 0) {
       const uniqueNurseIds = [...new Set(nurseAssignments.map(na => na.nurse_id))];
@@ -1339,8 +1349,7 @@ export async function deleteClient(clientId: string) {
           const { data: remainingAssignments } = await supabase
             .from('nurse_client')
             .select('id')
-            .eq('nurse_id', nurseId)
-            .neq('client_id', clientId);
+            .eq('nurse_id', nurseId);
 
           if (!remainingAssignments || remainingAssignments.length === 0) {
             await supabase
@@ -1353,7 +1362,6 @@ export async function deleteClient(clientId: string) {
     }
 
     revalidatePath('/clients');
-
     return { success: true };
     
   } catch (error: unknown) {
@@ -1364,7 +1372,6 @@ export async function deleteClient(clientId: string) {
     };
   }
 }
-
 
 /**
  * Generates a unique registration number for a client
