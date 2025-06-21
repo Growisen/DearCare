@@ -47,6 +47,7 @@ export const usePatientData = (id: string) => {
               serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || ''),
               preferredCaregiverGender: clientData.details?.preferred_caregiver_gender || '',
               startDate: clientData.details?.start_date,
+              status: statusResult.status,
             },
             address: {
             fullAddress: clientData.details?.patient_address || '',
