@@ -3,6 +3,7 @@ import Image from 'next/image';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
 import ImageViewer from '@/components/common/ImageViewer';
 import { ClientCategory } from '@/types/client.types';
+import { formatName } from '@/utils/formatters';
 
 interface ProfileHeaderProps {
   patient: {
@@ -69,7 +70,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {patient.profileImage ? (
               <Image
                 src={patient.profileImage}
-                alt={`${patient.firstName} ${patient.lastName}`}
+                alt={formatName(`${patient.firstName} ${patient.lastName}`)}
                 fill
                 className="object-cover"
                 priority
@@ -78,8 +79,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             ) : (
               <div className="h-full w-full bg-gray-200 flex items-center justify-center">
                 <div className="text-center text-gray-600 font-medium text-xl">
-                  <div>{patient.firstName[0]}</div>
-                  <div>{patient.lastName[0]}</div>
+                  <div>{formatName(patient.firstName[0])}</div>
+                  <div>{formatName(patient.lastName[0])}</div>
                 </div>
               </div>
             )}
@@ -88,7 +89,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           {/* Profile Details */}
           <div className="mt-2 sm:mt-0">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-              {patient.firstName} {patient.lastName}
+              {formatName(`${patient.firstName} ${patient.lastName}`)}
             </h1>
             <p className="text-sm text-gray-600 mt-1">
               {patient.age} years • {patient.gender} • {patient.bloodGroup}

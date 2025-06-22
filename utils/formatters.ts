@@ -55,3 +55,31 @@ export const getRelationLabel = (
   const option = relationOptions.find(opt => opt.value === value);
   return option ? option.label : value;
 };
+
+
+export function formatName(fullName: string): string {
+  if (!fullName) return "";
+
+  fullName = fullName.trim().replace(/\s+/g, ' ').toLowerCase();
+
+  fullName = fullName.replace(/([a-z]{2,})\.([a-z])/g, '$1. $2');
+  fullName = fullName.replace(/([a-z])\.([a-z])/g, '$1. $2');
+  fullName = fullName.replace(/([a-z])\.([a-z]{2,})/g, '$1. $2');
+
+  const parts = fullName.split(' ');
+
+  const formattedParts = [];
+
+  for (const part of parts) {
+    if (!part) continue;
+
+    if (part.replace(/\./g, '').length === 1) {
+      const letter = part.replace(/\./g, '').toUpperCase();
+      formattedParts.push(letter + '.');
+    } else {
+      formattedParts.push(part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+    }
+  }
+
+  return formattedParts.join(' ');
+}

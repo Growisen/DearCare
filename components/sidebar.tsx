@@ -1,9 +1,18 @@
-"use client"
 import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Users, Calendar, ClipboardList, Home, ArrowLeftCircle, MessageSquare, FileText } from "lucide-react"
+import { 
+  Users, 
+  Calendar, 
+  ClipboardCheck,
+  Home, 
+  ArrowLeftCircle, 
+  MessageSquare, 
+  Clipboard,
+  HeartPulse,
+  Building
+} from "lucide-react"
 import { useEffect } from "react"
 // import { useAuth } from '@/contexts/AuthContext'
 
@@ -52,16 +61,16 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
         
         <div className="p-3 flex-1">
           <nav className="space-y-1">
-            {[
-              { icon: Home, label: "Dashboard", href: "/dashboard" },
-              { icon: Users, label: "Nurses", href: "/nurses" },
-              { icon: Users, label: "Clients", href: "/clients" },
-              { icon: Users, label: "Staffs", href: "/staff" },
-              { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
-              { icon: ClipboardList, label: "Staff Attendance", href: "/staff-attendance" },
-              { icon: FileText, label: "Assignments", href: "/assignments" },
-              { icon: MessageSquare, label: "Complaints", href: "/complaints" },
-            ].map((item) => {
+          {[
+            { icon: Home, label: "Dashboard", href: "/dashboard" },
+            { icon: Users, label: "Clients", href: "/clients" },
+            { icon: HeartPulse, label: "Nurses", href: "/nurses" },
+            { icon: Building, label: "Staff", href: "/staff" },
+            { icon: Clipboard, label: "Assignments", href: "/assignments" },
+            { icon: ClipboardCheck, label: "Staff Attendance", href: "/staff-attendance" },
+            { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
+            { icon: MessageSquare, label: "Complaints", href: "/complaints" },
+          ].map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link

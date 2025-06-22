@@ -1,6 +1,7 @@
 import React, { memo } from "react"
 import { Eye, UserCircle2, CheckCircle, Calendar, BadgeCheck, User } from "lucide-react"
 import { Staff, StaffRole } from "@/types/dearCareStaff.types"
+import { formatName } from "@/utils/formatters"
 
 type StaffTableProps = {
   staff: Staff[]
@@ -18,7 +19,7 @@ const StaffTableRow = memo(({ staff, onReviewDetails, roleColors, roleIcons }: {
   
   return (
     <tr className="hover:bg-gray-50">
-      <td className="py-4 px-6 text-gray-800 font-medium">{staff.name}</td>
+      <td className="py-4 px-6 text-gray-800 font-medium">{formatName(staff.name)}</td>
       <td className="py-4 px-6 text-gray-600">{staff.organization}</td>
       <td className="py-4 px-6">
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-gray-800 font-medium ${roleColors[role]}`}>
@@ -36,7 +37,7 @@ const StaffTableRow = memo(({ staff, onReviewDetails, roleColors, roleIcons }: {
         <button 
           className="px-3.5 py-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium inline-flex items-center gap-1.5"
           onClick={() => onReviewDetails(staff)}
-          aria-label={`Review details for ${staff.name}`}
+          aria-label={`Review details for ${formatName(staff.name)}`}
         >
           <Eye className="h-4 w-4" />
           Review Details
@@ -60,7 +61,7 @@ const StaffMobileCard = memo(({ staff, onReviewDetails, roleColors, roleIcons }:
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800">{staff.name}</h3>
+          <h3 className="font-semibold text-gray-800">{formatName(staff.name)}</h3>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${roleColors[role]}`}>
           <RoleIcon className="w-3.5 h-3.5" />
@@ -80,7 +81,7 @@ const StaffMobileCard = memo(({ staff, onReviewDetails, roleColors, roleIcons }:
       <button 
         className="w-full px-4 py-2.5 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
         onClick={() => onReviewDetails(staff)}
-        aria-label={`Review details for ${staff.name}`}
+        aria-label={`Review details for ${formatName(staff.name)}`}
       >
         <Eye className="h-4 w-4" />
         Review Details
