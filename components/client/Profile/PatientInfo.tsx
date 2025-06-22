@@ -6,6 +6,7 @@ import ImageViewer from '@/components/common/ImageViewer';
 import { Json, LabInvestigations, RecorderInfo } from '@/types/client.types'; 
 import { MapPin, Phone, Mail, Briefcase, User, Heart, Ruler, Weight, Users } from 'lucide-react';
 import { createMapLink } from '../../../utils/mapUtils';
+import { formatName } from '@/utils/formatters';
 
 interface PatientInfoProps {
   patient: {
@@ -83,7 +84,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
               <Users className="w-3 h-3 mr-1 text-blue-500" />
               Emergency Contact
             </p>
-            <p className="text-sm font-medium text-gray-800">{patient.emergencyContact.name}</p>
+            <p className="text-sm font-medium text-gray-800">{formatName(patient.emergencyContact.name)}</p>
             <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
               <span className="text-blue-600">{patient.emergencyContact.relation}</span> • 
               <span className="text-gray-700">{patient.emergencyContact.phone}</span>
@@ -163,7 +164,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
               {patient.requestor.profileImage ? (
                 <Image
                   src={patient.requestor.profileImage}
-                  alt={patient.requestor.name}
+                  alt={formatName(patient.requestor.name)}
                   fill
                   className="object-cover hover:scale-105 transition-transform"
                   sizes="(max-width: 768px) 56px, 56px"
@@ -175,7 +176,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
               )}
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">{patient.requestor.name}</p>
+              <p className="text-sm font-semibold text-gray-800">{formatName(patient.requestor.name)}</p>
               <p className="text-xs text-blue-600">{patient.requestor.relation}</p>
             </div>
           </div>
@@ -240,7 +241,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
       {patient.requestor.profileImage && (
         <ImageViewer
           src={patient.requestor.profileImage}
-          alt={patient.requestor.name}
+          alt={formatName(patient.requestor.name)}
           isOpen={isImageViewerOpen}
           onClose={() => setIsImageViewerOpen(false)}
         />

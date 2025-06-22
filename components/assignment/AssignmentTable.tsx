@@ -5,6 +5,7 @@ import { format } from "date-fns"
 import Link from "next/link"
 import { NurseAssignmentData } from "@/app/actions/shift-schedule-actions"
 import { AssignmentDetailsOverlay } from "./AssignmentDetailsOverlay"
+import { formatName } from "@/utils/formatters"
 
 type AssignmentTableProps = {
   assignments: NurseAssignmentData[]
@@ -41,14 +42,14 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <span className="font-medium">{fullName}</span>
+            <span className="font-medium">{formatName(fullName)}</span>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_id}</p>
           </div>
         </div>
       </td>
       <td className="py-4 px-6">
         <div className="space-y-1">
-          <div className="font-medium text-gray-800">{clientName}</div>
+          <div className="font-medium text-gray-800">{formatName(clientName)}</div>
           {clientType && (
             <div className="text-xs text-gray-500">{clientType}</div>
           )}
@@ -122,7 +123,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <h3 className="font-semibold text-gray-800">{fullName}</h3>
+            <h3 className="font-semibold text-gray-800">{formatName(fullName)}</h3>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_id}</p>
           </div>
         </div>
@@ -141,7 +142,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
             <Building className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
             <div>
               <p className="text-gray-500">Client:</p>
-              <div className="font-medium text-gray-800">{clientName}</div>
+              <div className="font-medium text-gray-800">{formatName(clientName)}</div>
               {clientType && (
                 <div className="text-xs text-gray-500">{clientType}</div>
               )}
