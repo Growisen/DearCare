@@ -13,7 +13,7 @@ import { useClientData } from '@/hooks/useClientData';
 import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationModal';
 import { dutyPeriodOptions, serviceOptions } from '../utils/constants';
-import { getServiceLabel } from '../utils/formatters';
+import { formatName, getServiceLabel } from '../utils/formatters';
 import ImageViewer from './common/ImageViewer';
 import ClientEditForm from './client/ClientEditFormOverlay';
 import { relationOptions } from '@/utils/constants';
@@ -209,7 +209,7 @@ export function ClientDetailsOverlay({
                   size="lg" 
                 />
                 <p className="text-sm font-medium mt-2 text-gray-700">Patient</p>
-                <p className="text-xs text-gray-500">{client.details?.patient_name || 'Unknown'}</p>
+                <p className="text-xs text-gray-500">{formatName(client.details?.patient_name || "") || 'Unknown'}</p>
               </div>
             )}
             
@@ -221,7 +221,7 @@ export function ClientDetailsOverlay({
                   size="lg" 
                 />
                 <p className="text-sm font-medium mt-2 text-gray-700">Requestor</p>
-                <p className="text-xs text-gray-500">{client.details?.requestor_name || 'Unknown'}</p>
+                <p className="text-xs text-gray-500">{formatName(client.details?.requestor_name || "") || 'Unknown'}</p>
               </div>
             )}
           </div>
@@ -235,7 +235,7 @@ export function ClientDetailsOverlay({
           <div className="space-y-4">
             <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DetailItem label="Name" value={client.details?.patient_name} />
+              <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
               <DetailItem label="Age" value={client.details?.patient_age} />
               <DetailItem label="Gender" value={client.details?.patient_gender} />
               <DetailItem label="Phone" value={client.details?.patient_phone} />
@@ -263,7 +263,7 @@ export function ClientDetailsOverlay({
           <div className="space-y-4">
             <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</h5>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DetailItem label="Name" value={client.details?.requestor_name} />
+              <DetailItem label="Name" value={formatName(client.details?.requestor_name || "")} />
               <DetailItem label="Relation to Patient" value={getRelationLabel(relationOptions, client.details?.relation_to_patient || '')} />
               <DetailItem label="Email" value={client.details?.requestor_email} />
               <DetailItem label="Phone" value={client.details?.requestor_phone} />
@@ -310,7 +310,7 @@ export function ClientDetailsOverlay({
         <div className="space-y-4">
           <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Organization Details</h5>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DetailItem label="Organization Name" value={client.details?.organization_name} />
+            <DetailItem label="Organization Name" value={formatName(client.details?.organization_name || "")} />
             <DetailItem label="Organization Type" value={client.details?.organization_type} />
             <DetailItem label="Contract Duration" value={client.details?.contract_duration} />
           </div>
@@ -319,7 +319,7 @@ export function ClientDetailsOverlay({
         <div className="space-y-4">
           <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Person</h5>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DetailItem label="Name" value={client.details?.contact_person_name} />
+            <DetailItem label="Name" value={formatName(client.details?.contact_person_name || "")} />
             <DetailItem label="Role" value={client.details?.contact_person_role} />
             <DetailItem label="Email" value={client.details?.contact_email} />
             <DetailItem label="Phone" value={client.details?.contact_phone} />

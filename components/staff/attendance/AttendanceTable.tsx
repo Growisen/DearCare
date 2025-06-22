@@ -2,6 +2,7 @@ import React, { memo } from "react"
 import { Clock, MapPin } from "lucide-react"
 import { AttendanceRecord } from "@/app/actions/attendance-actions"
 import LocationMap from "@/components/staff/attendance/LocationMap"
+import { formatDate, formatName } from "@/utils/formatters"
 
 type AttendanceTableProps = {
   attendanceData: AttendanceRecord[]
@@ -12,8 +13,8 @@ const AttendanceTableRow = memo(({ record }: {
 }) => {
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{record.nurseName}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{record.date}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatName(record.nurseName)}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatDate(record.date)}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
         <div className="space-y-1">
           <div className="flex items-center">
@@ -74,7 +75,7 @@ const AttendanceMobileCard = memo(({ record }: {
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800">{record.nurseName}</h3>
+          <h3 className="font-semibold text-gray-800">{formatName(record.nurseName)}</h3>
           <p className="text-sm text-gray-500 mt-1">{record.date}</p>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${

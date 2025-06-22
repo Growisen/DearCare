@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Calendar, User, AlarmClock, Clock, Check, AlertTriangle } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { LeaveRequest, LeaveRequestStatus } from '@/types/leave.types'
+import { formatName } from '@/utils/formatters'
 
 interface LeaveRequestModalProps {
   isOpen: boolean
@@ -158,7 +159,7 @@ export default function LeaveRequestModal({
                 Confirm Leave Approval
               </h3>
               <p className="text-sm text-gray-600 mb-2">
-                Are you sure you want to approve this leave request for <span className="font-medium">{leaveRequest.nurseName}</span>?
+                Are you sure you want to approve this leave request for <span className="font-medium">{formatName(leaveRequest.nurseName)}</span>?
               </p>
               <div className="bg-yellow-50 border border-yellow-100 rounded-md px-4 py-3 mt-2 flex items-start gap-2 text-left w-full">
                 <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />

@@ -2,6 +2,7 @@ import React from 'react'
 import { format, parseISO } from 'date-fns'
 import StatusBadge from '@/components/leaveManagement/StatusBadge'
 import { LeaveRequest } from '@/types/leave.types'
+import { formatName } from '@/utils/formatters'
 
 type LeaveRequestsCardsProps = {
   leaveRequests: LeaveRequest[]
@@ -74,7 +75,7 @@ export function LeaveRequestsCards({
           <div key={request.id} className="p-5 space-y-4 hover:bg-gray-50 transition-colors">
             <div className="flex justify-between">
               <div>
-                <h3 className="font-medium text-gray-900">{request.nurseName}</h3>
+                <h3 className="font-medium text-gray-900">{formatName(request.nurseName)}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{request.nurseId}</p>
               </div>
               <StatusBadge status={request.status} />

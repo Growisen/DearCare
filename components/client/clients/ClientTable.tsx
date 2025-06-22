@@ -1,7 +1,7 @@
 import React, { memo } from "react"
 import { Eye } from "lucide-react"
 import { CheckCircle, Clock, AlertCircle } from "lucide-react"
-import { getServiceLabel } from "@/utils/formatters"
+import { formatDate, formatName, getServiceLabel } from "@/utils/formatters"
 import { serviceOptions } from "@/utils/constants"
 import { Client, ClientFilters } from "@/types/client.types"
 
@@ -21,8 +21,8 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
   
   return (
     <tr className="hover:bg-gray-50">
-      <td className="py-4 px-6 text-gray-800 font-medium">{client.name}</td>
-      <td className="py-4 px-6 text-gray-600">{client.requestDate}</td>
+      <td className="py-4 px-6 text-gray-800 font-medium">{formatName(client.name)}</td>
+      <td className="py-4 px-6 text-gray-600">{formatDate(client.requestDate)}</td>
       <td className="py-4 px-6 text-gray-600">{getServiceLabel(serviceOptions, client.service || '')}</td>
       <td className="py-4 px-6">
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
@@ -64,7 +64,7 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800">{client.name}</h3>
+          <h3 className="font-semibold text-gray-800">{formatName(client.name)}</h3>
           <p className="text-sm text-gray-500 mt-1">{getServiceLabel(serviceOptions, client.service || '')}</p>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
@@ -75,7 +75,7 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
       
       <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
         <p className="text-gray-500">Request Date:</p>
-        <p className="text-gray-800 font-medium">{client.requestDate}</p>
+        <p className="text-gray-800 font-medium">{formatDate(client.requestDate)}</p>
         <p className="text-gray-500">Email:</p>
         <p className="text-gray-800 break-all">{client.email}</p>
         <p className="text-gray-500">Phone:</p>

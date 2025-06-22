@@ -3,6 +3,7 @@ import { format, parseISO } from 'date-fns'
 import { Eye, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { LeaveRequest } from '@/types/leave.types'
 import Loader from '../Loader'
+import { formatName } from '@/utils/formatters'
 
 type LeaveRequestsTableProps = {
   leaveRequests: LeaveRequest[]
@@ -29,7 +30,7 @@ const LeaveRequestRow = memo(({
     <tr className="hover:bg-gray-50">
       <td className="py-4 px-6">
         <div>
-          <div className="text-gray-800 font-medium">{request.nurseName}</div>
+          <div className="text-gray-800 font-medium">{formatName(request.nurseName)}</div>
           <div className="text-xs text-gray-500">{request.nurseId}</div>
         </div>
       </td>
@@ -87,7 +88,7 @@ const LeaveRequestMobileCard = memo(({
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800">{request.nurseName}</h3>
+          <h3 className="font-semibold text-gray-800">{formatName(request.nurseName)}</h3>
           <p className="text-sm text-gray-500 mt-1">{request.leaveType} ({request.leaveMode})</p>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[request.status] || statusColors.default}`}>

@@ -2,6 +2,7 @@ import { UserIcon, BuildingOffice2Icon, CalendarIcon, ClockIcon } from '@heroico
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { FormattedAssignmentDetails } from '@/hooks/useAssignment';
+import { formatName } from '@/utils/formatters';
 
 export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: FormattedAssignmentDetails }) {
   return (
@@ -19,7 +20,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
               href={`/nurses/${assignmentDetails.nurseDetails.id}`}
               className="text-blue-600 hover:text-blue-800 hover:underline"
             >
-              {assignmentDetails.nurseDetails.name}
+              {formatName(assignmentDetails.nurseDetails.name)}
             </Link>
           </div>
           <div>
@@ -41,7 +42,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
               href={assignmentDetails.clientDetails.clientProfileUrl || ""}
               className="text-blue-600 hover:text-blue-800 hover:underline"
             >
-              {assignmentDetails.clientDetails.name}
+              {formatName(assignmentDetails.clientDetails.name)}
             </Link>
           </div>
           <div>

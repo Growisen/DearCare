@@ -10,6 +10,7 @@ import { adminCheckInNurse, adminCheckOutNurse } from "@/app/actions/attendance-
  
 import ConfirmationModal from "@/components/common/ConfirmationModal"
 import { useDashboardData } from "@/hooks/useDashboardData"
+import { formatName } from "@/utils/formatters"
 
 type AssignmentDetailsOverlayProps = {
   assignment: NurseAssignmentData
@@ -151,7 +152,7 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
                 <div className="flex items-center">
                   <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
                   <div>
-                    <div className="text-gray-900 font-medium">{fullName}</div>
+                    <div className="text-gray-900 font-medium">{formatName(fullName)}</div>
                     <p className="text-sm text-gray-500">ID: {assignment.nurse_id}</p>
                   </div>
                 </div>
@@ -165,7 +166,7 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
                 <div className="flex items-start">
                   <Building className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
                   <div>
-                    <div className="text-gray-900 font-medium">{clientName}</div>
+                    <div className="text-gray-900 font-medium">{formatName(clientName)}</div>
                     {clientType && <p className="text-sm text-gray-500">{clientType}</p>}
                   </div>
                 </div>

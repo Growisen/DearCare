@@ -10,6 +10,7 @@ import {
   usePhoneValidation,
   useAddressValidation
 } from "@/hooks/useValidation";
+import { formatName } from "@/utils/formatters";
 
 type StaffDetailsOverlayProps = {
   staff: Staff;
@@ -248,7 +249,7 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                     )}
                   </div>
                 ) : (
-                  <h3 className="text-lg font-semibold text-gray-800">{staff.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">{formatName(staff.name)}</h3>
                 )}
               </div>
               
@@ -503,7 +504,7 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Deletion</h3>
             <p className="text-gray-700 mb-4">
-              Are you sure you want to delete {staff.name}? This action cannot be undone.
+              Are you sure you want to delete {formatName(staff.name)}? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
