@@ -24,6 +24,7 @@ export default function AssignmentsPage() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     isExporting,
     handleSearch,
     handleStatusChange,
@@ -80,6 +81,7 @@ export default function AssignmentsPage() {
               totalPages={totalPages}
               totalCount={totalCount}
               pageSize={pageSize}
+              setPageSize={handlePageSizeChange}
               itemsLength={assignments.length}
               onPageChange={handlePageChange}
               onPreviousPage={handlePreviousPage}

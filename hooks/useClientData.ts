@@ -81,6 +81,11 @@ export function useClientData() {
     setCurrentPage(1);
   };
 
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
@@ -118,6 +123,7 @@ export function useClientData() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,

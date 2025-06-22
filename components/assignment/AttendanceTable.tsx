@@ -2,6 +2,8 @@ import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { PaginationControls } from '@/components/client/clients/PaginationControls';
 import { AttendanceRecord } from '@/hooks/useAssignment';
+import { useState } from 'react';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
 
 function formatTime(timeString: string | null) {
   if (!timeString) return "—";
@@ -45,9 +47,11 @@ export function AttendanceTable({
   totalPages,
   recordsCount,
   pageSize,
+  handlePageSizeChange,
   handlePreviousPage,
   handleNextPage,
   handlePageChange,
+  handleUnmarkAttendance,
 }: {
   attendanceRecords: AttendanceRecord[];
   tableLoading: boolean;
@@ -56,10 +60,36 @@ export function AttendanceTable({
   totalPages: number;
   recordsCount: number;
   pageSize: number;
+  handlePageSizeChange: (newSize: number) => void;
   handlePreviousPage: () => void;
   handleNextPage: () => void;
   handlePageChange: (page: number) => void;
+  handleUnmarkAttendance: (date: string) => Promise<void>;
 }) {
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  const openDeleteConfirmation = (date: string) => {
+    setRecordToDelete(date);
+    setConfirmationOpen(true);
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!recordToDelete) return;
+    
+    setDeleteLoading(true);
+    await handleUnmarkAttendance(recordToDelete);
+    setDeleteLoading(false);
+    setConfirmationOpen(false);
+    setRecordToDelete(null);
+  };
+  
+  const cancelDelete = () => {
+    setConfirmationOpen(false);
+    setRecordToDelete(null);
+  };
+
   if (tableLoading) {
     return (
       <div className="animate-pulse">
@@ -163,6 +193,14 @@ export function AttendanceTable({
                         Mark Attendance
                       </button>
                     )}
+                    {(record.status?.toLowerCase() !== 'absent') && (
+                      <button
+                        className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition"
+                        onClick={() => openDeleteConfirmation(record.date)}
+                      >
+                        Unmark Attendance
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
@@ -177,6 +215,7 @@ export function AttendanceTable({
             totalPages={totalPages}
             totalCount={recordsCount}
             pageSize={pageSize}
+            setPageSize={handlePageSizeChange}
             itemsLength={attendanceRecords.length}
             onPageChange={handlePageChange}
             onPreviousPage={handlePreviousPage}
@@ -184,6 +223,18 @@ export function AttendanceTable({
           />
         )}
       </div>
+
+
+      <ConfirmationModal
+        isOpen={confirmationOpen}
+        title="Unmark Attendance"
+        message="Are you sure you want to remove this attendance record? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={cancelDelete}
+        confirmButtonText="Remove"
+        confirmButtonColor="red"
+        isLoading={deleteLoading}
+      />
     </>
   );
 }

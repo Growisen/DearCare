@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { SupportingMedia } from "@/types/complaint.types";
 
 interface MediaRendererProps {
@@ -16,10 +17,12 @@ export default function MediaRenderer({ media }: MediaRendererProps) {
             className="relative h-40 w-full cursor-pointer rounded-md overflow-hidden border border-gray-200"
             onClick={() => setShowFullImage(true)}
           >
-            <img 
+            <Image 
               src={media.url} 
               alt={media.fileName} 
-              className="h-full w-full object-cover hover:opacity-90 transition"
+              fill
+              sizes="(max-width: 768px) 100vw, 400px"
+              className="object-cover hover:opacity-90 transition"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 p-2">
               <p className="text-white text-xs truncate">{media.fileName}</p>
@@ -39,11 +42,16 @@ export default function MediaRenderer({ media }: MediaRendererProps) {
                 >
                   Close &times;
                 </button>
-                <img 
-                  src={media.url} 
-                  alt={media.fileName} 
-                  className="max-h-[85vh] max-w-full object-contain"
-                />
+                <div className="relative w-full h-[85vh]">
+                  <Image 
+                    src={media.url} 
+                    alt={media.fileName}
+                    fill
+                    sizes="(max-width: 1536px) 100vw, 1536px" 
+                    className="object-contain"
+                    priority={true}
+                  />
+                </div>
               </div>
             </div>
           )}

@@ -36,6 +36,7 @@ export default function ClientsPage() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
@@ -119,6 +120,7 @@ export default function ClientsPage() {
                 totalPages={totalPages}
                 totalCount={totalCount}
                 pageSize={pageSize}
+                setPageSize={handlePageSizeChange}
                 itemsLength={clients.length}
                 onPageChange={handlePageChange}
                 onPreviousPage={handlePreviousPage}

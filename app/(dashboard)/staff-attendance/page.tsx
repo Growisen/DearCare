@@ -22,14 +22,14 @@ export default function StaffAttendancePage() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isExporting, setIsExporting] = useState(false)
   
   useEffect(() => {
     loadAttendanceData();
-  }, [selectedDate, currentPage]); // Add currentPage dependency
+  }, [selectedDate, currentPage, pageSize]);
   
   const loadAttendanceData = async () => {
     setLoading(true);
@@ -91,6 +91,11 @@ export default function StaffAttendancePage() {
     setSelectedDate(e.target.value);
     setCurrentPage(1);
   };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -241,6 +246,7 @@ export default function StaffAttendancePage() {
               totalPages={totalPages}
               totalCount={totalCount}
               pageSize={pageSize}
+              setPageSize={handlePageSizeChange}
               itemsLength={filteredData.length}
               onPageChange={handlePageChange}
               onPreviousPage={handlePreviousPage}

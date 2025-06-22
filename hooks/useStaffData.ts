@@ -12,7 +12,6 @@ export function useStaffData() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(10);
   
   const fetchData = useCallback(async () => {
@@ -77,6 +76,11 @@ export function useStaffData() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
   
   const handlePreviousPage = useCallback(() => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -106,6 +110,7 @@ export function useStaffData() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,

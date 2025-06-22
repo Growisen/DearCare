@@ -11,7 +11,7 @@ export const useComplaints = () => {
   const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus | 'all'>('all');
   const [selectedSource, setSelectedSource] = useState<ComplaintSource | 'all'>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(10);
   
 
   useEffect(() => {
@@ -109,6 +109,11 @@ export const useComplaints = () => {
   const handleExport = () => {
     exportMutation();
   };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
   
   const goToPage = (page: number) => {
     setCurrentPage(page);
@@ -148,6 +153,7 @@ export const useComplaints = () => {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     itemsLength: complaints.length,
     handleStatusChange,
     handleSourceChange,
