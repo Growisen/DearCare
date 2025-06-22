@@ -1044,3 +1044,70 @@ export async function markAttendance({
     };
   }
 }
+
+
+export interface UnmarkAttendanceParams {
+  id?: number;
+  assignmentId?: number;
+  date?: string;
+}
+
+export async function unmarkAttendance({
+  id,
+  assignmentId,
+  date,
+}: UnmarkAttendanceParams): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    let recordId = id;
+
+    if (!recordId) {
+      if (!assignmentId || !date) {
+        return { 
+          success: false, 
+          message: 'Either record ID or both assignment ID and date must be provided' 
+        };
+      }
+
+      const { data: existing, error: fetchError } = await supabase
+        .from('attendence_individual')
+        .select('id')
+        .eq('assigned_id', assignmentId)
+        .eq('date', date)
+        .maybeSingle();
+
+      if (fetchError) {
+        return { success: false, message: fetchError.message };
+      }
+
+      if (!existing) {
+        return { 
+          success: false, 
+          message: 'No attendance record found for the specified date' 
+        };
+      }
+
+      recordId = existing.id;
+    }
+
+    const { error: deleteError } = await supabase
+      .from('attendence_individual')
+      .delete()
+      .eq('id', recordId);
+
+    if (deleteError) {
+      return { success: false, message: deleteError.message };
+    }
+
+    return { success: true, message: 'Attendance record deleted successfully' };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to delete attendance record',
+    };
+  }
+}

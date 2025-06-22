@@ -33,6 +33,7 @@ export default function StaffPage() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
@@ -104,6 +105,7 @@ export default function StaffPage() {
                 totalPages={totalPages}
                 totalCount={totalCount}
                 pageSize={pageSize}
+                setPageSize={handlePageSizeChange}
                 itemsLength={staff.length}
                 onPageChange={handlePageChange}
                 onPreviousPage={handlePreviousPage}

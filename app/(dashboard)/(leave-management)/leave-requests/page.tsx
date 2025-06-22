@@ -9,7 +9,7 @@ import { LeaveRequest } from '@/types/leave.types'
 
 import { LeaveRequestsHeader } from '@/components/leaveManagement/LeaveRequestsHeader'
 import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTable'
-import { PaginationControls } from '@/components/leaveManagement/PaginationControls'
+import { PaginationControls } from '@/components/client/clients/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
 import { exportLeaveRequests } from '@/app/actions/leave-management'
 
@@ -127,6 +127,18 @@ export default function LeaveRequestsPage() {
     setCurrentPage(1)
   }
 
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
   const handleSearch = () => {
     applySearch()
   }
@@ -222,7 +234,9 @@ export default function LeaveRequestsPage() {
               pageSize={pageSize}
               itemsLength={leaveRequests.length}
               onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
+              setPageSize={handlePageSizeChange}
             />
           </div>
         )}

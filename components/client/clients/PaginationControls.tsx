@@ -9,6 +9,7 @@ type PaginationControlsProps = {
   onPageChange: (page: number) => void
   onPreviousPage: () => void
   onNextPage: () => void
+  setPageSize?: (size: number) => void
 }
 
 export function PaginationControls({
@@ -16,6 +17,7 @@ export function PaginationControls({
   totalPages,
   totalCount,
   pageSize,
+  setPageSize,
   itemsLength,
   onPageChange,
   onPreviousPage,
@@ -23,10 +25,31 @@ export function PaginationControls({
 }: PaginationControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-5 px-6 border-t border-gray-200 bg-gray-50">
-      <div className="text-sm text-gray-600">
-        Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}-
-        {Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> records
+      <div className="flex flex-col sm:flex-row items-center gap-2">
+        <div className="text-sm text-gray-600">
+          Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}-
+          {Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> records
+        </div>
+        
+        {setPageSize && (
+          <div className="flex items-center gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
+            <label htmlFor="page-size" className="text-sm text-gray-600">
+              Show:
+            </label>
+            <select
+              id="page-size"
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="block w-20 rounded-md border border-gray-300 py-1.5 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        )}
       </div>
+      
       <div className="flex items-center gap-2">
         <button
           onClick={onPreviousPage}
