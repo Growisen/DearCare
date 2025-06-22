@@ -4,12 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Loader from '@/components/Loader'
-import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
+import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails, deleteNurse } from '@/app/actions/add-nurse';
 import Link from 'next/link';
-// import Link from 'next/link';
 
 const NurseProfilePage: React.FC = () => {
-  const params = useParams()
+  const params = useParams();
   const [nurse, setNurse] = useState<SimplifiedNurseDetails | null>(null)
   const [assignments, setAssignments] = useState<NurseAssignmentWithClient[] | null>(null)
   const [loading, setLoading] = useState(true)
@@ -65,6 +64,20 @@ const NurseProfilePage: React.FC = () => {
     return age;
   };
 
+  // Delete handler
+  const handleDelete = async () => {
+    if (!params.id) return;
+    if (!confirm('Are you sure you want to delete this nurse? This action cannot be undone.')) return;
+    try {
+      const response = await deleteNurse(Number(params.id));
+      if (response?.error) throw new Error(response.error);
+      // Redirect after delete (adjust path as needed)
+      window.location.href = '/nurses';
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete nurse');
+    }
+  };
+
   if (loading) return <Loader />
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>
   if (!nurse) return <div className="p-4">No nurse found</div>
@@ -82,15 +95,27 @@ const NurseProfilePage: React.FC = () => {
           <div className="bg-gradient-to-r from-blue-50 to-white border-b border-gray-200 px-6 py-4">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-xl font-semibold text-gray-800">Nurse Profile</h1>
-              <Link 
-                href={`/nurses/${basicInfo.nurse_id}/edit`}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-                Edit Profile
-              </Link>
+              <div className="flex gap-2">
+                <Link 
+                  href={`/nurses/${basicInfo.nurse_id}/edit`}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit Profile
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+                  type="button"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Delete Nurse
+                </button>
+              </div>
             </div>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-col md:flex-row items-center gap-4">
@@ -677,7 +702,7 @@ const NurseProfilePage: React.FC = () => {
                                   <div className="flex">
                                     <span className="text-sm font-medium w-32 text-gray-500 flex items-center">
                                       <svg className="w-3.5 h-3.5 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 002 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                       </svg>
                                       Service:
                                     </span>

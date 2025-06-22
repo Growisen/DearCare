@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/Loader'
 import Image from 'next/image';
-import { fetchNurseDetailsmain, SimplifiedNurseDetails } from '@/app/actions/add-nurse';
+import { fetchNurseDetailsmain, SimplifiedNurseDetails, updateNurse } from '@/app/actions/add-nurse';
+//import { update } from '@/app/actions/update-nurse'; // Adjust the import path as needed
 
 // Optimized interfaces
 interface TempFile { file: File; preview: string; }
@@ -215,7 +216,7 @@ DocumentUploader.displayName = 'DocumentUploader';
 const EditNurseProfilePage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
-  const id = params.id;
+  const id =  Number(params.id); 
   
   // State declarations
   const [nurse, setNurse] = useState<SimplifiedNurseDetails | null>(null);
@@ -447,24 +448,15 @@ const EditNurseProfilePage: React.FC = () => {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData) return;
-    
+
     setSaving(true);
-    
+
     try {
-      const formDataForUpload = new FormData();
-      formDataForUpload.append('nurseData', JSON.stringify(formData));
-      
-      // Append all temp files
-      Object.entries(tempFiles).forEach(([docType, files]) => {
-        files.forEach((file, i) => formDataForUpload.append(`${docType}_${i}`, file.file));
-      });
-      
-      const response = await fetch(`/api/nurses/${id}`, {
-        method: 'PUT',
-        body: formDataForUpload,
-      });
-      
-      if (!response.ok) throw new Error('Failed to update nurse profile');
+      // Call your update function instead of fetch
+      // Adjust arguments as per your update function's signature
+      const response = await updateNurse(id, formData, tempFiles);
+
+      if (response?.error) throw new Error(response.error);
       router.push(`/nurses/${id}`);
     } catch (error) {
       console.error('Error saving profile:', error);
