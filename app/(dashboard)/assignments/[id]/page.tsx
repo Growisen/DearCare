@@ -17,6 +17,7 @@ export default function AssignmentDetailsPage() {
     recordsCount,
     currentPage,
     pageSize,
+    handlePageSizeChange,
     handlePreviousPage,
     handleNextPage,
     tableLoading,
@@ -31,6 +32,7 @@ export default function AssignmentDetailsPage() {
     attendanceLoading,
     attendanceError,
     handleMarkAttendance,
+    handleUnmarkAttendance
   } = useAssignment(id);
 
   const totalPages = Math.ceil(recordsCount / pageSize);
@@ -109,9 +111,11 @@ export default function AssignmentDetailsPage() {
             totalPages={totalPages}
             recordsCount={recordsCount}
             pageSize={pageSize}
+            handlePageSizeChange={handlePageSizeChange}
             handlePreviousPage={handlePreviousPage}
             handleNextPage={handleNextPage}
             handlePageChange={handlePageChange}
+            handleUnmarkAttendance={handleUnmarkAttendance}
           />
         </div>
       </div>

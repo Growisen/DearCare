@@ -78,7 +78,7 @@ export function useAssignmentData() {
   const [dateFilter, setDateFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10)
   const [isExporting, setIsExporting] = useState(false)
 
 
@@ -139,6 +139,11 @@ export function useAssignmentData() {
 
   const handleStatusChange = (status: 'all' | 'active' | 'completed' | 'upcoming') => {
     setFilterStatus(status)
+    setCurrentPage(1)
+  }
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
     setCurrentPage(1)
   }
 
@@ -249,6 +254,7 @@ export function useAssignmentData() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     isExporting,
     handleSearch,
     handleStatusChange,

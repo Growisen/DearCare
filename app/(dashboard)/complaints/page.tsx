@@ -23,6 +23,7 @@ export default function ComplaintsPage() {
     totalPages,
     totalCount,
     pageSize,
+    handlePageSizeChange,
     itemsLength,
     handleStatusChange,
     handleSourceChange,
@@ -77,6 +78,7 @@ export default function ComplaintsPage() {
               totalPages={totalPages}
               totalCount={totalCount}
               pageSize={pageSize}
+              setPageSize={handlePageSizeChange}
               itemsLength={itemsLength}
               onPageChange={goToPage}
               onPreviousPage={goToPreviousPage}

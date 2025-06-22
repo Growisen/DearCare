@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAssignmentById } from '../app/actions/shift-schedule-actions';
-import { getAttendanceRecords, markAttendance } from '../app/actions/attendance-actions';
+import { getAttendanceRecords, markAttendance, unmarkAttendance } from '../app/actions/attendance-actions';
 import { differenceInMonths, parseISO } from 'date-fns';
 import { format12HourTime } from '@/utils/formatters';
 import { getProfileUrl } from '@/app/actions/complaints-actions';
@@ -115,7 +115,7 @@ const calculateWeeklyHours = (startTime: string, endTime: string): string => {
 export function useAssignment(id: string) {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [checkIn, setCheckIn] = useState('');
@@ -224,6 +224,11 @@ export function useAssignment(id: string) {
     queryClient.invalidateQueries({ queryKey: ['attendance', id] });
   };
 
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -288,6 +293,33 @@ export function useAssignment(id: string) {
     }
   }, [selectedRecord, checkIn, checkOut, assignmentDetails?.id, closeModal, refreshData]);
 
+
+  const handleUnmarkAttendance = useCallback(async (attendanceDate: string) => {
+    if (!assignmentDetails) return;
+    
+    setAttendanceLoading(true);
+    try {
+      const res = await unmarkAttendance({
+        assignmentId: assignmentDetails.id,
+        date: attendanceDate
+      });
+
+      if (!res.success) {
+        toast.error(res.message || 'Failed to delete attendance record');
+        setAttendanceLoading(false);
+        return;
+      }
+      
+      toast.success('Attendance record deleted successfully');
+      refreshData();
+    } catch (error) {
+      toast.error('Failed to delete attendance record');
+      console.error('Error removing attendance:', error);
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }, [assignmentDetails, refreshData]);
+
   return {
     loading: assignmentLoading,
     error: assignmentError ? (assignmentError instanceof Error ? assignmentError.message : 'An unknown error occurred') : null,
@@ -296,6 +328,7 @@ export function useAssignment(id: string) {
     recordsCount,
     currentPage,
     pageSize,
+    handlePageSizeChange,
     handlePreviousPage,
     handleNextPage,
     tableLoading,
@@ -312,5 +345,6 @@ export function useAssignment(id: string) {
     attendanceLoading,
     attendanceError,
     handleMarkAttendance,
+    handleUnmarkAttendance
   };
 }
