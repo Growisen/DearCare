@@ -969,6 +969,170 @@ export async function updateNurseStatus(
   }
 }
 
+export async function deleteNurse(nurseId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // 1. Delete nurse images/documents from storage
+    const folders = [
+      'image',
+      'adhar',
+      'Educational_Certificates',
+      'Experience_Certificates',
+      'Noc_Certificate',
+      'ration_card'
+    ];
+    for (const folder of folders) {
+      // List files for this nurse in the folder
+      const { data: files, error: listError } = await supabase
+        .storage
+        .from('DearCare')
+        .list(`Nurses/${folder}`, { search: nurseId.toString() });
+      if (listError) continue;
+      if (files && files.length > 0) {
+        for (const file of files) {
+          if (file.name.startsWith(nurseId.toString())) {
+            await supabase.storage.from('DearCare').remove([`Nurses/${folder}/${file.name}`]);
+          }
+        }
+      }
+    }
+
+    // 2. Delete from nurse_health
+    await supabase
+      .from('nurse_health')
+      .delete()
+      .eq('nurse_id', nurseId);
+
+    // 3. Delete from nurse_references
+    await supabase
+      .from('nurse_references')
+      .delete()
+      .eq('nurse_id', nurseId);
+
+    // 4. Delete from nurses (main table)
+    const { error } = await supabase
+      .from('nurses')
+      .delete()
+      .eq('nurse_id', nurseId);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting nurse:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete nurse'
+    };
+  }
+}
+
+export async function updateNurse(
+  nurseId: number,
+  formData: SimplifiedNurseDetails,
+  tempFiles?: Record<string, { file: File; preview: string }[]>
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // 1. Update nurse basic info (all fields from your Row type)
+    const { error: basicError } = await supabase
+      .from('nurses')
+      .update({
+        first_name: formData.basic.first_name,
+        last_name: formData.basic.last_name,
+        email: formData.basic.email,
+        phone_number: formData.basic.phone_number,
+        gender: formData.basic.gender,
+        date_of_birth: formData.basic.date_of_birth,
+        address: formData.basic.address,
+        city: formData.basic.city,
+        state: formData.basic.state,
+        pin_code: formData.basic.pin_code ? Number(formData.basic.pin_code) : null,
+        languages: formData.basic.languages,
+        experience: formData.basic.experience ? Number(formData.basic.experience) : null,
+        service_type: formData.basic.service_type,
+        shift_pattern: formData.basic.shift_pattern,
+        category: formData.basic.category,
+        status: formData.basic.status,
+        marital_status: formData.basic.marital_status,
+        religion: formData.basic.religion,
+        mother_tongue: formData.basic.mother_tongue,
+        // If you have taluk, nurse_reg_no, noc_status, admitted_type, created_at, add them here as needed
+        taluk: (formData as any).basic.taluk ?? null,
+        nurse_reg_no: (formData as any).basic.nurse_reg_no ?? null,
+        noc_status: (formData as any).basic.noc_status ?? null,
+        admitted_type: (formData as any).basic.admitted_type ?? null,
+        created_at: (formData as any).basic.created_at ?? undefined,
+      })
+      .eq('nurse_id', nurseId);
+
+    if (basicError) throw basicError;
+
+    // 2. Update health info
+    if (formData.health) {
+      await supabase
+        .from('nurse_health')
+        .update({
+          health_status: formData.health.health_status,
+          disability: formData.health.disability,
+          source: formData.health.source,
+        })
+        .eq('nurse_id', nurseId);
+    }
+
+    // 3. Update references
+    if (formData.references) {
+      await supabase
+        .from('nurse_references')
+        .update({
+          referer_name: formData.references.referer_name,
+          phone_number: formData.references.phone_number,
+          relation: formData.references.relation,
+          description: formData.references.description,
+          family_references: formData.references.family_references,
+        })
+        .eq('nurse_id', nurseId);
+    }
+
+    // 4. Handle document uploads (if any)
+    if (tempFiles) {
+      const uploadFile = async (file: File, folder: string) => {
+        const extension = file.name.split('.').pop();
+        const fileName = `${nurseId}.${extension}`;
+        return supabase.storage
+          .from('DearCare')
+          .upload(`Nurses/${folder}/${fileName}`, file, {
+            cacheControl: '3600',
+            upsert: true,
+          });
+      };
+
+      for (const [docType, files] of Object.entries(tempFiles)) {
+        if (files && files.length > 0) {
+          // Only upload the first file for single-file fields
+          let folder = docType;
+          if (docType === 'profile_image') folder = 'image';
+          if (docType === 'educational') folder = 'Educational_Certificates';
+          if (docType === 'experience') folder = 'Experience_Certificates';
+          if (docType === 'noc') folder = 'Noc_Certificate';
+          if (docType === 'ration') folder = 'ration_card';
+          await uploadFile(files[0].file, folder);
+        }
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating nurse:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update nurse',
+    };
+  }
+}
+
 export async function listNursesWithAssignments(
   paginationParams?: { page: number; pageSize: number },
   filterParams?: { status?: string; city?: string; admittedType?: string }
