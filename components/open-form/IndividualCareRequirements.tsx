@@ -32,6 +32,7 @@ export const IndividualCareRequirements = ({ formData, handleInputChange, formEr
     { value: 'stroke_care', label: 'Stroke Care' },
     { value: 'orthopedic_care', label: 'Orthopedic Care' },
     { value: 'on_call_doctor_nurse', label: 'On Call Doctor/Nurse At-Home' },
+    { value: 'home_maid', label: 'Home Maid' }
   ];
 
   return (
