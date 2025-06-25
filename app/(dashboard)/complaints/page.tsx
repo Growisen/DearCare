@@ -73,17 +73,19 @@ export default function ComplaintsPage() {
               onViewComplaint={handleViewComplaint}
             />
             
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              setPageSize={handlePageSizeChange}
-              itemsLength={itemsLength}
-              onPageChange={goToPage}
-              onPreviousPage={goToPreviousPage}
-              onNextPage={goToNextPage}
-            />
+            {complaints.length > 0 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={pageSize}
+                setPageSize={handlePageSizeChange}
+                itemsLength={itemsLength}
+                onPageChange={goToPage}
+                onPreviousPage={goToPreviousPage}
+                onNextPage={goToNextPage}
+              />
+            )}
           </>
         )}
       </div>

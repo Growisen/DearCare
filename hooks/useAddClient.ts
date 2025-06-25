@@ -169,6 +169,14 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   };
 
   const validateAge = (age: string): string => {
+
+    const monthMatch = age.match(/^(\d{1,2})\s*months?$/i);
+    if (monthMatch) {
+      const months = Number(monthMatch[1]);
+      if (months < 1 || months > 12) return 'Please enter a valid age in months (1-12)';
+      return '';
+    }
+    
     const ageNum = Number(age);
     if (isNaN(ageNum)) return 'Age must be a number';
     if (ageNum <= 0 || ageNum > 120) return 'Please enter a valid age';
