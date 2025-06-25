@@ -25,8 +25,9 @@ export const serviceOptions = [
   { value: 'stroke_care', label: 'Stroke Care' },
   { value: 'orthopedic_care', label: 'Orthopedic Care' },
   { value: 'on_call_doctor_nurse', label: 'On Call Doctor/Nurse At-Home' },
+  { value: 'baby_care', label: 'Baby Care' },
+  { value: 'home_maid', label: 'Home Maid Services' },
 ];
-
 
 export const equipmentCategories = {
   bedriddenEquipment: [
