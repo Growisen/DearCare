@@ -12,9 +12,17 @@ interface RequestorInfoFormProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleBlur: (id: string) => void;
   handleProfileImageChange: (field: 'requestorProfilePic' | 'patientProfilePic', file: File | null) => void;
+  serviceType?: string; 
 }
 
-export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileImageChange, formErrors, handleBlur }: RequestorInfoFormProps) => {
+export const RequestorInfoForm = ({ 
+  formData, 
+  handleInputChange, 
+  handleProfileImageChange, 
+  formErrors, 
+  handleBlur,
+  serviceType 
+}: RequestorInfoFormProps) => {
   return (
     <div className="mb-8 border-b border-gray-200 pb-6">
       <h2 className="text-lg font-medium text-gray-900 mb-4">Requestor Information</h2>
@@ -51,28 +59,30 @@ export const RequestorInfoForm = ({ formData, handleInputChange, handleProfileIm
           error={formErrors.requestorEmail}
           required
         />
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="relationToPatient">
-            Relation to Patient 
-            {/* <span className="text-red-500">*</span> */}
-          </label>
-          <select 
-            id="relationToPatient" 
-            value={formData.relationToPatient} 
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('relationToPatient')} 
-            className={`w-full border ${formErrors.relationToPatient ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-          >
-            {relationOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {formErrors.relationToPatient && (
-            <p className="mt-1 text-sm text-red-600">{formErrors.relationToPatient}</p>
-          )}
-        </div>
+        
+        {serviceType !== 'home_maid' && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="relationToPatient">
+              Relation to Patient
+            </label>
+            <select 
+              id="relationToPatient" 
+              value={formData.relationToPatient} 
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('relationToPatient')} 
+              className={`w-full border ${formErrors.relationToPatient ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            >
+              {relationOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {formErrors.relationToPatient && (
+              <p className="mt-1 text-sm text-red-600">{formErrors.relationToPatient}</p>
+            )}
+          </div>
+        )}
         
         <InputField 
           label="Your Address" 

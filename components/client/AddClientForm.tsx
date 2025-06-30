@@ -70,16 +70,7 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
       {/* Conditional Form Fields */}
       {clientType === 'individual' ? (
         <>
-          {/* Requestor Information */}
-          <RequestorInfoForm 
-            formData={formData} 
-            formErrors={formErrors}
-            handleInputChange={handleInputChange}
-            handleBlur={handleBlur}
-            handleProfileImageChange={handleProfileImageChange}
-          />
-          
-          {/* Care Requirements - Moved before Patient Info */}
+          {/* Care Requirements - Moved to top */}
           <div className="mb-8 border-b border-gray-200 pb-6">
             <IndividualCareRequirements 
               formData={formData}
@@ -88,6 +79,16 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
               handleInputChange={handleInputChange} 
             />
           </div>
+          
+          {/* Requestor Information */}
+          <RequestorInfoForm 
+            formData={formData} 
+            formErrors={formErrors}
+            handleInputChange={handleInputChange}
+            handleBlur={handleBlur}
+            handleProfileImageChange={handleProfileImageChange}
+            serviceType={formData.serviceRequired}
+          />
           
           {/* Patient Information - Only show if service is NOT home_maid */}
           {formData.serviceRequired !== 'home_maid' && (

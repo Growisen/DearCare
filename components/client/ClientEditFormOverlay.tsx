@@ -17,8 +17,23 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
   const activeElementRef = useRef<string | null>(null);
   const activeElementSelectionStart = useRef<number | null>(null);
   const activeElementSelectionEnd = useRef<number | null>(null);
+  
+  // New state for baby age handling
+  const [isLessThanOneYear, setIsLessThanOneYear] = useState(false);
 
   const isIndividual = client.client_type === 'individual';
+  const isBabyCare = isIndividual && (formData as DetailedClientIndividual).details?.service_required === 'baby_care';
+
+  // Detect if age is in months format when component loads
+  useEffect(() => {
+    if (isBabyCare && isIndividual) {
+      const details = (client as DetailedClientIndividual).details || {};
+      const ageValue = details.patient_age?.toString() || '';
+      const isMonthFormat = /\d+\s*months?$/.test(ageValue);
+      setIsLessThanOneYear(isMonthFormat);
+    }
+  // Only run when client or isBabyCare changes, not on every formData change
+  }, [client, isBabyCare]);
 
   const saveActiveElementState = () => {
     if (document.activeElement instanceof HTMLInputElement || 
@@ -42,6 +57,17 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     }
   }, [formData]);
 
+  // Extract numeric month value from formatted string
+  const getSelectedMonth = () => {
+    if (isIndividual) {
+      const details = (formData as DetailedClientIndividual).details || {};
+      const ageValue = details.patient_age?.toString() || '';
+      const match = ageValue.match(/^(\d+)/);
+      return match ? match[1] : '';
+    }
+    return '';
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
@@ -51,7 +77,19 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       const [parent, child] = name.split('.');
       setFormData(prevData => {
         const parentObj = { ...(prevData[parent as keyof typeof prevData] as Record<string, string | number | boolean | null | undefined> || {}) };
-        parentObj[child] = value;
+        
+        // Special handling for baby age in months
+        if (isBabyCare && child === 'patient_age' && isLessThanOneYear) {
+          const monthValue = parseInt(value);
+          if (!isNaN(monthValue)) {
+            parentObj[child] = `${monthValue} ${monthValue === 1 ? 'month' : 'months'}`;
+          } else {
+            parentObj[child] = value;
+          }
+        } else {
+          parentObj[child] = value;
+        }
+        
         return {
           ...prevData,
           [parent]: parentObj
@@ -62,6 +100,25 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
         ...prevData,
         [name]: value
       }));
+    }
+  };
+
+  // Handle age group toggle
+  const handleAgeGroupChange = (isMonths: boolean) => {
+    setIsLessThanOneYear(isMonths);
+
+    // Always reset age value when switching between months and years
+    if (isIndividual) {
+      setFormData(prevData => {
+        const prevIndividual = prevData as DetailedClientIndividual;
+        const details = { ...(prevIndividual.details || {}) };
+        // Always clear patient_age when toggling
+        details.patient_age = '';
+        return {
+          ...prevData,
+          details
+        };
+      });
     }
   };
 
@@ -155,7 +212,8 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     onChange, 
     options = [],
     placeholder = '',
-    required = false
+    required = false,
+    min
   }: { 
     label: string; 
     name: string; 
@@ -165,6 +223,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     options?: Array<{value: string; label: string}>;
     placeholder?: string;
     required?: boolean;
+    min?: number;
   }) => {
     const inputId = name.replace('.', '_');
     
@@ -211,6 +270,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             placeholder={placeholder}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 bg-white"
             required={required}
+            min={min}
           />
         )}
       </div>
@@ -223,62 +283,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     
     return (
       <>
-        {/* Patient Information */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-            <div className="space-y-4">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField label="Patient Name" name="details.patient_name" value={details.patient_name} onChange={handleInputChange} />
-                <FormField label="Patient Age" name="details.patient_age" type="number" value={details.patient_age} onChange={handleInputChange} />
-                <FormField 
-                  label="Patient Gender" 
-                  name="details.patient_gender" 
-                  type="select" 
-                  value={details.patient_gender} 
-                  onChange={handleInputChange}
-                  options={[
-                    { value: 'male', label: 'Male' },
-                    { value: 'female', label: 'Female' },
-                    { value: 'other', label: 'Other' }
-                  ]}
-                />
-                <FormField label="Patient Phone" name="details.patient_phone" value={details.patient_phone} onChange={handleInputChange} />
-                <FormField 
-                  label="Preferred Caregiver Gender" 
-                  name="details.preferred_caregiver_gender" 
-                  type="select" 
-                  value={details.preferred_caregiver_gender} 
-                  onChange={handleInputChange}
-                  options={[
-                    { value: 'male', label: 'Male' },
-                    { value: 'female', label: 'Female' },
-                    { value: 'any', label: 'Any' }
-                  ]}
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Address</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField 
-                  label="Address" 
-                  name="details.patient_address" 
-                  type="textarea" 
-                  value={details.patient_address || details.complete_address} 
-                  onChange={handleInputChange}
-                />
-                <FormField label="City" name="details.patient_city" value={details.patient_city} onChange={handleInputChange} />
-                <FormField label="District" name="details.patient_district" value={details.patient_district} onChange={handleInputChange} />
-                <FormField label="State" name="details.patient_state" value={details.patient_state} onChange={handleInputChange} />
-                <FormField label="Pincode" name="details.patient_pincode" value={details.patient_pincode} onChange={handleInputChange} />
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Requestor Information */}
         <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
           <h4 className="text-sm font-semibold text-gray-800 mb-4">Requestor Information</h4>
@@ -310,6 +314,131 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                 <FormField label="District" name="details.requestor_district" value={details.requestor_district} onChange={handleInputChange} />
                 <FormField label="State" name="details.requestor_state" value={details.requestor_state} onChange={handleInputChange} />
                 <FormField label="Pincode" name="details.requestor_pincode" value={details.requestor_pincode} onChange={handleInputChange} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Patient Information */}
+        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+            <div className="space-y-4">
+              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField label="Patient Name" name="details.patient_name" value={details.patient_name} onChange={handleInputChange} />
+                
+                {/* Conditional rendering for baby care age input */}
+                {isBabyCare ? (
+                  <div>
+                    <div className="mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Baby&apos;s Age Group</label>
+                      <div className="flex gap-4">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            name="ageGroup"
+                            checked={isLessThanOneYear}
+                            onChange={() => handleAgeGroupChange(true)}
+                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Less than 1 year</span>
+                        </label>
+                        <label className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            name="ageGroup"
+                            checked={!isLessThanOneYear}
+                            onChange={() => handleAgeGroupChange(false)}
+                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">1 year or older</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    {isLessThanOneYear ? (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="details_patient_age">
+                          Baby&apos;s Age (in months)
+                        </label>
+                        <select
+                          id="details_patient_age"
+                          name="details.patient_age"
+                          value={getSelectedMonth()}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2.5 border text-gray-800 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                        >
+                          <option value="">Select month...</option>
+                          {[...Array(12)].map((_, i) => (
+                            <option key={i} value={i + 1}>
+                              {i + 1} {i === 0 ? 'month' : 'months'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <FormField
+                        label="Patient Age"
+                        name="details.patient_age"
+                        type="number"
+                        value={details.patient_age}
+                        onChange={handleInputChange}
+                        min={1}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <FormField
+                    label="Patient Age"
+                    name="details.patient_age"
+                    type="number"
+                    value={details.patient_age}
+                    onChange={handleInputChange}
+                  />
+                )}
+                
+                <FormField 
+                  label="Patient Gender" 
+                  name="details.patient_gender" 
+                  type="select" 
+                  value={details.patient_gender} 
+                  onChange={handleInputChange}
+                  options={[
+                    { value: 'male', label: 'Male' },
+                    { value: 'female', label: 'Female' },
+                    { value: 'other', label: 'Other' }
+                  ]}
+                />
+                <FormField label="Patient Phone" name="details.patient_phone" value={details.patient_phone} onChange={handleInputChange} />
+                <FormField 
+                  label="Preferred Caregiver Gender" 
+                  name="details.preferred_caregiver_gender" 
+                  type="select" 
+                  value={details.preferred_caregiver_gender} 
+                  onChange={handleInputChange}
+                  options={[
+                    { value: 'male', label: 'Male' },
+                    { value: 'female', label: 'Female' },
+                    { value: 'any', label: 'Any' }
+                  ]}
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Address</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField 
+                  label="Address" 
+                  name="details.patient_address" 
+                  type="textarea" 
+                  value={details.patient_address || details.complete_address} 
+                  onChange={handleInputChange}
+                />
+                <FormField label="City" name="details.patient_city" value={details.patient_city} onChange={handleInputChange} />
+                <FormField label="District" name="details.patient_district" value={details.patient_district} onChange={handleInputChange} />
+                <FormField label="State" name="details.patient_state" value={details.patient_state} onChange={handleInputChange} />
+                <FormField label="Pincode" name="details.patient_pincode" value={details.patient_pincode} onChange={handleInputChange} />
               </div>
             </div>
           </div>

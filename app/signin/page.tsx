@@ -36,7 +36,6 @@ const LoginPage = () => {
       
       if (success) {
         if (user) {
-          console.log("User data:", user);
           sessionStorage.setItem('userDetails', JSON.stringify(user));
         }
       
@@ -45,9 +44,7 @@ const LoginPage = () => {
         
         return router.push(redirectTo);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error("Login failed", error);
+    } catch {
       setError('An unexpected error occurred');
       setIsLoading(false);
     }
