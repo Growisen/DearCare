@@ -112,7 +112,7 @@ export async function addIndividualClient(formData: IndividualFormData) {
       .insert({
         care_duration: formData.careDuration,
         client_id: clientData.id,
-        patient_age: parseInt(formData.patientAge) || null,
+        patient_age: formData.patientAge || null,
         patient_gender: formData.patientGender || null,
         patient_name: formData.patientName,
         patient_phone: formData.patientPhone || null,
@@ -1595,7 +1595,7 @@ export async function getClientFiles(clientId: string): Promise<{success: boolea
 interface IndividualClientUpdateProfileData {
   patient_name: string;
   patient_phone: string;
-  patient_age: number | null;
+  patient_age: string | null;
   patient_gender: string | null;
   patient_address: string;
   patient_city: string;
@@ -1698,7 +1698,7 @@ export async function updateIndividualClientProfile(
     const rawUpdateData: IndividualClientUpdateProfileData = {
       patient_name: `${profileData.patientFirstName} ${profileData.patientLastName}`.trim(),
       patient_phone: profileData.patientPhone,
-      patient_age: profileData.patientAge ? parseInt(profileData.patientAge) : null,
+      patient_age: profileData.patientAge ? profileData.patientAge : null,
       patient_gender: profileData.patientGender ?? null,
       patient_address: profileData.patientAddress,
       patient_city: profileData.patientCity,

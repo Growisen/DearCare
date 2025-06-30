@@ -29,6 +29,7 @@ interface ClientFormComponentProps {
   handleSubmit: (e?: React.FormEvent) => Promise<void>;
   showCategories?: boolean;
   submitButtonText?: string;
+  clearError?: (fieldName: string) => void;
 }
 
 export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
@@ -46,7 +47,8 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
   handleSameAddressToggle,
   handleSubmit,
   showCategories = false,
-  submitButtonText = 'Submit Registration'
+  submitButtonText = 'Submit Registration',
+  clearError
 }) => {
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="p-6">
@@ -68,6 +70,16 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
       {/* Conditional Form Fields */}
       {clientType === 'individual' ? (
         <>
+          {/* Care Requirements - Moved to top */}
+          <div className="mb-8 border-b border-gray-200 pb-6">
+            <IndividualCareRequirements 
+              formData={formData}
+              formErrors={formErrors} 
+              handleBlur={handleBlur}  
+              handleInputChange={handleInputChange} 
+            />
+          </div>
+          
           {/* Requestor Information */}
           <RequestorInfoForm 
             formData={formData} 
@@ -75,18 +87,23 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
             handleInputChange={handleInputChange}
             handleBlur={handleBlur}
             handleProfileImageChange={handleProfileImageChange}
+            serviceType={formData.serviceRequired}
           />
           
-          {/* Patient Information */}
-          <PatientInfoForm 
-            formData={formData}
-            formErrors={formErrors} 
-            handleBlur={handleBlur}
-            handleInputChange={handleInputChange} 
-            handleProfileImageChange={handleProfileImageChange} 
-            handleSameAddressToggle={handleSameAddressToggle}
-            isSameAddress={isSameAddress} 
-          />
+          {/* Patient Information - Only show if service is NOT home_maid */}
+          {formData.serviceRequired !== 'home_maid' && (
+            <PatientInfoForm 
+              formData={formData}
+              formErrors={formErrors} 
+              handleBlur={handleBlur}
+              handleInputChange={handleInputChange} 
+              handleProfileImageChange={handleProfileImageChange} 
+              handleSameAddressToggle={handleSameAddressToggle}
+              isSameAddress={isSameAddress}
+              isBabyCare={formData.serviceRequired === 'baby_care'} 
+              clearError={clearError}
+            />
+          )}
         </>
       ) : (
         <OrganizationInfoForm 
@@ -97,19 +114,8 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         />
       )}
 
-      {/* Care Requirements */}
-      {clientType === 'individual' ? (
-        <div className="mb-8 border-b border-gray-200 pb-6">
-          {/* <h2 className="text-lg font-medium text-gray-900 mb-4">Care Requirements</h2> */}
-          
-          <IndividualCareRequirements 
-            formData={formData}
-            formErrors={formErrors} 
-            handleBlur={handleBlur}  
-            handleInputChange={handleInputChange} 
-          />
-        </div>
-      ) : (
+      {/* Staff Requirements section for non-individual clients */}
+      {clientType !== 'individual' && (
         <div className="mb-8 border-b border-gray-200 pb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Staff Requirements</h2>
           

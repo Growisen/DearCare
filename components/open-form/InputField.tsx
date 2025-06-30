@@ -8,7 +8,7 @@ interface InputFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   required?: boolean;
-  min?: string;
+  min?: string | number;
   onBlur?: () => void;
   error?: string; // Add error prop
 }

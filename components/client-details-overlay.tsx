@@ -228,34 +228,6 @@ export function ClientDetailsOverlay({
         </div>
       )}
 
-      {/* Patient Information */}
-      <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-          <div className="space-y-4">
-            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
-              <DetailItem label="Age" value={client.details?.patient_age} />
-              <DetailItem label="Gender" value={client.details?.patient_gender} />
-              <DetailItem label="Phone" value={client.details?.patient_phone} />
-              <DetailItem label="Preferred Caregiver Gender" value={client.details?.preferred_caregiver_gender} />
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
-              <DetailItem label="City" value={client.details?.patient_city} />
-              <DetailItem label="District" value={client.details?.patient_district} />
-              <DetailItem label="State" value={client.details?.patient_state} />
-              <DetailItem label="Pincode" value={client.details?.patient_pincode} />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Requestor Information */}
       <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
         <h4 className="text-sm font-semibold text-gray-800 mb-4">Requestor Information</h4>
@@ -285,6 +257,34 @@ export function ClientDetailsOverlay({
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Patient Information */}
+      <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+        <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+          <div className="space-y-4">
+            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
+              <DetailItem label="Age" value={client.details?.patient_age} />
+              <DetailItem label="Gender" value={client.details?.patient_gender} />
+              <DetailItem label="Phone" value={client.details?.patient_phone} />
+              <DetailItem label="Preferred Caregiver Gender" value={client.details?.preferred_caregiver_gender} />
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
+              <DetailItem label="City" value={client.details?.patient_city} />
+              <DetailItem label="District" value={client.details?.patient_district} />
+              <DetailItem label="State" value={client.details?.patient_state} />
+              <DetailItem label="Pincode" value={client.details?.patient_pincode} />
+            </div>
+          </div>
         </div>
       </div>
 

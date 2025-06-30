@@ -387,9 +387,9 @@ onChange={(e) => {
         </div>
         
         <div className="grid grid-cols-3 gap-4">
-          <Fields.Input label="Full Name" placeholder="Enter name" value={data.reference_name}  onChange={(e) => setData({ ...data, reference_name: e.target.value })} />
-          <Fields.Input label="Relation" placeholder="Enter relation" value={data.reference_relation} onChange={(e) => setData({ ...data, reference_relation: e.target.value })} />
-          <Fields.Input label="Phone Number" type="tel" placeholder="Enter phone number" value={data.reference_phone} onChange={(e) => setData({ ...data, reference_phone: e.target.value })} />
+          <Fields.Input label="Full Name" placeholder="Enter name" value={data.reference_name} required={false} onChange={(e) => setData({ ...data, reference_name: e.target.value })} />
+          <Fields.Input label="Relation" placeholder="Enter relation" value={data.reference_relation} required={false} onChange={(e) => setData({ ...data, reference_relation: e.target.value })} />
+          <Fields.Input label="Phone Number" type="tel" placeholder="Enter phone number" value={data.reference_phone} required={false} onChange={(e) => setData({ ...data, reference_phone: e.target.value })} />
         </div>
         
         <Fields.TextArea 
@@ -494,12 +494,7 @@ const validateStep = (step: number, data: StepData): boolean => {
       );
     
     case 2: // References
-      return !!(
-        (data as NurseReferenceData).reference_name &&
-        (data as NurseReferenceData).reference_phone &&
-        (data as NurseReferenceData).reference_relation 
-      
-      );
+      return true;
     
     case 3: // Work Details
       return !!(
