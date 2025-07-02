@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './auth'
 import { Client } from '@/types/client.types';
+import { logger } from '@/utils/logger';
 
 export interface Todo {
   id: string;
@@ -213,7 +214,7 @@ export async function fetchDashboardData(): Promise<{
     };
     
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
+    logger.error('Error fetching dashboard data:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -246,7 +247,7 @@ export async function addTodo(todo: Omit<Todo, 'id'>): Promise<{ success: boolea
       todo: data as Todo 
     };
   } catch (error) {
-    console.error('Error adding todo:', error);
+    logger.error('Error adding todo:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -270,7 +271,7 @@ export async function updateTodoStatus(id: string, completed: boolean): Promise<
     
     return { success: true };
   } catch (error) {
-    console.error('Error updating todo status:', error);
+    logger.error('Error updating todo status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -294,7 +295,7 @@ export async function deleteTodo(id: string): Promise<{ success: boolean; error?
     
     return { success: true };
   } catch (error) {
-    console.error('Error deleting todo:', error);
+    logger.error('Error deleting todo:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'

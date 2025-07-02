@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './auth';
 import { revalidatePath } from 'next/cache';
+import { logger } from '@/utils/logger';
 
 export interface WebUser {
   id: string;
@@ -49,7 +50,7 @@ export async function getUserById(userId: string): Promise<{
       .single();
     
     if (error) {
-      console.error('Error fetching user:', error);
+      logger.error('Error fetching user:', error);
       return {
         success: false,
         error: error.message
@@ -61,7 +62,7 @@ export async function getUserById(userId: string): Promise<{
       user: data as WebUser
     };
   } catch (error) {
-    console.error('Unexpected error fetching user:', error);
+    logger.error('Unexpected error fetching user:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch user data'
@@ -97,7 +98,7 @@ export async function updateUserProfile(
       .single();
     
     if (error) {
-      console.error('Error updating user profile:', error);
+      logger.error('Error updating user profile:', error);
       return {
         success: false,
         error: error.message
@@ -112,7 +113,7 @@ export async function updateUserProfile(
       user: updatedUser as WebUser
     };
   } catch (error) {
-    console.error('Unexpected error updating user profile:', error);
+    logger.error('Unexpected error updating user profile:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update user profile'
@@ -158,7 +159,7 @@ export async function uploadProfileImage(
       });
     
     if (uploadError) {
-      console.error('Error uploading profile image:', uploadError);
+      logger.error('Error uploading profile image:', uploadError);
       return {
         success: false,
         error: uploadError.message
@@ -181,7 +182,7 @@ export async function uploadProfileImage(
       .eq('id', userId);
     
     if (updateError) {
-      console.error('Error updating profile image URL:', updateError);
+      logger.error('Error updating profile image URL:', updateError);
       return {
         success: false,
         error: updateError.message
@@ -196,7 +197,7 @@ export async function uploadProfileImage(
       imageUrl: publicUrl
     };
   } catch (error) {
-    console.error('Unexpected error uploading profile image:', error);
+    logger.error('Unexpected error uploading profile image:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to upload profile image'
@@ -226,7 +227,7 @@ export async function getCurrentUser(): Promise<{
     }
 
     const userId = user.user_metadata?.user_id;
-    console.log("Using user ID:", userId);
+    logger.info("Using user ID:", userId);
     
    
     const { data, error } = await supabase
@@ -236,7 +237,7 @@ export async function getCurrentUser(): Promise<{
       .single();
     
     if (error) {
-      console.error('Error fetching current user data:', error);
+      logger.error('Error fetching current user data:', error);
       return {
         success: false,
         error: error.message
@@ -248,7 +249,7 @@ export async function getCurrentUser(): Promise<{
       user: data as WebUser
     };
   } catch (error) {
-    console.error('Unexpected error fetching current user:', error);
+    logger.error('Unexpected error fetching current user:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch current user'

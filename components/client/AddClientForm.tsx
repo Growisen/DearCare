@@ -30,6 +30,7 @@ interface ClientFormComponentProps {
   showCategories?: boolean;
   submitButtonText?: string;
   clearError?: (fieldName: string) => void;
+  isInOverlay?: boolean;
 }
 
 export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
@@ -48,7 +49,8 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
   handleSubmit,
   showCategories = false,
   submitButtonText = 'Submit Registration',
-  clearError
+  clearError,
+  isInOverlay = false
 }) => {
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="p-6">
@@ -66,6 +68,27 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         clientType={clientType} 
         onClientTypeChange={handleClientTypeChange} 
       />
+
+      {/* Old Register Number - Only shown when in overlay mode */}
+      {isInOverlay && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-md border border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="oldRegisterNumber">
+            Old Register Number (optional)
+          </label>
+          <input
+            type="text"
+            id="prevRegisterNumber"
+            name="prevRegisterNumber"
+            value={formData.prevRegisterNumber || ''}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter previous register number if applicable"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            If this client was previously registered in the old system, please enter their register number here.
+          </p>
+        </div>
+      )}
 
       {/* Conditional Form Fields */}
       {clientType === 'individual' ? (
