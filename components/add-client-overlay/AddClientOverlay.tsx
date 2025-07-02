@@ -54,6 +54,7 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
           handleSubmit={handleSubmit}
           showCategories={true}
           submitButtonText="Add Client"
+          isInOverlay={true}
         />
       </div>
     </div>

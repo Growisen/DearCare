@@ -1,6 +1,7 @@
 "use server"
 
 import { createSupabaseServerClient } from './auth'
+import { logger } from '@/utils/logger';
 
 export type AttendanceRecord = {
   id: number;
@@ -67,7 +68,7 @@ function convertTo12HourFormat(time24: string | null): string {
     
     return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
   } catch (error) {
-    console.error('Error converting time format:', error);
+    logger.error('Error converting time format:', error);
     return '';
   }
 }
@@ -193,7 +194,7 @@ function convertTo12HourFormat(time24: string | null): string {
 //           locationInfo = `${locationObj.latitude}, ${locationObj.longitude}`;
 //         }
 //       } catch (e) {
-//         console.error("Error parsing location data:", e);
+//         logger.error("Error parsing location data:", e);
 //       }
 
 //       return {
@@ -215,7 +216,7 @@ function convertTo12HourFormat(time24: string | null): string {
 //       data: formattedData
 //     };
 //   } catch (error) {
-//     console.error('Error fetching attendance records:', error);
+//     logger.error('Error fetching attendance records:', error);
 //     return {
 //       success: false,
 //       data: [],
@@ -360,7 +361,7 @@ export async function fetchStaffAttendance(
       }
     };
   } catch (error) {
-    console.error('Error fetching attendance records:', error);
+    logger.error('Error fetching attendance records:', error);
     return {
       success: false,
       data: [],
@@ -551,7 +552,7 @@ function parseLocation(location: string | null): string | null {
     }
     return location;
   } catch (e) {
-    console.error("Error parsing location data:", e);
+    logger.error("Error parsing location data:", e);
     return location;
   }
 }
@@ -575,7 +576,7 @@ export async function getTodayAttendanceForAssignment(
       .single();
     
     if (assignmentError) {
-      console.error('Error fetching nurse assignment:', assignmentError);
+      logger.error('Error fetching nurse assignment:', assignmentError);
       return {
         success: false,
         error: assignmentError.message
@@ -593,7 +594,7 @@ export async function getTodayAttendanceForAssignment(
       .maybeSingle();
     
     if (error) {
-      console.error('Error fetching assignment attendance:', error);
+      logger.error('Error fetching assignment attendance:', error);
       return {
         success: false,
         error: error.message
@@ -615,7 +616,7 @@ export async function getTodayAttendanceForAssignment(
         .maybeSingle();
       
       if (leaveError) {
-        console.error('Error checking leave status:', leaveError);
+        logger.error('Error checking leave status:', leaveError);
       } else if (leaveData) {
         onLeave = true;
         leaveType = formatLeaveType(leaveData.leave_type);
@@ -647,7 +648,7 @@ export async function getTodayAttendanceForAssignment(
       }
     };
   } catch (error) {
-    console.error('Error checking attendance status:', error);
+    logger.error('Error checking attendance status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Error checking attendance status'
@@ -676,7 +677,7 @@ export async function adminCheckInNurse(
       .maybeSingle();
     
     if (checkError) {
-      console.error('Error checking existing attendance:', checkError);
+      logger.error('Error checking existing attendance:', checkError);
       return {
         success: false,
         error: checkError.message
@@ -723,7 +724,7 @@ export async function adminCheckInNurse(
       success: true
     };
   } catch (error) {
-    console.error('Error during admin check-in:', error);
+    logger.error('Error during admin check-in:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -794,7 +795,7 @@ export async function adminCheckOutNurse(
       success: true
     };
   } catch (error) {
-    console.error('Error during admin check-out:', error);
+    logger.error('Error during admin check-out:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -951,7 +952,7 @@ export async function getAttendanceRecords(
       count: totalRecords
     };
   } catch (error) {
-    console.error('Failed to fetch attendance records:', error);
+    logger.error('Failed to fetch attendance records:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'

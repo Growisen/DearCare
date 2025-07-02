@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from './auth';
 import { updateNurseStatus } from './add-nurse';
 import { getClientProfileUrl } from '@/utils/formatters';
+import { logger } from '@/utils/logger';
 
 export interface ShiftAssignment {
   nurseId: string;
@@ -45,7 +46,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
 
       // Validate that nurseId is a number
       if (typeof shift.nurseId !== 'number' || isNaN(shift.nurseId)) {
-        console.log("type ", typeof shift.nurseId)
+        logger.info("type ", typeof shift.nurseId)
         return {
           success: false,
           message: 'Nurse ID must be a valid number'
@@ -87,7 +88,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       assigned_type: 'individual'
     }));
 
-    console.log('Attempting to insert shifts:', JSON.stringify(shiftRecords, null, 2));
+    logger.info('Attempting to insert shifts:', JSON.stringify(shiftRecords, null, 2));
 
     try {
      
@@ -98,7 +99,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         .single();
 
       if (clientError || !clientExists) {
-        console.error('Client does not exist:', clientId);
+        logger.error('Client does not exist:', clientId);
         return {
           success: false,
           message: 'Client does not exist'
@@ -112,12 +113,12 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         .in('nurse_id', nurseIds);
 
       if (nurseError) {
-        console.error('Error checking nurses:', nurseError);
+        logger.error('Error checking nurses:', nurseError);
       } else {
         const foundNurseIds = nursesExist.map(n => n.nurse_id);
         const missingNurseIds = nurseIds.filter(id => !foundNurseIds.includes(id));
         if (missingNurseIds.length > 0) {
-          console.warn('Some nurse IDs do not exist:', missingNurseIds);
+          logger.warn('Some nurse IDs do not exist:', missingNurseIds);
         }
       }
 
@@ -127,17 +128,17 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         .select();
 
       if (error) {
-        console.error('Error inserting shift data:', error);
+        logger.error('Error inserting shift data:', error);
         return {
           success: false,
           message: `Database error: ${error.message}`
         };
       }
 
-      console.log('Insert response data:', data);
+      logger.info('Insert response data:', data);
       
       if (!data || data.length === 0) {
-        console.warn('No data returned after insert - possible silent failure');
+        logger.warn('No data returned after insert - possible silent failure');
       }
 
       // Update status for all nurses involved in the shift assignment
@@ -154,7 +155,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         .map(update => update.error);
         
       if (statusUpdateErrors.length > 0) {
-        console.warn('Some nurse status updates failed:', statusUpdateErrors);
+        logger.warn('Some nurse status updates failed:', statusUpdateErrors);
       }
 
       return {
@@ -162,14 +163,14 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         message: 'Shifts scheduled successfully and nurse status updated to assigned',
       };
     } catch (insertError) {
-      console.error('Unexpected error during database operations:', insertError);
+      logger.error('Unexpected error during database operations:', insertError);
       return {
         success: false,
         message: 'Unexpected error during database operations'
       };
     }
   } catch (error) {
-    console.error('Error scheduling shifts:', error);
+    logger.error('Error scheduling shifts:', error);
     
     return {
       success: false,
@@ -208,7 +209,7 @@ export async function getNurseAssignments(clientId: string): Promise<{
       .eq('client_id', clientId);
     
     if (error) {
-      console.error('Error fetching nurse assignments:', error);
+      logger.error('Error fetching nurse assignments:', error);
       return {
         success: false,
         error: error.message
@@ -227,7 +228,7 @@ export async function getNurseAssignments(clientId: string): Promise<{
       data: formattedData as NurseAssignmentData[]
     };
   } catch (error) {
-    console.error('Unexpected error fetching nurse assignments:', error);
+    logger.error('Unexpected error fetching nurse assignments:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch nurse assignments'
@@ -318,7 +319,7 @@ export async function getAllNurseAssignments(
       try {
         query = query.or(`nurse_id.eq.${parseInt(searchQuery) || 0}`);
       } catch (searchError) {
-        console.error('Search query error:', searchError);
+        logger.error('Search query error:', searchError);
         return {
           success: false,
           error: 'Invalid search query format',
@@ -336,7 +337,7 @@ export async function getAllNurseAssignments(
       .order('id', { ascending: false });
 
     if (error) {
-      console.error('Error fetching nurse assignments:', error);
+      logger.error('Error fetching nurse assignments:', error);
       return {
         success: false,
         error: error.message
@@ -410,7 +411,7 @@ export async function getAllNurseAssignments(
       count: count || 0
     };
   } catch (error) {
-    console.error('Unexpected error fetching nurse assignments:', error);
+    logger.error('Unexpected error fetching nurse assignments:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch nurse assignments'
@@ -469,7 +470,7 @@ export async function updateNurseAssignment(
       .eq('id', assignmentId);
     
     if (error) {
-      console.error('Error updating nurse assignment:', error);
+      logger.error('Error updating nurse assignment:', error);
       return {
         success: false,
         message: `Database error: ${error.message}`
@@ -481,7 +482,7 @@ export async function updateNurseAssignment(
       message: 'Assignment updated successfully'
     };
   } catch (error) {
-    console.error('Error updating nurse assignment:', error);
+    logger.error('Error updating nurse assignment:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to update nurse assignment'
@@ -508,7 +509,7 @@ export async function endNurseAssignment(
       .eq('id', assignmentId);
     
     if (error) {
-      console.error('Error ending nurse assignment:', error);
+      logger.error('Error ending nurse assignment:', error);
       return {
         success: false,
         message: `Database error: ${error.message}`
@@ -520,7 +521,7 @@ export async function endNurseAssignment(
       message: 'Assignment ended successfully'
     };
   } catch (error) {
-    console.error('Error ending nurse assignment:', error);
+    logger.error('Error ending nurse assignment:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to end nurse assignment'
@@ -544,7 +545,7 @@ export async function deleteNurseAssignment(
       .single();
     
     if (fetchError) {
-      console.error('Error fetching assignment details:', fetchError);
+      logger.error('Error fetching assignment details:', fetchError);
       return {
         success: false,
         message: `Error fetching assignment details: ${fetchError.message}`
@@ -559,7 +560,7 @@ export async function deleteNurseAssignment(
       .eq('id', assignmentId);
     
     if (deleteError) {
-      console.error('Error deleting nurse assignment:', deleteError);
+      logger.error('Error deleting nurse assignment:', deleteError);
       return {
         success: false,
         message: `Database error: ${deleteError.message}`
@@ -572,12 +573,12 @@ export async function deleteNurseAssignment(
       .eq('nurse_id', nurseId);
     
     if (checkError) {
-      console.error('Error checking remaining assignments:', checkError);
+      logger.error('Error checking remaining assignments:', checkError);
     } else {
       if (!remainingAssignments || remainingAssignments.length === 0) {
         const statusResult = await updateNurseStatus(nurseId, 'unassigned');
         if (!statusResult.success) {
-          console.warn(`Failed to update nurse ${nurseId} status to unassigned:`, statusResult.error);
+          logger.warn(`Failed to update nurse ${nurseId} status to unassigned:`, statusResult.error);
         }
       }
     }
@@ -587,7 +588,7 @@ export async function deleteNurseAssignment(
       message: 'Assignment deleted successfully'
     };
   } catch (error) {
-    console.error('Error deleting nurse assignment:', error);
+    logger.error('Error deleting nurse assignment:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to delete nurse assignment'
@@ -622,7 +623,7 @@ export async function getAssignmentById(
       .single();
     
     if (error) {
-      console.error('Error fetching assignment:', error);
+      logger.error('Error fetching assignment:', error);
       return {
         success: false,
         error: error.message
@@ -695,7 +696,7 @@ export async function getAssignmentById(
       }
     };
   } catch (error) {
-    console.error('Error fetching assignment details:', error);
+    logger.error('Error fetching assignment details:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch assignment details'

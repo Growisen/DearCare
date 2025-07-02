@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './auth'
 import { Complaint, ComplaintStatus, ComplaintSource, StatusHistoryEntry } from '@/types/complaint.types'
+import { logger } from '@/utils/logger';
 
 function formatDate(dateString: string | null | undefined): string {
   if (!dateString) return '';
@@ -197,7 +198,7 @@ export async function fetchComplaints(
         }
       };
     } catch (error) {
-      console.error('Error fetching complaints:', error);
+      logger.error('Error fetching complaints:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -255,7 +256,7 @@ export async function exportComplaintsToCSV(): Promise<{
       data: csvString 
     };
   } catch (error) {
-    console.error('Error exporting complaints:', error);
+    logger.error('Error exporting complaints:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -435,7 +436,7 @@ export async function fetchComplaintById(complaintId: string): Promise<{
       data: complaintData
     };
   } catch (error) {
-    console.error('Error fetching complaint details:', error);
+    logger.error('Error fetching complaint details:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -492,7 +493,7 @@ export async function updateComplaintStatus(
       .maybeSingle();
     
     if (checkError) {
-      console.warn(`Error checking for existing resolution: ${checkError.message}`);
+      logger.warn(`Error checking for existing resolution: ${checkError.message}`);
     }
     
     let statusHistory;
@@ -535,7 +536,7 @@ export async function updateComplaintStatus(
     
     return { success: true };
   } catch (error) {
-    console.error('Error updating complaint status:', error);
+    logger.error('Error updating complaint status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -605,7 +606,7 @@ export async function getProfileUrl(
       url
     };
   } catch (error) {
-    console.error('Error generating profile URL:', error);
+    logger.error('Error generating profile URL:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'

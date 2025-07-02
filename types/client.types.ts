@@ -78,6 +78,7 @@ export interface BaseFormData {
 }
 
 export interface IndividualFormData extends BaseFormData {
+  prevRegisterNumber: string;
   requestorName: string;
   requestorPhone: string;
   requestorEmail: string;
@@ -108,6 +109,7 @@ export interface IndividualFormData extends BaseFormData {
 }
 
 export interface OrganizationFormData extends BaseFormData {
+  prevRegisterNumber: string;
   organizationName: string;
   organizationType: string;
   contactPersonName: string;
@@ -153,6 +155,7 @@ export interface ClientInformationProps {
 
 export interface DetailedClientIndividual {
   registration_number?: string;
+  prev_registration_number?: string;
   client_type: 'individual';
   client_category?: ClientCategory;
   duty_period?: string;
@@ -195,6 +198,7 @@ export interface DetailedClientIndividual {
 
 export interface DetailedClientOrganization {
   registration_number?: string;
+  prev_registration_number?: string;
   client_type: 'organization' | 'hospital' | 'carehome';
   client_category?: ClientCategory;
   details?: {

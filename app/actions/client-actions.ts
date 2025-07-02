@@ -9,6 +9,7 @@ import { sendClientCredentials, sendClientFormLink, sendClientRejectionNotificat
 import { v4 as uuidv4 } from 'uuid';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ClientCategory, ClientFile } from "@/types/client.types";
+import { logger } from '@/utils/logger';
 
 export async function getStorageUrl(path: string | null): Promise<string | null> {
   if (!path) return null;
@@ -22,10 +23,11 @@ export async function getStorageUrl(path: string | null): Promise<string | null>
       
     return publicUrl;
   } catch (error) {
-    console.error('Error generating storage URL:', error);
+    logger.error('Error generating storage URL:', error);
     return null;
   }
 }
+
 /**
  * Uploads a file to Supabase storage
  */
@@ -50,13 +52,13 @@ async function uploadProfilePicture(file: File, clientId: string, type: 'request
       });
     
     if (error) {
-      console.error(`Error uploading ${type} profile picture:`, error);
+      logger.error(`Error uploading ${type} profile picture:`, error);
       return null;
     }
     
     return data.path;
   } catch (error) {
-    console.error(`Error in uploadProfilePicture (${type}):`, error);
+    logger.error(`Error in uploadProfilePicture (${type}):`, error);
     return null;
   }
 }
@@ -77,7 +79,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         general_notes: formData.generalNotes,
         duty_period: formData.dutyPeriod,
         duty_period_reason: formData.dutyPeriodReason,
-        status: 'pending'
+        status: 'pending',
+        prev_registration_number: formData.prevRegisterNumber
       })
       .select()
       .single();
@@ -158,7 +161,7 @@ export async function addIndividualClient(formData: IndividualFormData) {
     return { success: true, id: clientData.id };
     
   } catch (error: unknown) {
-    console.error('Error adding individual client:', error);
+    logger.error('Error adding individual client:', error);
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
 }
@@ -179,7 +182,8 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         general_notes: formData.generalNotes,
         duty_period: formData.dutyPeriod,
         duty_period_reason: formData.dutyPeriodReason,
-        status: 'pending'
+        status: 'pending',
+        prevRegisterNumber: formData.prevRegisterNumber
       })
       .select()
       .single();
@@ -227,7 +231,7 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         .insert(staffRequirementsData);
       
       if (staffError) {
-        console.error('Error adding staff requirements:', staffError);
+        logger.error('Error adding staff requirements:', staffError);
         // We don't throw here to avoid rolling back the whole transaction,
         // but we log the error for investigation
       }
@@ -237,7 +241,7 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
     return { success: true, id: clientData.id };
     
   } catch (error: unknown) {
-    console.error('Error adding organization client:', error);
+    logger.error('Error adding organization client:', error);
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
 }
@@ -306,7 +310,7 @@ export async function getClients(
       */
       
       if (searchError) {
-        console.error("Error in search query:", searchError)
+        logger.error("Error in search query:", searchError)
         return { success: false, error: searchError.message }
       }
       
@@ -330,7 +334,7 @@ export async function getClients(
     const { count, error: countError } = await countQuery
     
     if (countError) {
-      console.error("Error counting clients:", countError)
+      logger.error("Error counting clients:", countError)
       return { success: false, error: countError.message }
     }
     
@@ -347,7 +351,7 @@ export async function getClients(
       .order('created_at', { ascending: false })
     
     if (error) {
-      console.error("Error fetching clients:", error)
+      logger.error("Error fetching clients:", error)
       return { success: false, error: error.message }
     }
     
@@ -388,7 +392,7 @@ export async function getClients(
     }
     
   } catch (error: unknown) {
-    console.error('Error fetching clients:', error)
+    logger.error('Error fetching clients:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred', 
@@ -478,7 +482,7 @@ export async function getClientDetails(clientId: string) {
       }
     }
   } catch (error: unknown) {
-    console.error('Error fetching client details:', error)
+    logger.error('Error fetching client details:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -540,12 +544,12 @@ export async function updateClientStatus(
             name: clientName,
             rejectionReason: rejectionReason
           });
-          console.log(`Rejection notification sent to ${clientEmail}`);
+          logger.error(`Rejection notification sent to ${clientEmail}`);
         } catch (emailError) {
-          console.error('Error sending rejection email:', emailError);
+          logger.error('Error sending rejection email:', emailError);
         }
       } else {
-        console.warn('Unable to send rejection email: Missing client email or name');
+        logger.warn('Unable to send rejection email: Missing client email or name');
       }
       
       revalidatePath('/clients');
@@ -596,7 +600,7 @@ export async function updateClientStatus(
     }
     
   } catch (error: unknown) {
-    console.error('Error updating client status:', error);
+    logger.error('Error updating client status:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -670,7 +674,7 @@ async function createUserAccountIfNeeded(
   const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
   
   if (userListError) {
-    console.error('Error listing users:', userListError);
+    logger.error('Error listing users:', userListError);
     return;
   }
   
@@ -706,7 +710,7 @@ async function createUserAccountIfNeeded(
     });
     
     if (createError) {
-      console.error('Error creating user account:', createError);
+      logger.error('Error creating user account:', createError);
     } else {
       const emailResult = await sendClientCredentials(clientEmail, {
         name: clientName,
@@ -715,9 +719,9 @@ async function createUserAccountIfNeeded(
       });
       
       if (emailResult.error) {
-        console.error('Error sending welcome email:', emailResult.error);
+        logger.error('Error sending welcome email:', emailResult.error);
       } else {
-        console.log(`Welcome email sent to ${clientEmail}`);
+        logger.info(`Welcome email sent to ${clientEmail}`);
       }
     }
   }
@@ -833,7 +837,7 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
     return { success: true, id: result.data?.[0]?.id };
     
   } catch (error: unknown) {
-    console.error('Error saving patient assessment:', error);
+    logger.error('Error saving patient assessment:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -865,7 +869,7 @@ export async function getPatientAssessment(clientId: string) {
     
     return { success: true, assessment: data };
   } catch (error: unknown) {
-    console.error('Error fetching patient assessment:', error);
+    logger.error('Error fetching patient assessment:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
@@ -898,7 +902,7 @@ export async function updateClientCategory(
     
     return { success: true, client: data };
   } catch (error: unknown) {
-    console.error('Error updating client category:', error);
+    logger.error('Error updating client category:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -958,7 +962,7 @@ export async function sendClientAssessmentFormLink(clientId: string) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending client assessment form:', error);
+    logger.error('Error sending client assessment form:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An error occurred' 
@@ -986,7 +990,7 @@ export async function getClientAssessmentFormStatus(clientId: string) {
       isFormFilled: !!data
     };
   } catch (error) {
-    console.error('Error checking form status:', error);
+    logger.error('Error checking form status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to check form status',
@@ -1041,7 +1045,7 @@ export async function getOrganizationClientDetails(clientId: string) {
       .eq('client_id', clientId)
       
     if (staffError) {
-      console.error('Error fetching staff requirements:', staffError)
+      logger.error('Error fetching staff requirements:', staffError)
       // Continue without staff requirements rather than failing completely
     }
     
@@ -1054,7 +1058,7 @@ export async function getOrganizationClientDetails(clientId: string) {
       }
     }
   } catch (error: unknown) {
-    console.error('Error fetching organization client details:', error)
+    logger.error('Error fetching organization client details:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -1087,14 +1091,14 @@ export async function getClientStatus(clientId: string) {
       };
     }
 
-    console.log("status", data.status)
+    logger.info("status", data.status)
     
     return { 
       success: true, 
       status: data.status
     };
   } catch (error: unknown) {
-    console.error('Error fetching client status:', error);
+    logger.error('Error fetching client status:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -1194,7 +1198,7 @@ export async function exportClients(
       .order('created_at', { ascending: false })
     
     if (error) {
-      console.error("Error fetching clients for export:", error)
+      logger.error("Error fetching clients for export:", error)
       return { success: false, error: error.message }
     }
     
@@ -1252,7 +1256,7 @@ export async function exportClients(
     }
     
   } catch (error: unknown) {
-    console.error('Error exporting clients:', error)
+    logger.error('Error exporting clients:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred', 
@@ -1337,7 +1341,7 @@ export async function deleteClient(clientId: string) {
       .eq('id', clientId);
 
     if (deleteError) {
-      console.error('Error deleting client record:', deleteError);
+      logger.error('Error deleting client record:', deleteError);
       return { success: false, error: deleteError.message };
     }
 
@@ -1365,7 +1369,7 @@ export async function deleteClient(clientId: string) {
     return { success: true };
     
   } catch (error: unknown) {
-    console.error('Error deleting client:', error);
+    logger.error('Error deleting client:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -1404,7 +1408,7 @@ async function generateRegistrationNumber(
   );
   
   if (counterError) {
-    console.error('Error generating sequence number:', counterError);
+    logger.error('Error generating sequence number:', counterError);
     const timestamp = Date.now().toString().slice(-5);
     return `${categoryPrefix}${typeCode}${currentYear}E${timestamp}`;
   }
@@ -1449,7 +1453,7 @@ export async function uploadClientFiles(
         });
         
       if (uploadError) {
-        console.error('Error uploading file:', uploadError);
+        logger.error('Error uploading file:', uploadError);
         continue;
       }
       
@@ -1475,7 +1479,7 @@ export async function uploadClientFiles(
         .single();
         
       if (fileError) {
-        console.error('Error storing file metadata:', fileError);
+        logger.error('Error storing file metadata:', fileError);
         // If metadata storage fails, remove the uploaded file
         await supabase.storage.from('DearCare').remove([uploadData.path]);
         continue;
@@ -1494,7 +1498,7 @@ export async function uploadClientFiles(
     };
     
   } catch (error) {
-    console.error('Error uploading client files:', error);
+    logger.error('Error uploading client files:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -1529,7 +1533,7 @@ export async function deleteClientFile(clientId: string, fileId: string): Promis
         .remove([fileData.storage_path]);
         
       if (storageError) {
-        console.error('Error removing file from storage:', storageError);
+        logger.error('Error removing file from storage:', storageError);
         // Continue with deleting the record even if storage removal fails
       }
     }
@@ -1551,7 +1555,7 @@ export async function deleteClientFile(clientId: string, fileId: string): Promis
     return { success: true };
     
   } catch (error) {
-    console.error('Error deleting client file:', error);
+    logger.error('Error deleting client file:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -1583,7 +1587,7 @@ export async function getClientFiles(clientId: string): Promise<{success: boolea
     };
     
   } catch (error) {
-    console.error('Error fetching client files:', error);
+    logger.error('Error fetching client files:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
@@ -1754,7 +1758,7 @@ export async function updateIndividualClientProfile(
       .select();
 
     if (error) {
-      console.error('Error updating client profile:', error);
+      logger.error('Error updating client profile:', error);
       return { success: false, error: error.message };
     }
 
@@ -1766,7 +1770,7 @@ export async function updateIndividualClientProfile(
     };
     
   } catch (error) {
-    console.error('Error updating client profile:', error);
+    logger.error('Error updating client profile:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -1805,7 +1809,7 @@ export async function updateOrganizationDetails(
         .eq('id', clientId);
       
       if (clientUpdateError) {
-        console.error('Error updating client general notes:', clientUpdateError);
+        logger.error('Error updating client general notes:', clientUpdateError);
         return { success: false, error: clientUpdateError.message };
       }
     }
@@ -1828,7 +1832,7 @@ export async function updateOrganizationDetails(
       .select();
     
     if (error) {
-      console.error('Error updating organization details:', error);
+      logger.error('Error updating organization details:', error);
       return { success: false, error: error.message };
     }
     
@@ -1840,7 +1844,7 @@ export async function updateOrganizationDetails(
     return { success: true, data: updatedRecord };
     
   } catch (error) {
-    console.error('Error in updateOrganizationDetails:', error);
+    logger.error('Error in updateOrganizationDetails:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred' 

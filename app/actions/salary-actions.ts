@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './auth'
 import { StaffSalary } from '@/types/staffSalary.types'
+import { logger } from '@/utils/logger'
 
 interface Nurse {
   nurse_id: number;
@@ -164,7 +165,7 @@ export async function fetchNurseHoursWorked(
       data: processedData
     };
   } catch (error) {
-    console.error('Error fetching nurse hours worked:', error);
+    logger.error('Error fetching nurse hours worked:', error);
     return {
       success: false,
       data: [],
