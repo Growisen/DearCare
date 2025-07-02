@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from './auth'
 import { revalidatePath } from 'next/cache'
 import { formatDate } from '@/utils/formatters'
+import { logger } from '@/utils/logger'
 
 export type LeaveRequest = {
   id: string
@@ -79,7 +80,7 @@ export async function getLeaveRequests(
     const { count, error: countError } = await countQuery
     
     if (countError) {
-      console.error('Error counting leave requests:', countError)
+      logger.error('Error counting leave requests:', countError)
       return { success: false, error: countError.message, leaveRequests: [], totalCount: 0 }
     }
     
@@ -90,7 +91,7 @@ export async function getLeaveRequests(
     const { data: leaveData, error: leaveError } = await query
     
     if (leaveError) {
-      console.error('Error fetching leave requests:', leaveError)
+      logger.error('Error fetching leave requests:', leaveError)
       return { success: false, error: leaveError.message, leaveRequests: [], totalCount: 0 }
     }
 
@@ -106,7 +107,7 @@ export async function getLeaveRequests(
       .in('nurse_id', nurseIds)
     
     if (nursesError) {
-      console.error('Error fetching nurses:', nursesError)
+      logger.error('Error fetching nurses:', nursesError)
     }
     
     const nurseMap = new Map()
@@ -146,7 +147,7 @@ export async function getLeaveRequests(
       totalCount: count
     }
   } catch (error: unknown) {
-    console.error('Error in getLeaveRequests:', error)
+    logger.error('Error in getLeaveRequests:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred',
@@ -193,7 +194,7 @@ export async function updateLeaveRequestStatus(
     
     return { success: true }
   } catch (error: unknown) {
-    console.error('Error updating leave request status:', error)
+    logger.error('Error updating leave request status:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -245,7 +246,7 @@ export async function exportLeaveRequests(
     const { data: leaveData, error: leaveError } = await query
     
     if (leaveError) {
-      console.error('Error fetching leave requests for export:', leaveError)
+      logger.error('Error fetching leave requests for export:', leaveError)
       return { success: false, error: leaveError.message }
     }
 
@@ -261,7 +262,7 @@ export async function exportLeaveRequests(
       .in('nurse_id', nurseIds)
     
     if (nursesError) {
-      console.error('Error fetching nurses for export:', nursesError)
+      logger.error('Error fetching nurses for export:', nursesError)
     }
     
     const nurseMap = new Map()
@@ -337,7 +338,7 @@ export async function exportLeaveRequests(
       recordCount: filteredRequests.length
     }
   } catch (error: unknown) {
-    console.error('Error in exportLeaveRequests:', error)
+    logger.error('Error in exportLeaveRequests:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred'

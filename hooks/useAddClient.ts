@@ -27,6 +27,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   const [formData, setFormData] = useState<FormData>({
     clientType: 'individual',
     clientCategory: 'DearCare LLP',
+    prevRegisterNumber: '',
     dutyPeriod: '',
     dutyPeriodReason: '',
     requestorName: '',
@@ -441,6 +442,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       
       if (clientType === 'individual') {
         result = await addIndividualClient({
+          prevRegisterNumber: formData.prevRegisterNumber,
           clientType,
           clientCategory: formData.clientCategory as ClientCategory,
           generalNotes: formData.generalNotes,
@@ -475,6 +477,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         });
       } else {
         result = await addOrganizationClient({
+          prevRegisterNumber: formData.prevRegisterNumber,
           clientType,
           clientCategory: formData.clientCategory as ClientCategory,
           generalNotes: formData.generalNotes,

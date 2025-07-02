@@ -449,7 +449,14 @@ export function ClientDetailsOverlay({
             <>
               <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900">Request Details</h2>
-                <p className="text-sm text-gray-500">Registration Number: {detailedClient?.registration_number || "Not Available"}</p>
+                <div className="text-sm text-gray-500">
+                  <p>Registration Number: {detailedClient?.registration_number || "Not Available"}</p>
+                  {detailedClient?.prev_registration_number && (
+                    <p className="mt-1">
+                      <span className="font-medium text-gray-600">Previous Register Number:</span> {detailedClient.prev_registration_number}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-3 ml-auto">
                 {shouldShowProfileButton() && (

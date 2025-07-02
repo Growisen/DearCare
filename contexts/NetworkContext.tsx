@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import OfflineOverlay from '@/components/common/OfflineOverlay';
 
 interface NetworkContextType {
   isOnline: boolean;
@@ -13,47 +14,47 @@ export const useNetwork = () => useContext(NetworkContext);
 
 export const NetworkProvider = ({ children }: { children: React.ReactNode }) => {
   const [isOnline, setIsOnline] = useState(true);
-  const router = useRouter();
+  const [showOfflineOverlay, setShowOfflineOverlay] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    // Set initial state based on navigator
     if (typeof window !== 'undefined') {
-      setIsOnline(navigator.onLine);
+      const initialStatus = navigator.onLine;
+      setIsOnline(initialStatus);
+      setShowOfflineOverlay(!initialStatus);
       
-      // Handle offline/online events
       const handleOnline = () => {
         setIsOnline(true);
-        if (pathname === '/offline') {
-          router.back();
-        }
       };
       
       const handleOffline = () => {
         setIsOnline(false);
-        router.push('/offline');
+        setShowOfflineOverlay(true);
       };
-      
-      // Initialize
-      if (!navigator.onLine) {
-        router.push('/offline');
-      }
 
-      // Add event listeners
       window.addEventListener('online', handleOnline);
       window.addEventListener('offline', handleOffline);
 
-      // Clean up
       return () => {
         window.removeEventListener('online', handleOnline);
         window.removeEventListener('offline', handleOffline);
       };
     }
-  }, [router, pathname]);
+  }, [pathname]);
+
+  const handleOverlayClose = () => {
+    setShowOfflineOverlay(false);
+  };
 
   return (
     <NetworkContext.Provider value={{ isOnline }}>
       {children}
+      {showOfflineOverlay && (
+        <OfflineOverlay 
+          onClose={handleOverlayClose} 
+          autoRedirect={true}
+        />
+      )}
     </NetworkContext.Provider>
   );
 };
