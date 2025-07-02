@@ -572,6 +572,14 @@ const EditNurseProfilePage: React.FC = () => {
                     onChange={handleInputChange} 
                     type="email" 
                   />
+
+                  <FormInput 
+                    label="Previous Register Number" 
+                    name="basic.nurse_prev_reg_no" 
+                    value={formData?.basic.nurse_prev_reg_no || ''} 
+                    onChange={handleInputChange} 
+                  />
+
                   <FormInput 
                     label="Phone Number" 
                     name="basic.phone_number" 
