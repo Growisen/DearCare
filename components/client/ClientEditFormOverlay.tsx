@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DetailedClientIndividual, DetailedClientOrganization } from '@/types/client.types';
-import { updateIndividualClientProfile, updateOrganizationDetails } from '@/app/actions/client-actions';
+import { updateIndividualClientProfile, updateOrganizationDetails } from '@/app/actions/clients/client-actions';
 import toast from 'react-hot-toast';
 import { dutyPeriodOptions, serviceOptions } from '@/utils/constants';
 import { relationOptions } from "@/utils/constants"

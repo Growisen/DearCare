@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { XIcon, Mail, Phone, Calendar, User, Trash2, Edit, Save, X, Building, IdCard } from "lucide-react";
 import { Staff, StaffRole } from "@/types/dearCareStaff.types";
-import { deleteStaff, updateStaff } from "@/app/actions/staff-actions";
+import { deleteStaff, updateStaff } from "@/app/actions/staff-management/staff-actions";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {

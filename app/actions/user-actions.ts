@@ -1,6 +1,6 @@
 "use server"
 
-import { createSupabaseServerClient } from './auth';
+import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/utils/logger';
 

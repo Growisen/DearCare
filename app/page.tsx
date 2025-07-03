@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/app/actions/auth";
+import { createSupabaseServerClient } from "@/app/actions/authentication/auth";
 
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();

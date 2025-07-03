@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchComplaints, exportComplaintsToCSV } from '@/app/actions/complaints-actions';
+import { fetchComplaints, exportComplaintsToCSV } from '@/app/actions/complaints-management/complaints-actions';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Complaint, ComplaintStatus, ComplaintSource } from '@/types/complaint.types';
 

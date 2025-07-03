@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react';
-import { updateClientStatus } from '../../app/actions/client-actions';
-import { Client } from '../../types/client.types';
+import { updateClientStatus } from '@/app/actions/clients/client-actions';
+import { Client } from '@/types/client.types';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
 type ClientStatus = "pending" | "under_review" | "approved" | "rejected" | "assigned";

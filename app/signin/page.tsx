@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/app/actions/auth"; 
+import { signIn } from "@/app/actions/authentication/auth"; 
 
 const LoginPage = () => {
   const router = useRouter();

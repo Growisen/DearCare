@@ -16,7 +16,7 @@ import ResolutionDetails from "@/components/complaints/ComplaintView/ResolutionD
 
 // Import types and mock data
 import { Complaint } from "@/types/complaint.types"
-import { fetchComplaintById, getProfileUrl } from "@/app/actions/complaints-actions"
+import { fetchComplaintById, getProfileUrl } from "@/app/actions/complaints-management/complaints-actions"
 
 export default function ComplaintDetailPage() {
   const params = useParams();

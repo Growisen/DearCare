@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ClientCategory, FormData, StaffRequirement, ClientType } from '@/types/client.types';
 import { toast } from 'react-hot-toast';
-import { addIndividualClient, addOrganizationClient } from '@/app/actions/client-actions';
+import { addIndividualClient, addOrganizationClient } from '@/app/actions/clients/client-actions';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface FormErrors {

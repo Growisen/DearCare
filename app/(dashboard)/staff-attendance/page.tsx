@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { fetchStaffAttendance, AttendanceRecord } from '@/app/actions/attendance-actions'
+import { fetchStaffAttendance, AttendanceRecord } from '@/app/actions/attendance/attendance-actions'
 
 import { AttendanceHeader } from '@/components/staff/attendance/AttendanceHeader'
 import { AttendanceTable } from '@/components/staff/attendance/AttendanceTable'

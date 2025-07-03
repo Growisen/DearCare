@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getClientDetails, getPatientAssessment, getClientStatus, updateClientCategory, deleteClient } from '@/app/actions/client-actions';
+import { getClientDetails, getPatientAssessment, getClientStatus, updateClientCategory, deleteClient } from '@/app/actions/clients/client-actions';
 import { Patient, ClientResponse, ClientCategory } from '@/types/client.types';
 import toast from 'react-hot-toast';
 import { getServiceLabel } from '@/utils/formatters';

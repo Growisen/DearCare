@@ -8,7 +8,7 @@ import ConfirmationModal from '@/components/client/ApprovedContent/ConfirmationM
 import NurseAssignmentsList from '@/components/client/NurseAssignmentsList'
 import Link from 'next/link'
 import CategorySelector from '@/components/client/Profile/CategorySelector'
-import { updateClientCategory, deleteClient, updateOrganizationDetails } from '@/app/actions/client-actions'
+import { updateClientCategory, deleteClient, updateOrganizationDetails } from '@/app/actions/clients/client-actions'
 import EditAssignmentModal from '@/components/client/EditAssignmentModal'
 import toast from 'react-hot-toast'
 import ImageViewer from '@/components/common/ImageViewer'

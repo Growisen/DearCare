@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { savePatientAssessment } from '@/app/actions/client-actions';
+import { savePatientAssessment } from '@/app/actions/clients/client-actions';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';

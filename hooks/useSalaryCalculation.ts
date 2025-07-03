@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StaffSalary } from '@/types/staffSalary.types';
-import { fetchNurseHoursWorked } from '@/app/actions/salary-actions';
+import { fetchNurseHoursWorked } from '@/app/actions/payroll/salary-actions';
 
 export function useSalaryCalculation() {
   const [salaryData, setSalaryData] = useState<StaffSalary[]>([]);

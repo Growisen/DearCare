@@ -115,7 +115,7 @@ export interface SimplifiedNurseDetails {
 }
 
 import { NurseFormData, NurseReferenceData, NurseHealthData, NurseBasicInfo, Nurse, NurseBasicDetails } from '@/types/staff.types'
-import { createSupabaseServerClient } from './auth'
+import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 

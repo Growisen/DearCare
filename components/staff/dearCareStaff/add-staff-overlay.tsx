@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { XIcon } from "lucide-react";
 import { toast } from 'react-hot-toast';
 import { StaffRole } from "@/types/dearCareStaff.types";
-import { createStaff } from "@/app/actions/staff-actions";
+import { createStaff } from "@/app/actions/staff-management/staff-actions";
 import { ClientCategorySelector } from "@/components/add-client-overlay/ClientCategorySelector"; 
 import { ClientCategory } from "@/types/client.types";
 import {

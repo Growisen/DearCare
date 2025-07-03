@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { getAllNurseAssignments, NurseAssignmentData } from '../app/actions/shift-schedule-actions'
+import { getAllNurseAssignments, NurseAssignmentData } from '@/app/actions/scheduling/shift-schedule-actions';
 
 function convertToCSV(assignments: NurseAssignmentData[]): string {
   const headers = [

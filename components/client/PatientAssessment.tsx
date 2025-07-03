@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getPatientAssessment, savePatientAssessment } from '../../app/actions/client-actions';
+import { getPatientAssessment, savePatientAssessment } from '@/app/actions/clients/client-actions';
 import { AssessmentData } from '@/types/client.types';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import { usePatientAssessmentForm, getDefaultFormData } from '@/hooks/usePatientAssessment';
