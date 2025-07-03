@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments, BaseNurseFields,stp1BaseNurseFields } from '@/types/staff.types';
-import { createNurse } from '@/app/actions/add-nurse';
+import { createNurse } from '@/app/actions/staff-management/add-nurse';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 const FORM_CONFIG = {

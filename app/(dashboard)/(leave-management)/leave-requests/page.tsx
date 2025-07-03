@@ -4,14 +4,13 @@ import { useState } from 'react'
 import { Check } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useLeaveRequestData } from '@/hooks/useLeaveRequestData'
-import { updateLeaveRequestStatus } from '@/app/actions/leave-management'
+import { updateLeaveRequestStatus, exportLeaveRequests } from '@/app/actions/staff-management/leave-management'
 import { LeaveRequest } from '@/types/leave.types'
 
 import { LeaveRequestsHeader } from '@/components/leaveManagement/LeaveRequestsHeader'
 import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTable'
 import { PaginationControls } from '@/components/client/clients/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
-import { exportLeaveRequests } from '@/app/actions/leave-management'
 
 export default function LeaveRequestsPage() {
   // Custom hook for managing leave request data

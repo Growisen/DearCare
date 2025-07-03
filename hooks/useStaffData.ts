@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getStaff } from "@/app/actions/staff-actions";
+import { getStaff } from "@/app/actions/staff-management/staff-actions";
 import { Staff, StaffOrganization } from "@/types/dearCareStaff.types";
 
 export function useStaffData() {

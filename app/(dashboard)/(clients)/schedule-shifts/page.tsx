@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { listNurses } from '@/app/actions/add-nurse';
-import { scheduleNurseShifts } from '@/app/actions/shift-schedule-actions';
+import { listNurses } from '@/app/actions/staff-management/add-nurse';
+import { scheduleNurseShifts } from '@/app/actions/scheduling/shift-schedule-actions';
 
 interface Nurse {
   _id: string;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card } from "../ui/card"
 import { Calendar, CheckCircle, Circle, Clock, MapPin, Plus, X, Loader2 } from "lucide-react"
-import { addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard-actions"
+import { addTodo, updateTodoStatus, deleteTodo, Todo } from "@/app/actions/dashboard/dashboard-actions"
 import toast from 'react-hot-toast';
 import ConfirmationModal from "../common/ConfirmationModal"
 import ModalPortal from "../ui/ModalPortal"

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { updateClientStatus, savePatientAssessment, sendClientAssessmentFormLink, getClientAssessmentFormStatus } from '@/app/actions/client-actions';
+import { 
+  updateClientStatus, 
+  savePatientAssessment, 
+  sendClientAssessmentFormLink, 
+  getClientAssessmentFormStatus 
+} from '@/app/actions/clients/client-actions';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';

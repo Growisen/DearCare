@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
-import { signIn as serverSignIn, signUp as serverSignUp, signOut as serverSignOut } from '@/app/actions/auth'
+import { signIn as serverSignIn, signUp as serverSignUp, signOut as serverSignOut } from '@/app/actions/authentication/auth'
 
 type AuthContextType = {
   user: User | null

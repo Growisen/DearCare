@@ -2,11 +2,11 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAssignmentById } from '../app/actions/shift-schedule-actions';
-import { getAttendanceRecords, markAttendance, unmarkAttendance } from '../app/actions/attendance-actions';
+import { getAssignmentById } from '@/app/actions//scheduling/shift-schedule-actions';
+import { getAttendanceRecords, markAttendance, unmarkAttendance } from '@/app/actions/attendance/attendance-actions';
 import { differenceInMonths, parseISO } from 'date-fns';
 import { format12HourTime } from '@/utils/formatters';
-import { getProfileUrl } from '@/app/actions/complaints-actions';
+import { getProfileUrl } from '@/app/actions/complaints-management/complaints-actions';
 import toast from 'react-hot-toast';
 
 interface ApiResponse<T> {

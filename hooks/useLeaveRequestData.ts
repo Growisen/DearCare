@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { getLeaveRequests } from '@/app/actions/leave-management'
-import { toast } from 'react-hot-toast'
-import { LeaveRequestStatus } from '@/types/leave.types'
-import { useQuery } from "@tanstack/react-query"
+import { useState, useEffect } from 'react';
+import { getLeaveRequests } from '@/app/actions/staff-management/leave-management';
+import { toast } from 'react-hot-toast';
+import { LeaveRequestStatus } from '@/types/leave.types';
+import { useQuery } from "@tanstack/react-query";
 
 export function useLeaveRequestData() {
   const [searchInput, setSearchInput] = useState('')

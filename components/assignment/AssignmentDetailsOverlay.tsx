@@ -1,13 +1,15 @@
-import { NurseAssignmentData } from "@/app/actions/shift-schedule-actions"
-import { AssignmentAttendanceDetails, getTodayAttendanceForAssignment } from "@/app/actions/attendance-actions"
+import { NurseAssignmentData } from "@/app/actions/scheduling/shift-schedule-actions"
+import { 
+  AssignmentAttendanceDetails, 
+  getTodayAttendanceForAssignment, 
+  adminCheckInNurse, 
+  adminCheckOutNurse 
+} from "@/app/actions/attendance/attendance-actions"
 import { format, isBefore, parseISO } from "date-fns"
 import { CalendarIcon, ClockIcon, UserIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
 import { AlertCircle, Building, CheckCircle } from "lucide-react"
 import { useEffect, useState } from "react"
-import Link from "next/link"
-
-import { adminCheckInNurse, adminCheckOutNurse } from "@/app/actions/attendance-actions" 
- 
+import Link from "next/link" 
 import ConfirmationModal from "@/components/common/ConfirmationModal"
 import { useDashboardData } from "@/hooks/useDashboardData"
 import { formatName } from "@/utils/formatters"

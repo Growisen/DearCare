@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { exportStaff } from "@/app/actions/staff-actions";
+import { exportStaff } from "@/app/actions/staff-management/staff-actions";
 import { StaffRole } from "@/types/dearCareStaff.types";
 
 export function useExportStaff(selectedRole: StaffRole | "all", searchQuery: string) {

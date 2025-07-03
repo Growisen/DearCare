@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getOrganizationClientDetails, getClientStatus } from '@/app/actions/client-actions';
+import { getOrganizationClientDetails, getClientStatus } from '@/app/actions/clients/client-actions';
 import { ClientCategory } from '@/types/client.types';
 
 // Define interfaces

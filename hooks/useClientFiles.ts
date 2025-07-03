@@ -3,7 +3,7 @@ import {
   uploadClientFiles, 
   deleteClientFile, 
   getClientFiles 
-} from '@/app/actions/client-actions';
+} from '@/app/actions/clients/client-actions';
 
 export type FileItem = {
   id: string;

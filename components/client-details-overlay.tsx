@@ -6,7 +6,7 @@ import { UnderReviewContent } from '../components/client/UnderReview';
 import { PendingContent } from '../components/client/PendingContent';
 import { RejectedContent } from '../components/client/RejectedContent';
 import { ClientDetailsProps, StaffRequirement, DetailedClientIndividual, DetailedClientOrganization, ClientStatus } from '../types/client.types';
-import { getClientDetails, deleteClient } from '../app/actions/client-actions';
+import { getClientDetails, deleteClient } from '@/app/actions/clients/client-actions';
 import Image from 'next/image';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useClientData } from '@/hooks/useClientData';

@@ -1,7 +1,7 @@
 'use server'
 
-import { createSupabaseServerClient } from './auth';
-import { updateNurseStatus } from './add-nurse';
+import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { updateNurseStatus } from '@/app/actions/staff-management/add-nurse';
 import { getClientProfileUrl } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
 

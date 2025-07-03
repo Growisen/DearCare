@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Loader from '@/components/Loader'
 import Image from 'next/image';
-import { fetchNurseDetailsmain, SimplifiedNurseDetails, updateNurse } from '@/app/actions/add-nurse';
+import { fetchNurseDetailsmain, SimplifiedNurseDetails, updateNurse } from '@/app/actions/staff-management/add-nurse';
 //import { update } from '@/app/actions/update-nurse'; // Adjust the import path as needed
 
 // Optimized interfaces

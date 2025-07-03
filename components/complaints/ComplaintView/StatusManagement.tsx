@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Complaint, ComplaintStatus } from "@/types/complaint.types";
 import { statusOptions } from "@/types/complaint.types";
-import { updateComplaintStatus } from "@/app/actions/complaints-actions";
+import { updateComplaintStatus } from "@/app/actions/complaints-management/complaints-actions";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useDashboardData } from '@/hooks/useDashboardData';
