@@ -1,6 +1,6 @@
 "use server"
 
-import { createSupabaseServerClient } from './auth'
+import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { StaffRole, StaffOrganization } from '@/types/dearCareStaff.types';

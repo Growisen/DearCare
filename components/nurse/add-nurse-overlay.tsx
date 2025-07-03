@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseHealthData,NurseDocuments, BaseNurseFields,stp1BaseNurseFields } from '@/types/staff.types';
-import { createNurse } from '@/app/actions/add-nurse';
+import { createNurse } from '@/app/actions/staff-management/add-nurse';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 const FORM_CONFIG = {
@@ -230,6 +230,13 @@ const StepContent = {
           value={formData.admitted_type} 
           onChange={(e) => setFormData({ ...formData, admitted_type: e.target.value as 'Tata_Homenursing' | 'Dearcare_Llp' })} 
         />
+        <Fields.Input 
+          label="Previous Register Number" 
+          placeholder="Enter previous register number (if applicaple)" 
+          value={formData.nurse_prev_reg_no} 
+          onChange={(e) => setFormData({ ...formData, nurse_prev_reg_no: e.target.value })}
+          required={false}
+        />
         <Fields.Select label="Gender" options={["Male", "Female"]} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} />
         <Fields.Select label="Marital Status" options={FORM_CONFIG.options.maritalStatus} value={formData.marital_status} onChange={(e) => setFormData({ ...formData, marital_status: e.target.value })} />
         <Fields.Input 
@@ -237,8 +244,8 @@ const StepContent = {
           type="date" 
           placeholder="" 
           value={formData.date_of_birth}
-          max={new Date().toISOString().split('T')[0]} // Add this line to prevent future dates
-onChange={(e) => {
+          max={new Date().toISOString().split('T')[0]} 
+          onChange={(e) => {
             setFormData({ ...formData, date_of_birth: e.target.value });
             calculateAge(e.target.value);
           }}
@@ -559,7 +566,8 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     mother_tongue: '',
     age: '',
     nurse_reg_no: '',
-    admitted_type: 'Tata_Homenursing'
+    admitted_type: 'Tata_Homenursing',
+    nurse_prev_reg_no: ''
   });
   
   const [referenceData, setReferenceData] = useState<NurseReferenceData>({

@@ -1,6 +1,6 @@
 "use server"
 
-import { createSupabaseServerClient } from './auth'
+import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { Client } from '@/types/client.types';
 import { logger } from '@/utils/logger';
 

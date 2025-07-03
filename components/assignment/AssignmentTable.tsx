@@ -3,7 +3,7 @@ import { CalendarIcon, ClockIcon, UserIcon } from "@heroicons/react/24/outline"
 import { Building, Eye } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
-import { NurseAssignmentData } from "@/app/actions/shift-schedule-actions"
+import { NurseAssignmentData } from "@/app/actions/scheduling/shift-schedule-actions";
 import { AssignmentDetailsOverlay } from "./AssignmentDetailsOverlay"
 import { formatName } from "@/utils/formatters"
 

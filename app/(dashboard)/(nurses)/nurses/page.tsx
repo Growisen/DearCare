@@ -5,9 +5,8 @@ import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "@/components/nurse/NurseTable"
 import NurseCard from "@/components/nurse/NurseCard"
 import { NurseBasicInfo, NurseBasicDetails } from "@/types/staff.types"
-import { fetchBasicDetails } from "@/app/actions/add-nurse"
+import { fetchBasicDetails, exportNurseData } from "@/app/actions/staff-management/add-nurse"
 import Loader from "@/components/Loader"
-import { exportNurseData } from '@/app/actions/add-nurse';
 import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"

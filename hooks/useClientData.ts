@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { getClients } from "@/app/actions/client-actions"
+import { getClients } from "@/app/actions/clients/client-actions"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Client, ClientFilters, ClientStatus, ClientCategory } from '@/types/client.types'
 

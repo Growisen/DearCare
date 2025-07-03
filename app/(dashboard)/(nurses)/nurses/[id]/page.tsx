@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Loader from '@/components/Loader'
-import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails, deleteNurse } from '@/app/actions/add-nurse';
+import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails, deleteNurse } from '@/app/actions/staff-management/add-nurse';
 import Link from 'next/link';
 
 const NurseProfilePage: React.FC = () => {

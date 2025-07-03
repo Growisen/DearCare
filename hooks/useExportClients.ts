@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { exportClients } from "@/app/actions/client-actions"
+import { useState } from "react";
+import { exportClients } from "@/app/actions/clients/client-actions";
 import { ClientFilters } from "@/types/client.types";
 
 export function useExportClients(selectedStatus: ClientFilters, searchQuery: string) {

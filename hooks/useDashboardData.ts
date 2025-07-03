@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { fetchDashboardData, DashboardData } from "@/app/actions/dashboard-actions"
+import { fetchDashboardData, DashboardData } from "@/app/actions/dashboard/dashboard-actions"
 
 export function useDashboardData() {
   const queryClient = useQueryClient();

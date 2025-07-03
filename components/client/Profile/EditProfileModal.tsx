@@ -3,7 +3,7 @@ import InputField from '@/components/open-form/InputField';
 import ProfileImageUpload from '@/components/open-form/ProfileImageUpload';
 import { Patient } from '@/types/client.types';
 import toast from 'react-hot-toast';
-import { updateIndividualClientProfile } from "@/app/actions/client-actions";
+import { updateIndividualClientProfile } from "@/app/actions/clients/client-actions";
 import { relationOptions } from "@/utils/constants"
 import {
   useNameValidation,

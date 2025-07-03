@@ -1,6 +1,6 @@
 import React, { memo } from "react"
 import { Clock, MapPin } from "lucide-react"
-import { AttendanceRecord } from "@/app/actions/attendance-actions"
+import { AttendanceRecord } from "@/app/actions/attendance/attendance-actions"
 import LocationMap from "@/components/staff/attendance/LocationMap"
 import { formatDate, formatName } from "@/utils/formatters"
 

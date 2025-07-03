@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getNurseAssignments, updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/shift-schedule-actions';
-import { listNursesWithAssignments } from '@/app/actions/add-nurse';
+import { getNurseAssignments, updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/scheduling/shift-schedule-actions';
+import { listNursesWithAssignments } from '@/app/actions/staff-management/add-nurse';
 import { NurseAssignment } from '@/types/client.types';
 import { Nurse } from '@/types/staff.types';
 import toast from 'react-hot-toast';
