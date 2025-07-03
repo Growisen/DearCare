@@ -803,6 +803,108 @@ export async function adminCheckOutNurse(
   }
 }
 
+export async function markLongShiftAttendance(
+  assignmentId: number,
+): Promise<{ 
+  success: boolean; 
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data: assignmentData, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select('shift_start_time, shift_end_time')
+      .eq('id', assignmentId)
+      .single();
+    
+    if (assignmentError) {
+      logger.error('Error fetching shift details:', assignmentError);
+      return {
+        success: false,
+        error: assignmentError.message
+      };
+    }
+
+    let totalHours = '0:00';
+    if (assignmentData.shift_start_time && assignmentData.shift_end_time) {
+      const [startHours, startMinutes] = assignmentData.shift_start_time.split(':').map(Number);
+      const [endHours, endMinutes] = assignmentData.shift_end_time.split(':').map(Number);
+      
+      let diffMinutes = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
+      if (diffMinutes < 0) diffMinutes += 24 * 60;
+      
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      
+      totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    const { data: existingRecord, error: checkError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('date', today)
+      .eq('assigned_id', assignmentId)
+      .maybeSingle();
+    
+    if (checkError) {
+      logger.error('Error checking existing attendance:', checkError);
+      return {
+        success: false,
+        error: checkError.message
+      };
+    }
+    
+    if (existingRecord) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: assignmentData.shift_start_time,
+          end_time: assignmentData.shift_end_time,
+          total_hours: totalHours,
+          is_admin_action: true
+        })
+        .eq('id', existingRecord.id);
+      
+      if (updateError) {
+        return {
+          success: false,
+          error: updateError.message
+        };
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert({
+          date: today,
+          start_time: assignmentData.shift_start_time,
+          end_time: assignmentData.shift_end_time,
+          assigned_id: assignmentId,
+          total_hours: totalHours,
+          is_admin_action: true
+        });
+      
+      if (insertError) {
+        return {
+          success: false,
+          error: insertError.message
+        };
+      }
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    logger.error('Error during long shift attendance marking:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
 export interface AttendanceRecordById {
   date: string;
   checkIn: string | null;

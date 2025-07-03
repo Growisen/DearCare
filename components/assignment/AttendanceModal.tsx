@@ -12,6 +12,8 @@ export function AttendanceModal({
   attendanceLoading,
   attendanceError,
   handleMarkAttendance,
+  shiftStartTime,
+  shiftEndTime,
 }: {
   modalOpen: boolean;
   closeModal: () => void;
@@ -23,6 +25,8 @@ export function AttendanceModal({
   attendanceLoading: boolean;
   attendanceError: string | null;
   handleMarkAttendance: () => void;
+  shiftStartTime?: string;
+  shiftEndTime?: string;
 }) {
   const [localError, setLocalError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -33,6 +37,50 @@ export function AttendanceModal({
       return () => clearTimeout(timer);
     }
   }, [localError]);
+
+  useEffect(() => {
+    if (modalOpen && selectedRecord && shiftStartTime && shiftEndTime) {
+      const [startHours, startMinutes] = shiftStartTime.split(':').map(Number);
+      const [endHours, endMinutes] = shiftEndTime.split(':').map(Number);
+      
+      const shiftStartMinutes = startHours * 60 + (startMinutes || 0);
+      const shiftEndMinutes = endHours * 60 + (endMinutes || 0);
+      
+      let durationMinutes = shiftEndMinutes - shiftStartMinutes;
+      if (durationMinutes < 0) {
+        durationMinutes += 24 * 60;
+      }
+      
+      if (durationMinutes >= 0) {
+        const formattedStartTime = formatTimeFor24Hour(shiftStartTime);
+        const formattedEndTime = formatTimeFor24Hour(shiftEndTime);
+        
+        setCheckIn(formattedStartTime);
+        setCheckOut(formattedEndTime);
+        console.log('Setting times (formatted):', formattedStartTime, formattedEndTime);
+      } else {
+        if (checkIn && checkOut) {
+          setCheckIn('');
+          setCheckOut('');
+        }
+      }
+    }
+  }, [modalOpen, selectedRecord, shiftStartTime, shiftEndTime, setCheckIn, setCheckOut]);
+  
+  function formatTimeFor24Hour(timeStr: string): string {
+    if (timeStr.includes('AM') || timeStr.includes('PM')) {
+      const [timePart, period] = timeStr.split(' ');
+      // eslint-disable-next-line prefer-const
+      let [hours, minutes] = timePart.split(':').map(Number);      
+
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    return timeStr;
+  }
 
   if (!modalOpen || !selectedRecord) return null;
 
