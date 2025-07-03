@@ -130,6 +130,8 @@ export default function AssignmentDetailsPage() {
         attendanceLoading={attendanceLoading}
         attendanceError={attendanceError}
         handleMarkAttendance={handleMarkAttendance}
+        shiftStartTime={assignmentDetails?.shiftDetails?.startTime}
+        shiftEndTime={assignmentDetails?.shiftDetails?.endTime}
       />
     </div>
   );
