@@ -3,7 +3,8 @@ import {
   AssignmentAttendanceDetails, 
   getTodayAttendanceForAssignment, 
   adminCheckInNurse, 
-  adminCheckOutNurse 
+  adminCheckOutNurse,
+  markLongShiftAttendance 
 } from "@/app/actions/attendance/attendance-actions"
 import { format, isBefore, parseISO } from "date-fns"
 import { CalendarIcon, ClockIcon, UserIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
@@ -13,6 +14,8 @@ import Link from "next/link"
 import ConfirmationModal from "@/components/common/ConfirmationModal"
 import { useDashboardData } from "@/hooks/useDashboardData"
 import { formatName } from "@/utils/formatters"
+
+const LONG_SHIFT_HOUR_THRESHOLD = 22;
 
 type AssignmentDetailsOverlayProps = {
   assignment: NurseAssignmentData
@@ -29,6 +32,7 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
   
   useEffect(() => {
     fetchAttendanceData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assignment.id])
   
   async function fetchAttendanceData() {
@@ -48,6 +52,23 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
       setLoading(false)
     }
   }
+
+function calculateShiftDurationInHours(startTime: string, endTime: string): number {
+  try {
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    let durationInMinutes = (endHours - startHours) * 60 + (endMinutes - startMinutes);
+    
+    if (durationInMinutes < 0) {
+      durationInMinutes += 24 * 60;
+    }
+    
+    return durationInMinutes / 60;
+  } catch {
+    return 0;
+  }
+}
   
   function openCheckInConfirmation() {
     setShowCheckInConfirmation(true)
@@ -93,6 +114,24 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
       }
     } catch (error) {
       console.error("Error during check-out:", error)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+  
+  async function handleMarkLongShiftAttendance() {
+    setActionLoading('check-in')
+    setShowCheckInConfirmation(false)
+    try {
+      const result = await markLongShiftAttendance(assignment.id)
+      if (result.success) {
+        invalidateDashboardCache()
+        await fetchAttendanceData()
+      } else {
+        console.error("Attendance marking failed")
+      }
+    } catch (error) {
+      console.error("Error during attendance marking:", error)
     } finally {
       setActionLoading(null)
     }
@@ -308,23 +347,35 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
                     
                     {/* Add check-in button for admin */}
                     <div className="mt-3">
-                      <button
-                        onClick={openCheckInConfirmation}
-                        disabled={actionLoading === 'check-in'}
-                        className={`px-3 py-2 text-sm font-medium rounded-md ${
-                          actionLoading === 'check-in' 
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                            : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-                        }`}
-                      >
-                        {actionLoading === 'check-in' ? (
-                          <span className="flex items-center">
-                            <span className="animate-pulse mr-2">⏱️</span> Processing...
-                          </span>
-                        ) : (
-                          'Admin Check-in Nurse'
-                        )}
-                      </button>
+                    {(() => {
+                      const shiftDuration = calculateShiftDurationInHours(
+                        assignment.shift_start_time, 
+                        assignment.shift_end_time
+                      );
+                      const isLongShift = shiftDuration > LONG_SHIFT_HOUR_THRESHOLD;
+                      
+                      return (
+                        <button
+                          onClick={isLongShift ? openCheckInConfirmation : openCheckInConfirmation}
+                          disabled={actionLoading === 'check-in'}
+                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                            actionLoading === 'check-in' 
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                              : isLongShift
+                                ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+                                : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                          }`}
+                        >
+                          {actionLoading === 'check-in' ? (
+                            <span className="flex items-center">
+                              <span className="animate-pulse mr-2">⏱️</span> Processing...
+                            </span>
+                          ) : (
+                            isLongShift ? 'Mark Attendance' : 'Admin Check-in Nurse'
+                          )}
+                        </button>
+                      );
+                    })()}
                     </div>
                   </div>
                 )}
@@ -382,11 +433,37 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
       {/* Check-in Confirmation Modal */}
       <ConfirmationModal
         isOpen={showCheckInConfirmation}
-        title="Confirm Check-in"
-        message={`Are you sure you want to check in ${fullName} for today's shift?`}
-        onConfirm={handleAdminCheckIn}
+        title={(() => {
+          const shiftDuration = calculateShiftDurationInHours(
+            assignment.shift_start_time, 
+            assignment.shift_end_time
+          );
+          return shiftDuration > LONG_SHIFT_HOUR_THRESHOLD ? "Confirm Attendance" : "Confirm Check-in";
+        })()}
+        message={(() => {
+          const shiftDuration = calculateShiftDurationInHours(
+            assignment.shift_start_time, 
+            assignment.shift_end_time
+          );
+          return shiftDuration > LONG_SHIFT_HOUR_THRESHOLD 
+            ? `Are you sure you want to mark ${fullName}'s attendance for today's long shift? This will record the full shift hours.`
+            : `Are you sure you want to check in ${fullName} for today's shift?`;
+        })()}
+        onConfirm={(() => {
+          const shiftDuration = calculateShiftDurationInHours(
+            assignment.shift_start_time, 
+            assignment.shift_end_time
+          );
+          return shiftDuration > LONG_SHIFT_HOUR_THRESHOLD ? handleMarkLongShiftAttendance : handleAdminCheckIn;
+        })()}
         onCancel={() => setShowCheckInConfirmation(false)}
-        confirmButtonText="Check In"
+        confirmButtonText={(() => {
+          const shiftDuration = calculateShiftDurationInHours(
+            assignment.shift_start_time, 
+            assignment.shift_end_time
+          );
+          return shiftDuration > LONG_SHIFT_HOUR_THRESHOLD ? "Mark Attendance" : "Check In";
+        })()}
         confirmButtonColor="blue"
         isLoading={actionLoading === 'check-in'}
       />
