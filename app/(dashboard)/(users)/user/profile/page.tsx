@@ -8,6 +8,7 @@ import EditableField from "@/components/User/Profile/EditableField";
 import { updateUserProfile, uploadProfileImage } from "@/app/actions/user-actions";
 import { toast } from "react-hot-toast";
 import { Briefcase } from "lucide-react";
+import Loader from '@/components/Loader';
 
 export default function ProfilePage() {
   const { userData, updateEmail, updatePhoto, updateField } = useUserData(true);
@@ -81,9 +82,13 @@ export default function ProfilePage() {
   };
 
   if (userData.isLoading) {
-    return <div className="h-full flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-500"></div>
-    </div>;
+    return(
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center gap-2">
+          <Loader message="Loading profile..." color="secondary" />
+        </div>
+      </div>
+    );
   }
 
   if (userData.error) {
