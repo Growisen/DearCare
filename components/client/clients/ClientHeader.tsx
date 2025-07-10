@@ -103,26 +103,6 @@ export function ClientHeader({
 
         {/* Filters section - desktop view */}
         <div className="hidden sm:flex flex-wrap items-center gap-3">
-          {/* Status filters */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
-            <div className="flex gap-1.5 items-center flex-wrap">
-              {["all", "pending", "approved", "under_review", "rejected"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => handleStatusChange(status as ClientStatus)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    selectedStatus === status
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
-                </button>
-              ))}
-            </div>
-          </div>
-          
           {/* Category filter - desktop */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
@@ -138,6 +118,26 @@ export function ClientHeader({
                   }`}
                 >
                   {category === "all" ? "All Categories" : category}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Status filters */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
+            <div className="flex gap-1.5 items-center flex-wrap">
+              {["all", "pending", "approved", "under_review", "rejected"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleStatusChange(status as ClientStatus)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    selectedStatus === status
+                      ? "bg-blue-50 text-blue-700 border border-blue-200"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
                 </button>
               ))}
             </div>
