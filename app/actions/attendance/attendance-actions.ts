@@ -21,6 +21,7 @@ interface Nurse {
   nurse_id: number;
   first_name: string;
   last_name: string;
+  admitted_type: "Dearcare_Llp" | "Tata_Homenursing";
 }
 
 interface NurseClient {
@@ -88,7 +89,8 @@ export async function fetchStaffAttendance(
   date?: string,
   page: number = 1,
   pageSize: number = 50,
-  includeAbsent: boolean = true
+  includeAbsent: boolean = true,
+  admittedType?: string 
 ): Promise<{ 
   success: boolean; 
   data: AttendanceRecord[]; 
@@ -125,7 +127,8 @@ export async function fetchStaffAttendance(
           nurse:nurse_id (
             nurse_id,
             first_name,
-            last_name
+            last_name,
+            admitted_type
           )
         )
       `, { count: 'exact' })
@@ -139,18 +142,38 @@ export async function fetchStaffAttendance(
     
     if (attendanceError) throw new Error(attendanceError.message);
     
-    const presentAssignmentIds = new Set((attendanceData as RawAttendanceRecord[])
+    let filteredAttendanceData = attendanceData as RawAttendanceRecord[];
+    if (admittedType) {
+      filteredAttendanceData = filteredAttendanceData.filter(record => {
+        const nurseClient = record.nurse_client;
+        if (!nurseClient) return false;
+        
+        const nurse = Array.isArray(nurseClient) 
+          ? (nurseClient.length > 0 ? nurseClient[0].nurse : null)
+          : nurseClient.nurse;
+          
+        if (!nurse) return false;
+        
+        const nurseData = Array.isArray(nurse) 
+          ? (nurse.length > 0 ? nurse[0] : null) 
+          : nurse;
+          
+        return nurseData?.admitted_type === admittedType;
+      });
+    }
+    
+    const presentAssignmentIds = new Set(filteredAttendanceData
       .map(record => record.assigned_id)
       .filter(id => id !== null));
     
-    const formattedAttendanceData: AttendanceRecord[] = (attendanceData as RawAttendanceRecord[]).map(record => {
+    const formattedAttendanceData: AttendanceRecord[] = filteredAttendanceData.map(record => {
       return processAttendanceRecord(record);
     });
     
     let absentRecords: AttendanceRecord[] = [];
     
     if (includeAbsent) {
-      const { data: scheduledNurses, error: scheduledError } = await supabase
+      const nurseClientQuery = supabase
         .from('nurse_client')
         .select(`
           id,
@@ -162,16 +185,38 @@ export async function fetchStaffAttendance(
           nurse:nurse_id (
             nurse_id,
             first_name,
-            last_name
+            last_name,
+            admitted_type
           )
         `, { count: 'exact' })
         .lte('start_date', targetDate)
         .gte('end_date', targetDate);
       
+      if (admittedType) {
+        nurseClientQuery.eq('nurse.admitted_type', admittedType);
+      }
+      
+      const { data: scheduledNurses, error: scheduledError } = await nurseClientQuery;
+      
       if (scheduledError) throw new Error(scheduledError.message);
       
       if (scheduledNurses) {
-        absentRecords = await Promise.all(scheduledNurses
+        // Make sure we're filtering correctly for absent nurses
+        let filteredScheduledNurses = scheduledNurses;
+        if (admittedType) {
+          filteredScheduledNurses = scheduledNurses.filter(assignment => {
+            const nurse = assignment.nurse;
+            if (!nurse) return false;
+            
+            const nurseData = Array.isArray(nurse) 
+              ? (nurse.length > 0 ? nurse[0] : null) 
+              : nurse;
+              
+            return nurseData?.admitted_type === admittedType;
+          });
+        }
+        
+        absentRecords = await Promise.all(filteredScheduledNurses
           .filter(assignment => !presentAssignmentIds.has(assignment.id))
           .map(assignment => processAbsentNurse(assignment, targetDate))
         );
@@ -202,8 +247,8 @@ export async function fetchStaffAttendance(
       data: formattedAttendanceData,
       pagination: {
         currentPage: page,
-        totalPages: Math.ceil((attendanceCount || 0) / pageSize),
-        totalRecords: attendanceCount || 0,
+        totalPages: Math.ceil((admittedType ? formattedAttendanceData.length : attendanceCount || 0) / pageSize),
+        totalRecords: admittedType ? formattedAttendanceData.length : attendanceCount || 0,
         pageSize
       }
     };

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { getLeaveRequests } from '@/app/actions/staff-management/leave-management';
+import { getLeaveRequests, updateLeaveRequestStatus, exportLeaveRequests } from '@/app/actions/staff-management/leave-management';
 import { toast } from 'react-hot-toast';
-import { LeaveRequestStatus } from '@/types/leave.types';
+import { LeaveRequestStatus, LeaveRequest } from '@/types/leave.types';
 import { useQuery } from "@tanstack/react-query";
 
 export function useLeaveRequestData() {
   const [searchInput, setSearchInput] = useState('')
   const [appliedSearchTerm, setAppliedSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [admittedTypeFilter, setAdmittedTypeFilter] = useState<'Dearcare_Llp' | 'Tata_Homenursing' | "">("");
   const [dateRange, setDateRange] = useState<{startDate: string | null, endDate: string | null}>({
     startDate: null,
     endDate: null
@@ -15,6 +16,21 @@ export function useLeaveRequestData() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [processingRequestIds, setProcessingRequestIds] = useState<Set<string>>(new Set())
+  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    requestId: string | null;
+    action: 'approve' | 'reject' | null;
+  }>({
+    isOpen: false,
+    requestId: null,
+    action: null,
+  })
+  
+
+  const statuses = ['Pending', 'Approved', 'Rejected']
   
   const getStatusFilter = (): LeaveRequestStatus | null => {
     if (statusFilter && statusFilter !== 'All') {
@@ -26,12 +42,10 @@ export function useLeaveRequestData() {
     return null
   }
 
-
   useEffect(() => {
     setCurrentPage(1)
   }, [statusFilter, appliedSearchTerm, dateRange.startDate, dateRange.endDate])
 
-  // Use React Query for data fetching and caching
   const { 
     data, 
     isLoading, 
@@ -44,12 +58,14 @@ export function useLeaveRequestData() {
       dateRange.startDate,
       dateRange.endDate,
       currentPage,
-      pageSize
+      pageSize,
+      admittedTypeFilter
     ],
     queryFn: async () => {
       try {
         const result = await getLeaveRequests(
           getStatusFilter(),
+          admittedTypeFilter,
           appliedSearchTerm,
           dateRange.startDate,
           dateRange.endDate,
@@ -81,7 +97,6 @@ export function useLeaveRequestData() {
   const totalCount = data?.totalCount || 0
   const totalPages = Math.ceil(totalCount / pageSize)
   
-  // Apply search when search button is clicked
   const applySearch = () => {
     setAppliedSearchTerm(searchInput)
     setCurrentPage(1)
@@ -110,8 +125,148 @@ export function useLeaveRequestData() {
       setCurrentPage(currentPage + 1)
     }
   }
+  
+  const handleViewLeaveRequest = (request: LeaveRequest) => {
+    setSelectedLeaveRequest(request)
+    setIsModalOpen(true)
+  }
+
+  const handleApproveLeaveRequest = async (id: string) => {
+    setProcessingRequestIds(prev => new Set(prev).add(id))
+    
+    try {
+      const result = await updateLeaveRequestStatus(id, 'approved')
+      if (result.success) {
+        toast.success('Leave request approved')
+        refetch()
+        if (selectedLeaveRequest?.id === id) {
+          setSelectedLeaveRequest({...selectedLeaveRequest, status: 'approved'})
+        }
+      } else {
+        toast.error(result.error || 'Failed to approve leave request')
+      }
+    } catch {
+      toast.error('An error occurred while approving the request')
+    } finally {
+      setProcessingRequestIds(prev => {
+        const updated = new Set(prev)
+        updated.delete(id)
+        return updated
+      })
+    }
+  }
+
+  const handleRejectLeaveRequest = async (id: string, rejectionReason?: string) => {
+    try {
+      if (!rejectionReason?.trim()) {
+        toast.error('Please provide a reason for rejection');
+        return;
+      }
+      
+      setProcessingRequestIds(prev => new Set(prev).add(id))
+      
+      const result = await updateLeaveRequestStatus(id, 'rejected', rejectionReason)
+      if (result.success) {
+        toast.success('Leave request rejected')
+        refetch()
+        if (selectedLeaveRequest?.id === id) {
+          setSelectedLeaveRequest({
+            ...selectedLeaveRequest, 
+            status: 'rejected', 
+            rejectionReason
+          })
+        }
+        setIsModalOpen(false)
+      } else {
+        toast.error(result.error || 'Failed to reject leave request')
+      }
+    } catch {
+      toast.error('An error occurred while rejecting the request')
+    } finally {
+      setProcessingRequestIds(prev => {
+        const updated = new Set(prev)
+        updated.delete(id)
+        return updated
+      })
+    }
+  }
+  
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
+
+
+
+  const handleSearch = () => {
+    applySearch()
+  }
+
+  const handleResetFilters = () => {
+    clearAllFilters()
+    refetch()
+  }
+
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      const currentStatus = statusFilter && statusFilter !== 'All' 
+        ? statusFilter.toLowerCase() as 'pending' | 'approved' | 'rejected' 
+        : null
+  
+      const result = await exportLeaveRequests(
+        currentStatus,
+        searchInput,
+        dateRange.startDate,
+        dateRange.endDate
+      )
+  
+      if (!result.success) {
+        toast.error(result.error || 'Failed to export leave requests')
+        return
+      }
+  
+      if (result.recordCount === 0) {
+        toast.error('No data to export based on current filters')
+        return
+      }
+  
+      const csvData = result.csvData || '';
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
+      
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      
+      // Set filename with current date
+      const date = new Date().toISOString().split('T')[0]
+      link.setAttribute('href', url)
+      link.setAttribute('download', `leave_requests_${date}.csv`)
+      link.style.visibility = 'hidden'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      if (result.recordCount !== undefined) {
+        toast.success(`${result.recordCount} leave requests exported successfully`)
+      } else {
+        toast.success('Leave requests exported successfully')
+      }
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export leave requests')
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   return {
+    statuses,
+    isModalOpen, 
+    setIsModalOpen,
+    isExporting,
+    confirmationModal, 
+    setConfirmationModal,
     leaveRequests,
     isLoading,
     searchTerm: searchInput,
@@ -119,6 +274,8 @@ export function useLeaveRequestData() {
     applySearch,
     statusFilter, 
     setStatusFilter,
+    admittedTypeFilter, 
+    setAdmittedTypeFilter,
     dateRange,
     setDateRange,
     currentPage,
@@ -130,9 +287,17 @@ export function useLeaveRequestData() {
     processingRequestIds,
     setProcessingRequestIds,
     clearAllFilters,
-    fetchLeaveRequests: refetch,
+    refetch,
     handlePageChange,
     handlePreviousPage,
-    handleNextPage
+    handleNextPage,
+    handleViewLeaveRequest,
+    handleApproveLeaveRequest,
+    handleRejectLeaveRequest,
+    handleExport,
+    handlePageSizeChange,
+    handleSearch,
+    handleResetFilters,
+    selectedLeaveRequest
   }
 }

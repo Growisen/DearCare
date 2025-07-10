@@ -1,6 +1,7 @@
 import React from "react"
 import { Search, X, Download, Calendar, RefreshCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { AdmittedType } from "@/app/actions/staff-management/leave-management";
 
 type LeaveRequestsHeaderProps = {
   onAddLeaveRequest?: () => void
@@ -16,6 +17,8 @@ type LeaveRequestsHeaderProps = {
   handleSearch: () => void
   handleResetFilters: () => void
   statuses: string[]
+  admittedTypeFilter: 'Dearcare_Llp' | 'Tata_Homenursing' | ""
+  setAdmittedTypeFilter: (value: 'Dearcare_Llp' | 'Tata_Homenursing' | "") => void
 }
 
 export function LeaveRequestsHeader({ 
@@ -29,10 +32,18 @@ export function LeaveRequestsHeader({
   setDateRange,
   handleSearch,
   handleResetFilters,
-  statuses
+  statuses,
+  admittedTypeFilter = "",
+  setAdmittedTypeFilter
 }: LeaveRequestsHeaderProps) {
   
-  const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate
+  const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate || admittedTypeFilter
+
+  const admittedTypeMap = [
+    { value: "", display: "All Categories" },
+    { value: "Dearcare_Llp", display: "DearCare LLP" },
+    { value: "Tata_Homenursing", display: "Tata HomeNursing" }
+  ];
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
@@ -100,7 +111,7 @@ export function LeaveRequestsHeader({
           </button>
         </div>
 
-        {/* Filters */}
+        {/* Date filters */}
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-2">
             <div className="relative">
@@ -119,35 +130,6 @@ export function LeaveRequestsHeader({
               value={dateRange.endDate || ''}
               onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
             />
-          </div>
-          
-          <span className="text-xs font-medium text-gray-600 whitespace-nowrap hidden sm:inline ml-2">Status:</span>
-          {/* Desktop view - compact pill buttons */}
-          <div className="hidden sm:flex gap-1.5 items-center">
-            {['All', ...statuses].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status === 'All' ? null : status)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  (status === 'All' && statusFilter === null) || statusFilter === status
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-            
-            {hasActiveFilters && (
-              <button
-                onClick={handleResetFilters}
-                className="ml-2 px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
-                title="Reset all filters"
-              >
-                <RefreshCw className="h-3 w-3" />
-                Reset
-              </button>
-            )}
           </div>
           
           {/* Mobile view - compact select dropdowns */}
@@ -204,6 +186,86 @@ export function LeaveRequestsHeader({
               )}
             </div>
           </div>
+        </div>
+      </div>
+      
+      {/* Combined Status and Category Filters Section with spacing below */}
+      <div className="px-3 pb-5 mb-3 bg-gray-50">
+        {/* Desktop view */}
+        <div className="hidden sm:flex items-center gap-4 flex-wrap">
+          {/* Category filters */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
+            <div className="flex gap-1.5 items-center flex-wrap">
+              {admittedTypeMap.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => setAdmittedTypeFilter(type.value as AdmittedType)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    admittedTypeFilter === type.value
+                      ? "bg-blue-50 text-blue-700 border border-blue-200"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {type.display}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Status filters */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
+            <div className="flex gap-1.5 items-center">
+              {['All', ...statuses].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status === 'All' ? null : status)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    (status === 'All' && statusFilter === null) || statusFilter === status
+                      ? "bg-blue-50 text-blue-700 border border-blue-200"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Reset button */}
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              className="px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
+              title="Reset all filters"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Reset
+            </button>
+          )}
+        </div>
+        
+        {/* Mobile view */}
+        <div className="sm:hidden mt-2">
+          <select
+            value={admittedTypeFilter}
+            onChange={(e) => setAdmittedTypeFilter(e.target.value as AdmittedType)}
+            className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+            style={{ 
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: `right 0.5rem center`,
+              backgroundRepeat: `no-repeat`,
+              backgroundSize: `1.5em 1.5em`,
+              paddingRight: `2rem`
+            }}
+          >
+            {admittedTypeMap.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.display}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     </div>
