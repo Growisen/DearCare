@@ -1,204 +1,48 @@
 "use client"
 
-import { useState } from 'react'
 import { Check } from 'lucide-react'
-import { toast } from 'react-hot-toast'
 import { useLeaveRequestData } from '@/hooks/useLeaveRequestData'
-import { updateLeaveRequestStatus, exportLeaveRequests } from '@/app/actions/staff-management/leave-management'
-import { LeaveRequest } from '@/types/leave.types'
-
 import { LeaveRequestsHeader } from '@/components/leaveManagement/LeaveRequestsHeader'
 import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTable'
 import { PaginationControls } from '@/components/client/clients/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
 
 export default function LeaveRequestsPage() {
-  // Custom hook for managing leave request data
+
   const {
+    statuses,
+    isModalOpen, 
+    setIsModalOpen,
+    isExporting,
+    confirmationModal, 
+    setConfirmationModal,
     leaveRequests,
     isLoading,
     searchTerm,
     setSearchTerm,
-    applySearch,
-    statusFilter,
+    statusFilter, 
     setStatusFilter,
+    admittedTypeFilter, 
+    setAdmittedTypeFilter,
     dateRange,
     setDateRange,
     currentPage,
-    setCurrentPage,
     totalPages,
     totalCount,
     pageSize,
-    setPageSize,
     processingRequestIds,
-    setProcessingRequestIds,
-    clearAllFilters,
-    fetchLeaveRequests,
-    handlePageChange
+    handlePageChange,
+    handlePreviousPage,
+    handleNextPage,
+    handleViewLeaveRequest,
+    handleApproveLeaveRequest,
+    handleRejectLeaveRequest,
+    handleExport,
+    handlePageSizeChange,
+    handleSearch,
+    handleResetFilters,
+    selectedLeaveRequest
   } = useLeaveRequestData()
-
-
-  // Local state
-  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isExporting, setIsExporting] = useState(false)
-  const [confirmationModal, setConfirmationModal] = useState<{
-    isOpen: boolean;
-    requestId: string | null;
-    action: 'approve' | 'reject' | null;
-  }>({
-    isOpen: false,
-    requestId: null,
-    action: null,
-  })
-  
-  // Filter statuses without 'All' since it's handled separately in the header
-  const statuses = ['Pending', 'Approved', 'Rejected']
-  
-  // Event handlers
-  const handleViewLeaveRequest = (request: LeaveRequest) => {
-    setSelectedLeaveRequest(request)
-    setIsModalOpen(true)
-  }
-
-  const handleApproveLeaveRequest = async (id: string) => {
-    setProcessingRequestIds(prev => new Set(prev).add(id))
-    
-    try {
-      const result = await updateLeaveRequestStatus(id, 'approved')
-      if (result.success) {
-        toast.success('Leave request approved')
-        fetchLeaveRequests()
-        if (selectedLeaveRequest?.id === id) {
-          setSelectedLeaveRequest({...selectedLeaveRequest, status: 'approved'})
-        }
-      } else {
-        toast.error(result.error || 'Failed to approve leave request')
-      }
-    } catch {
-      toast.error('An error occurred while approving the request')
-    } finally {
-      setProcessingRequestIds(prev => {
-        const updated = new Set(prev)
-        updated.delete(id)
-        return updated
-      })
-    }
-  }
-
-  const handleRejectLeaveRequest = async (id: string, rejectionReason?: string) => {
-    try {
-      if (!rejectionReason?.trim()) {
-        toast.error('Please provide a reason for rejection');
-        return;
-      }
-      
-      setProcessingRequestIds(prev => new Set(prev).add(id))
-      
-      const result = await updateLeaveRequestStatus(id, 'rejected', rejectionReason)
-      if (result.success) {
-        toast.success('Leave request rejected')
-        fetchLeaveRequests()
-        if (selectedLeaveRequest?.id === id) {
-          setSelectedLeaveRequest({
-            ...selectedLeaveRequest, 
-            status: 'rejected', 
-            rejectionReason
-          })
-        }
-        setIsModalOpen(false)
-      } else {
-        toast.error(result.error || 'Failed to reject leave request')
-      }
-    } catch {
-      toast.error('An error occurred while rejecting the request')
-    } finally {
-      setProcessingRequestIds(prev => {
-        const updated = new Set(prev)
-        updated.delete(id)
-        return updated
-      })
-    }
-  }
-  
-  const handlePageSizeChange = (newSize: number) => {
-    setPageSize(newSize)
-    setCurrentPage(1)
-  }
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
-
-  const handleSearch = () => {
-    applySearch()
-  }
-
-  const handleResetFilters = () => {
-    clearAllFilters()
-    fetchLeaveRequests()
-  }
-
-  const handleExport = async () => {
-    setIsExporting(true)
-    try {
-      // Get the current status filter value in the correct format
-      const currentStatus = statusFilter && statusFilter !== 'All' 
-        ? statusFilter.toLowerCase() as 'pending' | 'approved' | 'rejected' 
-        : null
-  
-      // Call our export function with current filters
-      const result = await exportLeaveRequests(
-        currentStatus,
-        searchTerm,
-        dateRange.startDate,
-        dateRange.endDate
-      )
-  
-      if (!result.success) {
-        toast.error(result.error || 'Failed to export leave requests')
-        return
-      }
-  
-      if (result.recordCount === 0) {
-        toast.error('No data to export based on current filters')
-        return
-      }
-  
-      // Create blob from the CSV data
-      const csvData = result.csvData || '';
-      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
-      
-      // Create download link and trigger download
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      
-      // Set filename with current date
-      const date = new Date().toISOString().split('T')[0]
-      link.setAttribute('href', url)
-      link.setAttribute('download', `leave_requests_${date}.csv`)
-      link.style.visibility = 'hidden'
-      
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      
-      toast.success(`${result.recordCount} leave requests exported successfully`)
-    } catch (error) {
-      console.error('Export error:', error)
-      toast.error('Failed to export leave requests')
-    } finally {
-      setIsExporting(false)
-    }
-  }
 
   return (
     <div className="space-y-8 pb-10">
@@ -214,6 +58,8 @@ export default function LeaveRequestsPage() {
         handleSearch={handleSearch}
         handleResetFilters={handleResetFilters}
         statuses={statuses}
+        admittedTypeFilter={admittedTypeFilter}
+        setAdmittedTypeFilter={setAdmittedTypeFilter}
       />
 
       <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">

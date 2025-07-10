@@ -9,6 +9,7 @@ export type LeaveRequest = {
   id: string
   nurseName: string
   nurseId: string
+  admittedType: string
   leaveType: string
   leaveMode: string
   startDate: string
@@ -20,12 +21,14 @@ export type LeaveRequest = {
   rejectionReason?: string
 }
 
+export type AdmittedType = "" | "Dearcare_Llp" | "Tata_Homenursing"
 
 /**
  * Fetches all leave requests for admin view
  */
 export async function getLeaveRequests(
   status?: 'pending' | 'approved' | 'rejected' | null,
+  admittedTypeFilter?: 'Dearcare_Llp' | 'Tata_Homenursing' | "",
   searchQuery?: string,
   startDate?: string | null,
   endDate?: string | null,
@@ -48,8 +51,10 @@ export async function getLeaveRequests(
         reason,
         status,
         rejection_reason,
-        applied_on
+        applied_on,
+        nurses!inner(admitted_type)
       `)
+      .order('applied_on', { ascending: false })
     
     if (status) {
       baseQuery = baseQuery.eq('status', status)
@@ -63,18 +68,29 @@ export async function getLeaveRequests(
       baseQuery = baseQuery.lte('applied_on', endDate)
     }
     
+    if (admittedTypeFilter) {
+      baseQuery = baseQuery.eq('nurses.admitted_type', admittedTypeFilter)
+    }
+    
     let countQuery = supabase
       .from('nurse_leave_requests')
-      .select('*', { count: 'exact', head: true })
+      .select('id, nurses!inner(admitted_type)', { count: 'exact', head: true })
+      .order('applied_on', { ascending: false })
     
     if (status) {
       countQuery = countQuery.eq('status', status)
     }
+    
     if (startDate) {
       countQuery = countQuery.gte('applied_on', startDate)
     }
+    
     if (endDate) {
       countQuery = countQuery.lte('applied_on', endDate)
+    }
+    
+    if (admittedTypeFilter) {
+      countQuery = countQuery.eq('nurses.admitted_type', admittedTypeFilter)
     }
     
     const { count, error: countError } = await countQuery
@@ -84,9 +100,7 @@ export async function getLeaveRequests(
       return { success: false, error: countError.message, leaveRequests: [], totalCount: 0 }
     }
     
-    const query = baseQuery
-      .order('applied_on', { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1)
+    const query = baseQuery.range((page - 1) * pageSize, page * pageSize - 1)
     
     const { data: leaveData, error: leaveError } = await query
     
@@ -103,7 +117,7 @@ export async function getLeaveRequests(
     
     const { data: nursesData, error: nursesError } = await supabase
       .from('nurses')
-      .select('nurse_id, first_name, last_name')
+      .select('nurse_id, first_name, last_name, admitted_type')
       .in('nurse_id', nurseIds)
     
     if (nursesError) {
@@ -113,25 +127,32 @@ export async function getLeaveRequests(
     const nurseMap = new Map()
     if (nursesData) {
       nursesData.forEach(nurse => {
-        nurseMap.set(nurse.nurse_id, 
-          `${nurse.first_name || ''} ${nurse.last_name || ''}`.trim())
+        nurseMap.set(nurse.nurse_id, {
+          name: `${nurse.first_name || ''} ${nurse.last_name || ''}`.trim(),
+          admittedType: nurse.admitted_type
+        })
       })
     }
     
-    const leaveRequests: LeaveRequest[] = leaveData.map(item => ({
-      id: item.id,
-      nurseId: String(item.nurse_id),
-      nurseName: nurseMap.get(item.nurse_id) || 'Unknown',
-      leaveType: formatLeaveType(item.leave_type),
-      leaveMode: formatLeaveMode(item.leave_mode),
-      startDate: item.start_date,
-      endDate: item.end_date,
-      days: item.days,
-      reason: item.reason || '',
-      status: item.status,
-      appliedOn: item.applied_on,
-      rejectionReason: item.rejection_reason
-    }))
+    const leaveRequests: LeaveRequest[] = leaveData.map(item => {
+      const nurseInfo = nurseMap.get(item.nurse_id) || { name: 'Unknown', admittedType: '' }
+      
+      return {
+        id: item.id,
+        nurseId: String(item.nurse_id),
+        nurseName: nurseInfo.name,
+        admittedType: nurseInfo.admittedType || '',
+        leaveType: formatLeaveType(item.leave_type),
+        leaveMode: formatLeaveMode(item.leave_mode),
+        startDate: item.start_date,
+        endDate: item.end_date,
+        days: item.days,
+        reason: item.reason || '',
+        status: item.status,
+        appliedOn: item.applied_on,
+        rejectionReason: item.rejection_reason
+      }
+    })
     
     const filteredRequests = searchQuery ? 
       leaveRequests.filter(request => 
