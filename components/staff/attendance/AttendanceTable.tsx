@@ -43,8 +43,10 @@ const AttendanceTableRow = memo(({ record }: {
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
         <div className="flex flex-col space-y-2">
           <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-            <span>{record.location}</span>
+            {record.location && 
+              <MapPin className="w-4 h-4 mr-2 text-gray-500" />
+            }
+            <span>{record.location || "N/A"}</span>
           </div>
           {record.location && (
             <div className="ml-6 w-56">
@@ -96,7 +98,7 @@ const AttendanceMobileCard = memo(({ record }: {
         <p className="text-gray-800">{record.hoursWorked || "N/A"}</p>
         <p className="text-gray-500">Location:</p>
         <div className="space-y-2">
-          <p className="text-gray-800 break-all">{record.location || "Resolving location..."}</p>
+          <p className="text-gray-800 break-all">{record.location || "N/A"}</p>
           {record.location && (
             <div className="w-full">
               <LocationMap location={record.location} />
