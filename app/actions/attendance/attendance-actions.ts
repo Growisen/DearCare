@@ -3,6 +3,10 @@
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { logger } from '@/utils/logger';
 
+/**
+ * TYPES & INTERFACES
+ * -----------------
+ */
 export type AttendanceRecord = {
   id: number;
   nurseName: string;
@@ -15,6 +19,42 @@ export type AttendanceRecord = {
   status: string;
   location: string | null;
   nurseId: number | null;
+}
+
+export interface AssignmentAttendanceDetails {
+  id?: number;
+  checked_in: boolean;
+  check_in_time?: string;
+  check_out_time?: string;
+  location?: string | null;
+  total_hours?: string | null;
+  on_leave?: boolean;
+  leave_type?: string;
+}
+
+export interface AttendanceRecordById {
+  date: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  totalHours: string | number;
+  status: string;
+  notes?: string;
+  location?: string | null;
+  isAdminAction?: boolean;
+}
+
+export interface MarkAttendanceParams {
+  assignmentId: number;
+  date: string; // 'YYYY-MM-DD'
+  checkIn: string; // 'HH:mm'
+  checkOut: string; // 'HH:mm'
+  isAdminAction?: boolean;
+}
+
+export interface UnmarkAttendanceParams {
+  id?: number;
+  assignmentId?: number;
+  date?: string;
 }
 
 interface Nurse {
@@ -32,7 +72,6 @@ interface NurseClient {
   nurse: Nurse | Nurse[];
 }
 
-// Update the RawAttendanceRecord interface to match the actual data structure
 interface RawAttendanceRecord {
   id: number;
   date: string;
@@ -40,20 +79,14 @@ interface RawAttendanceRecord {
   end_time: string | null;
   total_hours: string | null;
   location: string | null;
+  assigned_id: number | null;
   nurse_client: NurseClient | NurseClient[] | null;
 }
 
-export interface AssignmentAttendanceDetails {
-  id?: number;
-  checked_in: boolean;
-  check_in_time?: string;
-  check_out_time?: string;
-  location?: string | null;
-  total_hours?: string | null;
-  on_leave?: boolean;
-  leave_type?: string;
-}
-
+/**
+ * HELPER FUNCTIONS
+ * ---------------
+ */
 
 // Convert 24-hour format to 12-hour format
 function convertTo12HourFormat(time24: string | null): string {
@@ -72,316 +105,6 @@ function convertTo12HourFormat(time24: string | null): string {
     logger.error('Error converting time format:', error);
     return '';
   }
-}
-
-interface RawAttendanceRecord {
-  id: number;
-  date: string;
-  start_time: string | null;
-  end_time: string | null;
-  total_hours: string | null;
-  location: string | null;
-  assigned_id: number | null;
-  nurse_client: NurseClient | NurseClient[] | null;
-}
-
-export async function fetchStaffAttendance(
-  date?: string,
-  page: number = 1,
-  pageSize: number = 50,
-  includeAbsent: boolean = true,
-  admittedType?: string 
-): Promise<{ 
-  success: boolean; 
-  data: AttendanceRecord[]; 
-  pagination?: {
-    currentPage: number;
-    totalPages: number;
-    totalRecords: number;
-    pageSize: number;
-  };
-  error?: string 
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const targetDate = date || new Date().toISOString().split('T')[0];
-    
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-    
-    const attendanceQuery = supabase
-      .from('attendence_individual')
-      .select(`
-        id,
-        date,
-        start_time,
-        end_time,
-        total_hours,
-        location,
-        assigned_id,
-        nurse_client:assigned_id (
-          id,
-          nurse_id,
-          shift_start_time,
-          shift_end_time,
-          nurse:nurse_id (
-            nurse_id,
-            first_name,
-            last_name,
-            admitted_type
-          )
-        )
-      `, { count: 'exact' })
-      .eq('date', targetDate);
-    
-    if (!includeAbsent) {
-      attendanceQuery.range(from, to);
-    }
-    
-    const { data: attendanceData, error: attendanceError, count: attendanceCount } = await attendanceQuery;
-    
-    if (attendanceError) throw new Error(attendanceError.message);
-    
-    let filteredAttendanceData = attendanceData as RawAttendanceRecord[];
-    if (admittedType) {
-      filteredAttendanceData = filteredAttendanceData.filter(record => {
-        const nurseClient = record.nurse_client;
-        if (!nurseClient) return false;
-        
-        const nurse = Array.isArray(nurseClient) 
-          ? (nurseClient.length > 0 ? nurseClient[0].nurse : null)
-          : nurseClient.nurse;
-          
-        if (!nurse) return false;
-        
-        const nurseData = Array.isArray(nurse) 
-          ? (nurse.length > 0 ? nurse[0] : null) 
-          : nurse;
-          
-        return nurseData?.admitted_type === admittedType;
-      });
-    }
-    
-    const presentAssignmentIds = new Set(filteredAttendanceData
-      .map(record => record.assigned_id)
-      .filter(id => id !== null));
-    
-    const formattedAttendanceData: AttendanceRecord[] = filteredAttendanceData.map(record => {
-      return processAttendanceRecord(record);
-    });
-    
-    let absentRecords: AttendanceRecord[] = [];
-    
-    if (includeAbsent) {
-      const nurseClientQuery = supabase
-        .from('nurse_client')
-        .select(`
-          id,
-          nurse_id,
-          shift_start_time,
-          shift_end_time,
-          start_date,
-          end_date,
-          nurse:nurse_id (
-            nurse_id,
-            first_name,
-            last_name,
-            admitted_type
-          )
-        `, { count: 'exact' })
-        .lte('start_date', targetDate)
-        .gte('end_date', targetDate);
-      
-      if (admittedType) {
-        nurseClientQuery.eq('nurse.admitted_type', admittedType);
-      }
-      
-      const { data: scheduledNurses, error: scheduledError } = await nurseClientQuery;
-      
-      if (scheduledError) throw new Error(scheduledError.message);
-      
-      if (scheduledNurses) {
-        // Make sure we're filtering correctly for absent nurses
-        let filteredScheduledNurses = scheduledNurses;
-        if (admittedType) {
-          filteredScheduledNurses = scheduledNurses.filter(assignment => {
-            const nurse = assignment.nurse;
-            if (!nurse) return false;
-            
-            const nurseData = Array.isArray(nurse) 
-              ? (nurse.length > 0 ? nurse[0] : null) 
-              : nurse;
-              
-            return nurseData?.admitted_type === admittedType;
-          });
-        }
-        
-        absentRecords = await Promise.all(filteredScheduledNurses
-          .filter(assignment => !presentAssignmentIds.has(assignment.id))
-          .map(assignment => processAbsentNurse(assignment, targetDate))
-        );
-      }
-    }
-    
-    let allRecords = [...formattedAttendanceData];
-    if (includeAbsent) {
-      allRecords = [...formattedAttendanceData, ...absentRecords];
-      
-      const totalRecords = allRecords.length;
-      allRecords = allRecords.slice(from, from + pageSize);
-      
-      return {
-        success: true,
-        data: allRecords,
-        pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(totalRecords / pageSize),
-          totalRecords,
-          pageSize
-        }
-      };
-    }
-    
-    return {
-      success: true,
-      data: formattedAttendanceData,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil((admittedType ? formattedAttendanceData.length : attendanceCount || 0) / pageSize),
-        totalRecords: admittedType ? formattedAttendanceData.length : attendanceCount || 0,
-        pageSize
-      }
-    };
-  } catch (error) {
-    logger.error('Error fetching attendance records:', error);
-    return {
-      success: false,
-      data: [],
-      error: error instanceof Error ? error.message : 'An unknown error occurred'
-    };
-  }
-}
-
-function processAttendanceRecord(record: RawAttendanceRecord): AttendanceRecord {
-  const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
-  const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
-  
-  let nurseClient = null;
-  if (record.nurse_client) {
-    nurseClient = Array.isArray(record.nurse_client) 
-      ? (record.nurse_client.length > 0 ? record.nurse_client[0] : null)
-      : record.nurse_client;
-  }
-  
-  const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
-  const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
-
-  let status = 'Absent';
-  if (record.start_time) {
-    status = 'Present';
-    
-    if (nurseClient?.shift_start_time && record.start_time) {
-      const expectedMinutes = parseInt(nurseClient.shift_start_time.split(':')[0]) * 60 
-        + parseInt(nurseClient.shift_start_time.split(':')[1]);
-      const actualMinutes = parseInt(record.start_time.split(':')[0]) * 60 
-        + parseInt(record.start_time.split(':')[1]);
-      
-      if (actualMinutes > expectedMinutes + 15) {
-        status = 'Late';
-      }
-    }
-  }
-
-  let nurse = null;
-  if (nurseClient?.nurse) {
-    nurse = Array.isArray(nurseClient.nurse)
-      ? (nurseClient.nurse.length > 0 ? nurseClient.nurse[0] : null)
-      : nurseClient.nurse;
-  }
-    
-  const nurseName = nurse?.first_name && nurse?.last_name
-    ? `${nurse.first_name} ${nurse.last_name}`
-    : 'Unknown Nurse';
-
-    const hoursWorked = calculateHoursWorked(
-      record.total_hours,
-      record.start_time, 
-      record.end_time
-    );
-
-  const locationInfo = parseLocation(record.location);
-
-  return {
-    id: record.id,
-    nurseName,
-    date: record.date,
-    shiftStart: actualStart,
-    shiftEnd: actualEnd,
-    scheduledStart,
-    scheduledEnd,
-    hoursWorked, 
-    status,
-    location: locationInfo,
-    nurseId: nurse?.nurse_id || null
-  };
-}
-
-interface NurseAssignment {
-  id: number;
-  nurse_id: number;
-  shift_start_time: string;
-  shift_end_time: string;
-  start_date: string;
-  end_date: string;
-  nurse: Nurse | Nurse[];
-}
-
-async function processAbsentNurse(assignment: NurseAssignment, targetDate: string): Promise<AttendanceRecord> {
-  let nurse = null;
-  if (assignment.nurse) {
-    nurse = Array.isArray(assignment.nurse)
-      ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
-      : assignment.nurse;
-  }
-  
-  const nurseId = nurse?.nurse_id || null;
-  const nurseName = nurse?.first_name && nurse?.last_name
-    ? `${nurse.first_name} ${nurse.last_name}`
-    : 'Unknown Nurse';
-  
-  const scheduledStart = assignment.shift_start_time ? convertTo12HourFormat(assignment.shift_start_time) : '';
-  const scheduledEnd = assignment.shift_end_time ? convertTo12HourFormat(assignment.shift_end_time) : '';
-  
-  let status = 'Absent';
-  if (nurseId) {
-    const supabase = await createSupabaseServerClient();
-    const { data } = await supabase
-      .from('nurse_leave_requests')
-      .select('leave_type')
-      .eq('nurse_id', nurseId)
-      .eq('status', 'approved')
-      .lte('start_date', targetDate)
-      .gte('end_date', targetDate)
-      .limit(1);
-    
-    if (data && data.length > 0) {
-      status = `On Leave (${formatLeaveType(data[0].leave_type)})`;
-    }
-  }
-  
-  return {
-    id: -assignment.id,
-    nurseName,
-    date: targetDate,
-    shiftStart: '',
-    shiftEnd: '',
-    scheduledStart,
-    scheduledEnd,
-    hoursWorked: 0,
-    status: status,
-    location: null,
-    nurseId
-  };
 }
 
 function formatLeaveType(type: string): string {
@@ -448,6 +171,67 @@ function parseLocation(location: string | null): string | null {
     return location;
   }
 }
+
+function processAttendanceRecord(record: RawAttendanceRecord): AttendanceRecord {
+  const nurseClient = record.nurse_client && 
+    (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
+  
+  const nurse = nurseClient?.nurse &&
+    (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
+  
+  const nurseName = nurse?.first_name && nurse?.last_name
+    ? `${nurse.first_name} ${nurse.last_name}`
+    : 'Unknown Nurse';
+    
+  const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
+  const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
+  const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
+  const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
+
+  let status = 'Absent';
+  if (record.start_time) {
+    status = 'Present';
+    
+    if (nurseClient?.shift_start_time && record.start_time) {
+      const [shiftH, shiftM] = nurseClient.shift_start_time.split(':').map(Number);
+      const [actualH, actualM] = record.start_time.split(':').map(Number);
+      
+      const expectedMinutes = shiftH * 60 + shiftM;
+      const actualMinutes = actualH * 60 + actualM;
+      
+      if (actualMinutes > expectedMinutes + 15) {
+        status = 'Late';
+      }
+    }
+  }
+
+  const hoursWorked = calculateHoursWorked(
+    record.total_hours,
+    record.start_time, 
+    record.end_time
+  );
+
+  const locationInfo = parseLocation(record.location);
+
+  return {
+    id: record.id,
+    nurseName,
+    date: record.date,
+    shiftStart: actualStart,
+    shiftEnd: actualEnd,
+    scheduledStart,
+    scheduledEnd,
+    hoursWorked, 
+    status,
+    location: locationInfo,
+    nurseId: nurse?.nurse_id || null
+  };
+}
+
+/**
+ * CORE ATTENDANCE FUNCTIONS
+ * ------------------------
+ */
 
 export async function getTodayAttendanceForAssignment(
   assignmentId: number
@@ -548,9 +332,151 @@ export async function getTodayAttendanceForAssignment(
   }
 }
 
+export async function markAttendance({
+  assignmentId,
+  date,
+  checkIn,
+  checkOut,
+  isAdminAction = false,
+}: MarkAttendanceParams): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('assigned_id', assignmentId)
+      .eq('date', date)
+      .maybeSingle();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      return { success: false, message: fetchError.message };
+    }
+
+    let totalHours: string | null = null;
+    if (checkIn && checkOut) {
+      const [inH, inM] = checkIn.split(':').map(Number);
+      const [outH, outM] = checkOut.split(':').map(Number);
+      const inMinutes = inH * 60 + inM;
+      const outMinutes = outH * 60 + outM;
+      const diff = outMinutes - inMinutes;
+      if (diff > 0) {
+        const hours = Math.floor(diff / 60);
+        const minutes = diff % 60;
+        totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+      }
+    }
+
+    if (existing) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: checkIn,
+          end_time: checkOut,
+          is_admin_action: isAdminAction,
+          total_hours: totalHours,
+        })
+        .eq('id', existing.id);
+
+      if (updateError) {
+        return { success: false, message: updateError.message };
+      }
+      return { success: true, message: 'Attendance updated successfully' };
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert([{
+          assigned_id: assignmentId,
+          date,
+          start_time: checkIn,
+          end_time: checkOut,
+          is_admin_action: isAdminAction,
+          total_hours: totalHours,
+        }]);
+
+      if (insertError) {
+        return { success: false, message: insertError.message };
+      }
+      return { success: true, message: 'Attendance marked successfully' };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to mark attendance',
+    };
+  }
+}
+
+export async function unmarkAttendance({
+  id,
+  assignmentId,
+  date,
+}: UnmarkAttendanceParams): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    let recordId = id;
+
+    if (!recordId) {
+      if (!assignmentId || !date) {
+        return { 
+          success: false, 
+          message: 'Either record ID or both assignment ID and date must be provided' 
+        };
+      }
+
+      const { data: existing, error: fetchError } = await supabase
+        .from('attendence_individual')
+        .select('id')
+        .eq('assigned_id', assignmentId)
+        .eq('date', date)
+        .maybeSingle();
+
+      if (fetchError) {
+        return { success: false, message: fetchError.message };
+      }
+
+      if (!existing) {
+        return { 
+          success: false, 
+          message: 'No attendance record found for the specified date' 
+        };
+      }
+
+      recordId = existing.id;
+    }
+
+    const { error: deleteError } = await supabase
+      .from('attendence_individual')
+      .delete()
+      .eq('id', recordId);
+
+    if (deleteError) {
+      return { success: false, message: deleteError.message };
+    }
+
+    return { success: true, message: 'Attendance record deleted successfully' };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to delete attendance record',
+    };
+  }
+}
+
+/**
+ * ADMIN ACTIONS
+ * ------------
+ */
+
 export async function adminCheckInNurse(
-  assignmentId: number,
-  // nurseId: number
+  assignmentId: number
 ): Promise<{ 
   success: boolean; 
   error?: string;
@@ -582,7 +508,6 @@ export async function adminCheckInNurse(
         .update({
           start_time: currentTime,
           is_admin_action: true
-          // admin_action_notes: `Admin check-in at ${currentTime}`
         })
         .eq('id', existingRecord.id);
       
@@ -598,10 +523,8 @@ export async function adminCheckInNurse(
         .insert({
           date: today,
           start_time: currentTime,
-          // nurse_id: nurseId,
           assigned_id: assignmentId,
           is_admin_action: true
-          // admin_action_notes: `Admin check-in at ${currentTime}`
         });
       
       if (insertError) {
@@ -671,8 +594,7 @@ export async function adminCheckOutNurse(
       .update({
         end_time: currentTime,
         total_hours: totalHours,
-        is_admin_action: true,
-        // admin_action_notes: (attendance.admin_action_notes || '') + ` | Admin check-out at ${currentTime}`
+        is_admin_action: true
       })
       .eq('id', attendanceId);
     
@@ -797,15 +719,223 @@ export async function markLongShiftAttendance(
   }
 }
 
-export interface AttendanceRecordById {
-  date: string;
-  checkIn: string | null;
-  checkOut: string | null;
-  totalHours: string | number;
-  status: string;
-  notes?: string;
-  location?: string | null;
-  isAdminAction?:boolean;
+/**
+ * REPORTING FUNCTIONS
+ * -----------------
+ */
+
+export async function fetchStaffAttendance(
+  date?: string,
+  page: number = 1,
+  pageSize: number = 50,
+  includeAbsent: boolean = true,
+  admittedType?: string 
+): Promise<{ 
+  success: boolean; 
+  data: AttendanceRecord[]; 
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalRecords: number;
+    pageSize: number;
+  };
+  error?: string 
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    
+    let attendanceQuery = supabase
+      .from('attendence_individual')
+      .select(`
+        id,
+        date,
+        start_time,
+        end_time,
+        total_hours,
+        location,
+        assigned_id,
+        nurse_client:assigned_id (
+          id,
+          nurse_id,
+          shift_start_time,
+          shift_end_time,
+          nurse:nurse_id (
+            nurse_id,
+            first_name,
+            last_name,
+            admitted_type
+          )
+        )
+      `, { count: 'exact' })
+      .eq('date', targetDate)
+      .not('nurse_client', 'is', null);
+      
+    if (admittedType) {
+      attendanceQuery = attendanceQuery.eq('nurse_client.nurse.admitted_type', admittedType);
+    }
+    
+    if (!includeAbsent) {
+      attendanceQuery.range(from, to);
+    }
+    
+    const { data: attendanceData, error: attendanceError } = await attendanceQuery;
+    
+    if (attendanceError) throw new Error(attendanceError.message);
+    
+    const validAttendanceData = attendanceData.filter(record => {
+      const nurseClient = record.nurse_client && 
+        (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
+        
+      const nurse = nurseClient?.nurse &&
+        (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
+        
+      return nurse && nurse.first_name && nurse.last_name && 
+        (!admittedType || nurse.admitted_type === admittedType);
+    });
+    
+    const presentAssignmentIds = new Set(
+      validAttendanceData
+        .filter(record => record.assigned_id !== null)
+        .map(record => record.assigned_id)
+    );
+    
+    const formattedAttendanceData = validAttendanceData.map(processAttendanceRecord);
+    
+    let absentRecords: AttendanceRecord[] = [];
+    if (includeAbsent) {
+      let nurseClientQuery = supabase
+        .from('nurse_client')
+        .select(`
+          id,
+          nurse_id,
+          shift_start_time,
+          shift_end_time,
+          start_date,
+          end_date,
+          nurse:nurse_id (
+            nurse_id,
+            first_name,
+            last_name,
+            admitted_type
+          )
+        `)
+        .lte('start_date', targetDate)
+        .gte('end_date', targetDate)
+        .not('nurse', 'is', null);
+      
+      if (admittedType) {
+        nurseClientQuery = nurseClientQuery.eq('nurse.admitted_type', admittedType);
+      }
+      
+      const { data: scheduledNurses, error: scheduledError } = await nurseClientQuery;
+      
+      if (scheduledError) throw new Error(scheduledError.message);
+      
+      if (scheduledNurses && scheduledNurses.length > 0) {
+        const validScheduledNurses = scheduledNurses.filter(assignment => {
+          const nurse = assignment.nurse && 
+            (Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse);
+          
+          return nurse && nurse.first_name && nurse.last_name && 
+            (!admittedType || nurse.admitted_type === admittedType);
+        });
+        
+        const absentNurses = validScheduledNurses.filter(
+          assignment => !presentAssignmentIds.has(assignment.id)
+        );
+        
+        if (absentNurses.length > 0) {
+          const nurseIds = absentNurses.map(assignment => assignment.nurse_id).filter(Boolean);
+          
+          const { data: leaveData } = await supabase
+            .from('nurse_leave_requests')
+            .select('nurse_id, leave_type')
+            .eq('status', 'approved')
+            .lte('start_date', targetDate)
+            .gte('end_date', targetDate)
+            .in('nurse_id', nurseIds);
+            
+          const leaveMap = new Map();
+          if (leaveData) {
+            leaveData.forEach(leave => {
+              leaveMap.set(leave.nurse_id, leave.leave_type);
+            });
+          }
+          
+          absentRecords = absentNurses.map(assignment => {
+            let nurse = null;
+            if (assignment.nurse) {
+              nurse = Array.isArray(assignment.nurse)
+                ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
+                : assignment.nurse;
+            }
+            
+            const nurseId = nurse?.nurse_id || null;
+            const nurseName = nurse?.first_name && nurse?.last_name
+              ? `${nurse.first_name} ${nurse.last_name}`
+              : 'Unknown Nurse';
+            
+            const scheduledStart = assignment.shift_start_time 
+              ? convertTo12HourFormat(assignment.shift_start_time) 
+              : '';
+            const scheduledEnd = assignment.shift_end_time 
+              ? convertTo12HourFormat(assignment.shift_end_time) 
+              : '';
+            
+            let status = 'Absent';
+            if (nurseId && leaveMap.has(nurseId)) {
+              status = `On Leave (${formatLeaveType(leaveMap.get(nurseId))})`;
+            }
+            
+            return {
+              id: -assignment.id,
+              nurseName,
+              date: targetDate,
+              shiftStart: '',
+              shiftEnd: '',
+              scheduledStart,
+              scheduledEnd,
+              hoursWorked: 0,
+              status,
+              location: null,
+              nurseId
+            };
+          });
+        }
+      }
+    }
+    
+    let allRecords = [...formattedAttendanceData, ...absentRecords];
+    const totalRecords = allRecords.length;
+    
+    allRecords.sort((a, b) => a.nurseName.localeCompare(b.nurseName));
+    
+    if (includeAbsent) {
+      allRecords = allRecords.slice(from, from + pageSize);
+    }
+    
+    return {
+      success: true,
+      data: allRecords,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalRecords / pageSize),
+        totalRecords,
+        pageSize
+      }
+    };
+  } catch (error) {
+    logger.error('Error fetching attendance records:', error);
+    return {
+      success: false,
+      data: [],
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
 }
 
 export async function getAttendanceRecords(
@@ -950,159 +1080,6 @@ export async function getAttendanceRecords(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
-    };
-  }
-}
-
-export interface MarkAttendanceParams {
-  assignmentId: number;
-  date: string; // 'YYYY-MM-DD'
-  checkIn: string; // 'HH:mm'
-  checkOut: string; // 'HH:mm'
-  isAdminAction?: boolean;
-}
-
-export async function markAttendance({
-  assignmentId,
-  date,
-  checkIn,
-  checkOut,
-  isAdminAction = false,
-}: MarkAttendanceParams): Promise<{
-  success: boolean;
-  message: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-
-    const { data: existing, error: fetchError } = await supabase
-      .from('attendence_individual')
-      .select('id')
-      .eq('assigned_id', assignmentId)
-      .eq('date', date)
-      .maybeSingle();
-
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      return { success: false, message: fetchError.message };
-    }
-
-    let totalHours: string | null = null;
-    if (checkIn && checkOut) {
-      const [inH, inM] = checkIn.split(':').map(Number);
-      const [outH, outM] = checkOut.split(':').map(Number);
-      const inMinutes = inH * 60 + inM;
-      const outMinutes = outH * 60 + outM;
-      const diff = outMinutes - inMinutes;
-      if (diff > 0) {
-        const hours = Math.floor(diff / 60);
-        const minutes = diff % 60;
-        totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
-      }
-    }
-
-    if (existing) {
-      const { error: updateError } = await supabase
-        .from('attendence_individual')
-        .update({
-          start_time: checkIn,
-          end_time: checkOut,
-          is_admin_action: isAdminAction,
-          total_hours: totalHours,
-        })
-        .eq('id', existing.id);
-
-      if (updateError) {
-        return { success: false, message: updateError.message };
-      }
-      return { success: true, message: 'Attendance updated successfully' };
-    } else {
-      const { error: insertError } = await supabase
-        .from('attendence_individual')
-        .insert([{
-          assigned_id: assignmentId,
-          date,
-          start_time: checkIn,
-          end_time: checkOut,
-          is_admin_action: isAdminAction,
-          total_hours: totalHours,
-        }]);
-
-      if (insertError) {
-        return { success: false, message: insertError.message };
-      }
-      return { success: true, message: 'Attendance marked successfully' };
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Failed to mark attendance',
-    };
-  }
-}
-
-
-export interface UnmarkAttendanceParams {
-  id?: number;
-  assignmentId?: number;
-  date?: string;
-}
-
-export async function unmarkAttendance({
-  id,
-  assignmentId,
-  date,
-}: UnmarkAttendanceParams): Promise<{
-  success: boolean;
-  message: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-
-    let recordId = id;
-
-    if (!recordId) {
-      if (!assignmentId || !date) {
-        return { 
-          success: false, 
-          message: 'Either record ID or both assignment ID and date must be provided' 
-        };
-      }
-
-      const { data: existing, error: fetchError } = await supabase
-        .from('attendence_individual')
-        .select('id')
-        .eq('assigned_id', assignmentId)
-        .eq('date', date)
-        .maybeSingle();
-
-      if (fetchError) {
-        return { success: false, message: fetchError.message };
-      }
-
-      if (!existing) {
-        return { 
-          success: false, 
-          message: 'No attendance record found for the specified date' 
-        };
-      }
-
-      recordId = existing.id;
-    }
-
-    const { error: deleteError } = await supabase
-      .from('attendence_individual')
-      .delete()
-      .eq('id', recordId);
-
-    if (deleteError) {
-      return { success: false, message: deleteError.message };
-    }
-
-    return { success: true, message: 'Attendance record deleted successfully' };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Failed to delete attendance record',
     };
   }
 }
