@@ -212,7 +212,7 @@ const NurseProfilePage: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 font-medium">Address</p>
-                        <p className="text-sm text-gray-700">{basicInfo.address}</p>
+                        <p className="text-sm text-gray-700 break-words max-w-full overflow-hidden">{basicInfo.address}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 font-medium">Phone Number</p>
