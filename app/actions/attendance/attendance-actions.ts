@@ -3,6 +3,10 @@
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { logger } from '@/utils/logger';
 
+/**
+ * TYPES & INTERFACES
+ * -----------------
+ */
 export type AttendanceRecord = {
   id: number;
   nurseName: string;
@@ -15,6 +19,42 @@ export type AttendanceRecord = {
   status: string;
   location: string | null;
   nurseId: number | null;
+}
+
+export interface AssignmentAttendanceDetails {
+  id?: number;
+  checked_in: boolean;
+  check_in_time?: string;
+  check_out_time?: string;
+  location?: string | null;
+  total_hours?: string | null;
+  on_leave?: boolean;
+  leave_type?: string;
+}
+
+export interface AttendanceRecordById {
+  date: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  totalHours: string | number;
+  status: string;
+  notes?: string;
+  location?: string | null;
+  isAdminAction?: boolean;
+}
+
+export interface MarkAttendanceParams {
+  assignmentId: number;
+  date: string; // 'YYYY-MM-DD'
+  checkIn: string; // 'HH:mm'
+  checkOut: string; // 'HH:mm'
+  isAdminAction?: boolean;
+}
+
+export interface UnmarkAttendanceParams {
+  id?: number;
+  assignmentId?: number;
+  date?: string;
 }
 
 interface Nurse {
@@ -32,7 +72,6 @@ interface NurseClient {
   nurse: Nurse | Nurse[];
 }
 
-// Update the RawAttendanceRecord interface to match the actual data structure
 interface RawAttendanceRecord {
   id: number;
   date: string;
@@ -40,20 +79,14 @@ interface RawAttendanceRecord {
   end_time: string | null;
   total_hours: string | null;
   location: string | null;
+  assigned_id: number | null;
   nurse_client: NurseClient | NurseClient[] | null;
 }
 
-export interface AssignmentAttendanceDetails {
-  id?: number;
-  checked_in: boolean;
-  check_in_time?: string;
-  check_out_time?: string;
-  location?: string | null;
-  total_hours?: string | null;
-  on_leave?: boolean;
-  leave_type?: string;
-}
-
+/**
+ * HELPER FUNCTIONS
+ * ---------------
+ */
 
 // Convert 24-hour format to 12-hour format
 function convertTo12HourFormat(time24: string | null): string {
@@ -74,16 +107,622 @@ function convertTo12HourFormat(time24: string | null): string {
   }
 }
 
-interface RawAttendanceRecord {
-  id: number;
-  date: string;
-  start_time: string | null;
-  end_time: string | null;
-  total_hours: string | null;
-  location: string | null;
-  assigned_id: number | null;
-  nurse_client: NurseClient | NurseClient[] | null;
+function formatLeaveType(type: string): string {
+  const mapping: Record<string, string> = {
+    'sick': 'Sick Leave',
+    'annual': 'Annual Leave',
+    'personal': 'Personal Leave',
+    'casual': 'Casual Leave',
+    'maternity': 'Maternity Leave',
+    'paternity': 'Paternity Leave',
+    'unpaid': 'Unpaid Leave'
+  }
+  return mapping[type] || type;
 }
+
+function calculateHoursWorked(
+  totalHours: string | null,
+  startTime: string | null = null,
+  endTime: string | null = null
+): number | string {
+  if (!totalHours && (!startTime || !endTime)) {
+    return 0;
+  }
+  
+  if (totalHours) {
+    if (totalHours.includes(':')) {
+      const [hours, minutes] = totalHours.split(':').map(Number);
+      if (hours === 0) {
+        return `${minutes} min`;
+      } else {
+        return `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
+      }
+    } else {
+      const numHours = parseFloat(totalHours);
+      return `${numHours}h`;
+    }
+  }
+  
+  const start = new Date(`1970-01-01T${startTime}`);
+  const end = new Date(`1970-01-01T${endTime}`);
+  const totalHoursValue = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  
+  const hours = Math.floor(totalHoursValue);
+  const minutes = Math.round((totalHoursValue - hours) * 60);
+  
+  if (hours === 0) {
+    return `${minutes} min`;
+  } else {
+    return `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
+  }
+}
+
+function parseLocation(location: string | null): string | null {
+  if (!location) return null;
+  
+  try {
+    if (typeof location === 'string' && (location.startsWith('{') || location.startsWith('['))) {
+      const locationObj = JSON.parse(location);
+      return `${locationObj.latitude}, ${locationObj.longitude}`;
+    }
+    return location;
+  } catch (e) {
+    logger.error("Error parsing location data:", e);
+    return location;
+  }
+}
+
+function processAttendanceRecord(record: RawAttendanceRecord): AttendanceRecord {
+  const nurseClient = record.nurse_client && 
+    (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
+  
+  const nurse = nurseClient?.nurse &&
+    (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
+  
+  const nurseName = nurse?.first_name && nurse?.last_name
+    ? `${nurse.first_name} ${nurse.last_name}`
+    : 'Unknown Nurse';
+    
+  const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
+  const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
+  const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
+  const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
+
+  let status = 'Absent';
+  if (record.start_time) {
+    status = 'Present';
+    
+    if (nurseClient?.shift_start_time && record.start_time) {
+      const [shiftH, shiftM] = nurseClient.shift_start_time.split(':').map(Number);
+      const [actualH, actualM] = record.start_time.split(':').map(Number);
+      
+      const expectedMinutes = shiftH * 60 + shiftM;
+      const actualMinutes = actualH * 60 + actualM;
+      
+      if (actualMinutes > expectedMinutes + 15) {
+        status = 'Late';
+      }
+    }
+  }
+
+  const hoursWorked = calculateHoursWorked(
+    record.total_hours,
+    record.start_time, 
+    record.end_time
+  );
+
+  const locationInfo = parseLocation(record.location);
+
+  return {
+    id: record.id,
+    nurseName,
+    date: record.date,
+    shiftStart: actualStart,
+    shiftEnd: actualEnd,
+    scheduledStart,
+    scheduledEnd,
+    hoursWorked, 
+    status,
+    location: locationInfo,
+    nurseId: nurse?.nurse_id || null
+  };
+}
+
+/**
+ * CORE ATTENDANCE FUNCTIONS
+ * ------------------------
+ */
+
+export async function getTodayAttendanceForAssignment(
+  assignmentId: number
+): Promise<{
+  success: boolean;
+  data?: AssignmentAttendanceDetails;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
+    
+    // First, get the nurse ID associated with this assignment
+    const { data: assignmentData, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select('nurse_id')
+      .eq('id', assignmentId)
+      .single();
+    
+    if (assignmentError) {
+      logger.error('Error fetching nurse assignment:', assignmentError);
+      return {
+        success: false,
+        error: assignmentError.message
+      };
+    }
+    
+    const nurseId = assignmentData?.nurse_id;
+    
+    // Check if there's an attendance record for today
+    const { data, error } = await supabase
+      .from('attendence_individual')
+      .select('id, start_time, end_time, total_hours, location')
+      .eq('date', today)
+      .eq('assigned_id', assignmentId)
+      .maybeSingle();
+    
+    if (error) {
+      logger.error('Error fetching assignment attendance:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+    
+    // Check if the nurse is on approved leave for today
+    let onLeave = false;
+    let leaveType = '';
+    
+    if (nurseId) {
+      const { data: leaveData, error: leaveError } = await supabase
+        .from('nurse_leave_requests')
+        .select('leave_type')
+        .eq('nurse_id', nurseId)
+        .eq('status', 'approved')
+        .lte('start_date', today)
+        .gte('end_date', today)
+        .maybeSingle();
+      
+      if (leaveError) {
+        logger.error('Error checking leave status:', leaveError);
+      } else if (leaveData) {
+        onLeave = true;
+        leaveType = formatLeaveType(leaveData.leave_type);
+      }
+    }
+    
+    if (!data) {
+      return {
+        success: true,
+        data: {
+          checked_in: false,
+          on_leave: onLeave,
+          leave_type: leaveType || undefined
+        }
+      };
+    }
+    
+    return {
+      success: true,
+      data: {
+        id: data.id,
+        checked_in: !!data.start_time,
+        check_in_time: data.start_time || undefined,
+        check_out_time: data.end_time || undefined,
+        location: data.location,
+        total_hours: data.total_hours,
+        on_leave: onLeave,
+        leave_type: leaveType || undefined
+      }
+    };
+  } catch (error) {
+    logger.error('Error checking attendance status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error checking attendance status'
+    };
+  }
+}
+
+export async function markAttendance({
+  assignmentId,
+  date,
+  checkIn,
+  checkOut,
+  isAdminAction = false,
+}: MarkAttendanceParams): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('assigned_id', assignmentId)
+      .eq('date', date)
+      .maybeSingle();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      return { success: false, message: fetchError.message };
+    }
+
+    let totalHours: string | null = null;
+    if (checkIn && checkOut) {
+      const [inH, inM] = checkIn.split(':').map(Number);
+      const [outH, outM] = checkOut.split(':').map(Number);
+      const inMinutes = inH * 60 + inM;
+      const outMinutes = outH * 60 + outM;
+      const diff = outMinutes - inMinutes;
+      if (diff > 0) {
+        const hours = Math.floor(diff / 60);
+        const minutes = diff % 60;
+        totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+      }
+    }
+
+    if (existing) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: checkIn,
+          end_time: checkOut,
+          is_admin_action: isAdminAction,
+          total_hours: totalHours,
+        })
+        .eq('id', existing.id);
+
+      if (updateError) {
+        return { success: false, message: updateError.message };
+      }
+      return { success: true, message: 'Attendance updated successfully' };
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert([{
+          assigned_id: assignmentId,
+          date,
+          start_time: checkIn,
+          end_time: checkOut,
+          is_admin_action: isAdminAction,
+          total_hours: totalHours,
+        }]);
+
+      if (insertError) {
+        return { success: false, message: insertError.message };
+      }
+      return { success: true, message: 'Attendance marked successfully' };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to mark attendance',
+    };
+  }
+}
+
+export async function unmarkAttendance({
+  id,
+  assignmentId,
+  date,
+}: UnmarkAttendanceParams): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    let recordId = id;
+
+    if (!recordId) {
+      if (!assignmentId || !date) {
+        return { 
+          success: false, 
+          message: 'Either record ID or both assignment ID and date must be provided' 
+        };
+      }
+
+      const { data: existing, error: fetchError } = await supabase
+        .from('attendence_individual')
+        .select('id')
+        .eq('assigned_id', assignmentId)
+        .eq('date', date)
+        .maybeSingle();
+
+      if (fetchError) {
+        return { success: false, message: fetchError.message };
+      }
+
+      if (!existing) {
+        return { 
+          success: false, 
+          message: 'No attendance record found for the specified date' 
+        };
+      }
+
+      recordId = existing.id;
+    }
+
+    const { error: deleteError } = await supabase
+      .from('attendence_individual')
+      .delete()
+      .eq('id', recordId);
+
+    if (deleteError) {
+      return { success: false, message: deleteError.message };
+    }
+
+    return { success: true, message: 'Attendance record deleted successfully' };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to delete attendance record',
+    };
+  }
+}
+
+/**
+ * ADMIN ACTIONS
+ * ------------
+ */
+
+export async function adminCheckInNurse(
+  assignmentId: number
+): Promise<{ 
+  success: boolean; 
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    
+    const { data: existingRecord, error: checkError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('date', today)
+      .eq('assigned_id', assignmentId)
+      .maybeSingle();
+    
+    if (checkError) {
+      logger.error('Error checking existing attendance:', checkError);
+      return {
+        success: false,
+        error: checkError.message
+      };
+    }
+    
+    if (existingRecord) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: currentTime,
+          is_admin_action: true
+        })
+        .eq('id', existingRecord.id);
+      
+      if (updateError) {
+        return {
+          success: false,
+          error: updateError.message
+        };
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert({
+          date: today,
+          start_time: currentTime,
+          assigned_id: assignmentId,
+          is_admin_action: true
+        });
+      
+      if (insertError) {
+        return {
+          success: false,
+          error: insertError.message
+        };
+      }
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    logger.error('Error during admin check-in:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+export async function adminCheckOutNurse(
+  attendanceId: number
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    
+    // Fetch the attendance record to get check-in time
+    const { data: attendance, error: fetchError } = await supabase
+      .from('attendence_individual')
+      .select('start_time')
+      .eq('id', attendanceId)
+      .single();
+    
+    if (fetchError || !attendance) {
+      return {
+        success: false,
+        error: fetchError?.message || 'Attendance record not found'
+      };
+    }
+    
+    // Calculate hours worked
+    let totalHours = '0:00';
+    if (attendance.start_time) {
+      const [startHours, startMinutes] = attendance.start_time.split(':').map(Number);
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      
+      const [endHours, endMinutes] = currentTime.split(':').map(Number);
+      const endTotalMinutes = endHours * 60 + endMinutes;
+      
+      const diffMinutes = endTotalMinutes - startTotalMinutes;
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      
+      totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    // Update the attendance record with check-out time and total hours
+    const { error: updateError } = await supabase
+      .from('attendence_individual')
+      .update({
+        end_time: currentTime,
+        total_hours: totalHours,
+        is_admin_action: true
+      })
+      .eq('id', attendanceId);
+    
+    if (updateError) {
+      return {
+        success: false,
+        error: updateError.message
+      };
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    logger.error('Error during admin check-out:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+export async function markLongShiftAttendance(
+  assignmentId: number,
+): Promise<{ 
+  success: boolean; 
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data: assignmentData, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select('shift_start_time, shift_end_time')
+      .eq('id', assignmentId)
+      .single();
+    
+    if (assignmentError) {
+      logger.error('Error fetching shift details:', assignmentError);
+      return {
+        success: false,
+        error: assignmentError.message
+      };
+    }
+
+    let totalHours = '0:00';
+    if (assignmentData.shift_start_time && assignmentData.shift_end_time) {
+      const [startHours, startMinutes] = assignmentData.shift_start_time.split(':').map(Number);
+      const [endHours, endMinutes] = assignmentData.shift_end_time.split(':').map(Number);
+      
+      let diffMinutes = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
+      if (diffMinutes < 0) diffMinutes += 24 * 60;
+      
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      
+      totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    const { data: existingRecord, error: checkError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('date', today)
+      .eq('assigned_id', assignmentId)
+      .maybeSingle();
+    
+    if (checkError) {
+      logger.error('Error checking existing attendance:', checkError);
+      return {
+        success: false,
+        error: checkError.message
+      };
+    }
+    
+    if (existingRecord) {
+      const { error: updateError } = await supabase
+        .from('attendence_individual')
+        .update({
+          start_time: assignmentData.shift_start_time,
+          end_time: assignmentData.shift_end_time,
+          total_hours: totalHours,
+          is_admin_action: true
+        })
+        .eq('id', existingRecord.id);
+      
+      if (updateError) {
+        return {
+          success: false,
+          error: updateError.message
+        };
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('attendence_individual')
+        .insert({
+          date: today,
+          start_time: assignmentData.shift_start_time,
+          end_time: assignmentData.shift_end_time,
+          assigned_id: assignmentId,
+          total_hours: totalHours,
+          is_admin_action: true
+        });
+      
+      if (insertError) {
+        return {
+          success: false,
+          error: insertError.message
+        };
+      }
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    logger.error('Error during long shift attendance marking:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * REPORTING FUNCTIONS
+ * -----------------
+ */
 
 export async function fetchStaffAttendance(
   date?: string,
@@ -299,544 +938,6 @@ export async function fetchStaffAttendance(
   }
 }
 
-function processAttendanceRecord(record: RawAttendanceRecord): AttendanceRecord {
-  const nurseClient = record.nurse_client && 
-    (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
-  
-  const nurse = nurseClient?.nurse &&
-    (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
-  
-  const nurseName = nurse?.first_name && nurse?.last_name
-    ? `${nurse.first_name} ${nurse.last_name}`
-    : 'Unknown Nurse';
-    
-  const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
-  const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
-  const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
-  const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
-
-  let status = 'Absent';
-  if (record.start_time) {
-    status = 'Present';
-    
-    if (nurseClient?.shift_start_time && record.start_time) {
-      const [shiftH, shiftM] = nurseClient.shift_start_time.split(':').map(Number);
-      const [actualH, actualM] = record.start_time.split(':').map(Number);
-      
-      const expectedMinutes = shiftH * 60 + shiftM;
-      const actualMinutes = actualH * 60 + actualM;
-      
-      if (actualMinutes > expectedMinutes + 15) {
-        status = 'Late';
-      }
-    }
-  }
-
-  const hoursWorked = calculateHoursWorked(
-    record.total_hours,
-    record.start_time, 
-    record.end_time
-  );
-
-  const locationInfo = parseLocation(record.location);
-
-  return {
-    id: record.id,
-    nurseName,
-    date: record.date,
-    shiftStart: actualStart,
-    shiftEnd: actualEnd,
-    scheduledStart,
-    scheduledEnd,
-    hoursWorked, 
-    status,
-    location: locationInfo,
-    nurseId: nurse?.nurse_id || null
-  };
-}
-
-// interface NurseAssignment {
-//   id: number;
-//   nurse_id: number;
-//   shift_start_time: string;
-//   shift_end_time: string;
-//   start_date: string;
-//   end_date: string;
-//   nurse: Nurse | Nurse[];
-// }
-
-// async function processAbsentNurse(assignment: NurseAssignment, targetDate: string): Promise<AttendanceRecord> {
-//   let nurse = null;
-//   if (assignment.nurse) {
-//     nurse = Array.isArray(assignment.nurse)
-//       ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
-//       : assignment.nurse;
-//   }
-  
-//   const nurseId = nurse?.nurse_id || null;
-//   const nurseName = nurse?.first_name && nurse?.last_name
-//     ? `${nurse.first_name} ${nurse.last_name}`
-//     : 'Unknown Nurse';
-  
-//   const scheduledStart = assignment.shift_start_time ? convertTo12HourFormat(assignment.shift_start_time) : '';
-//   const scheduledEnd = assignment.shift_end_time ? convertTo12HourFormat(assignment.shift_end_time) : '';
-  
-//   let status = 'Absent';
-//   if (nurseId) {
-//     const supabase = await createSupabaseServerClient();
-//     const { data } = await supabase
-//       .from('nurse_leave_requests')
-//       .select('leave_type')
-//       .eq('nurse_id', nurseId)
-//       .eq('status', 'approved')
-//       .lte('start_date', targetDate)
-//       .gte('end_date', targetDate)
-//       .limit(1);
-    
-//     if (data && data.length > 0) {
-//       status = `On Leave (${formatLeaveType(data[0].leave_type)})`;
-//     }
-//   }
-  
-//   return {
-//     id: -assignment.id,
-//     nurseName,
-//     date: targetDate,
-//     shiftStart: '',
-//     shiftEnd: '',
-//     scheduledStart,
-//     scheduledEnd,
-//     hoursWorked: 0,
-//     status: status,
-//     location: null,
-//     nurseId
-//   };
-// }
-
-function formatLeaveType(type: string): string {
-  const mapping: Record<string, string> = {
-    'sick': 'Sick Leave',
-    'annual': 'Annual Leave',
-    'personal': 'Personal Leave',
-    'casual': 'Casual Leave',
-    'maternity': 'Maternity Leave',
-    'paternity': 'Paternity Leave',
-    'unpaid': 'Unpaid Leave'
-  }
-  return mapping[type] || type;
-}
-
-function calculateHoursWorked(
-  totalHours: string | null,
-  startTime: string | null = null,
-  endTime: string | null = null
-): number | string {
-  if (!totalHours && (!startTime || !endTime)) {
-    return 0;
-  }
-  
-  if (totalHours) {
-    if (totalHours.includes(':')) {
-      const [hours, minutes] = totalHours.split(':').map(Number);
-      if (hours === 0) {
-        return `${minutes} min`;
-      } else {
-        return `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
-      }
-    } else {
-      const numHours = parseFloat(totalHours);
-      return `${numHours}h`;
-    }
-  }
-  
-  const start = new Date(`1970-01-01T${startTime}`);
-  const end = new Date(`1970-01-01T${endTime}`);
-  const totalHoursValue = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-  
-  const hours = Math.floor(totalHoursValue);
-  const minutes = Math.round((totalHoursValue - hours) * 60);
-  
-  if (hours === 0) {
-    return `${minutes} min`;
-  } else {
-    return `${hours}h${minutes > 0 ? ' ' + minutes + 'm' : ''}`;
-  }
-}
-
-function parseLocation(location: string | null): string | null {
-  if (!location) return null;
-  
-  try {
-    if (typeof location === 'string' && (location.startsWith('{') || location.startsWith('['))) {
-      const locationObj = JSON.parse(location);
-      return `${locationObj.latitude}, ${locationObj.longitude}`;
-    }
-    return location;
-  } catch (e) {
-    logger.error("Error parsing location data:", e);
-    return location;
-  }
-}
-
-export async function getTodayAttendanceForAssignment(
-  assignmentId: number
-): Promise<{
-  success: boolean;
-  data?: AssignmentAttendanceDetails;
-  error?: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const today = new Date().toISOString().split('T')[0];
-    
-    // First, get the nurse ID associated with this assignment
-    const { data: assignmentData, error: assignmentError } = await supabase
-      .from('nurse_client')
-      .select('nurse_id')
-      .eq('id', assignmentId)
-      .single();
-    
-    if (assignmentError) {
-      logger.error('Error fetching nurse assignment:', assignmentError);
-      return {
-        success: false,
-        error: assignmentError.message
-      };
-    }
-    
-    const nurseId = assignmentData?.nurse_id;
-    
-    // Check if there's an attendance record for today
-    const { data, error } = await supabase
-      .from('attendence_individual')
-      .select('id, start_time, end_time, total_hours, location')
-      .eq('date', today)
-      .eq('assigned_id', assignmentId)
-      .maybeSingle();
-    
-    if (error) {
-      logger.error('Error fetching assignment attendance:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-    
-    // Check if the nurse is on approved leave for today
-    let onLeave = false;
-    let leaveType = '';
-    
-    if (nurseId) {
-      const { data: leaveData, error: leaveError } = await supabase
-        .from('nurse_leave_requests')
-        .select('leave_type')
-        .eq('nurse_id', nurseId)
-        .eq('status', 'approved')
-        .lte('start_date', today)
-        .gte('end_date', today)
-        .maybeSingle();
-      
-      if (leaveError) {
-        logger.error('Error checking leave status:', leaveError);
-      } else if (leaveData) {
-        onLeave = true;
-        leaveType = formatLeaveType(leaveData.leave_type);
-      }
-    }
-    
-    if (!data) {
-      return {
-        success: true,
-        data: {
-          checked_in: false,
-          on_leave: onLeave,
-          leave_type: leaveType || undefined
-        }
-      };
-    }
-    
-    return {
-      success: true,
-      data: {
-        id: data.id,
-        checked_in: !!data.start_time,
-        check_in_time: data.start_time || undefined,
-        check_out_time: data.end_time || undefined,
-        location: data.location,
-        total_hours: data.total_hours,
-        on_leave: onLeave,
-        leave_type: leaveType || undefined
-      }
-    };
-  } catch (error) {
-    logger.error('Error checking attendance status:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Error checking attendance status'
-    };
-  }
-}
-
-export async function adminCheckInNurse(
-  assignmentId: number,
-  // nurseId: number
-): Promise<{ 
-  success: boolean; 
-  error?: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-    
-    const { data: existingRecord, error: checkError } = await supabase
-      .from('attendence_individual')
-      .select('id')
-      .eq('date', today)
-      .eq('assigned_id', assignmentId)
-      .maybeSingle();
-    
-    if (checkError) {
-      logger.error('Error checking existing attendance:', checkError);
-      return {
-        success: false,
-        error: checkError.message
-      };
-    }
-    
-    if (existingRecord) {
-      const { error: updateError } = await supabase
-        .from('attendence_individual')
-        .update({
-          start_time: currentTime,
-          is_admin_action: true
-          // admin_action_notes: `Admin check-in at ${currentTime}`
-        })
-        .eq('id', existingRecord.id);
-      
-      if (updateError) {
-        return {
-          success: false,
-          error: updateError.message
-        };
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from('attendence_individual')
-        .insert({
-          date: today,
-          start_time: currentTime,
-          // nurse_id: nurseId,
-          assigned_id: assignmentId,
-          is_admin_action: true
-          // admin_action_notes: `Admin check-in at ${currentTime}`
-        });
-      
-      if (insertError) {
-        return {
-          success: false,
-          error: insertError.message
-        };
-      }
-    }
-    
-    return {
-      success: true
-    };
-  } catch (error) {
-    logger.error('Error during admin check-in:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    };
-  }
-}
-
-export async function adminCheckOutNurse(
-  attendanceId: number
-): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-    
-    // Fetch the attendance record to get check-in time
-    const { data: attendance, error: fetchError } = await supabase
-      .from('attendence_individual')
-      .select('start_time')
-      .eq('id', attendanceId)
-      .single();
-    
-    if (fetchError || !attendance) {
-      return {
-        success: false,
-        error: fetchError?.message || 'Attendance record not found'
-      };
-    }
-    
-    // Calculate hours worked
-    let totalHours = '0:00';
-    if (attendance.start_time) {
-      const [startHours, startMinutes] = attendance.start_time.split(':').map(Number);
-      const startTotalMinutes = startHours * 60 + startMinutes;
-      
-      const [endHours, endMinutes] = currentTime.split(':').map(Number);
-      const endTotalMinutes = endHours * 60 + endMinutes;
-      
-      const diffMinutes = endTotalMinutes - startTotalMinutes;
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
-      
-      totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
-    }
-    
-    // Update the attendance record with check-out time and total hours
-    const { error: updateError } = await supabase
-      .from('attendence_individual')
-      .update({
-        end_time: currentTime,
-        total_hours: totalHours,
-        is_admin_action: true,
-        // admin_action_notes: (attendance.admin_action_notes || '') + ` | Admin check-out at ${currentTime}`
-      })
-      .eq('id', attendanceId);
-    
-    if (updateError) {
-      return {
-        success: false,
-        error: updateError.message
-      };
-    }
-    
-    return {
-      success: true
-    };
-  } catch (error) {
-    logger.error('Error during admin check-out:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    };
-  }
-}
-
-export async function markLongShiftAttendance(
-  assignmentId: number,
-): Promise<{ 
-  success: boolean; 
-  error?: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const today = new Date().toISOString().split('T')[0];
-    
-    const { data: assignmentData, error: assignmentError } = await supabase
-      .from('nurse_client')
-      .select('shift_start_time, shift_end_time')
-      .eq('id', assignmentId)
-      .single();
-    
-    if (assignmentError) {
-      logger.error('Error fetching shift details:', assignmentError);
-      return {
-        success: false,
-        error: assignmentError.message
-      };
-    }
-
-    let totalHours = '0:00';
-    if (assignmentData.shift_start_time && assignmentData.shift_end_time) {
-      const [startHours, startMinutes] = assignmentData.shift_start_time.split(':').map(Number);
-      const [endHours, endMinutes] = assignmentData.shift_end_time.split(':').map(Number);
-      
-      let diffMinutes = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
-      if (diffMinutes < 0) diffMinutes += 24 * 60;
-      
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
-      
-      totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
-    }
-    
-    const { data: existingRecord, error: checkError } = await supabase
-      .from('attendence_individual')
-      .select('id')
-      .eq('date', today)
-      .eq('assigned_id', assignmentId)
-      .maybeSingle();
-    
-    if (checkError) {
-      logger.error('Error checking existing attendance:', checkError);
-      return {
-        success: false,
-        error: checkError.message
-      };
-    }
-    
-    if (existingRecord) {
-      const { error: updateError } = await supabase
-        .from('attendence_individual')
-        .update({
-          start_time: assignmentData.shift_start_time,
-          end_time: assignmentData.shift_end_time,
-          total_hours: totalHours,
-          is_admin_action: true
-        })
-        .eq('id', existingRecord.id);
-      
-      if (updateError) {
-        return {
-          success: false,
-          error: updateError.message
-        };
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from('attendence_individual')
-        .insert({
-          date: today,
-          start_time: assignmentData.shift_start_time,
-          end_time: assignmentData.shift_end_time,
-          assigned_id: assignmentId,
-          total_hours: totalHours,
-          is_admin_action: true
-        });
-      
-      if (insertError) {
-        return {
-          success: false,
-          error: insertError.message
-        };
-      }
-    }
-    
-    return {
-      success: true
-    };
-  } catch (error) {
-    logger.error('Error during long shift attendance marking:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    };
-  }
-}
-
-export interface AttendanceRecordById {
-  date: string;
-  checkIn: string | null;
-  checkOut: string | null;
-  totalHours: string | number;
-  status: string;
-  notes?: string;
-  location?: string | null;
-  isAdminAction?:boolean;
-}
-
 export async function getAttendanceRecords(
   assignmentId: number,
   page: number = 1,
@@ -979,159 +1080,6 @@ export async function getAttendanceRecords(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
-    };
-  }
-}
-
-export interface MarkAttendanceParams {
-  assignmentId: number;
-  date: string; // 'YYYY-MM-DD'
-  checkIn: string; // 'HH:mm'
-  checkOut: string; // 'HH:mm'
-  isAdminAction?: boolean;
-}
-
-export async function markAttendance({
-  assignmentId,
-  date,
-  checkIn,
-  checkOut,
-  isAdminAction = false,
-}: MarkAttendanceParams): Promise<{
-  success: boolean;
-  message: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-
-    const { data: existing, error: fetchError } = await supabase
-      .from('attendence_individual')
-      .select('id')
-      .eq('assigned_id', assignmentId)
-      .eq('date', date)
-      .maybeSingle();
-
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      return { success: false, message: fetchError.message };
-    }
-
-    let totalHours: string | null = null;
-    if (checkIn && checkOut) {
-      const [inH, inM] = checkIn.split(':').map(Number);
-      const [outH, outM] = checkOut.split(':').map(Number);
-      const inMinutes = inH * 60 + inM;
-      const outMinutes = outH * 60 + outM;
-      const diff = outMinutes - inMinutes;
-      if (diff > 0) {
-        const hours = Math.floor(diff / 60);
-        const minutes = diff % 60;
-        totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
-      }
-    }
-
-    if (existing) {
-      const { error: updateError } = await supabase
-        .from('attendence_individual')
-        .update({
-          start_time: checkIn,
-          end_time: checkOut,
-          is_admin_action: isAdminAction,
-          total_hours: totalHours,
-        })
-        .eq('id', existing.id);
-
-      if (updateError) {
-        return { success: false, message: updateError.message };
-      }
-      return { success: true, message: 'Attendance updated successfully' };
-    } else {
-      const { error: insertError } = await supabase
-        .from('attendence_individual')
-        .insert([{
-          assigned_id: assignmentId,
-          date,
-          start_time: checkIn,
-          end_time: checkOut,
-          is_admin_action: isAdminAction,
-          total_hours: totalHours,
-        }]);
-
-      if (insertError) {
-        return { success: false, message: insertError.message };
-      }
-      return { success: true, message: 'Attendance marked successfully' };
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Failed to mark attendance',
-    };
-  }
-}
-
-
-export interface UnmarkAttendanceParams {
-  id?: number;
-  assignmentId?: number;
-  date?: string;
-}
-
-export async function unmarkAttendance({
-  id,
-  assignmentId,
-  date,
-}: UnmarkAttendanceParams): Promise<{
-  success: boolean;
-  message: string;
-}> {
-  try {
-    const supabase = await createSupabaseServerClient();
-
-    let recordId = id;
-
-    if (!recordId) {
-      if (!assignmentId || !date) {
-        return { 
-          success: false, 
-          message: 'Either record ID or both assignment ID and date must be provided' 
-        };
-      }
-
-      const { data: existing, error: fetchError } = await supabase
-        .from('attendence_individual')
-        .select('id')
-        .eq('assigned_id', assignmentId)
-        .eq('date', date)
-        .maybeSingle();
-
-      if (fetchError) {
-        return { success: false, message: fetchError.message };
-      }
-
-      if (!existing) {
-        return { 
-          success: false, 
-          message: 'No attendance record found for the specified date' 
-        };
-      }
-
-      recordId = existing.id;
-    }
-
-    const { error: deleteError } = await supabase
-      .from('attendence_individual')
-      .delete()
-      .eq('id', recordId);
-
-    if (deleteError) {
-      return { success: false, message: deleteError.message };
-    }
-
-    return { success: true, message: 'Attendance record deleted successfully' };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Failed to delete attendance record',
     };
   }
 }
