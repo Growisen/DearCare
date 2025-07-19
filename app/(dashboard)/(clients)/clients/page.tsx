@@ -12,6 +12,7 @@ import { LoadingState } from "@/components/Loader"
 import { ErrorState } from "@/components/client/clients/ErrorState"
 import { EmptyState } from "@/components/client/clients/EmptyState"
 import { PaginationControls } from "@/components/client/clients/PaginationControls"
+import { logger } from "@/utils/logger"
 
 export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
@@ -64,7 +65,7 @@ export default function ClientsPage() {
       
       refreshData();
     } catch (error) {
-      console.error("Error in handleResetFilters:", error);
+      logger.debug("Error in handleResetFilters:", error);
     }
   }
 

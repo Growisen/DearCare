@@ -20,6 +20,7 @@ import { useTabManagement } from '@/hooks/useTabManagement'
 import { useAssignmentData } from '@/hooks/useAssignmentData'
 import EditOrganizationDetailsModal from '@/components/client/EditOrganizationDetailsModal'
 import { useOrganizationClient } from '@/hooks/useOrganizationClient'
+import { logger } from '@/utils/logger'
 
 interface UpdateOrganizationClientData {
   organization_name: string
@@ -112,7 +113,7 @@ const OrganizationClientProfile = () => {
         toast.error(`Failed to update details: ${result.error}`);
       }
     } catch (error) {
-      console.error('Error updating organization:', error);
+      logger.debug('Error updating organization:', error);
       toast.error('Failed to update organization details');
     }
   };
@@ -131,12 +132,12 @@ const OrganizationClientProfile = () => {
       
       if (!result.success) {
         fetchClientData();
-        console.error('Failed to update category:', result.error)
+        logger.error('Failed to update category')
       } else {
-        console.log(`Category successfully updated to ${newCategory}`)
+        logger.debug(`Category successfully updated to ${newCategory}`)
       }
-    } catch (error) {
-      console.error('Failed to update category:', error)
+    } catch {
+      logger.error('Failed to update category:')
       fetchClientData();
     }
   }
@@ -149,11 +150,12 @@ const OrganizationClientProfile = () => {
         toast.success('Organization deleted successfully')
         window.location.href = '/clients'
       } else {
-        toast.error(`Failed to delete organization: ${result.error}`)
+        toast.error('Failed to delete organization')
+        logger.debug('Failed to delete organization', result.error);
         setShowDeleteConfirmation(false)
       }
     } catch (error) {
-      console.error('Error deleting organization:', error)
+      logger.debug('Error deleting organization:', error)
       toast.error('An error occurred while deleting the organization')
       setShowDeleteConfirmation(false)
     }
@@ -511,7 +513,7 @@ const OrganizationClientProfile = () => {
                   nurses={nurses}
                   onEditAssignment={handleEditAssignment}
                   onEndAssignment={(assignmentId) => {
-                    console.log('End assignment:', assignmentId);
+                    logger.debug('End assignment:', assignmentId);
                   }}
                   onDeleteAssignment={handleDeleteAssignment}
                 />

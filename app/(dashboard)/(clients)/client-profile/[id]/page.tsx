@@ -32,6 +32,8 @@ import { useClientFiles } from '@/hooks/useClientFiles';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
 
+import { logger } from '@/utils/logger';
+
 const PatientProfilePage = () => {
   const { invalidateDashboardCache } = useDashboardData()
   const { invalidateAssignmentsCache } = useAssignmentData()
@@ -263,7 +265,7 @@ const PatientProfilePage = () => {
                     nurses={nurses}
                     onEditAssignment={handleEditAssignment}
                     onEndAssignment={(assignmentId) => {
-                      console.log('End assignment:', assignmentId);
+                      logger.debug('End assignment:', assignmentId);
                     }}
                     onDeleteAssignment={handleDeleteAssignment}
                   />
