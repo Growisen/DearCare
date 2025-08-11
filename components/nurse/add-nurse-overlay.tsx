@@ -4,6 +4,9 @@ import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseH
 import { createNurse } from '@/app/actions/staff-management/add-nurse';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
+
+import { getTodayDDMMYYYY, formatDateToDDMMYYYY, formatDateToISO } from '@/utils/dateUtils';
+
 const FORM_CONFIG = {
   options: {
     locationsInKerala: ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad", "Kannur", "Kottayam", "Malappuram"] as string[],
@@ -188,16 +191,16 @@ const Fields = {
           </span>
         </div>
         {preview && (
-  <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
-    <Image
-      src={preview}
-      alt="File preview"
-      fill
-      className="object-cover"
-      sizes="128px"
-    />
-  </div>
-)}
+          <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+            <Image
+              src={preview}
+              alt="File preview"
+              fill
+              className="object-cover"
+              sizes="128px"
+            />
+          </div>
+        )}
       </div>
     </div>
     );
@@ -237,6 +240,16 @@ const StepContent = {
           onChange={(e) => setFormData({ ...formData, nurse_prev_reg_no: e.target.value })}
           required={false}
         />
+        <FormField label="Joining Date">
+          <input
+            type="date"
+            className={FORM_CONFIG.styles.input}
+            value={formatDateToISO(formData.joining_date)}
+            onChange={e => setFormData({ ...formData, joining_date: formatDateToDDMMYYYY(e.target.value) })}
+            required
+            max={new Date().toISOString().split('T')[0]}
+          />
+        </FormField>
         <Fields.Select label="Gender" options={["Male", "Female"]} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} />
         <Fields.Select label="Marital Status" options={FORM_CONFIG.options.maritalStatus} value={formData.marital_status} onChange={(e) => setFormData({ ...formData, marital_status: e.target.value })} />
         <Fields.Input 
@@ -567,7 +580,8 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     age: '',
     nurse_reg_no: '',
     admitted_type: 'Tata_Homenursing',
-    nurse_prev_reg_no: ''
+    nurse_prev_reg_no: '',
+    joining_date: getTodayDDMMYYYY()
   });
   
   const [referenceData, setReferenceData] = useState<NurseReferenceData>({
@@ -676,7 +690,7 @@ if (!result.success) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="shrink-0 border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">Add New Nurse</h2>

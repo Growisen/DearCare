@@ -2,6 +2,8 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SimplifiedNurseDetails } from '@/app/actions/staff-management/add-nurse';
+import { getExperienceFromJoiningDate } from '@/utils/dateUtils';
+import { formatOrganizationName } from '@/utils/formatters';
 
 interface ProfileHeaderProps {
   nurse: SimplifiedNurseDetails;
@@ -68,6 +70,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
             <p className="text-sm text-gray-600 mt-1">
               {basicInfo.category} • {basicInfo.experience || 0} years experience
             </p>
+
+            <div className="text-sm text-gray-700 mt-1">
+              <span>
+                Joined: {basicInfo.joining_date 
+                  ? new Date(basicInfo.joining_date).toLocaleDateString() 
+                  : 'N/A'}
+              </span>
+              <span className="mx-2">|</span>
+              <span>
+                Experience in 
+                <span className="inline-block bg-gray-200 text-gray-800 font-serif px-2 py-0.5 rounded ml-1 mr-1">
+                  {formatOrganizationName(basicInfo.admitted_type ?? '') || 'Organization'}
+                </span>
+                : {getExperienceFromJoiningDate(basicInfo.joining_date ?? '')}
+              </span>
+            </div>
             
             <div className="flex flex-wrap items-center justify-center md:justify-start mt-3 gap-2">
               <span className="inline-flex items-center px-3 py-1 bg-white text-sm rounded-full text-gray-700 border border-gray-200 shadow-sm">

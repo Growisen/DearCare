@@ -4,4 +4,5 @@ export interface StaffSalary {
     regNo: string;
     hours: number | string;
     salary: number;
+    missingFields?: Array<{ field: string; date: string }>;
   }

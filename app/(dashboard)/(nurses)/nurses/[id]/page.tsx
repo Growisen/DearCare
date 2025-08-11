@@ -8,6 +8,7 @@ import ProfileHeader from '@/components/nurseProfile/ProfileHeader';
 import TabNavigation from '@/components/nurseProfile/TabNavigation';
 import ProfileContent from '@/components/nurseProfile/ProfileContent';
 import AssignmentsContent from '@/components/nurseProfile/AssignmentsContent';
+import AnalyticsContent from '@/components/nurse/NursePerformanceAnalytics'; 
 
 const NurseProfilePage: React.FC = () => {
   const params = useParams();
@@ -15,7 +16,7 @@ const NurseProfilePage: React.FC = () => {
   const [assignments, setAssignments] = useState<NurseAssignmentWithClient[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'profile' | 'assignments'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'assignments' | 'analytics'>('profile')
 
   useEffect(() => {
     async function loadData() {
@@ -91,8 +92,10 @@ const NurseProfilePage: React.FC = () => {
           <div className="p-6">
             {activeTab === 'profile' ? (
               <ProfileContent nurse={nurse} calculateAge={calculateAge} />
-            ) : (
+            ) : activeTab === 'assignments' ? (
               <AssignmentsContent assignments={assignments} />
+            ) : (
+              <AnalyticsContent nurseId={Number(params.id)} />
             )}
           </div>
         </div>

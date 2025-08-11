@@ -88,6 +88,7 @@ export interface SimplifiedNurseDetails {
     taluk?: string | null;
     nurse_reg_no?: string | null;
     nurse_prev_reg_no?: string | null;
+    joining_date?: string | null;
     noc_status?: string | null;
     admitted_type?: string | null;
     created_at?: string | null;
@@ -228,6 +229,7 @@ export async function createNurse(
         nurse_reg_no: nurseRegNo,
         admitted_type: nurseData.admitted_type,
         nurse_prev_reg_no: nurseData.nurse_prev_reg_no,
+        joining_date: nurseData.joining_date,
         created_at: new Date().toISOString()
       })
       .select('nurse_id')
@@ -1068,6 +1070,7 @@ export async function updateNurse(
     mother_tongue: formData.basic.mother_tongue,
     taluk: formData.basic.taluk ?? null,
     nurse_reg_no: formData.basic.nurse_reg_no ?? null,
+    joining_date: formData.basic.joining_date ?? null,
     nurse_prev_reg_no: formData.basic.nurse_prev_reg_no ?? null,
     noc_status: formData.basic.noc_status ?? null,
     admitted_type: formData.basic.admitted_type ?? null,

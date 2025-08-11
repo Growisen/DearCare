@@ -580,6 +580,14 @@ const EditNurseProfilePage: React.FC = () => {
                     onChange={handleInputChange} 
                   />
 
+                  <FormInput
+                    label="Joining Date"
+                    name="basic.joining_date"
+                    value={formData?.basic.joining_date || ''}
+                    onChange={handleInputChange}
+                    type="date"
+                  />
+
                   <FormInput 
                     label="Phone Number" 
                     name="basic.phone_number" 
