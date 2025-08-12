@@ -142,7 +142,6 @@ export const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({
             Hours Worked: {typeof employee.hours === 'string' ? employee.hours : formatDecimalHours(parseTimeToDecimalHours(employee.hours))} 
             <span className="text-gray-500 ml-1">({parseTimeToDecimalHours(employee.hours).toFixed(2)} decimal hours)</span>
           </p>
-          <p className="text-sm text-gray-600">Current Salary: ₹{employee.salary.toLocaleString()}</p>
           {(dateFrom || dateTo) && (
             <p className="text-sm text-gray-700 mt-2">
               Salary calculated for: <span className="font-semibold">{dateFrom ? formatDateToDDMMYYYY(dateFrom) : 'N/A'}</span> to <span className="font-semibold">{dateTo ? formatDateToDDMMYYYY(dateTo) : 'N/A'}</span>

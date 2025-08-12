@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface TabNavigationProps {
-  activeTab: 'profile' | 'assignments' | 'analytics';
-  setActiveTab: (tab: 'profile' | 'assignments' | 'analytics') => void;
+  activeTab: 'profile' | 'assignments' | 'analytics' | 'salaryDetails';
+  setActiveTab: (tab: 'profile' | 'assignments' | 'analytics' | 'salaryDetails') => void;
 }
 
 const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }) => {
@@ -38,6 +38,17 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }
         onClick={() => setActiveTab('analytics')}
       >
         Analytics
+      </button>
+
+      <button
+        className={`px-6 py-3 text-sm font-medium ${
+          activeTab === 'salaryDetails'
+            ? 'border-b-2 border-blue-600 text-blue-600'
+            : 'text-gray-500 hover:text-gray-700'
+        }`}
+        onClick={() => setActiveTab('salaryDetails')}
+      >
+        Salary Details
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getNurseProfileAnalytics, NurseAnalytics } from '@/app/actions/staff-management/nurse-profile-analytics';
+import Loader from '../Loader';
 
 interface AnalyticsItem {
   label: string;
@@ -57,7 +58,7 @@ const AnalyticsContent: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     fetchAnalytics();
   }, [nurseId]);
 
-  if (loading) return <div className="text-gray-800">Loading analytics...</div>;
+  if (loading) return <Loader message='Loading analytics...' />;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

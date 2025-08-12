@@ -295,7 +295,6 @@ export async function saveSalaryPayment({
   deductions?: number;
   netSalary: number;
   paymentStatus?: 'pending' | 'paid' | 'cancelled';
-  paymentMethod?: 'bank_transfer' | 'cash' | 'cheque' | 'other';
   transactionReference?: string;
   notes?: string;
   createdBy?: string;
@@ -333,7 +332,6 @@ export async function saveSalaryPayment({
   return data;
 }
 
-// Combined function to handle both salary payment and config update
 export async function saveSalaryPaymentWithConfig({
   nurseId,
   payPeriodStart,
@@ -409,4 +407,42 @@ export async function saveSalaryPaymentWithConfig({
     console.error('Error in saveSalaryPaymentWithConfig:', error);
     throw error;
   }
+}
+
+
+export async function fetchNurseSalaryPayments(nurseId: number) {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from('salary_payments')
+    .select(`
+      id,
+      pay_period_start,
+      pay_period_end,
+      pay_date,
+      hourly_rate,
+      hours_worked,
+      hourly_pay,
+      net_salary,
+      payment_status,
+      payment_method,
+      transaction_reference,
+      notes,
+      created_at,
+      updated_at,
+      salary_config:salary_config_id (
+        id,
+        hourly_rate
+      )
+    `)
+    .eq('nurse_id', nurseId)
+    .order('pay_period_end', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch salary payments: ${error.message}`);
+  }
+
+  console.log(data);
+
+  return data ?? [];
 }
