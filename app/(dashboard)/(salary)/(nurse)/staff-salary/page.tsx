@@ -5,6 +5,7 @@ import { SalaryHeader } from "@/components/salary/SalaryHeader"
 import { SalaryTable } from "@/components/salary/SalaryTable"
 import { SalaryMobileCards } from "@/components/salary/SalaryMobileCards"
 import { useSalaryCalculation } from "@/hooks/useSalaryCalculation"
+import Loader from "@/components/Loader"
 
 const categories = ["all", "DearCare LLP", "Tata HomeNursing"]
 
@@ -64,12 +65,12 @@ export default function StaffSalaryPage() {
         />
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
           {loading ? (
-            <div className="p-6 text-center">Loading hours data...</div>
+            <Loader message="Loading hours data..." />
           ) : error ? (
             <div className="p-6 text-center text-red-600">{error}</div>
           ) : salaryData.length > 0 ? (
             <>
-              <SalaryTable data={paginatedData} />
+              <SalaryTable data={paginatedData} dateFrom={dateFrom} dateTo={dateTo} />
               <SalaryMobileCards data={paginatedData} />
               <PaginationControls
                 currentPage={currentPage}

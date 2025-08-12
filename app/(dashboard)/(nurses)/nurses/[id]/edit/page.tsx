@@ -19,7 +19,7 @@ interface FormFieldProps {
 
 // Form styling constants
 const formFieldStyles = {
-  input: "w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 hover:border-gray-300",
+  input: "w-full px-3 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 hover:border-gray-300",
   label: "block text-xs font-medium text-gray-600 transition-colors duration-200",
   error: "text-xs text-red-500 mt-1"
 };
@@ -29,7 +29,7 @@ const FormInput = ({ label, name, value = "", onChange, type = "text", error, ..
   FormFieldProps & { type?: string }) => (
   <div className="space-y-1">
     <label className={formFieldStyles.label}>{label}</label>
-    <input type={type} name={name} value={value} onChange={onChange} className={formFieldStyles.input} {...props} />
+    <input type={type} name={name} value={value} onChange={onChange} className={formFieldStyles.input} {...props}/>
     {error && <span className={formFieldStyles.error}>{error}</span>}
   </div>
 );

@@ -188,3 +188,225 @@ export async function fetchNurseHoursWorked(
     };
   }
 }
+
+export async function fetchSalaryConfig(nurseId: number) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('salary_configurations')
+    .select('id, hourly_rate')
+    .eq('nurse_id', nurseId)
+    .eq('is_active', true)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    return {
+      id: null,
+      hourlyRate: 0,
+    };
+  }
+
+  return {
+    id: data.id,
+    hourlyRate: Number(data.hourly_rate) || 0,
+  };
+}
+
+export async function upsertSalaryConfig({
+  nurseId,
+  hourlyRate,
+  configId = null,
+}: {
+  nurseId: number;
+  hourlyRate: number;
+  configId?: number | null;
+}) {
+  const supabase = await createSupabaseServerClient();
+  const user = await supabase.auth.getUser();
+  
+  if (configId) {
+    // Update existing config
+    const { data, error } = await supabase
+      .from('salary_configurations')
+      .update({
+        hourly_rate: hourlyRate,
+        updated_by: user.data.user?.id,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', configId)
+      .eq('nurse_id', nurseId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update salary config: ${error.message}`);
+    }
+    return data;
+  } else {
+    // Create new config
+    const { data, error } = await supabase
+      .from('salary_configurations')
+      .insert([{
+        nurse_id: nurseId,
+        hourly_rate: hourlyRate,
+        is_active: true,
+        created_by: user.data.user?.id,
+        updated_by: user.data.user?.id,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create salary config: ${error.message}`);
+    }
+    return data;
+  }
+}
+
+export async function saveSalaryPayment({
+  nurseId,
+  salaryConfigId,
+  payPeriodStart,
+  payPeriodEnd,
+  basePay = 0,
+  hourlyRate = 0,
+  hoursWorked = 0,
+  hourlyPay = 0,
+  allowance = 0,
+  bonus = 0,
+  grossSalary,
+  deductions = 0,
+  netSalary,
+  paymentStatus = 'pending',
+  notes = '',
+}: {
+  nurseId: number;
+  salaryConfigId?: number | null;
+  payPeriodStart: string;
+  payPeriodEnd: string;
+  basePay?: number;
+  hourlyRate?: number;
+  hoursWorked?: number;
+  hourlyPay?: number;
+  allowance?: number;
+  bonus?: number;
+  grossSalary: number;
+  deductions?: number;
+  netSalary: number;
+  paymentStatus?: 'pending' | 'paid' | 'cancelled';
+  paymentMethod?: 'bank_transfer' | 'cash' | 'cheque' | 'other';
+  transactionReference?: string;
+  notes?: string;
+  createdBy?: string;
+}) {
+  const supabase = await createSupabaseServerClient();
+  const user = await supabase.auth.getUser();
+  
+  const { data, error } = await supabase
+    .from('salary_payments')
+    .insert([{
+      nurse_id: nurseId,
+      salary_config_id: salaryConfigId,
+      pay_period_start: payPeriodStart,
+      pay_period_end: payPeriodEnd,
+      base_pay: basePay,
+      hourly_rate: hourlyRate,
+      hours_worked: hoursWorked,
+      hourly_pay: hourlyPay,
+      allowance: allowance,
+      bonus: bonus,
+      gross_salary: grossSalary,
+      deductions: deductions,
+      net_salary: netSalary,
+      payment_status: paymentStatus,
+      notes: notes,
+      created_by: user.data.user?.id,
+      updated_by: user.data.user?.id,
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to save salary payment: ${error.message}`);
+  }
+  return data;
+}
+
+// Combined function to handle both salary payment and config update
+export async function saveSalaryPaymentWithConfig({
+  nurseId,
+  payPeriodStart,
+  payPeriodEnd,
+  hourlyRate,
+  hoursWorked,
+  currentConfigId = null,
+  shouldUpdateConfig = false,
+  basePay = 0,
+  allowance = 0,
+  bonus = 0,
+  deductions = 0,
+  paymentStatus = 'pending',
+  notes = '',
+}: {
+  nurseId: number;
+  payPeriodStart: string;
+  payPeriodEnd: string;
+  hourlyRate: number;
+  hoursWorked: number;
+  currentConfigId?: number | null;
+  shouldUpdateConfig?: boolean;
+  basePay?: number;
+  allowance?: number;
+  bonus?: number;
+  deductions?: number;
+  paymentStatus?: 'pending' | 'paid' | 'cancelled';
+  notes?: string;
+}) {  
+  try {
+    // Start a transaction-like approach
+    let salaryConfigId = currentConfigId;
+    
+    // Update or create salary config if needed
+    if (shouldUpdateConfig || hourlyRate > 0) {
+      const configData = await upsertSalaryConfig({
+        nurseId,
+        hourlyRate,
+        configId: currentConfigId,
+      });
+      salaryConfigId = configData.id;
+    }
+
+    const hourlyPay = hourlyRate * hoursWorked;
+    const grossSalary = basePay + hourlyPay + allowance + bonus;
+    const netSalary = grossSalary - deductions;
+
+    const paymentData = await saveSalaryPayment({
+      nurseId,
+      salaryConfigId,
+      payPeriodStart,
+      payPeriodEnd,
+      basePay,
+      hourlyRate,
+      hoursWorked,
+      hourlyPay,
+      allowance,
+      bonus,
+      grossSalary,
+      deductions,
+      netSalary,
+      paymentStatus,
+      notes,
+    });
+
+    return {
+      payment: paymentData,
+      configId: salaryConfigId,
+      grossSalary,
+      netSalary,
+    };
+  } catch (error) {
+    console.error('Error in saveSalaryPaymentWithConfig:', error);
+    throw error;
+  }
+}
