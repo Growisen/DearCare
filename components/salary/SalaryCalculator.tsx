@@ -17,6 +17,7 @@ interface SalaryCalculatorProps {
   onSalaryUpdate: (id: number, newSalary: number) => void;
   dateFrom?: string;
   dateTo?: string;
+  salaryCalculated?: boolean;
 }
 
 const parseTimeToDecimalHours = (timeString: string | number): number => {
@@ -267,10 +268,7 @@ export const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             disabled={loading || !!error || isUpdating}
           >
-            {(loading || isUpdating) && (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-            )}
-            {isUpdating ? 'Saving...' : 'Update Salary'}
+            {isUpdating ? 'Saving...' : employee.salaryCalculated? 'Update Salary' : "Save Salary"}
           </button>
         </div>
       </div>

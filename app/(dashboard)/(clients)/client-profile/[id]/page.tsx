@@ -22,6 +22,7 @@ import EditPatientModal from '@/components/client/Profile/EditPatientModal';
 import ServiceDetailsSection from '@/components/client/Profile/ServiceDetailsSection';
 import EditAssignmentModal from '@/components/client/EditAssignmentModal';
 import FileSection from '@/components/client/Profile/FilesSection';
+import ClientPaymentHistory from '@/components/client/Profile/PaymentDetails'
 
 // Custom hooks
 import { usePatientData } from '@/hooks/usePatientData';
@@ -193,16 +194,29 @@ const PatientProfilePage = () => {
                   Files
                 </button>
                 {status === 'approved' && (
-                  <button
-                    onClick={() => handleTabChange('assignments')}
-                    className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                      activeTab === 'assignments'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Nurse Assignments
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleTabChange('assignments')}
+                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                        activeTab === 'assignments'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Nurse Assignments
+                    </button>
+
+                    <button
+                      onClick={() => handleTabChange('paymentDetails')}
+                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                        activeTab === 'paymentDetails'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Payment Details
+                    </button>
+                  </>
                 )}
               </nav>
             </div>
@@ -270,6 +284,12 @@ const PatientProfilePage = () => {
                     onDeleteAssignment={handleDeleteAssignment}
                   />
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'paymentDetails' && status === 'approved' && (
+              <div className="space-y-6">
+                <ClientPaymentHistory clientId={id} />
               </div>
             )}
           </div>

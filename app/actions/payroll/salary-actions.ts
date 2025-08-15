@@ -35,7 +35,10 @@ export async function fetchNurseHoursWorked(
   organization?: string
 ): Promise<{
   success: boolean;
-  data: (StaffSalary & { missingFields?: Array<{ field: string; date: string }>; })[];
+  data: (StaffSalary & { 
+    missingFields?: Array<{ field: string; date: string }>;
+    salaryCalculated?: boolean;
+  })[];
   error?: string;
 }> {
   try {
@@ -156,7 +159,29 @@ export async function fetchNurseHoursWorked(
       });
     });
 
-    const processedData: (StaffSalary & { missingFields?: Array<{ field: string, date: string }> })[] = Array.from(
+    const nurseIds = Array.from(nurseHoursMap.keys());
+    const salaryPaymentsMap = new Map<number, boolean>();
+
+    if (nurseIds.length > 0 && dateFrom && dateTo) {
+      const { data: salaryPayments, error: salaryError } = await supabase
+        .from('salary_payments')
+        .select('nurse_id, pay_period_start, pay_period_end')
+        .in('nurse_id', nurseIds)
+        .gte('pay_period_start', dateFrom)
+        .lte('pay_period_end', dateTo);
+
+      if (!salaryError && salaryPayments) {
+        type SalaryPayment = { nurse_id: number; pay_period_start: string; pay_period_end: string };
+        (salaryPayments as SalaryPayment[]).forEach((payment) => {
+          salaryPaymentsMap.set(payment.nurse_id, true);
+        });
+      }
+    }
+
+    const processedData: (StaffSalary & { 
+      missingFields?: Array<{ field: string, date: string }>,
+      salaryCalculated?: boolean
+    })[] = Array.from(
       nurseHoursMap.values()
     ).map((nurse) => {
       const totalHours = nurse.hours;
@@ -175,6 +200,7 @@ export async function fetchNurseHoursWorked(
         hours: `${hours}hrs:${minutes.toString().padStart(2, "0")}min`,
         salary: 0,
         missingFields: nurseMissingFieldsMap.get(nurse.id) ?? [],
+        salaryCalculated: salaryPaymentsMap.get(nurse.id) ?? false,
       };
     });
 
