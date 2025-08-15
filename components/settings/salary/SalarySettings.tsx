@@ -1,71 +1,190 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  saveSalaryNotification,
+  getCurrentSalaryNotification,
+  toggleSalaryNotificationStatus
+} from "@/app/actions/settings/salary-notification";
+import Loader from "@/components/Loader";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const SalarySettings: React.FC = () => {
   const [initialDate, setInitialDate] = useState("");
   const [salaryIntervalDays, setSalaryIntervalDays] = useState<number>(30);
-  const [notifications, setNotifications] = useState<number[]>([3, 1]); 
+  const [notifications, setNotifications] = useState<number[]>([3, 1]);
+  const [isActive, setIsActive] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const { invalidateNotifications } = useNotifications();
+
+  useEffect(() => {
+    async function fetchNotification() {
+      setLoading(true);
+      try {
+        const result = await getCurrentSalaryNotification();
+
+        if (result.success && result.notification) {
+          const n = result.notification;
+
+          console.log(n)
+
+          setInitialDate(n.start_date || "");
+          setSalaryIntervalDays(n.interval_days || 30);
+          setIsActive(
+            typeof n.is_active === "boolean" ? n.is_active : true
+          );
+          setNotifications(
+            Array.isArray(n.notify_before_days) && n.notify_before_days.length > 0
+              ? n.notify_before_days
+              : [3, 1]
+          );
+        } else {
+          console.warn("No notification settings found.");
+        }
+      } catch (err) {
+        console.error("Error fetching salary notification:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNotification();
+  }, []);
 
   const addNotificationDay = () => {
-    setNotifications([...notifications, 1]);
+    setNotifications((prev) => [...prev, 1]);
   };
 
   const updateNotificationDay = (index: number, value: number) => {
-    const updated = [...notifications];
-    updated[index] = value;
-    setNotifications(updated);
+    setNotifications((prev) =>
+      prev.map((day, i) => (i === index ? value : day))
+    );
   };
 
   const removeNotificationDay = (index: number) => {
-    setNotifications(notifications.filter((_, i) => i !== index));
+    setNotifications((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true);
+
     const settings = {
-      initialDate,
-      salaryIntervalDays,
-      notifications,
+      title: "salary_notification",
+      initial_date: initialDate,
+      salary_interval_days: salaryIntervalDays,
+      notification_days: notifications,
+      is_active: isActive,
     };
-    console.log("Saving salary settings:", settings);
-    // TODO: Send to API
+
+    try {
+      const result = await saveSalaryNotification(settings);
+      if (result.success) {
+        invalidateNotifications();
+        alert("Settings saved!");
+      } else {
+        alert("Error: " + result.error);
+      }
+    } catch (err) {
+      alert(
+        "Unexpected error: " + (err instanceof Error ? err.message : String(err))
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleToggleActive = async () => {
+    setIsSaving(true);
+    try {
+      const result = await toggleSalaryNotificationStatus(!isActive);
+      if (result.success) {
+        invalidateNotifications();
+        setIsActive((prev) => !prev);
+      } else {
+        alert("Failed to update status: " + result.error);
+      }
+    } catch (err) {
+      alert(
+        "Unexpected error: " + (err instanceof Error ? err.message : String(err))
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="mx-auto py-3 px-2 max-w-6xl">
-        <div className="bg-white rounded border border-gray-300 p-5 space-y-6">
-          {/* Initial Salary Pay Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Initial Salary Pay Date
-            </label>
-            <input
-              type="date"
-              value={initialDate}
-              onChange={(e) => setInitialDate(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-blue-200"
+      {loading ? (
+        <Loader message="Loading scheduled info.." />
+       ): (
+       <div className="bg-white rounded border border-gray-300 p-5 space-y-6"> 
+        <h2 className="text-gray-700">Salary Configuration</h2>
+        <div className="flex items-center space-x-3">
+          <label className="text-sm font-medium text-gray-700">
+            Enable Salary Notifications
+          </label>
+          <button
+            onClick={handleToggleActive}
+            disabled={isSaving}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              isActive ? "bg-slate-600" : "bg-gray-300"
+            } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isActive ? "translate-x-6" : "translate-x-1"
+              }`}
             />
-          </div>
+          </button>
+          <span
+            className={`text-sm ${
+              isActive ? "text-green-600" : "text-gray-500"
+            }`}
+          >
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        </div>
 
-          {/* Number of Days to Next Salary */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Days to Next Salary Date
-            </label>
-            <input
-              type="number"
-              min={1}
-              value={salaryIntervalDays}
-              onChange={(e) => setSalaryIntervalDays(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-blue-200"
-            />
-          </div>
+        {/* Date */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Initial Salary Pay Date
+          </label>
+          <input
+            type="date"
+            value={initialDate}
+            onChange={(e) => setInitialDate(e.target.value)}
+            disabled={!isActive || isSaving}
+            className={`w-full border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-slate-200 ${
+              !isActive || isSaving ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
+          />
+        </div>
 
-          {/* Notification Preferences */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Notification Preferences
-            </label>
+        {/* Interval */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Number of Days to Next Salary Date
+          </label>
+          <input
+            type="number"
+            min={1}
+            value={salaryIntervalDays}
+            onChange={(e) => setSalaryIntervalDays(Number(e.target.value))}
+            disabled={!isActive || isSaving}
+            className={`w-full border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-slate-200 ${
+              !isActive || isSaving ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
+          />
+        </div>
+
+        {/* Notifications */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Notification Preferences
+          </label>
+          <div className={!isActive || isSaving ? "opacity-50" : ""}>
             <table className="min-w-full text-sm text-gray-700 border border-gray-300">
               <thead>
                 <tr className="bg-gray-100">
@@ -86,13 +205,23 @@ const SalarySettings: React.FC = () => {
                         onChange={(e) =>
                           updateNotificationDay(index, Number(e.target.value))
                         }
-                        className="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 text-sm"
+                        disabled={!isActive || isSaving}
+                        className={`w-full border border-gray-300 rounded px-2 py-1 text-gray-700 text-sm ${
+                          !isActive || isSaving
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : ""
+                        }`}
                       />
                     </td>
                     <td className="border border-gray-300 px-3 py-2 text-gray-700 text-center">
                       <button
                         onClick={() => removeNotificationDay(index)}
-                        className="text-red-600 hover:underline"
+                        disabled={!isActive || isSaving}
+                        className={`text-red-600 hover:underline ${
+                          !isActive || isSaving
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                        }`}
                       >
                         Remove
                       </button>
@@ -104,22 +233,55 @@ const SalarySettings: React.FC = () => {
 
             <button
               onClick={addNotificationDay}
-              className="mt-2 text-blue-600 hover:underline"
+              disabled={!isActive || isSaving}
+              className={`mt-2 text-slate-600 hover:underline ${
+                !isActive || isSaving
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              }`}
             >
               + Add Notification Day
             </button>
           </div>
-
-          {/* Save Button */}
-          <div className="pt-4">
-            <button
-              onClick={handleSave}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Save Settings
-            </button>
-          </div>
         </div>
+
+        {/* Save */}
+        <div className="pt-4">
+          <button
+            onClick={handleSave}
+            disabled={!isActive || isSaving}
+            className={`bg-slate-600 text-white px-4 py-2 rounded transition-colors flex items-center space-x-2 ${
+              !isActive || isSaving ? "opacity-75 cursor-not-allowed" : "hover:bg-slate-700"
+            }`}
+          >
+            {isSaving && (
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 
+                  3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            )}
+            <span>{isSaving ? "Saving..." : "Save Settings"}</span>
+          </button>
+        </div>
+      </div>
+      )}
     </div>
   );
 };
