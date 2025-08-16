@@ -71,6 +71,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
             { icon: ClipboardCheck, label: "Staff Attendance", href: "/staff-attendance" },
             { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
             { icon: MessageSquare, label: "Complaints", href: "/complaints" },
+            { icon: ClipboardCheck, label: "Staff Salary", href: "/staff-salary" },
             { icon: Settings, label: "Settings", href: "/settings" },
           ].map((item) => {
               const isActive = pathname === item.href
