@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Input } from "./ui/input"
 import AccountDropdown from "./Admin/Accounts/AccountDropdown"
 import { useState, useRef, useEffect } from "react"
+import { useNotifications } from "@/hooks/useNotifications"
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -25,23 +26,52 @@ interface NavbarProps {
   onNotificationRead?: (id: string) => void
 }
 
+function formatTitle(title: string): string {
+  return title
+    .replace(/_/g, " ")                // replace underscores with spaces
+    .replace(/\w\S*/g, (word) =>        // capitalize first letter of each word
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    );
+}
+
+
+export function getNotificationMessage(title: string): { formattedTitle: string, message: string } {
+  let message = "You have a new notification.";
+
+  switch (title) {
+    case "salary_notification":
+      message = "It's time to process salary payments.";
+      break;
+    case "meeting_reminder":
+      message = "You have an upcoming meeting.";
+      break;
+    case "leave_request":
+      message = "You have new leave requests pending approval.";
+      break;
+  }
+
+  return {
+    formattedTitle: formatTitle(title),
+    message,
+  };
+}
+
 export default function Navbar({ 
   onMenuClick, 
   onNavigate,
   searchResults = [],
   onSearch,
-  notifications = [],
-  onNotificationRead
 }: NavbarProps) {
+  const { todaysReminders } = useNotifications();
+  const reminderTitles = todaysReminders.data?.reminders?.map(r => r.title) || [];
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
 
-  const unreadCount = notifications.filter(n => n.unread).length
+  const hasReminders = reminderTitles.length > 0;
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchQuery(value)
     if (onSearch) {
@@ -50,24 +80,26 @@ export default function Navbar({
     setShowSearchResults(value.length > 0)
   }
 
-  // Handle navigation
   const handleNavigation = (section: string) => {
     if (onNavigate) {
       onNavigate(section)
     }
   }
 
-  // Handle notification click with proper typing
-  const handleNotificationClick = (notification: NonNullable<NavbarProps['notifications']>[number]) => {
-    if (notification.unread && onNotificationRead) {
-      onNotificationRead(notification.id)
+  useEffect(() => {
+    if (hasReminders) {
+      const dismissed = localStorage.getItem("notificationsDismissed");
+      if (!dismissed) {
+        setShowNotifications(true);
+      }
     }
-    // Navigate to relevant section based on notification
-    handleNavigation(notification.type || 'dashboard')
-    setShowNotifications(false)
-  }
+  }, [hasReminders]);
 
-  // Close dropdowns when clicking outside
+  const handleCloseNotifications = () => {
+    setShowNotifications(false);
+    localStorage.setItem("notificationsDismissed", "true");
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node | null)) {
@@ -161,7 +193,7 @@ export default function Navbar({
               className="relative p-2 hover:bg-slate-50 rounded-lg transition-colors group"
             >
               <Bell className="w-5 h-5 text-slate-500 group-hover:text-slate-700" />
-              {unreadCount > 0 && (
+              {hasReminders && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
               )}
             </button>
@@ -172,32 +204,31 @@ export default function Navbar({
                 <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
                   <h3 className="font-medium text-slate-900">Notifications</h3>
                   <button
-                    onClick={() => setShowNotifications(false)}
+                    onClick={handleCloseNotifications}
                     className="p-1 hover:bg-slate-100 rounded"
                   >
                     <X className="w-4 h-4 text-slate-500" />
                   </button>
                 </div>
                 
-                {notifications.length > 0 ? (
+                {reminderTitles.length > 0 ? (
                   <div className="py-2">
-                    {notifications.map((notification) => (
-                      <button
-                        key={notification.id}
-                        onClick={() => handleNotificationClick(notification)}
-                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-l-2 ${
-                          notification.unread ? 'border-blue-500 bg-blue-50/30' : 'border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-medium text-slate-900 text-sm">{notification.title}</div>
-                            <div className="text-sm text-slate-600 mt-1">{notification.message}</div>
+                    {reminderTitles.map((title, index) => {
+                      const { formattedTitle, message } = getNotificationMessage(title);
+                      return (
+                        <div
+                          key={index}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-medium text-slate-900 text-sm">{formattedTitle}</div>
+                              <div className="text-sm text-slate-600 mt-1">{message}</div>
+                            </div>
                           </div>
-                          <div className="text-xs text-slate-500 ml-2">{notification.time}</div>
                         </div>
-                      </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="px-4 py-6 text-center text-slate-500">

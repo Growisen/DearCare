@@ -1,0 +1,6 @@
+{
+  "entryPointStrategy": "expand",
+  "entryPoints": ["./app/actions"],
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "docs"
+}

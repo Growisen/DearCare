@@ -22,6 +22,7 @@ import EditPatientModal from '@/components/client/Profile/EditPatientModal';
 import ServiceDetailsSection from '@/components/client/Profile/ServiceDetailsSection';
 import EditAssignmentModal from '@/components/client/EditAssignmentModal';
 import FileSection from '@/components/client/Profile/FilesSection';
+import ClientPaymentHistory from '@/components/client/Profile/PaymentDetails'
 
 // Custom hooks
 import { usePatientData } from '@/hooks/usePatientData';
@@ -94,7 +95,13 @@ const PatientProfilePage = () => {
     handleDeleteAssignment,
     setShowEditModal,
     setEditingAssignment,
-    refetch
+    refetch,
+    showEndModal,
+    setShowEndModal,
+    handleEndAssignment,
+    confirmEndAssignment,
+    endDate,
+    setEndDate,
   } = useNurseAssignments(id);
 
   const {
@@ -191,16 +198,29 @@ const PatientProfilePage = () => {
                   Files
                 </button>
                 {status === 'approved' && (
-                  <button
-                    onClick={() => handleTabChange('assignments')}
-                    className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                      activeTab === 'assignments'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Nurse Assignments
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleTabChange('assignments')}
+                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                        activeTab === 'assignments'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Nurse Assignments
+                    </button>
+
+                    <button
+                      onClick={() => handleTabChange('paymentDetails')}
+                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                        activeTab === 'paymentDetails'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Payment Details
+                    </button>
+                  </>
                 )}
               </nav>
             </div>
@@ -262,12 +282,16 @@ const PatientProfilePage = () => {
                     assignments={nurseAssignments}
                     nurses={nurses}
                     onEditAssignment={handleEditAssignment}
-                    onEndAssignment={(assignmentId) => {
-                      console.log('End assignment:', assignmentId);
-                    }}
+                    onEndAssignment={handleEndAssignment}
                     onDeleteAssignment={handleDeleteAssignment}
                   />
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'paymentDetails' && status === 'approved' && (
+              <div className="space-y-6">
+                <ClientPaymentHistory clientId={id} />
               </div>
             )}
           </div>
@@ -351,6 +375,35 @@ const PatientProfilePage = () => {
         onConfirm={handleDeleteConfirmation}
         onCancel={() => setShowDeleteConfirmation(false)}
         confirmText="Delete Client"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+      />
+
+      {/* End Assignment Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showEndModal}
+        title="End Assignment"
+        message={
+          <div>
+            <p>
+              Are you sure you want to end this nurse assignment?
+            </p>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
+              <input
+                type="date"
+                className="border rounded px-2 py-1"
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                max={new Date().toISOString().slice(0, 10)}
+              />
+            </div>
+          </div>
+        }
+        onConfirm={confirmEndAssignment}
+        onCancel={() => setShowEndModal(false)}
+        confirmText="End Assignment"
         confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
     </div>
