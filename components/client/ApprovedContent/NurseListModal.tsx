@@ -5,13 +5,14 @@ import { formatDate } from '@/utils/formatters';
 import { X } from 'lucide-react';
 
 interface NurseWithAssignment extends Nurse {
-  assignment?: {
-    startDate?: string;
-    endDate?: string;
-    shiftType?: string;
-    clientId?: string;
-    clientType?: string;
-  };
+  assignments?: {
+    startDate: string;
+    endDate: string | null;
+    shiftType: 'day' | 'night' | '24h';
+    clientId: string;
+    clientType: string;
+    registrationNumber: string;
+  }[];
   leaveInfo?: {
     startDate: string;
     endDate?: string;
@@ -279,42 +280,112 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                         }
                       }}
                     >
-                      {nurse.assignment && (
-                        <div className="mt-2 text-sm text-gray-600">
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                            Assigned
-                          </span>
-                          {nurse.assignment.startDate && (
-                            <span className="ml-2">
-                              From: {formatDate(nurse.assignment.startDate)}
+                      {/* Display all assignments or no assignments message */}
+                      {nurse.assignments && nurse.assignments.length > 0 ? (
+                        <div className="mt-2">
+                          <div className="flex items-center mb-2">
+                            <span className="px-3 py-1 rounded border text-xs font-semibold bg-white text-black border-gray-300">
+                              ✓ Assigned
                             </span>
-                          )}
-                          {nurse.assignment.endDate && (
-                            <span className="ml-2">
-                              To: {formatDate(nurse.assignment.endDate)}
+                            <span className="ml-2 text-xs text-gray-600 font-medium">
+                              ({nurse.assignments.length} assignment{nurse.assignments.length > 1 ? 's' : ''})
                             </span>
-                          )}
-                          {nurse.assignment.shiftType && (
-                            <span className="ml-2">
-                              Shift: {nurse.assignment.shiftType}
-                            </span>
-                          )}
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {nurse.assignments.map((assignment, index) => (
+                              <div 
+                                key={`${nurse._id}-assignment-${index}`} 
+                                className="bg-gray-50 border border-gray-300 rounded p-2"
+                              >
+                                <div className="flex items-center mb-1">
+                                  <span className="text-black mr-2 font-bold text-xs">•</span>
+                                  <span className="font-semibold text-black text-xs">
+                                    Assignment {index + 1}
+                                  </span>
+                                  
+                                  {assignment.clientType && (
+                                    <span className="ml-2 px-2 py-0.5 bg-white border border-gray-300 rounded text-xs font-medium text-black">
+                                      {assignment.clientType}
+                                    </span>
+                                  )}
+                                  
+                                  {assignment.shiftType && (
+                                    <span className="ml-1 px-2 py-0.5 bg-white border border-gray-300 rounded text-xs font-medium text-black">
+                                      {assignment.shiftType} shift
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="text-xs text-gray-600 ml-3">
+                                  {assignment.startDate && (
+                                    <span className="font-medium">
+                                      From: {formatDate(assignment.startDate)}
+                                    </span>
+                                  )}
+                                  
+                                  {assignment.endDate && (
+                                    <span className="ml-3 font-medium">
+                                      To: {formatDate(assignment.endDate)}
+                                    </span>
+                                  )}
+                                  
+                                  {!assignment.endDate && assignment.startDate && (
+                                    <span className="ml-3 px-2 py-0.5 bg-black text-white rounded text-xs font-semibold">
+                                      Ongoing
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {assignment.registrationNumber && (
+                                  <div className="mt-1 text-xs text-gray-600 ml-3">
+                                    <span className="font-medium">Client ID:</span> {assignment.registrationNumber}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
+                      ) : (
+                        nurse.status !== 'leave' && (
+                          <div className="mt-2">
+                            <div className="bg-gray-50 border border-gray-300 rounded p-2">
+                              <div className="flex items-center">
+                                <span className="text-gray-500 mr-2 font-bold text-xs">○</span>
+                                <span className="text-gray-600 text-xs font-medium">
+                                  No assignments upcoming
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
                       )}
 
+                      {/* Display leave info */}
                       {nurse.leaveInfo && (
-                        <div className="mt-2 text-sm text-gray-600">
-                          <div className="bg-orange-50 p-2 rounded-md border border-orange-200">
-                            <p className="font-medium text-orange-700 mb-1">On Leave</p>
-                            <p>
-                              <span className="font-medium">From:</span> {formatDate(nurse.leaveInfo.startDate)}
-                              {nurse.leaveInfo.endDate && (
-                                <span> <span className="font-medium">To:</span> {formatDate(nurse.leaveInfo.endDate)}</span>
+                        <div className="mt-2">
+                          <div className="bg-gray-100 border-l-4 border-black rounded p-3">
+                            <div className="flex items-center mb-2">
+                              <span className="text-black mr-2 font-bold text-sm">⏸</span>
+                              <span className="font-semibold text-black text-sm">On Leave</span>
+                            </div>
+                            
+                            <div className="text-xs text-black ml-5">
+                              <div className="mb-1">
+                                <span className="font-medium">From:</span> {formatDate(nurse.leaveInfo.startDate)}
+                                {nurse.leaveInfo.endDate && (
+                                  <span className="ml-3">
+                                    <span className="font-medium">To:</span> {formatDate(nurse.leaveInfo.endDate)}
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {nurse.leaveInfo.reason && (
+                                <div>
+                                  <span className="font-medium">Reason:</span> {nurse.leaveInfo.reason}
+                                </div>
                               )}
-                            </p>
-                            {nurse.leaveInfo.reason && (
-                              <p><span className="font-medium">Reason:</span> {nurse.leaveInfo.reason}</p>
-                            )}
+                            </div>
                           </div>
                         </div>
                       )}

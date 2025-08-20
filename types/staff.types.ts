@@ -85,6 +85,7 @@ export interface NurseFormData {
   nurse_reg_no: string;
   admitted_type: 'Tata_Homenursing' | 'Dearcare_Llp';
   nurse_prev_reg_no: string;
+  joining_date: string;
 }
 
 

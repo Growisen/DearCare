@@ -83,3 +83,12 @@ export function formatName(fullName: string): string {
 
   return formattedParts.join(' ');
 }
+
+export function formatOrganizationName(name: string) {
+  if (!name) return '';
+  return name
+    .split(/[^a-zA-Z]+/)
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}

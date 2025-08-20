@@ -88,6 +88,7 @@ export interface SimplifiedNurseDetails {
     taluk?: string | null;
     nurse_reg_no?: string | null;
     nurse_prev_reg_no?: string | null;
+    joining_date?: string | null;
     noc_status?: string | null;
     admitted_type?: string | null;
     created_at?: string | null;
@@ -228,6 +229,7 @@ export async function createNurse(
         nurse_reg_no: nurseRegNo,
         admitted_type: nurseData.admitted_type,
         nurse_prev_reg_no: nurseData.nurse_prev_reg_no,
+        joining_date: nurseData.joining_date,
         created_at: new Date().toISOString()
       })
       .select('nurse_id')
@@ -1068,6 +1070,7 @@ export async function updateNurse(
     mother_tongue: formData.basic.mother_tongue,
     taluk: formData.basic.taluk ?? null,
     nurse_reg_no: formData.basic.nurse_reg_no ?? null,
+    joining_date: formData.basic.joining_date ?? null,
     nurse_prev_reg_no: formData.basic.nurse_prev_reg_no ?? null,
     noc_status: formData.basic.noc_status ?? null,
     admitted_type: formData.basic.admitted_type ?? null,
@@ -1140,6 +1143,16 @@ export async function updateNurse(
   }
 }
 
+
+interface AssignmentInfo {
+  startDate: string;
+  endDate: string | null;
+  shiftType: 'day' | 'night' | '24h';
+  clientId: string;
+  clientType: string;
+  registrationNumber: string;
+}
+
 export async function listNursesWithAssignments(
   paginationParams?: { page: number; pageSize: number },
   filterParams?: { status?: string; city?: string; admittedType?: string }
@@ -1189,7 +1202,6 @@ export async function listNursesWithAssignments(
     if (countError) throw countError;
     const totalCount = count;
 
-
     const { data: nursesData, error: nursesError } = await nursesQuery
       .order('first_name')
       .range(start, end);
@@ -1199,6 +1211,7 @@ export async function listNursesWithAssignments(
     const nurseIds = nursesData.map(nurse => nurse.nurse_id);
     const currentDate = new Date().toISOString().split('T')[0];
 
+    // Fetch leave data (unchanged)
     const { data: leaveData, error: leaveError } = await supabase
       .from('nurse_leave_requests')
       .select(`
@@ -1214,7 +1227,6 @@ export async function listNursesWithAssignments(
 
     console.log("leave", leaveData)
 
-
     if (leaveError) throw leaveError;
 
     const leaveByNurseId = new Map();
@@ -1222,6 +1234,7 @@ export async function listNursesWithAssignments(
       leaveByNurseId.set(leave.nurse_id, leave);
     }
 
+    // FIXED: Fetch all non-completed assignments (current + upcoming)
     const { data: assignmentsData, error: assignmentsError } = await supabase
       .from('nurse_client')
       .select(`
@@ -1231,10 +1244,14 @@ export async function listNursesWithAssignments(
         end_date,
         shift_start_time,
         shift_end_time,
-        clients(client_type)
+        clients(
+          client_type,
+          registration_number
+        )
       `)
       .in('nurse_id', nurseIds)
-      .or(`end_date.is.null,end_date.gte.${currentDate}`);
+      .or(`end_date.is.null,end_date.gt.${currentDate}`) 
+      .order('start_date');
 
     if (assignmentsError) throw assignmentsError;
 
@@ -1251,7 +1268,7 @@ export async function listNursesWithAssignments(
       const nurseAssignments = assignmentsByNurseId.get(nurse.nurse_id) || [];
       
       let nurseStatus: Nurse['status'] = 'unassigned';
-      let assignment = null;
+      let assignments = [];
       let leaveInfo = null;
       
       if (nurseLeave) {
@@ -1262,20 +1279,26 @@ export async function listNursesWithAssignments(
           reason: nurseLeave.reason
         };
       } 
-
       else if (nurseAssignments.length > 0) {
         nurseStatus = 'assigned';
-        const currentAssignment = nurseAssignments[0]; 
-        
-        assignment = {
-          startDate: currentAssignment.start_date,
-          endDate: currentAssignment.end_date,
-          shiftType: currentAssignment.shift_start_time && currentAssignment.shift_end_time ? 
-            determineShiftType(currentAssignment.shift_start_time, currentAssignment.shift_end_time) : 
+
+        assignments = nurseAssignments.map((assignment: {
+          start_date: string;
+          end_date: string | null;
+          shift_start_time: string | null;
+          shift_end_time: string | null;
+          client_id: string;
+          clients?: { client_type: string, registration_number: string };
+        }): AssignmentInfo => ({
+          startDate: assignment.start_date,
+          endDate: assignment.end_date,
+          shiftType: assignment.shift_start_time && assignment.shift_end_time ? 
+            determineShiftType(assignment.shift_start_time, assignment.shift_end_time) : 
             'day',
-          clientId: currentAssignment.client_id,
-          clientType: currentAssignment.clients?.client_type
-        };
+          clientId: assignment.client_id,
+          clientType: assignment.clients?.client_type ?? '',
+          registrationNumber: assignment.clients?.registration_number ?? ''
+        }));
       }
 
       return {
@@ -1290,7 +1313,7 @@ export async function listNursesWithAssignments(
         gender: '',
         dob: '',
         status: nurseStatus,
-        assignment: assignment,
+        assignments: assignments, // CHANGED: Now plural and contains all assignments
         leaveInfo: leaveInfo,
         location: nurse.city || '',
         rating: 3,
@@ -1304,7 +1327,6 @@ export async function listNursesWithAssignments(
     }
     
     const adjustedCount = filterParams?.status ? transformedData.length : totalCount;
-    
     const totalPages = Math.ceil((adjustedCount || 0) / pageSize);
 
     return { 

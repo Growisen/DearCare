@@ -19,9 +19,9 @@ interface NurseAssignment {
 
 interface NurseAssignmentsListProps {
   assignments: NurseAssignment[];
-  nurses?: Nurse[]; // Make this optional since we may not need it anymore
+  nurses?: Nurse[];
   onEditAssignment: (assignment: NurseAssignment) => void;
-  onEndAssignment: (assignmentId: string) => void;
+  onEndAssignment: (assignment: NurseAssignment) => void; // <-- Change type
   onDeleteAssignment: (assignmentId: number | string) => void;
 }
 
@@ -92,7 +92,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
 
         return (
           <div
-            key={`${assignment.nurseId}-${assignment.startDate}`}
+            key={assignment.id ?? `${assignment.nurseId}-${assignment.startDate}-${Math.random()}`}
             className="bg-white rounded-lg border border-gray-200 p-4"
           >
             <div className="flex justify-between items-start">
@@ -129,7 +129,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                       Edit
                     </button>
                     <button
-                      onClick={() => onEndAssignment(assignment.nurseId.toString())}
+                      onClick={() => onEndAssignment(assignment)}
                       className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >
                       End Assignment
