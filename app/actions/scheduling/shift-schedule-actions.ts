@@ -6,7 +6,7 @@ import { getClientProfileUrl } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
 
 export interface ShiftAssignment {
-  nurseId: string;
+  nurseId: string | number;
   startDate: string;
   endDate: string;
   shiftStart: string;
@@ -18,10 +18,70 @@ export type ScheduleResponse = {
   message: string;
 }
 
+// --- Add this utility function above your exported functions ---
+function validateShiftTimes(shiftStart: string, shiftEnd: string): { valid: boolean; message?: string } {
+  const timeRegex = /^(\d{2}):(\d{2})(?::(\d{2}))?$/;
+  if (!timeRegex.test(shiftStart) || !timeRegex.test(shiftEnd)) {
+    return { valid: false, message: 'Shift times must be in HH:MM or HH:MM:SS format' };
+  }
+
+  const parseTime = (timeStr: string) => {
+    const [, hour, min, sec] = timeStr.match(timeRegex) || [];
+    return {
+      hour: Number(hour),
+      min: Number(min),
+      sec: Number(sec || '0'),
+    };
+  };
+
+  const startTime = parseTime(shiftStart);
+  const endTime = parseTime(shiftEnd);
+
+  // Validate time components
+  if (
+    startTime.hour < 0 || startTime.hour > 23 ||
+    startTime.min < 0 || startTime.min > 59 ||
+    startTime.sec < 0 || startTime.sec > 59 ||
+    endTime.hour < 0 || endTime.hour > 23 ||
+    endTime.min < 0 || endTime.min > 59 ||
+    endTime.sec < 0 || endTime.sec > 59
+  ) {
+    return { valid: false, message: 'Invalid time values in shift times' };
+  }
+
+  // Handle midnight as end time (24:00:00 equivalent)
+  if (
+    endTime.hour === 0 && endTime.min === 0 && endTime.sec === 0 &&
+    (shiftEnd === '00:00' || shiftEnd === '00:00:00')
+  ) {
+    endTime.hour = 24;
+  }
+
+  // Calculate total seconds for comparison
+  const startTotal = startTime.hour * 3600 + startTime.min * 60 + startTime.sec;
+  const endTotal = endTime.hour * 3600 + endTime.min * 60 + endTime.sec;
+
+  // Allow 24-hour shift if start and end are the same and duration is exactly 24 hours
+  const is24HourShift = startTotal === 0 && endTotal === 86400; // 24 * 3600 = 86400 seconds
+
+  // For overnight shifts, allow end time to be "earlier" than start time
+  const isOvernightShift = endTotal < startTotal && !is24HourShift;
+
+  if (!is24HourShift && !isOvernightShift && endTotal <= startTotal) {
+    return {
+      valid: false,
+      message: 'Shift end time must be after shift start time, unless it\'s an overnight or 24-hour shift'
+    };
+  }
+
+  return { valid: true };
+}
+
 export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: string): Promise<ScheduleResponse> {
   try {
-
     const supabase = await createSupabaseServerClient();
+
+    console.log(shifts)
 
     if (!shifts || !Array.isArray(shifts) || shifts.length === 0) {
       return {
@@ -30,14 +90,35 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       };
     }
 
-    const processedShifts = shifts.map(shift => ({
-      ...shift,
-      nurseId: typeof shift.nurseId === 'string' ? parseInt(shift.nurseId, 10) : shift.nurseId
-    }));
+    // Process shifts and validate nurseId conversion
+    const processedShifts = shifts.map(shift => {
+      let nurseId = shift.nurseId;
+      
+      // Convert string to number if needed
+      if (typeof nurseId === 'string') {
+        const parsed = parseInt(nurseId, 10);
+        if (isNaN(parsed)) {
+          throw new Error(`Invalid nurse ID format: ${nurseId}`);
+        }
+        nurseId = parsed;
+      }
+      
+      return {
+        ...shift,
+        nurseId
+      };
+    });
 
+    // Validate each shift
     for (const shift of processedShifts) {
-
-      if (shift.nurseId === undefined || shift.nurseId === null || !shift.startDate || !shift.endDate || !shift.shiftStart || !shift.shiftEnd) {
+      if (
+        shift.nurseId === undefined ||
+        shift.nurseId === null ||
+        !shift.startDate ||
+        !shift.endDate ||
+        !shift.shiftStart ||
+        !shift.shiftEnd
+      ) {
         return {
           success: false,
           message: 'Incomplete shift data provided'
@@ -46,38 +127,42 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
 
       // Validate that nurseId is a number
       if (typeof shift.nurseId !== 'number' || isNaN(shift.nurseId)) {
-        logger.info("type ", typeof shift.nurseId)
+        logger.info("Invalid nurse ID type:", typeof shift.nurseId);
         return {
           success: false,
-          message: 'Nurse ID must be a valid number'
+          message: `Nurse ID must be a valid number, got: ${shift.nurseId}`
         };
       }
 
+      // Validate dates
       const startDate = new Date(shift.startDate);
       const endDate = new Date(shift.endDate);
-      
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return {
+          success: false,
+          message: 'Invalid date format provided'
+        };
+      }
+
       if (endDate < startDate) {
         return {
           success: false,
           message: 'End date cannot be before start date'
         };
       }
-      
-      const [startTimeStr, startSecs = '00'] = shift.shiftStart.split(':');
-      const [endTimeStr, endSecs = '00'] = shift.shiftEnd.split(':');
-      const [startHour, startMin] = startTimeStr.split(':').map(Number);
-      const [endHour, endMin] = endTimeStr.split(':').map(Number);
-      
-      if (startHour > endHour || 
-          (startHour === endHour && startMin > endMin) || 
-          (startHour === endHour && startMin === endMin && startSecs >= endSecs)) {
+
+      // Use the new validation function
+      const timeValidation = validateShiftTimes(shift.shiftStart, shift.shiftEnd);
+      if (!timeValidation.valid) {
         return {
           success: false,
-          message: 'Shift end time must be after shift start time'
+          message: timeValidation.message || 'Invalid shift times'
         };
       }
     }
 
+    // Prepare shift records for database insertion
     const shiftRecords = processedShifts.map(shift => ({
       client_id: clientId,
       nurse_id: shift.nurseId,
@@ -91,7 +176,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
     logger.info('Attempting to insert shifts:', JSON.stringify(shiftRecords, null, 2));
 
     try {
-     
+      // Verify client exists
       const { data: clientExists, error: clientError } = await supabase
         .from('clients')
         .select('id')
@@ -99,29 +184,90 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         .single();
 
       if (clientError || !clientExists) {
-        logger.error('Client does not exist:', clientId);
+        logger.error('Client validation error:', clientError);
         return {
           success: false,
-          message: 'Client does not exist'
+          message: `Client does not exist or validation failed: ${clientId}`
         };
       }
 
-      const nurseIds = processedShifts.map(shift => shift.nurseId);
+      // Verify all nurses exist
+      const uniqueNurseIds = [...new Set(processedShifts.map(shift => shift.nurseId))];
       const { data: nursesExist, error: nurseError } = await supabase
         .from('nurses')
         .select('nurse_id')
-        .in('nurse_id', nurseIds);
+        .in('nurse_id', uniqueNurseIds);
 
       if (nurseError) {
         logger.error('Error checking nurses:', nurseError);
-      } else {
-        const foundNurseIds = nursesExist.map(n => n.nurse_id);
-        const missingNurseIds = nurseIds.filter(id => !foundNurseIds.includes(id));
-        if (missingNurseIds.length > 0) {
-          logger.warn('Some nurse IDs do not exist:', missingNurseIds);
+        return {
+          success: false,
+          message: 'Error validating nurse records'
+        };
+      }
+
+      const foundNurseIds = nursesExist?.map(n => n.nurse_id) || [];
+      const missingNurseIds = uniqueNurseIds.filter(id => !foundNurseIds.includes(id));
+      
+      if (missingNurseIds.length > 0) {
+        logger.warn('Missing nurse IDs:', missingNurseIds);
+        return {
+          success: false,
+          message: `The following nurse IDs do not exist: ${missingNurseIds.join(', ')}`
+        };
+      }
+
+      // Check for scheduling conflicts
+      // Convert date strings to timestamps for Math.min/Math.max, then back to string
+      const minStartDate = new Date(
+        Math.min(...processedShifts.map(s => new Date(s.startDate).getTime()))
+      ).toISOString().split('T')[0];
+      const maxEndDate = new Date(
+        Math.max(...processedShifts.map(s => new Date(s.endDate).getTime()))
+      ).toISOString().split('T')[0];
+
+      const { data: existingShifts, error: conflictError } = await supabase
+        .from('nurse_client')
+        .select('nurse_id, start_date, end_date, shift_start_time, shift_end_time')
+        .in('nurse_id', uniqueNurseIds)
+        .gte('end_date', minStartDate)
+        .lte('start_date', maxEndDate);
+
+      if (conflictError) {
+        logger.error('Error checking for conflicts:', conflictError);
+        return {
+          success: false,
+          message: 'Error checking for scheduling conflicts'
+        };
+      }
+
+      // Simple conflict detection (can be enhanced based on business rules)
+      const conflicts = [];
+      for (const newShift of processedShifts) {
+        const nurseExistingShifts = existingShifts?.filter(es => es.nurse_id === newShift.nurseId) || [];
+        
+        for (const existing of nurseExistingShifts) {
+          const newStart = new Date(newShift.startDate);
+          const newEnd = new Date(newShift.endDate);
+          const existingStart = new Date(existing.start_date);
+          const existingEnd = new Date(existing.end_date);
+          
+          // Check for date overlap
+          if (newStart <= existingEnd && newEnd >= existingStart) {
+            conflicts.push(`Nurse ${newShift.nurseId} has conflicting shifts`);
+            break;
+          }
         }
       }
 
+      if (conflicts.length > 0) {
+        return {
+          success: false,
+          message: `Scheduling conflicts detected: ${conflicts.join(', ')}`
+        };
+      }
+
+      // Insert shifts
       const { data, error } = await supabase
         .from('nurse_client')
         .insert(shiftRecords)
@@ -135,33 +281,43 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      logger.info('Insert response data:', data);
-      
       if (!data || data.length === 0) {
         logger.warn('No data returned after insert - possible silent failure');
+        return {
+          success: false,
+          message: 'Insert operation completed but no data was returned'
+        };
       }
 
-      // Update status for all nurses involved in the shift assignment
-      const uniqueNurseIds = [...new Set(processedShifts.map(shift => shift.nurseId))];
-      
+      logger.info('Successfully inserted shifts:', data);
+
+      // Update nurse statuses
       const statusUpdates = await Promise.all(
-        uniqueNurseIds.map(nurseId => 
-          updateNurseStatus(nurseId, 'assigned')
-        )
+        uniqueNurseIds.map(async (nurseId) => {
+          try {
+            return await updateNurseStatus(Number(nurseId), 'assigned');
+          } catch (error) {
+            logger.error(`Failed to update status for nurse ${nurseId}:`, error);
+            return { success: false, error: `Failed to update nurse ${nurseId}` };
+          }
+        })
       );
+
+      const failedStatusUpdates = statusUpdates.filter(update => !update.success);
       
-      const statusUpdateErrors = statusUpdates
-        .filter(update => !update.success)
-        .map(update => update.error);
-        
-      if (statusUpdateErrors.length > 0) {
-        logger.warn('Some nurse status updates failed:', statusUpdateErrors);
+      if (failedStatusUpdates.length > 0) {
+        logger.warn('Some nurse status updates failed:', failedStatusUpdates);
+        return {
+          success: true,
+          message: `Shifts scheduled successfully, but ${failedStatusUpdates.length} nurse status updates failed`,
+        };
       }
 
       return {
         success: true,
-        message: 'Shifts scheduled successfully and nurse status updated to assigned',
+        message: 'Shifts scheduled successfully and all nurse statuses updated',
       };
+
     } catch (insertError) {
       logger.error('Unexpected error during database operations:', insertError);
       return {
@@ -169,6 +325,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         message: 'Unexpected error during database operations'
       };
     }
+
   } catch (error) {
     logger.error('Error scheduling shifts:', error);
     
@@ -178,7 +335,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
     };
   }
 }
-
 
 export interface NurseAssignmentData {
   id: number;
@@ -448,17 +604,11 @@ export async function updateNurseAssignment(
     }
     
     if (updates.shift_start_time && updates.shift_end_time) {
-      const [startTimeStr, startSecs = '00'] = updates.shift_start_time.split(':');
-      const [endTimeStr, endSecs = '00'] = updates.shift_end_time.split(':');
-      const [startHour, startMin] = startTimeStr.split(':').map(Number);
-      const [endHour, endMin] = endTimeStr.split(':').map(Number);
-      
-      if (startHour > endHour || 
-          (startHour === endHour && startMin > endMin) || 
-          (startHour === endHour && startMin === endMin && startSecs >= endSecs)) {
+      const timeValidation = validateShiftTimes(updates.shift_start_time, updates.shift_end_time);
+      if (!timeValidation.valid) {
         return {
           success: false,
-          message: 'Shift end time must be after shift start time'
+          message: timeValidation.message || 'Invalid shift times'
         };
       }
     }
