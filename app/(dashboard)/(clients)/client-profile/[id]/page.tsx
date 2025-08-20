@@ -33,8 +33,6 @@ import { useClientFiles } from '@/hooks/useClientFiles';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
 
-import { logger } from '@/utils/logger';
-
 const PatientProfilePage = () => {
   const { invalidateDashboardCache } = useDashboardData()
   const { invalidateAssignmentsCache } = useAssignmentData()
@@ -97,7 +95,13 @@ const PatientProfilePage = () => {
     handleDeleteAssignment,
     setShowEditModal,
     setEditingAssignment,
-    refetch
+    refetch,
+    showEndModal,
+    setShowEndModal,
+    handleEndAssignment,
+    confirmEndAssignment,
+    endDate,
+    setEndDate,
   } = useNurseAssignments(id);
 
   const {
@@ -278,9 +282,7 @@ const PatientProfilePage = () => {
                     assignments={nurseAssignments}
                     nurses={nurses}
                     onEditAssignment={handleEditAssignment}
-                    onEndAssignment={(assignmentId) => {
-                      logger.debug('End assignment:', assignmentId);
-                    }}
+                    onEndAssignment={handleEndAssignment}
                     onDeleteAssignment={handleDeleteAssignment}
                   />
                 </div>
@@ -373,6 +375,35 @@ const PatientProfilePage = () => {
         onConfirm={handleDeleteConfirmation}
         onCancel={() => setShowDeleteConfirmation(false)}
         confirmText="Delete Client"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+      />
+
+      {/* End Assignment Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showEndModal}
+        title="End Assignment"
+        message={
+          <div>
+            <p>
+              Are you sure you want to end this nurse assignment?
+            </p>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
+              <input
+                type="date"
+                className="border rounded px-2 py-1"
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                max={new Date().toISOString().slice(0, 10)}
+              />
+            </div>
+          </div>
+        }
+        onConfirm={confirmEndAssignment}
+        onCancel={() => setShowEndModal(false)}
+        confirmText="End Assignment"
         confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
     </div>

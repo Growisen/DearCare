@@ -1,9 +1,12 @@
-"use server"
+"use server";
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/utils/logger';
 
+/**
+ * Represents a web user in the DearCare system.
+ */
 export interface WebUser {
   id: string;
   full_name: string;
@@ -20,6 +23,9 @@ export interface WebUser {
   country: string | null;
 }
 
+/**
+ * Data fields that can be updated for a user profile.
+ */
 export interface UserUpdateData {
   full_name?: string;
   email?: string;
@@ -33,7 +39,19 @@ export interface UserUpdateData {
 }
 
 /**
- * Fetches a user by their ID from the dearcare_web_users table
+ * Fetches a user by their ID from the `dearcare_web_users` table.
+ *
+ * @param userId - The unique ID of the user.
+ * @returns An object with the following properties:
+ *   - `success`: `true` if the user was found, otherwise `false`.
+ *   - `user`: The {@link WebUser} object containing all user fields if found, otherwise `undefined`.
+ *   - `error`: A string describing the error if the operation failed, otherwise `undefined`.
+ *
+ * @example
+ * ```ts
+ * const { success, user, error } = await getUserById("123");
+ * if (success) console.log(user?.full_name);
+ * ```
  */
 export async function getUserById(userId: string): Promise<{
   success: boolean;
@@ -71,7 +89,20 @@ export async function getUserById(userId: string): Promise<{
 }
 
 /**
- * Updates a user's profile information
+ * Updates a user's profile information in the `dearcare_web_users` table.
+ *
+ * @param userId - The unique ID of the user to update.
+ * @param data - Partial fields of {@link UserUpdateData} to update.
+ * @returns An object with the following properties:
+ *   - `success`: `true` if the update was successful, otherwise `false`.
+ *   - `user`: The updated {@link WebUser} object with all user fields if successful, otherwise `undefined`.
+ *   - `error`: A string describing the error if the update failed, otherwise `undefined`.
+ *
+ * @example
+ * ```ts
+ * const result = await updateUserProfile("123", { city: "New York" });
+ * if (result.success) console.log("Updated user:", result.user);
+ * ```
  */
 export async function updateUserProfile(
   userId: string, 
@@ -122,7 +153,21 @@ export async function updateUserProfile(
 }
 
 /**
- * Uploads a profile image to storage and updates the user's profile_image_url
+ * Uploads a profile image to Supabase storage and updates the `profile_image_url` in the user's record.
+ *
+ * @param userId - The unique ID of the user.
+ * @param file - The image file to upload.
+ * @returns An object with the following properties:
+ *   - `success`: `true` if the image was uploaded and the user's profile updated, otherwise `false`.
+ *   - `imageUrl`: The public URL string of the uploaded image if successful, otherwise `undefined`.
+ *   - `error`: A string describing the error if the upload or update failed, otherwise `undefined`.
+ *
+ * @example
+ * ```ts
+ * const file = new File([blob], "avatar.png", { type: "image/png" });
+ * const result = await uploadProfileImage("123", file);
+ * if (result.success) console.log("Image URL:", result.imageUrl);
+ * ```
  */
 export async function uploadProfileImage(
   userId: string,
@@ -206,7 +251,18 @@ export async function uploadProfileImage(
 }
 
 /**
- * Fetches the currently logged in user
+ * Fetches the currently logged-in user.
+ *
+ * @returns An object with the following properties:
+ *   - `success`: `true` if an authenticated user was found, otherwise `false`.
+ *   - `user`: The authenticated {@link WebUser} object with all user fields if found, otherwise `undefined`.
+ *   - `error`: A string describing the error if no user is authenticated or fetching failed, otherwise `undefined`.
+ *
+ * @example
+ * ```ts
+ * const result = await getCurrentUser();
+ * if (result.success) console.log("Current user:", result.user);
+ * ```
  */
 export async function getCurrentUser(): Promise<{
   success: boolean;
@@ -229,7 +285,6 @@ export async function getCurrentUser(): Promise<{
     const userId = user.user_metadata?.user_id;
     logger.info("Using user ID:", userId);
     
-   
     const { data, error } = await supabase
       .from('dearcare_web_users')
       .select('*')

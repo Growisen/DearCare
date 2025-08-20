@@ -74,7 +74,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
             <div className="text-sm text-gray-700 mt-1">
               <span>
                 Joined: {basicInfo.joining_date 
-                  ? new Date(basicInfo.joining_date).toLocaleDateString() 
+                  ? basicInfo.joining_date 
                   : 'N/A'}
               </span>
               <span className="mx-2">|</span>

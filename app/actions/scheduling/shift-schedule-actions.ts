@@ -553,6 +553,19 @@ export async function deleteNurseAssignment(
     }
     
     const nurseId = assignment.nurse_id;
+
+    const { error: attendanceDeleteError } = await supabase
+      .from('attendence_individual')
+      .delete()
+      .eq('assigned_id', assignmentId);
+
+    if (attendanceDeleteError) {
+      logger.error('Error deleting related attendance records:', attendanceDeleteError);
+      return {
+        success: false,
+        message: `Failed to delete related attendance records: ${attendanceDeleteError.message}`
+      };
+    }
     
     const { error: deleteError } = await supabase
       .from('nurse_client')

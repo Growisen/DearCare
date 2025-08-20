@@ -16,6 +16,9 @@ export const useNurseAssignments = (clientId: string) => {
   const [showNurseList, setShowNurseList] = useState(false);
   const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showEndModal, setShowEndModal] = useState(false);
+  const [assignmentToEnd, setAssignmentToEnd] = useState<NurseAssignment | null>(null);
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10)); // Default to today
   
   // New pagination and filtering state
   const [currentPage, setCurrentPage] = useState(1);
@@ -187,10 +190,8 @@ export const useNurseAssignments = (clientId: string) => {
       const result = await deleteNurseAssignment(numericId);
       
       if (result.success) {
-        invalidateDashboardCache()
-        setNurseAssignments(prevAssignments => 
-          prevAssignments.filter(assignment => assignment.id !== numericId)
-        );
+        invalidateDashboardCache();
+        await refetch(); // <-- Add this line to reload assignments from the server
         toast.success('Assignment deleted successfully');
       } else {
         toast.error(`Failed to delete assignment: ${result.message}`);
@@ -198,6 +199,34 @@ export const useNurseAssignments = (clientId: string) => {
     } catch (error) {
       console.error('Error deleting assignment:', error);
       toast.error('An error occurred while deleting the assignment');
+    }
+  };
+
+  const handleEndAssignment = (assignment: NurseAssignment) => {
+    setAssignmentToEnd(assignment);
+    setEndDate(new Date().toISOString().slice(0, 10));
+    setShowEndModal(true);
+  };
+
+  const confirmEndAssignment = async () => {
+    if (!assignmentToEnd || assignmentToEnd.id === undefined) return;
+    try {
+      const updates = {
+        end_date: endDate,
+      };
+      const result = await updateNurseAssignment(assignmentToEnd.id, updates);
+      if (result.success) {
+        invalidateDashboardCache();
+        await refetch();
+        toast.success('Assignment ended successfully');
+      } else {
+        toast.error(`Failed to end assignment`);
+      }
+    } catch {
+      toast.error('An error occurred while ending the assignment');
+    } finally {
+      setShowEndModal(false);
+      setAssignmentToEnd(null);
     }
   };
 
@@ -220,6 +249,13 @@ export const useNurseAssignments = (clientId: string) => {
     showNurseList,
     selectedNurse,
     showConfirmation,
+    showEndModal,
+    setShowEndModal,
+    assignmentToEnd,
+    handleEndAssignment,
+    confirmEndAssignment,
+    endDate,
+    setEndDate,
     // New pagination properties
     currentPage,
     totalPages,

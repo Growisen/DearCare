@@ -38,6 +38,8 @@ export async function fetchNurseHoursWorked(
   data: (StaffSalary & { 
     missingFields?: Array<{ field: string; date: string }>;
     salaryCalculated?: boolean;
+    salaryStatus?: 'none' | 'partial' | 'full';
+    paidPeriods?: Array<{ start: string; end: string }>;
   })[];
   error?: string;
 }> {
@@ -160,27 +162,82 @@ export async function fetchNurseHoursWorked(
     });
 
     const nurseIds = Array.from(nurseHoursMap.keys());
-    const salaryPaymentsMap = new Map<number, boolean>();
+    const salaryPaymentsMap = new Map<number, {
+      status: 'none' | 'partial' | 'full';
+      paidPeriods: Array<{ start: string; end: string }>;
+    }>();
 
     if (nurseIds.length > 0 && dateFrom && dateTo) {
+      // Get all salary payments that might overlap with the query range
       const { data: salaryPayments, error: salaryError } = await supabase
         .from('salary_payments')
         .select('nurse_id, pay_period_start, pay_period_end')
         .in('nurse_id', nurseIds)
-        .gte('pay_period_start', dateFrom)
-        .lte('pay_period_end', dateTo);
+        .or(`and(pay_period_start.lte.${dateTo},pay_period_end.gte.${dateFrom})`);
 
       if (!salaryError && salaryPayments) {
         type SalaryPayment = { nurse_id: number; pay_period_start: string; pay_period_end: string };
+        
+        // Group payments by nurse_id for easier processing
+        const paymentsByNurse = new Map<number, SalaryPayment[]>();
         (salaryPayments as SalaryPayment[]).forEach((payment) => {
-          salaryPaymentsMap.set(payment.nurse_id, true);
+          if (!paymentsByNurse.has(payment.nurse_id)) {
+            paymentsByNurse.set(payment.nurse_id, []);
+          }
+          paymentsByNurse.get(payment.nurse_id)!.push(payment);
+        });
+
+        const queryStart = new Date(dateFrom);
+        const queryEnd = new Date(dateTo);
+        const totalQueryDays = Math.ceil((queryEnd.getTime() - queryStart.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+
+        // Check each nurse's payment coverage
+        paymentsByNurse.forEach((payments, nurseId) => {
+          const paidPeriods: Array<{ start: string; end: string }> = [];
+          let totalPaidDays = 0;
+
+          payments.forEach((payment) => {
+            const paymentStart = new Date(payment.pay_period_start);
+            const paymentEnd = new Date(payment.pay_period_end);
+
+            // Get the overlapping portion with query range
+            const overlapStart = paymentStart > queryStart ? paymentStart : queryStart;
+            const overlapEnd = paymentEnd < queryEnd ? paymentEnd : queryEnd;
+
+            if (overlapStart <= overlapEnd) {
+              paidPeriods.push({
+                start: overlapStart.toISOString().split('T')[0],
+                end: overlapEnd.toISOString().split('T')[0]
+              });
+
+              const overlapDays = Math.ceil((overlapEnd.getTime() - overlapStart.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+              totalPaidDays += overlapDays;
+            }
+          });
+
+          // Determine payment status
+          let status: 'none' | 'partial' | 'full';
+          if (totalPaidDays === 0) {
+            status = 'none';
+          } else if (totalPaidDays >= totalQueryDays) {
+            status = 'full';
+          } else {
+            status = 'partial';
+          }
+
+          salaryPaymentsMap.set(nurseId, {
+            status,
+            paidPeriods: paidPeriods.sort((a, b) => a.start.localeCompare(b.start))
+          });
         });
       }
     }
 
     const processedData: (StaffSalary & { 
       missingFields?: Array<{ field: string, date: string }>,
-      salaryCalculated?: boolean
+      salaryCalculated?: boolean,
+      salaryStatus?: 'none' | 'partial' | 'full',
+      paidPeriods?: Array<{ start: string; end: string }>
     })[] = Array.from(
       nurseHoursMap.values()
     ).map((nurse) => {
@@ -193,6 +250,8 @@ export async function fetchNurseHoursWorked(
         minutes = 0;
       }
 
+      const paymentInfo = salaryPaymentsMap.get(nurse.id);
+
       return {
         id: nurse.id,
         name: nurse.name,
@@ -200,7 +259,9 @@ export async function fetchNurseHoursWorked(
         hours: `${hours}hrs:${minutes.toString().padStart(2, "0")}min`,
         salary: 0,
         missingFields: nurseMissingFieldsMap.get(nurse.id) ?? [],
-        salaryCalculated: salaryPaymentsMap.get(nurse.id) ?? false,
+        salaryCalculated: paymentInfo?.status === 'full',
+        salaryStatus: paymentInfo?.status ?? 'none',
+        paidPeriods: paymentInfo?.paidPeriods ?? []
       };
     });
 
