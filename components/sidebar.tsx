@@ -12,7 +12,8 @@ import {
   Clipboard,
   HeartPulse,
   Building,
-  Settings
+  Settings,
+  UserPlus,
 } from "lucide-react"
 import { useEffect } from "react"
 // import { useAuth } from '@/contexts/AuthContext'
@@ -72,6 +73,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
             { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
             { icon: MessageSquare, label: "Complaints", href: "/complaints" },
             // { icon: ClipboardCheck, label: "Staff Salary", href: "/staff-salary" },
+            { icon: UserPlus, label: "Enquiry", href: "/enquiry-data" },
             { icon: Settings, label: "Settings", href: "/settings" },
           ].map((item) => {
               const isActive = pathname === item.href
