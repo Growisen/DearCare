@@ -57,8 +57,8 @@ export default function ClientFormPage() {
             </div>
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm text-gray-600 font-medium">Client Support: <span className="text-blue-600">+1 (800) 123-4567</span></p>
-            <p className="text-sm text-gray-600 mt-1">care@dearcare.com</p>
+            <p className="text-sm text-gray-600 font-medium">Client Support: <span className="text-blue-600">+91 9645400035</span></p>
+            <p className="text-sm text-gray-600 mt-1">info@dearcare.in</p>
           </div>
         </div>
 
