@@ -131,3 +131,50 @@ export async function getClientPaymentGroups(clientId: string) {
     };
   }
 }
+
+export async function requireAuthenticatedUser(supabase: ReturnType<typeof createSupabaseServerClient>) {
+  const { data: { user }, error } = await (await supabase).auth.getUser();
+  if (error || !user) {
+    return { user: null, error: error?.message || "Not authenticated" };
+  }
+  return { user, error: null };
+}
+
+export async function deleteClientPaymentGroup(paymentRecordId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { user, error: authError } = await requireAuthenticatedUser(Promise.resolve(supabase));
+    if (authError || !user) {
+      return { success: false, error: authError };
+    }
+
+    const { error: lineItemsError } = await supabase
+      .from('client_payment_line_items')
+      .delete()
+      .eq('payment_record_id', paymentRecordId);
+
+    if (lineItemsError) {
+      logger.error('Error deleting payment line items:', lineItemsError);
+      return { success: false, error: lineItemsError.message };
+    }
+
+    const { error: recordError } = await supabase
+      .from('client_payment_records')
+      .delete()
+      .eq('id', paymentRecordId);
+
+    if (recordError) {
+      logger.error('Error deleting payment record:', recordError);
+      return { success: false, error: recordError.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error deleting client payment group:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}

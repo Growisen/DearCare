@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSaveClientPaymentGroup } from "@/hooks/useSaveClientPaymentGroup";
 import Loader from '@/components/Loader';
+import { deleteClientPaymentGroup } from "@/app/actions/clients/client-payment-records";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+import ModalPortal from "@/components/ui/ModalPortal";
 
 interface LineItem {
   id: string;
@@ -42,7 +45,6 @@ interface ApiEntryGroup {
   show_to_client: boolean;
 }
 
-
 const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) => {
   const { saveGroup, fetchGroups, loading, isSaving } = useSaveClientPaymentGroup();
   
@@ -54,6 +56,13 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
   ]);
   const [groupNotes, setGroupNotes] = useState("");
   const [groupShowToClient, setGroupShowToClient] = useState(false);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    groupId: number | null;
+  }>({ open: false, groupId: null });
 
   async function fetchData() {
     const apiEntries = await fetchGroups(clientId);
@@ -140,9 +149,28 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     }
   };
 
-  const deleteEntryGroup = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this entire entry group?")) {
-      setEntries(prev => prev.filter(group => group.id !== id));
+  // Update deleteEntryGroup to use confirmation modal
+  const handleDeleteClick = (id: number) => {
+    setConfirmModal({ open: true, groupId: id });
+  };
+
+  const confirmDelete = async () => {
+    if (confirmModal.groupId == null) return;
+    const group = entries.find(g => g.id === confirmModal.groupId);
+    if (!group) {
+      setConfirmModal({ open: false, groupId: null });
+      return;
+    }
+    setDeletingId(group.id.toString());
+    setConfirmModal({ open: false, groupId: null });
+    const result = await deleteClientPaymentGroup(group.id.toString());
+    setDeletingId(null);
+
+    if (result.success) {
+      fetchData();
+      alert("Entry group deleted!");
+    } else {
+      alert(result.error || "Failed to delete entry group.");
     }
   };
 
@@ -268,6 +296,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
             <h2 className="text-base font-semibold text-gray-900">All Entries ({entries.length})</h2>
           </div>
           
+          {/* Table for large screens */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -344,10 +373,11 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
                       </td>
                       <td className="px-6 py-4 align-top text-center">
                         <button 
-                          onClick={() => deleteEntryGroup(group.id)} 
+                          onClick={() => handleDeleteClick(group.id)} 
                           className="text-red-600 hover:text-red-900 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"
+                          disabled={deletingId === group.id.toString()}
                         >
-                          Delete
+                          {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
                         </button>
                       </td>
                     </tr>
@@ -357,6 +387,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
             </table>
           </div>
 
+          {/* Cards for mobile */}
           <div className="lg:hidden divide-y divide-gray-200">
             {entries.map((group) => {
               const groupTotal = group.lineItems.reduce((sum, item) => sum + item.amount, 0);
@@ -367,10 +398,11 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
                       {group.groupName}
                     </h3>
                     <button 
-                      onClick={() => deleteEntryGroup(group.id)} 
+                      onClick={() => handleDeleteClick(group.id)} 
                       className="text-red-600 hover:text-red-800 text-sm font-medium ml-4 flex-shrink-0 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                      disabled={deletingId === group.id.toString()}
                     >
-                      Delete
+                      {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
                     </button>
                   </div>
                   
@@ -445,6 +477,21 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ModalPortal>
+        <ConfirmationModal
+          isOpen={confirmModal.open}
+          title="Delete Entry Group"
+          message="Are you sure you want to delete this entire entry group? This action cannot be undone."
+          onConfirm={confirmDelete}
+          onCancel={() => setConfirmModal({ open: false, groupId: null })}
+          confirmButtonText="Delete"
+          cancelButtonText="Cancel"
+          confirmButtonColor="red"
+          isLoading={!!deletingId}
+        />
+      </ModalPortal>
     </div>
   );
 };
