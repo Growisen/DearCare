@@ -93,9 +93,10 @@ export function AttendanceModal({
     const checkInTotalMinutes = checkInHours * 60 + checkInMinutes;
     const checkOutTotalMinutes = checkOutHours * 60 + checkOutMinutes;
     
-    const diffMinutes = checkOutTotalMinutes - checkInTotalMinutes;
-    if (diffMinutes < 0) return "0h 0m";
-    
+    let diffMinutes = checkOutTotalMinutes - checkInTotalMinutes;
+    if (diffMinutes < 0) diffMinutes += 24 * 60;
+    if (diffMinutes === 0 && checkIn === checkOut) diffMinutes = 24 * 60;
+
     const hours = Math.floor(diffMinutes / 60);
     const minutes = diffMinutes % 60;
     
