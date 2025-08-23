@@ -81,7 +81,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
   try {
     const supabase = await createSupabaseServerClient();
 
-    console.log(shifts)
+    console.log('Input shifts:', shifts);
 
     if (!shifts || !Array.isArray(shifts) || shifts.length === 0) {
       return {
@@ -90,17 +90,30 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       };
     }
 
+    // Validate clientId
+    if (!clientId || typeof clientId !== 'string') {
+      return {
+        success: false,
+        message: 'Valid client ID is required'
+      };
+    }
+
     // Process shifts and validate nurseId conversion
-    const processedShifts = shifts.map(shift => {
+    const processedShifts = shifts.map((shift, index) => {
       let nurseId = shift.nurseId;
       
       // Convert string to number if needed
       if (typeof nurseId === 'string') {
         const parsed = parseInt(nurseId, 10);
-        if (isNaN(parsed)) {
-          throw new Error(`Invalid nurse ID format: ${nurseId}`);
+        if (isNaN(parsed) || parsed <= 0) {
+          throw new Error(`Invalid nurse ID format at shift ${index}: ${nurseId}`);
         }
         nurseId = parsed;
+      }
+      
+      // Ensure nurseId is a positive number
+      if (typeof nurseId !== 'number' || isNaN(nurseId) || nurseId <= 0) {
+        throw new Error(`Nurse ID must be a positive number at shift ${index}, got: ${nurseId}`);
       }
       
       return {
@@ -110,7 +123,9 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
     });
 
     // Validate each shift
-    for (const shift of processedShifts) {
+    for (let i = 0; i < processedShifts.length; i++) {
+      const shift = processedShifts[i];
+      
       if (
         shift.nurseId === undefined ||
         shift.nurseId === null ||
@@ -121,16 +136,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       ) {
         return {
           success: false,
-          message: 'Incomplete shift data provided'
-        };
-      }
-
-      // Validate that nurseId is a number
-      if (typeof shift.nurseId !== 'number' || isNaN(shift.nurseId)) {
-        logger.info("Invalid nurse ID type:", typeof shift.nurseId);
-        return {
-          success: false,
-          message: `Nurse ID must be a valid number, got: ${shift.nurseId}`
+          message: `Incomplete shift data at index ${i}`
         };
       }
 
@@ -141,14 +147,14 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         return {
           success: false,
-          message: 'Invalid date format provided'
+          message: `Invalid date format at shift ${i}`
         };
       }
 
       if (endDate < startDate) {
         return {
           success: false,
-          message: 'End date cannot be before start date'
+          message: `End date cannot be before start date at shift ${i}`
         };
       }
 
@@ -157,7 +163,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       if (!timeValidation.valid) {
         return {
           success: false,
-          message: timeValidation.message || 'Invalid shift times'
+          message: `Invalid shift times at shift ${i}: ${timeValidation.message || 'Invalid shift times'}`
         };
       }
     }
@@ -183,11 +189,24 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         .eq('id', clientId)
         .single();
 
-      if (clientError || !clientExists) {
+      if (clientError) {
         logger.error('Client validation error:', clientError);
+        if (clientError.code === 'PGRST116') {
+          return {
+            success: false,
+            message: `Client with ID ${clientId} does not exist`
+          };
+        }
         return {
           success: false,
-          message: `Client does not exist or validation failed: ${clientId}`
+          message: `Error validating client: ${clientError.message}`
+        };
+      }
+
+      if (!clientExists) {
+        return {
+          success: false,
+          message: `Client with ID ${clientId} does not exist`
         };
       }
 
@@ -202,7 +221,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         logger.error('Error checking nurses:', nurseError);
         return {
           success: false,
-          message: 'Error validating nurse records'
+          message: `Error validating nurse records: ${nurseError.message}`
         };
       }
 
@@ -218,7 +237,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       }
 
       // Check for scheduling conflicts
-      // Convert date strings to timestamps for Math.min/Math.max, then back to string
       const minStartDate = new Date(
         Math.min(...processedShifts.map(s => new Date(s.startDate).getTime()))
       ).toISOString().split('T')[0];
@@ -237,13 +255,14 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         logger.error('Error checking for conflicts:', conflictError);
         return {
           success: false,
-          message: 'Error checking for scheduling conflicts'
+          message: `Error checking for scheduling conflicts: ${conflictError.message}`
         };
       }
 
-      // Simple conflict detection (can be enhanced based on business rules)
+      // Enhanced conflict detection
       const conflicts = [];
-      for (const newShift of processedShifts) {
+      for (let i = 0; i < processedShifts.length; i++) {
+        const newShift = processedShifts[i];
         const nurseExistingShifts = existingShifts?.filter(es => es.nurse_id === newShift.nurseId) || [];
         
         for (const existing of nurseExistingShifts) {
@@ -251,11 +270,76 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
           const newEnd = new Date(newShift.endDate);
           const existingStart = new Date(existing.start_date);
           const existingEnd = new Date(existing.end_date);
-          
+
           // Check for date overlap
           if (newStart <= existingEnd && newEnd >= existingStart) {
-            conflicts.push(`Nurse ${newShift.nurseId} has conflicting shifts`);
-            break;
+            // Helper to convert HH:MM or HH:MM:SS to seconds
+            const timeToSeconds = (timeStr: string): number => {
+              if (!timeStr || typeof timeStr !== 'string') {
+                throw new Error(`Invalid time format: ${timeStr}`);
+              }
+              const parts = timeStr.split(':').map(Number);
+              if (parts.length < 2 || parts.some(isNaN)) {
+                throw new Error(`Invalid time format: ${timeStr}`);
+              }
+              const [h, m, s = 0] = parts;
+              if (h < 0 || h >= 24 || m < 0 || m >= 60 || s < 0 || s >= 60) {
+                throw new Error(`Invalid time values: ${timeStr}`);
+              }
+              return h * 3600 + m * 60 + s;
+            };
+
+            try {
+              const newStartTime = timeToSeconds(newShift.shiftStart);
+              const newEndTime = timeToSeconds(newShift.shiftEnd);
+              const existingStartTime = timeToSeconds(existing.shift_start_time);
+              const existingEndTime = timeToSeconds(existing.shift_end_time);
+
+              // Function to check time overlap
+              function timesOverlap(startA: number, endA: number, startB: number, endB: number): boolean {
+                // Handle overnight shifts by creating intervals
+                const getIntervals = (start: number, end: number): [number, number][] => {
+                  return start < end ? [[start, end]] : [[start, 86400], [0, end]];
+                };
+
+                const intervalsA = getIntervals(startA, endA);
+                const intervalsB = getIntervals(startB, endB);
+
+                // Check if any intervals overlap
+                for (const [aStart, aEnd] of intervalsA) {
+                  for (const [bStart, bEnd] of intervalsB) {
+                    if (aStart < bEnd && bStart < aEnd) return true;
+                  }
+                }
+                return false;
+              }
+
+              if (timesOverlap(newStartTime, newEndTime, existingStartTime, existingEndTime)) {
+                conflicts.push(`Nurse ${newShift.nurseId} has conflicting shifts (date and time overlap) at shift index ${i}`);
+                break;
+              }
+            } catch (timeError) {
+              logger.error(`Time parsing error for nurse ${newShift.nurseId}:`, timeError);
+              return {
+                success: false,
+                message: `Invalid time format in shift data: ${timeError instanceof Error ? timeError.message : String(timeError)}`
+              };
+            }
+          }
+        }
+        
+        // Also check for conflicts within the new shifts being scheduled
+        for (let j = i + 1; j < processedShifts.length; j++) {
+          const otherShift = processedShifts[j];
+          if (newShift.nurseId === otherShift.nurseId) {
+            const newStart = new Date(newShift.startDate);
+            const newEnd = new Date(newShift.endDate);
+            const otherStart = new Date(otherShift.startDate);
+            const otherEnd = new Date(otherShift.endDate);
+            
+            if (newStart <= otherEnd && newEnd >= otherStart) {
+              conflicts.push(`Nurse ${newShift.nurseId} has conflicting shifts within the new schedule (shifts ${i} and ${j})`);
+            }
           }
         }
       }
@@ -267,7 +351,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      // Insert shifts
+      // Insert shifts with transaction-like behavior
       const { data, error } = await supabase
         .from('nurse_client')
         .insert(shiftRecords)
@@ -289,27 +373,36 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
+      if (data.length !== shiftRecords.length) {
+        logger.warn(`Expected ${shiftRecords.length} insertions but got ${data.length}`);
+        return {
+          success: false,
+          message: 'Not all shifts were inserted successfully'
+        };
+      }
+
       logger.info('Successfully inserted shifts:', data);
 
-      // Update nurse statuses
-      const statusUpdates = await Promise.all(
-        uniqueNurseIds.map(async (nurseId) => {
-          try {
-            return await updateNurseStatus(Number(nurseId), 'assigned');
-          } catch (error) {
-            logger.error(`Failed to update status for nurse ${nurseId}:`, error);
-            return { success: false, error: `Failed to update nurse ${nurseId}` };
-          }
-        })
+      // Update nurse statuses with better error handling
+      const statusUpdateResults = await Promise.allSettled(
+        uniqueNurseIds.map(nurseId => 
+          updateNurseStatus(Number(nurseId), 'assigned')
+        )
       );
 
-      const failedStatusUpdates = statusUpdates.filter(update => !update.success);
+      const failedUpdates = statusUpdateResults
+        .map((result, index) => ({ result, nurseId: uniqueNurseIds[index] }))
+        .filter(({ result }) => result.status === 'rejected')
+        .map(({ nurseId, result }) => ({
+          nurseId,
+          error: result.status === 'rejected' ? result.reason : 'Unknown error'
+        }));
       
-      if (failedStatusUpdates.length > 0) {
-        logger.warn('Some nurse status updates failed:', failedStatusUpdates);
+      if (failedUpdates.length > 0) {
+        logger.warn('Some nurse status updates failed:', failedUpdates);
         return {
           success: true,
-          message: `Shifts scheduled successfully, but ${failedStatusUpdates.length} nurse status updates failed`,
+          message: `Shifts scheduled successfully, but ${failedUpdates.length} nurse status updates failed for nurses: ${failedUpdates.map(f => f.nurseId).join(', ')}`,
         };
       }
 
@@ -322,7 +415,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       logger.error('Unexpected error during database operations:', insertError);
       return {
         success: false,
-        message: 'Unexpected error during database operations'
+        message: `Unexpected error during database operations: ${insertError instanceof Error ? insertError.message : 'Unknown error'}`
       };
     }
 
