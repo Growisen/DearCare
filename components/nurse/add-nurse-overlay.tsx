@@ -17,7 +17,10 @@ const FORM_CONFIG = {
     shiftingPatterns: ["24 Hour", "12 Hour", "8 Hour", "Hourly"] as string[],
     staffCategories: ["Permanent", "Trainee", "Temporary"] as string[],
     nocOptions: ["Yes", "No", "Applied", "Going To Apply"] as string[],
-    admittedTypes: ['Tata_Homenursing', 'Dearcare_Llp'] as string[],
+    admittedTypes: [
+      { label: 'Tata Home Nursing', value: 'Tata_Homenursing' },
+      { label: 'Dearcare LLP', value: 'Dearcare_Llp' }
+    ] as { label: string, value: string }[],
     sourceOfInformation: [
       "Leads From Facebook",
       "Leads From Ivr",
@@ -227,12 +230,19 @@ const StepContent = {
       <FormLayout>
         <Fields.Input label="First Name" placeholder="Enter first name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
         <Fields.Input label="Last Name" placeholder="Enter last name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-        <Fields.Select 
-          label="Admitted Type" 
-          options={FORM_CONFIG.options.admittedTypes} 
-          value={formData.admitted_type} 
-          onChange={(e) => setFormData({ ...formData, admitted_type: e.target.value as 'Tata_Homenursing' | 'Dearcare_Llp' })} 
-        />
+        <FormField label="Admitted Type">
+          <select
+            className={FORM_CONFIG.styles.input}
+            value={formData.admitted_type}
+            onChange={e => setFormData({ ...formData, admitted_type: e.target.value as 'Tata_Homenursing' | 'Dearcare_Llp' })}
+            required
+          >
+            <option value="">Select admitted type</option>
+            {FORM_CONFIG.options.admittedTypes.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </FormField>
         <Fields.Input 
           label="Previous Register Number" 
           placeholder="Enter previous register number (if applicaple)" 
