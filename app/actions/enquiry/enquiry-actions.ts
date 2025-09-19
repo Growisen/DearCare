@@ -48,15 +48,125 @@ export async function createServiceEnquiry(
   }
 }
 
-
+/**
+ * Pagination interface for service enquiries.
+ */
+export interface PaginationInfo {
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+}
 
 /**
- * Fetches all service enquiries from the dearcare_services_enquiries table.
+ * Fetches paginated service enquiries from the dearcare_services_enquiries table.
  * Requires user authentication.
  *
- * @returns An object with success status, data (array of enquiries), or an error message.
+ * @param page - The page number to fetch (default: 1)
+ * @param pageSize - Number of records per page (default: 10)
+ * @param searchQuery - Optional search term to filter enquiries
+ * @returns An object with success status, data, pagination info, or an error message.
  */
-export async function fetchAllServiceEnquiries(): Promise<{
+export async function fetchAllServiceEnquiries(
+  page: number = 1,
+  pageSize: number = 10,
+  searchQuery?: string
+): Promise<{
+  success: boolean;
+  data?: ServiceEnquiryData[];
+  pagination?: PaginationInfo;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: 'Authentication required.' };
+    }
+
+    // Create a count query to get total number of records
+    let countQuery = supabase
+      .from('dearcare_services_enquiries')
+      .select('*', { count: 'exact', head: true });
+    
+    // Create the data query
+    let dataQuery = supabase
+      .from('dearcare_services_enquiries')
+      .select('*');
+    
+    // Apply search filter if provided
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      const searchFilter = `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,service.ilike.%${searchTerm}%`;
+      
+      countQuery = countQuery.or(searchFilter);
+      dataQuery = dataQuery.or(searchFilter);
+    }
+    
+    // Get the total count
+    const { count, error: countError } = await countQuery;
+    
+    if (countError) {
+      logger.error('Error counting service enquiries:', countError);
+      return { success: false, error: countError.message };
+    }
+    
+    // If no records found, return early
+    if (count === 0) {
+      return {
+        success: true,
+        data: [],
+        pagination: {
+          totalCount: 0,
+          currentPage: page,
+          pageSize,
+          totalPages: 0
+        }
+      };
+    }
+    
+    // Get paginated data
+    const { data, error } = await dataQuery
+      .range((page - 1) * pageSize, (page * pageSize) - 1)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error('Error fetching service enquiries:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { 
+      success: true, 
+      data, 
+      pagination: {
+        totalCount: count || 0,
+        currentPage: page,
+        pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      }
+    };
+  } catch (error) {
+    logger.error('Unexpected error fetching service enquiries:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch service enquiries'
+    };
+  }
+}
+
+/**
+ * Exports all service enquiries without pagination - for data export purposes.
+ * 
+ * @param searchQuery - Optional search term to filter enquiries
+ * @returns An object with success status, data, or an error message.
+ */
+export async function exportServiceEnquiries(
+  searchQuery?: string
+): Promise<{
   success: boolean;
   data?: ServiceEnquiryData[];
   error?: string;
@@ -72,22 +182,32 @@ export async function fetchAllServiceEnquiries(): Promise<{
       return { success: false, error: 'Authentication required.' };
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('dearcare_services_enquiries')
-      .select('*')
+      .select('*');
+    
+    // Apply search filter if provided
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      query = query.or(
+        `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,service.ilike.%${searchTerm}%`
+      );
+    }
+    
+    const { data, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) {
-      logger.error('Error fetching service enquiries:', error);
+      logger.error('Error exporting service enquiries:', error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
   } catch (error) {
-    logger.error('Unexpected error fetching service enquiries:', error);
+    logger.error('Unexpected error exporting service enquiries:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch service enquiries'
+      error: error instanceof Error ? error.message : 'Failed to export service enquiries'
     };
   }
 }
