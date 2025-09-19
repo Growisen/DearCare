@@ -47,7 +47,7 @@ export default function EnquiryDataPage() {
           totalPages: 0
         });
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
       setEnquiries([]);
     } finally {
@@ -116,7 +116,7 @@ export default function EnquiryDataPage() {
                 Total: {pagination.totalCount} {pagination.totalCount === 1 ? 'enquiry' : 'enquiries'}
                 {searchTerm && (
                   <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                    Filtered by: "{searchTerm}"
+                    Filtered by: &quot;{searchTerm}&quot;
                   </span>
                 )}
               </p>
