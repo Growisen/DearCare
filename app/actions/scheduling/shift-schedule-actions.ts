@@ -11,6 +11,7 @@ export interface ShiftAssignment {
   endDate: string;
   shiftStart: string;
   shiftEnd: string;
+  salaryPerDay: string;
 }
 
 export type ScheduleResponse = {
@@ -18,7 +19,6 @@ export type ScheduleResponse = {
   message: string;
 }
 
-// --- Add this utility function above your exported functions ---
 function validateShiftTimes(shiftStart: string, shiftEnd: string): { valid: boolean; message?: string } {
   const timeRegex = /^(\d{2}):(\d{2})(?::(\d{2}))?$/;
   if (!timeRegex.test(shiftStart) || !timeRegex.test(shiftEnd)) {
@@ -37,7 +37,6 @@ function validateShiftTimes(shiftStart: string, shiftEnd: string): { valid: bool
   const startTime = parseTime(shiftStart);
   const endTime = parseTime(shiftEnd);
 
-  // Validate time components
   if (
     startTime.hour < 0 || startTime.hour > 23 ||
     startTime.min < 0 || startTime.min > 59 ||
@@ -49,7 +48,6 @@ function validateShiftTimes(shiftStart: string, shiftEnd: string): { valid: bool
     return { valid: false, message: 'Invalid time values in shift times' };
   }
 
-  // Handle midnight as end time (24:00:00 equivalent)
   if (
     endTime.hour === 0 && endTime.min === 0 && endTime.sec === 0 &&
     (shiftEnd === '00:00' || shiftEnd === '00:00:00')
@@ -57,14 +55,12 @@ function validateShiftTimes(shiftStart: string, shiftEnd: string): { valid: bool
     endTime.hour = 24;
   }
 
-  // Calculate total seconds for comparison
   const startTotal = startTime.hour * 3600 + startTime.min * 60 + startTime.sec;
   const endTotal = endTime.hour * 3600 + endTime.min * 60 + endTime.sec;
 
-  // Allow 24-hour shift if start and end are the same and duration is exactly 24 hours
-  const is24HourShift = startTotal === 0 && endTotal === 86400; // 24 * 3600 = 86400 seconds
+  const is24HourShift = startTotal === 0 && endTotal === 86400; 
 
-  // For overnight shifts, allow end time to be "earlier" than start time
+
   const isOvernightShift = endTotal < startTotal && !is24HourShift;
 
   if (!is24HourShift && !isOvernightShift && endTotal <= startTotal) {
@@ -90,7 +86,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       };
     }
 
-    // Validate clientId
     if (!clientId || typeof clientId !== 'string') {
       return {
         success: false,
@@ -98,11 +93,9 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       };
     }
 
-    // Process shifts and validate nurseId conversion
     const processedShifts = shifts.map((shift, index) => {
       let nurseId = shift.nurseId;
       
-      // Convert string to number if needed
       if (typeof nurseId === 'string') {
         const parsed = parseInt(nurseId, 10);
         if (isNaN(parsed) || parsed <= 0) {
@@ -111,7 +104,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         nurseId = parsed;
       }
       
-      // Ensure nurseId is a positive number
       if (typeof nurseId !== 'number' || isNaN(nurseId) || nurseId <= 0) {
         throw new Error(`Nurse ID must be a positive number at shift ${index}, got: ${nurseId}`);
       }
@@ -122,7 +114,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       };
     });
 
-    // Validate each shift
     for (let i = 0; i < processedShifts.length; i++) {
       const shift = processedShifts[i];
       
@@ -132,7 +123,8 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         !shift.startDate ||
         !shift.endDate ||
         !shift.shiftStart ||
-        !shift.shiftEnd
+        !shift.shiftEnd ||
+        !shift.salaryPerDay
       ) {
         return {
           success: false,
@@ -140,7 +132,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      // Validate dates
       const startDate = new Date(shift.startDate);
       const endDate = new Date(shift.endDate);
 
@@ -157,8 +148,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
           message: `End date cannot be before start date at shift ${i}`
         };
       }
-
-      // Use the new validation function
       const timeValidation = validateShiftTimes(shift.shiftStart, shift.shiftEnd);
       if (!timeValidation.valid) {
         return {
@@ -168,7 +157,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       }
     }
 
-    // Prepare shift records for database insertion
     const shiftRecords = processedShifts.map(shift => ({
       client_id: clientId,
       nurse_id: shift.nurseId,
@@ -176,13 +164,13 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
       end_date: shift.endDate,
       shift_start_time: shift.shiftStart,
       shift_end_time: shift.shiftEnd,
+      salary_per_day: shift.salaryPerDay,
       assigned_type: 'individual'
     }));
 
     logger.info('Attempting to insert shifts:', JSON.stringify(shiftRecords, null, 2));
 
     try {
-      // Verify client exists
       const { data: clientExists, error: clientError } = await supabase
         .from('clients')
         .select('id')
@@ -210,7 +198,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      // Verify all nurses exist
       const uniqueNurseIds = [...new Set(processedShifts.map(shift => shift.nurseId))];
       const { data: nursesExist, error: nurseError } = await supabase
         .from('nurses')
@@ -236,7 +223,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      // Check for scheduling conflicts
       const minStartDate = new Date(
         Math.min(...processedShifts.map(s => new Date(s.startDate).getTime()))
       ).toISOString().split('T')[0];
@@ -259,7 +245,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      // Enhanced conflict detection
       const conflicts = [];
       for (let i = 0; i < processedShifts.length; i++) {
         const newShift = processedShifts[i];
@@ -271,9 +256,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
           const existingStart = new Date(existing.start_date);
           const existingEnd = new Date(existing.end_date);
 
-          // Check for date overlap
           if (newStart <= existingEnd && newEnd >= existingStart) {
-            // Helper to convert HH:MM or HH:MM:SS to seconds
             const timeToSeconds = (timeStr: string): number => {
               if (!timeStr || typeof timeStr !== 'string') {
                 throw new Error(`Invalid time format: ${timeStr}`);
@@ -295,9 +278,7 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
               const existingStartTime = timeToSeconds(existing.shift_start_time);
               const existingEndTime = timeToSeconds(existing.shift_end_time);
 
-              // Function to check time overlap
               function timesOverlap(startA: number, endA: number, startB: number, endB: number): boolean {
-                // Handle overnight shifts by creating intervals
                 const getIntervals = (start: number, end: number): [number, number][] => {
                   return start < end ? [[start, end]] : [[start, 86400], [0, end]];
                 };
@@ -305,7 +286,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
                 const intervalsA = getIntervals(startA, endA);
                 const intervalsB = getIntervals(startB, endB);
 
-                // Check if any intervals overlap
                 for (const [aStart, aEnd] of intervalsA) {
                   for (const [bStart, bEnd] of intervalsB) {
                     if (aStart < bEnd && bStart < aEnd) return true;
@@ -328,7 +308,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
           }
         }
         
-        // Also check for conflicts within the new shifts being scheduled
         for (let j = i + 1; j < processedShifts.length; j++) {
           const otherShift = processedShifts[j];
           if (newShift.nurseId === otherShift.nurseId) {
@@ -351,7 +330,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
         };
       }
 
-      // Insert shifts with transaction-like behavior
       const { data, error } = await supabase
         .from('nurse_client')
         .insert(shiftRecords)
@@ -383,7 +361,6 @@ export async function scheduleNurseShifts(shifts: ShiftAssignment[], clientId: s
 
       logger.info('Successfully inserted shifts:', data);
 
-      // Update nurse statuses with better error handling
       const statusUpdateResults = await Promise.allSettled(
         uniqueNurseIds.map(nurseId => 
           updateNurseStatus(Number(nurseId), 'assigned')
@@ -439,6 +416,7 @@ export interface NurseAssignmentData {
   shift_end_time: string;
   status: 'active' | 'completed' | 'cancelled';
   assigned_type: string;
+  salary_per_day?: number;
 }
 
 export async function getNurseAssignments(clientId: string): Promise<{

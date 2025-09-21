@@ -346,6 +346,8 @@ export interface NurseAssignment {
   shiftType?: 'day' | 'night' | '24h';
   nurse_first_name?: string;
   nurse_last_name?: string;
+  salary_per_day?: number;
+  salaryPerDay?: number;
 }
 
 

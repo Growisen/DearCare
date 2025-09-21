@@ -18,9 +18,8 @@ export const useNurseAssignments = (clientId: string) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [assignmentToEnd, setAssignmentToEnd] = useState<NurseAssignment | null>(null);
-  const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10)); // Default to today
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10));
   
-  // New pagination and filtering state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [totalPages, setTotalPages] = useState(1);
@@ -152,7 +151,8 @@ export const useNurseAssignments = (clientId: string) => {
           status: assignment.status || 'active',
           shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time),
           nurse_first_name: assignment.nurses?.first_name,
-          nurse_last_name: assignment.nurses?.last_name
+          nurse_last_name: assignment.nurses?.last_name,
+          salaryPerDay: assignment.salary_per_day
         }));
         
         setNurseAssignments(transformedAssignments);
@@ -162,7 +162,6 @@ export const useNurseAssignments = (clientId: string) => {
     }
   };
 
-  // Modified to only fetch assignments on initial load
   const refetch = async () => {
     try {
       await fetchAssignments();
@@ -172,24 +171,21 @@ export const useNurseAssignments = (clientId: string) => {
     }
   };
 
-  // New handler for opening the nurse list modal
   const handleOpenNurseList = async () => {
     setIsLoadingNurses(true);
     setShowNurseList(true);
   };
 
-  // New method to change page
   const changePage = (page: number) => {
     setCurrentPage(page);
   };
 
-  // New method to update filters
   const updateFilters = (newFilters: typeof filters) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters
     }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleAssignNurse = async (nurseId: string) => {
@@ -204,7 +200,6 @@ export const useNurseAssignments = (clientId: string) => {
     };
     
     setNurseAssignments(prev => [...prev, newAssignment]);
-    // TODO: Make API call to save assignment
   };
 
   const handleEditAssignment = (assignment: NurseAssignment) => {
@@ -256,7 +251,7 @@ export const useNurseAssignments = (clientId: string) => {
       
       if (result.success) {
         invalidateDashboardCache();
-        await refetch(); // <-- Add this line to reload assignments from the server
+        await refetch();
         toast.success('Assignment deleted successfully');
       } else {
         toast.error(`Failed to delete assignment: ${result.message}`);
@@ -321,14 +316,11 @@ export const useNurseAssignments = (clientId: string) => {
     confirmEndAssignment,
     endDate,
     setEndDate,
-    // New pagination properties
     currentPage,
     totalPages,
     totalNurses,
     pageSize,
-    // New filter properties
     filters,
-    // Existing methods
     setShowNurseList,
     setSelectedNurse,
     setShowConfirmation,
@@ -338,7 +330,6 @@ export const useNurseAssignments = (clientId: string) => {
     handleDeleteAssignment,
     setShowEditModal,
     setEditingAssignment,
-    // New methods
     changePage,
     updateFilters,
     setPageSize,
