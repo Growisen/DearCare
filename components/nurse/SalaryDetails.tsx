@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../Loader";
 import { fetchNurseSalaryPayments } from "@/app/actions/payroll/salary-actions";
+import { calculateNurseSalary } from "@/app/actions/payroll/calculate-nurse-salary";
 import { formatDateToDDMMYYYY } from "@/utils/dateUtils";
 
 interface SalaryPayment {
@@ -28,6 +29,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [hourlySalary, setHourlySalary] = useState<number>(0);
   const [payments, setPayments] = useState<SalaryPayment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recalculatingId, setRecalculatingId] = useState<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -65,6 +67,39 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         .catch(() => setLoading(false));
     }, [nurseId]);
 
+  // Handler to recalculate salary for a payment
+  const handleRecalculate = async (payment: SalaryPayment) => {
+    setRecalculatingId(payment.id);
+    try {
+      const result = await calculateNurseSalary({
+        nurseId,
+        startDate: payment.payPeriodStart,
+        endDate: payment.payPeriodEnd,
+        id: payment.id,
+      });
+      if (result.success) {
+        // Update the payment in the list with recalculated values
+        setPayments((prev) =>
+          prev.map((p) =>
+            p.id === payment.id
+              ? {
+                  ...p,
+                  salary: result.salary,
+                  daysWorked: result.daysWorked,
+                  hoursWorked: result.hoursWorked,
+                  // Optionally update netSalary or other fields if needed
+                }
+              : p
+          )
+        );
+      } else {
+        alert("Recalculation failed: " + result.error);
+      }
+    } catch {
+      alert("Recalculation error.");
+    }
+    setRecalculatingId(null);
+  };
 
   if (loading) {
     return <Loader message='Loading salary details...' />;
@@ -99,6 +134,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
                   <th className="border border-gray-300 px-4 py-2 text-right">Net Salary (₹)</th>
                   <th className="border border-gray-300 px-4 py-2 text-left">Payment Details</th>
                   <th className="border border-gray-300 px-4 py-2 text-left">Info</th>
+                  <th className="border border-gray-300 px-4 py-2 text-center">Actions</th>
               </tr>
           </thead>
           <tbody>
@@ -173,15 +209,22 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
                         >
                             View Details
                         </a>
+                        <button
+                          type="button"
+                          className="text-indigo-600 hover:underline text-xs hover:bg-indigo-50 rounded px-2 py-1 mt-1"
+                          title="Recalculate Salary"
+                          disabled={recalculatingId === payment.id}
+                          onClick={() => handleRecalculate(payment)}
+                        >
+                          {recalculatingId === payment.id ? "Recalculating..." : "Recalculate"}
+                        </button>
                     </div>
-                    </td>
+                  </td>
                 </tr>
             ))}
             </tbody>
-
         </table>
-        </div>
-
+      </div>
     </div>
   );
 };
