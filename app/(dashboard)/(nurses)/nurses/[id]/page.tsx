@@ -84,7 +84,7 @@ const NurseProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[95%] mx-auto py-4">
+      <div className="max-w-[100%]">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <ProfileHeader nurse={nurse} onDelete={handleDelete} />
 
