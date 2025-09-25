@@ -165,6 +165,9 @@ export default function NursesSalaryPage() {
                     Net Salary (₹)
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Info
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -198,6 +201,9 @@ export default function NursesSalaryPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="text-sm font-semibold text-gray-900">₹{record.net_salary.toLocaleString()}</div>
                     </td>
+                    <td className="max-w-xs px-3 py-4 whitespace- flex-wrap text-center">
+                      <div className="text-sm font-semibold text-gray-500">₹{record.info}</div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         record.payment_status === "paid" 
@@ -208,19 +214,26 @@ export default function NursesSalaryPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <div className="flex flex-col items-center space-y-1">
+                      <div className="flex flex-col items-center space-y-2">
                         <a
                           href={`/nurses/salary-report?nurseId=${record.nurse_id}&payPeriodStart=${encodeURIComponent(record.pay_period_start)}&payPeriodEnd=${encodeURIComponent(record.pay_period_end)}`}
                           className="text-blue-600 hover:text-blue-900 text-xs hover:underline"
                         >
                           View Details
                         </a>
-                        <a
+                        {/* <a
                           href={`/dearcare-payroll/edit-nurse-salary/${record.id}`}
                           className="text-indigo-600 hover:text-indigo-900 text-xs hover:underline"
                         >
                           Edit
-                        </a>
+                        </a> */}
+                        <button
+                            onClick={() => {}}
+                            disabled={record.payment_status === "paid"}
+                            className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
+                        >
+                            Approve
+                        </button>
                       </div>
                     </td>
                   </tr>
