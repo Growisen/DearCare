@@ -17,4 +17,5 @@ export interface SalaryPayment {
   notes: string;
   createdAt: string;
   updatedAt: string;
+  bonus?: number;
 }

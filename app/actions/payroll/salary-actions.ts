@@ -511,6 +511,7 @@ export async function fetchNurseSalaryPayments(nurseId: number) {
       hours_worked,
       days_worked,
       salary,
+      net_salary,
       info,
       payment_status,
       payment_method,

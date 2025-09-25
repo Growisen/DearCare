@@ -8,6 +8,7 @@ interface PaymentHistoryTableProps {
   recalculatingId: number | null;
   onOpenCreateModal: () => void;
   onOpenConfirmModal: (payment: SalaryPayment) => void;
+  onOpenBonusModal: (payment: SalaryPayment) => void;
 }
 
 const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
@@ -16,6 +17,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   recalculatingId,
   onOpenCreateModal,
   onOpenConfirmModal,
+  onOpenBonusModal,
 }) => {
   return (
     <div className="bg-white rounded border border-gray-300 p-3 overflow-x-auto">
@@ -112,12 +114,20 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                   </a>
                   <button
                     type="button"
-                    className="text-indigo-600 hover:underline text-xs hover:bg-indigo-50 rounded px-2 py-1 mt-1"
+                    className="text-indigo-600 hover:underline text-xs hover:bg-indigo-50 rounded px-2 py-1"
                     title="Recalculate Salary"
                     disabled={recalculatingId === payment.id}
                     onClick={() => onOpenConfirmModal(payment)}
                   >
                     {recalculatingId === payment.id ? "Recalculating..." : "Recalculate"}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-green-600 hover:underline text-xs hover:bg-green-50 rounded px-2 py-1"
+                    title="Add Bonus"
+                    onClick={() => onOpenBonusModal(payment)}
+                  >
+                    Add Bonus
                   </button>
                 </div>
               </td>

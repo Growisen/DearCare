@@ -54,16 +54,15 @@ export async function calculateNurseSalary({
   nurseId,
   startDate,
   endDate,
-  id, // <-- add id to the argument list
+  id,
 }: {
   nurseId: number;
   startDate: string;
   endDate: string;
-  id?: number; // <-- make id optional
+  id?: number;
 }) {
   const supabase = await createSupabaseServerClient();
 
-  // 1. Get nurse_client assignments for this nurse
   const { data: nurseClients, error: nurseClientError } = await supabase
     .from("nurse_client")
     .select(
@@ -88,7 +87,6 @@ export async function calculateNurseSalary({
     };
   }
 
-  // 2. Map assignments for quick lookup and collect assignment IDs
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const assignmentMap = new Map<number, any>();
   const assignmentIds: number[] = [];
@@ -125,7 +123,6 @@ export async function calculateNurseSalary({
     };
   }
 
-  // 3. Get attendance records for these assignments in the period
   const { data: attendanceRecords, error: attendanceError } = await supabase
     .from("attendence_individual")
     .select(
@@ -198,7 +195,6 @@ export async function calculateNurseSalary({
     daysWorked += 1;
   }
 
-  // Add info field similar to edge function
   let info = `${daysWorked} days, ${totalHours.toFixed(2)} hours`;
   if (skippedRecords.length > 0) {
     const missingDataCount = skippedRecords.filter(r => r.reason === "Missing attendance data").length;
@@ -206,10 +202,8 @@ export async function calculateNurseSalary({
     info += ` | SKIPPED: ${skippedRecords.length} records (${missingDataCount} missing data, ${invalidHoursCount} invalid hours)`;
   }
 
-  // Upsert or update salary_payments table with the current calculation
   let upsertError;
   if (id) {
-    // Update existing record
     const { error } = await supabase
       .from("salary_payments")
       .update({
@@ -219,6 +213,7 @@ export async function calculateNurseSalary({
         days_worked: daysWorked,
         hours_worked: Number(totalHours.toFixed(2)),
         salary: Number(totalSalary.toFixed(2)),
+        net_salary: Number(totalSalary.toFixed(2)),
         payment_status: "pending",
         info,
         reviewed: false,
@@ -228,7 +223,6 @@ export async function calculateNurseSalary({
       .eq("id", id);
     upsertError = error;
   } else {
-    // Insert new record
     const { error } = await supabase
       .from("salary_payments")
       .insert([
@@ -239,6 +233,7 @@ export async function calculateNurseSalary({
           days_worked: daysWorked,
           hours_worked: Number(totalHours.toFixed(2)),
           salary: Number(totalSalary.toFixed(2)),
+          net_salary: Number(totalSalary.toFixed(2)),
           payment_status: "pending",
           info,
           reviewed: false,
@@ -267,9 +262,93 @@ export async function calculateNurseSalary({
     startDate,
     endDate,
     salary: Number(totalSalary.toFixed(2)),
+    netSalary: Number(totalSalary.toFixed(2)),
     daysWorked,
     hoursWorked: Number(totalHours.toFixed(2)),
     skippedRecords,
     info,
+  };
+}
+
+
+export async function addNurseBonus({
+  paymentId,
+  bonusAmount,
+  bonusReason,
+}: {
+  paymentId: number;
+  bonusAmount: number;
+  bonusReason: string;
+}) {
+  if (!paymentId || bonusAmount <= 0) {
+    return {
+      success: false,
+      error: "Invalid payment ID or bonus amount",
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { data: paymentRecord, error: fetchError } = await supabase
+    .from("salary_payments")
+    .select("id, salary, bonus, info, net_salary")
+    .eq("id", paymentId)
+    .single();
+
+  if (fetchError) {
+    return {
+      success: false,
+      error: fetchError.message,
+    };
+  }
+
+  if (!paymentRecord) {
+    return {
+      success: false,
+      error: "Payment record not found",
+    };
+  }
+
+  const currentBonus = paymentRecord.bonus || 0;
+  const newBonus = currentBonus + bonusAmount;
+  
+  const baseSalary = paymentRecord.salary || 0;
+  const newNetSalary = baseSalary + newBonus;
+
+  let updatedInfo = paymentRecord.info || "";
+  const bonusInfo = ` | BONUS: ${bonusAmount.toFixed(2)} (${bonusReason})`;
+  
+  if (!updatedInfo.includes(" | BONUS:")) {
+    updatedInfo += bonusInfo;
+  } else {
+    updatedInfo = updatedInfo.replace(/ \| BONUS:.+/, bonusInfo);
+  }
+
+  const { error: updateError } = await supabase
+    .from("salary_payments")
+    .update({
+      bonus: newBonus,
+      net_salary: newNetSalary,
+      info: updatedInfo,
+    })
+    .eq("id", paymentId);
+
+  if (updateError) {
+    return {
+      success: false,
+      error: updateError.message,
+    };
+  }
+
+  return {
+    success: true,
+    paymentId,
+    previousBonus: currentBonus,
+    newBonus,
+    bonusAmount,
+    bonusReason,
+    baseSalary,
+    netSalary: newNetSalary,
+    updatedInfo,
   };
 }

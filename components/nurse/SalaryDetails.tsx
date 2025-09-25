@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../Loader";
 import { fetchNurseSalaryPayments } from "@/app/actions/payroll/salary-actions";
-import { calculateNurseSalary } from "@/app/actions/payroll/calculate-nurse-salary";
+import { calculateNurseSalary, addNurseBonus } from "@/app/actions/payroll/calculate-nurse-salary";
 import ConfirmationModal from "../common/ConfirmationModal";
 import ModalPortal from "../ui/ModalPortal";
 import HourlySalaryCard from "./salary/HourlySalaryCard";
 import PaymentHistoryTable from "./salary/PaymentHistoryTable";
 import CreateSalaryModal from "./salary/CreateSalaryModal";
+import AddBonusModal from "./salary/AddBonusModal";
 import { SalaryPayment } from "./types";
 
 const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
@@ -17,7 +18,9 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<SalaryPayment | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showBonusModal, setShowBonusModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [processingBonus, setProcessingBonus] = useState(false);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -43,6 +46,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         notes: p.notes ?? "",
         createdAt: p.created_at ?? "",
         updatedAt: p.updated_at ?? "",
+        bonus: p.bonus ?? 0,
       }));
 
       setPayments(mappedPayments);
@@ -81,6 +85,8 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
                   salary: result.salary,
                   daysWorked: result.daysWorked,
                   hoursWorked: result.hoursWorked,
+                  info: result.info || p.info,
+                  netSalary: result.netSalary || 0,
                 }
               : p
           )
@@ -102,12 +108,54 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     setShowConfirm(true);
   };
 
+  // Handler to open bonus modal
+  const handleOpenBonusModal = (payment: SalaryPayment) => {
+    setSelectedPayment(payment);
+    setShowBonusModal(true);
+  };
+
   // Handler to actually recalculate after confirmation
   const handleConfirmRecalculate = async () => {
     if (!selectedPayment) return;
     setShowConfirm(false);
     await handleRecalculate(selectedPayment);
     setSelectedPayment(null);
+  };
+
+  // Handler to add bonus
+  const handleAddBonus = async (paymentId: number, bonusAmount: number, bonusReason: string) => {
+    setProcessingBonus(true);
+    try {
+      const result = await addNurseBonus({
+        paymentId,
+        bonusAmount,
+        bonusReason,
+      });
+      
+      if (result.success) {
+        // Update the payment in the list with new bonus information
+        setPayments((prev) =>
+          prev.map((p) =>
+            p.id === paymentId
+              ? {
+                  ...p,
+                  bonus: result.newBonus,
+                  netSalary: result.netSalary,
+                  info: result.updatedInfo,
+                }
+              : p
+          )
+        );
+        setShowBonusModal(false);
+      } else {
+        alert("Failed to add bonus: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error adding bonus:", error);
+      alert("Error adding bonus.");
+    } finally {
+      setProcessingBonus(false);
+    }
   };
 
   const handleCreateSalary = async (startDate: string, endDate: string) => {
@@ -139,19 +187,17 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
 
   return (
     <div className="space-y-8">
-      {/* Hourly Salary Card */}
       <HourlySalaryCard hourlySalary={hourlySalary} />
 
-      {/* Salary Payment History Table */}
       <PaymentHistoryTable
         payments={payments}
         nurseId={nurseId}
         recalculatingId={recalculatingId}
         onOpenCreateModal={() => setShowCreateModal(true)}
         onOpenConfirmModal={handleOpenConfirm}
+        onOpenBonusModal={handleOpenBonusModal}
       />
 
-      {/* Confirmation Modal */}
       <ModalPortal>
         <ConfirmationModal
           isOpen={showConfirm}
@@ -165,13 +211,22 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         />
       </ModalPortal>
 
-      {/* Create Salary Modal */}
       <ModalPortal>
         <CreateSalaryModal
           isOpen={showCreateModal}
           isCreating={creating}
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateSalary}
+        />
+      </ModalPortal>
+
+      <ModalPortal>
+        <AddBonusModal
+          isOpen={showBonusModal}
+          isProcessing={processingBonus}
+          payment={selectedPayment}
+          onClose={() => setShowBonusModal(false)}
+          onSubmit={handleAddBonus}
         />
       </ModalPortal>
     </div>
