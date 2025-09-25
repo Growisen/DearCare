@@ -352,3 +352,109 @@ export async function addNurseBonus({
     updatedInfo,
   };
 }
+
+
+interface NurseInfo {
+  nurse_id: number;
+  first_name: string;
+  last_name: string;
+  nurse_reg_no: string;
+}
+
+export interface SalaryPaymentRecord {
+  id: number;
+  nurse_id: number;
+  pay_period_start: string;
+  pay_period_end: string;
+  days_worked: number;
+  hours_worked: number;
+  salary: number;
+  net_salary: number;
+  payment_status: string;
+  info: string;
+  reviewed: boolean;
+  skipped_records_count: number;
+  skipped_records_details: unknown;
+  bonus?: number;
+  nurses?: NurseInfo;
+  name: string;
+  nurse_reg_no: string;
+  [key: string]: unknown;
+}
+
+
+export async function fetchSalaryPaymentsWithNurseInfo({
+  page = 1,
+  pageSize = 20,
+  search = "",
+}: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}) {
+  const supabase = await createSupabaseServerClient();
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from("salary_payments")
+    .select(
+      `
+      *,
+      nurses (
+        nurse_id,
+        first_name,
+        last_name,
+        nurse_reg_no
+      )
+    `
+    );
+
+  query = query.range(from, to);
+
+  const { data, error } = await query;
+
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+      records: [],
+      page,
+      pageSize,
+      total: 0,
+    };
+  }
+
+  // Filter in JS if search is provided
+  let records = (data ?? []);
+  if (search.trim()) {
+    const lowerSearch = search.trim().toLowerCase();
+    records = records.filter((record: SalaryPaymentRecord) => {
+      const nurse = record.nurses;
+      return nurse &&
+        (
+          nurse.first_name?.toLowerCase().includes(lowerSearch) ||
+          nurse.last_name?.toLowerCase().includes(lowerSearch) ||
+          nurse.nurse_reg_no?.toLowerCase().includes(lowerSearch)
+        );
+    });
+  }
+
+  records = records.map((record: SalaryPaymentRecord) => ({
+    ...record,
+    name: record.nurses
+      ? `${record.nurses.first_name} ${record.nurses.last_name}`.trim()
+      : "",
+    nurse_reg_no: record.nurses?.nurse_reg_no ?? "",
+    nurse_id: record.nurses?.nurse_id ?? record.nurse_id,
+  }));
+
+  return {
+    success: true,
+    records,
+    page,
+    pageSize,
+    total: records.length,
+  };
+}
