@@ -52,7 +52,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
       setPayments(mappedPayments);
 
       if (mappedPayments.length > 0) {
-        setHourlySalary(mappedPayments[0].hourlyRate);
+        setHourlySalary(mappedPayments[0].averageHourlyRate ?? 0);
       }
     } catch (error) {
       console.error("Error fetching payments:", error);

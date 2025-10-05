@@ -129,6 +129,12 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                   >
                     Add Bonus
                   </button>
+                  <button
+                    onClick={() => {}}
+                    className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
+                  >
+                      Approve
+                  </button>
                 </div>
               </td>
             </tr>
