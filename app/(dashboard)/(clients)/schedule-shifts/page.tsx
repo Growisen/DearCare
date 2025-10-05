@@ -22,9 +22,9 @@ interface ShiftData {
   endDate: string;
   shiftStart: string;
   shiftEnd: string;
+  salaryPerDay: string;
 }
 
-// Create a separate component that uses useSearchParams
 const ScheduleShiftsContent = () => {  
   const searchParams = useSearchParams();
   const nurseIds = useMemo(() => {
@@ -46,34 +46,35 @@ const ScheduleShiftsContent = () => {
     setLoading(false);
     return;
   }
-  
+
   const fetchNurses = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data: allNurses, error: nurseError } = await listNurses();
-      
+
       if (nurseError) {
         throw new Error(`Error: ${nurseError}`);
       }
-      
+
       if (!allNurses) {
         throw new Error('Failed to load nurse data');
       }
-      
+
       const nursesData = allNurses.filter(nurse => 
         nurseIds.includes(nurse._id)
       );
-      
+
       const initialShifts = nursesData.map((nurse) => ({
         nurseId: nurse._id,
         startDate: '',
         endDate: '',
         shiftStart: '09:00:00',
         shiftEnd: '17:00:00',
+        salaryPerDay: '',
       }));
-            
+
       setNurses(nursesData);
       setShifts(initialShifts);
     } catch (err) {
@@ -83,18 +84,16 @@ const ScheduleShiftsContent = () => {
       setLoading(false);
     }
   };
-  
+
   fetchNurses();
 }, [nurseIds]);
   
-  // Memoize handleShiftChange to prevent recreating on every render
   const handleShiftChange = useCallback((nurseId: string, field: keyof ShiftData, value: string) => {
     if (field === 'shiftStart' || field === 'shiftEnd') {
-      // Ensure time is in proper format (add :00 seconds if needed)
       const formattedTime = value.includes(':') && value.split(':').length === 2 
         ? `${value}:00` 
         : value;
-      
+
       setShifts(prev => 
         prev.map(shift => 
           shift.nurseId === nurseId ? { ...shift, [field]: formattedTime } : shift
@@ -109,11 +108,10 @@ const ScheduleShiftsContent = () => {
     }
   }, []);
     
-    // Memoize handleSubmit to prevent recreating on every render
     const handleSubmit = useCallback(async () => {
       try {
         const isValid = shifts.every(shift => 
-          shift.startDate && shift.endDate && shift.shiftStart && shift.shiftEnd
+          shift.startDate && shift.endDate && shift.shiftStart && shift.shiftEnd && shift.salaryPerDay // Add salary validation
         );
         
         if (!isValid) {
@@ -128,7 +126,6 @@ const ScheduleShiftsContent = () => {
         
         setLoading(true);
         
-        // Call server action to schedule shifts with clientId
         const result = await scheduleNurseShifts(shifts, clientId);
         
         if (result.success) {
@@ -148,7 +145,6 @@ const ScheduleShiftsContent = () => {
       }
     }, [shifts, clientId]);
   
-  // Memoize today's date to avoid recalculating it on every render
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   
   if (loading) {
@@ -215,6 +211,7 @@ const ScheduleShiftsContent = () => {
               endDate: '',
               shiftStart: '09:00',
               shiftEnd: '17:00',
+              salaryPerDay: '',
             };
             
             return (
@@ -291,10 +288,25 @@ const ScheduleShiftsContent = () => {
                     </label>
                     <input
                       type="time"
-                      value={nurseShift.shiftEnd.substring(0, 5)} // Display only HH:MM part
+                      value={nurseShift.shiftEnd.substring(0, 5)}
                       onChange={(e) => handleShiftChange(nurse._id, 'shiftEnd', e.target.value)}
                       className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Salary Per Day *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={nurseShift.salaryPerDay}
+                      onChange={(e) => handleShiftChange(nurse._id, 'salaryPerDay', e.target.value)}
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                      required
+                      placeholder="Enter salary amount"
                     />
                   </div>
                 </div>
@@ -322,7 +334,6 @@ const ScheduleShiftsContent = () => {
   );
 };
 
-// Loading fallback component
 function LoadingFallback() {
   return (
     <div className="p-8 flex justify-center items-center min-h-[60vh]">
@@ -332,7 +343,6 @@ function LoadingFallback() {
   );
 }
 
-// Main component with Suspense boundary
 const ScheduleShiftsPage = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>

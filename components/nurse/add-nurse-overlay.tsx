@@ -489,6 +489,15 @@ const StepContent = {
       <Fields.Select label="Shifting Pattern" options={FORM_CONFIG.options.shiftingPatterns} value={formData.shift_pattern} onChange={(e) => setFormData({ ...formData, shift_pattern: e.target.value })} />
       <Fields.Select label="Category of Staff" options={FORM_CONFIG.options.staffCategories} value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} />
       <Fields.Input label="Medical Field Experience" placeholder="Enter years of experience" value={formData.experience} onChange={(e) => setFormData({ ...formData, experience: e.target.value })} />
+      <Fields.Input 
+        label="Salary Per Month" 
+        type="number" 
+        placeholder="Enter salary per month" 
+        value={formData.salary_per_month} 
+        onChange={(e) => setFormData({ ...formData, salary_per_month: e.target.value })} 
+        required={false}
+        min={0}
+      />
     </FormLayout>
   ),
 
@@ -591,7 +600,8 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     nurse_reg_no: '',
     admitted_type: 'Tata_Homenursing',
     nurse_prev_reg_no: '',
-    joining_date: getTodayDDMMYYYY()
+    joining_date: getTodayDDMMYYYY(),
+    salary_per_month: ''
   });
   
   const [referenceData, setReferenceData] = useState<NurseReferenceData>({

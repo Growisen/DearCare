@@ -15,19 +15,20 @@ interface NurseAssignment {
   shiftType?: 'day' | 'night' | '24h';
   nurse_first_name?: string;
   nurse_last_name?: string;
+  salaryPerDay?: number;
 }
 
 interface NurseAssignmentsListProps {
   assignments: NurseAssignment[];
   nurses?: Nurse[];
   onEditAssignment: (assignment: NurseAssignment) => void;
-  onEndAssignment: (assignment: NurseAssignment) => void; // <-- Change type
+  onEndAssignment: (assignment: NurseAssignment) => void;
   onDeleteAssignment: (assignmentId: number | string) => void;
 }
 
 const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   assignments,
-  nurses = [], // Default to empty array
+  nurses = [],
   onEditAssignment,
   onEndAssignment,
   onDeleteAssignment,
@@ -70,11 +71,9 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   return (
     <div className="space-y-4">
       {assignments.map((assignment) => {
-        // Try to get nurse name from the assignment first, fall back to nurses array if needed
         let firstName = assignment.nurse_first_name;
         let lastName = assignment.nurse_last_name;
         
-        // Fallback to the nurses array if needed
         if (!firstName && !lastName && nurses.length > 0) {
           const nurse = nurses.find((n) => 
             n._id === assignment.nurseId || n._id === assignment.nurseId.toString()
@@ -85,7 +84,6 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
           }
         }
         
-        // Skip rendering if we don't have nurse name data
         if (!firstName && !lastName) return null;
 
         const displayStatus = getDisplayStatus(assignment);
@@ -105,6 +103,9 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   <p>Start Date: {formatDate(assignment.startDate)}</p>
                   {assignment.endDate && (
                     <p>End Date: {formatDate(assignment.endDate)}</p>
+                  )}
+                  {assignment.salaryPerDay !== undefined && (
+                    <p>Salary per Day: ₹{assignment.salaryPerDay ? assignment.salaryPerDay : 0}</p>
                   )}
                   <span
                     className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${

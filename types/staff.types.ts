@@ -86,6 +86,7 @@ export interface NurseFormData {
   admitted_type: 'Tata_Homenursing' | 'Dearcare_Llp';
   nurse_prev_reg_no: string;
   joining_date: string;
+  salary_per_month: number | string;
 }
 
 
