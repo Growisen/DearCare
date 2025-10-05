@@ -354,6 +354,92 @@ export async function addNurseBonus({
 }
 
 
+
+export async function addNurseSalaryDeduction({
+  paymentId,
+  deductionAmount,
+  deductionReason,
+}: {
+  paymentId: number;
+  deductionAmount: number;
+  deductionReason: string;
+}) {
+  if (!paymentId || deductionAmount <= 0) {
+    return {
+      success: false,
+      error: "Invalid payment ID or deduction amount",
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { data: paymentRecord, error: fetchError } = await supabase
+    .from("salary_payments")
+    .select("id, salary, deduction, info, net_salary, bonus")
+    .eq("id", paymentId)
+    .single();
+
+  if (fetchError) {
+    return {
+      success: false,
+      error: fetchError.message,
+    };
+  }
+
+  if (!paymentRecord) {
+    return {
+      success: false,
+      error: "Payment record not found",
+    };
+  }
+
+  const currentDeduction = paymentRecord.deduction || 0;
+  const newDeduction = currentDeduction + deductionAmount;
+
+  const baseSalary = paymentRecord.salary || 0;
+  const bonus = paymentRecord.bonus || 0;
+  const newNetSalary = baseSalary + bonus - newDeduction;
+
+  let updatedInfo = paymentRecord.info || "";
+  const deductionInfo = ` | DEDUCTION: ${deductionAmount.toFixed(2)} (${deductionReason})`;
+
+  if (!updatedInfo.includes(" | DEDUCTION:")) {
+    updatedInfo += deductionInfo;
+  } else {
+    updatedInfo += deductionInfo;
+  }
+
+  const { error: updateError } = await supabase
+    .from("salary_payments")
+    .update({
+      deduction: newDeduction,
+      net_salary: newNetSalary,
+      info: updatedInfo,
+    })
+    .eq("id", paymentId);
+
+  if (updateError) {
+    return {
+      success: false,
+      error: updateError.message,
+    };
+  }
+
+  return {
+    success: true,
+    paymentId,
+    previousDeduction: currentDeduction,
+    newDeduction,
+    deductionAmount,
+    deductionReason,
+    baseSalary,
+    bonus,
+    netSalary: newNetSalary,
+    updatedInfo,
+  };
+}
+
+
 interface NurseInfo {
   nurse_id: number;
   first_name: string;

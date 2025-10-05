@@ -9,6 +9,7 @@ interface PaymentHistoryTableProps {
   onOpenCreateModal: () => void;
   onOpenConfirmModal: (payment: SalaryPayment) => void;
   onOpenBonusModal: (payment: SalaryPayment) => void;
+  onOpenDeductionModal: (payment: SalaryPayment) => void;
 }
 
 const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
@@ -18,6 +19,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   onOpenCreateModal,
   onOpenConfirmModal,
   onOpenBonusModal,
+  onOpenDeductionModal,
 }) => {
   return (
     <div className="bg-white rounded border border-gray-300 p-3 overflow-x-auto">
@@ -130,10 +132,19 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     Add Bonus
                   </button>
                   <button
+                    type="button"
                     onClick={() => {}}
                     className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
                   >
                       Approve
+                  </button>
+                  <button
+                    type="button"
+                    className="text-red-600 hover:underline text-xs hover:bg-green-50 rounded px-2 py-1"
+                    title="Add Deduction"
+                    onClick={() => onOpenDeductionModal(payment)}
+                  >
+                    Deduction
                   </button>
                 </div>
               </td>

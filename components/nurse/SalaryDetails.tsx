@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../Loader";
 import { fetchNurseSalaryPayments } from "@/app/actions/payroll/salary-actions";
-import { calculateNurseSalary, addNurseBonus } from "@/app/actions/payroll/calculate-nurse-salary";
+import { calculateNurseSalary, addNurseBonus, addNurseSalaryDeduction } from "@/app/actions/payroll/calculate-nurse-salary";
 import ConfirmationModal from "../common/ConfirmationModal";
 import ModalPortal from "../ui/ModalPortal";
 import HourlySalaryCard from "./salary/HourlySalaryCard";
 import PaymentHistoryTable from "./salary/PaymentHistoryTable";
 import CreateSalaryModal from "./salary/CreateSalaryModal";
 import AddBonusModal from "./salary/AddBonusModal";
+import AddDeductionModal from "./salary/AddDeductionModal";
 import { SalaryPayment } from "./types";
 
 const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
@@ -19,8 +20,10 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [selectedPayment, setSelectedPayment] = useState<SalaryPayment | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBonusModal, setShowBonusModal] = useState(false);
+  const [showDeductionModal, setShowDeductionModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [processingBonus, setProcessingBonus] = useState(false);
+  const [processingDeduction, setProcessingDeduction] = useState(false);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -114,6 +117,12 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     setShowBonusModal(true);
   };
 
+  // Handler to open deduction modal
+  const handleOpenDeductionModal = (payment: SalaryPayment) => {
+    setSelectedPayment(payment);
+    setShowDeductionModal(true);
+  };
+
   // Handler to actually recalculate after confirmation
   const handleConfirmRecalculate = async () => {
     if (!selectedPayment) return;
@@ -158,6 +167,41 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     }
   };
 
+  // Handler to add deduction
+  const handleAddDeduction = async (paymentId: number, deductionAmount: number, deductionReason: string) => {
+    setProcessingDeduction(true);
+    try {
+      const result = await addNurseSalaryDeduction({
+        paymentId,
+        deductionAmount,
+        deductionReason,
+      });
+
+      if (result.success) {
+        setPayments((prev) =>
+          prev.map((p) =>
+            p.id === paymentId
+              ? {
+                  ...p,
+                  deduction: result.newDeduction,
+                  netSalary: result.netSalary ?? p.netSalary,
+                  info: result.updatedInfo,
+                }
+              : p
+          )
+        );
+        setShowDeductionModal(false);
+      } else {
+        alert("Failed to add deduction: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error adding deduction:", error);
+      alert("Error adding deduction.");
+    } finally {
+      setProcessingDeduction(false);
+    }
+  };
+
   const handleCreateSalary = async (startDate: string, endDate: string) => {
     setCreating(true);
     try {
@@ -196,6 +240,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         onOpenCreateModal={() => setShowCreateModal(true)}
         onOpenConfirmModal={handleOpenConfirm}
         onOpenBonusModal={handleOpenBonusModal}
+        onOpenDeductionModal={handleOpenDeductionModal}
       />
 
       <ModalPortal>
@@ -227,6 +272,16 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
           payment={selectedPayment}
           onClose={() => setShowBonusModal(false)}
           onSubmit={handleAddBonus}
+        />
+      </ModalPortal>
+
+      <ModalPortal>
+        <AddDeductionModal
+          isOpen={showDeductionModal}
+          isProcessing={processingDeduction}
+          payment={selectedPayment}
+          onClose={() => setShowDeductionModal(false)}
+          onSubmit={handleAddDeduction}
         />
       </ModalPortal>
     </div>
