@@ -291,7 +291,7 @@ export async function addNurseBonus({
 
   const { data: paymentRecord, error: fetchError } = await supabase
     .from("salary_payments")
-    .select("id, salary, bonus, info, net_salary")
+    .select("id, salary, bonus, deduction, info, net_salary")
     .eq("id", paymentId)
     .single();
 
@@ -313,16 +313,13 @@ export async function addNurseBonus({
   const newBonus = currentBonus + bonusAmount;
   
   const baseSalary = paymentRecord.salary || 0;
-  const newNetSalary = baseSalary + newBonus;
+  const currentDeduction = paymentRecord.deduction || 0;
+  const newNetSalary = baseSalary + newBonus - currentDeduction;
 
   let updatedInfo = paymentRecord.info || "";
   const bonusInfo = ` | BONUS: ${bonusAmount.toFixed(2)} (${bonusReason})`;
   
-  if (!updatedInfo.includes(" | BONUS:")) {
-    updatedInfo += bonusInfo;
-  } else {
-    updatedInfo = updatedInfo.replace(/ \| BONUS:.+/, bonusInfo);
-  }
+  updatedInfo += bonusInfo;
 
   const { error: updateError } = await supabase
     .from("salary_payments")

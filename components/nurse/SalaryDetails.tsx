@@ -142,14 +142,13 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
       });
       
       if (result.success) {
-        // Update the payment in the list with new bonus information
         setPayments((prev) =>
           prev.map((p) =>
             p.id === paymentId
               ? {
                   ...p,
                   bonus: result.newBonus,
-                  netSalary: result.netSalary,
+                  netSalary: result.netSalary ?? p.netSalary,
                   info: result.updatedInfo,
                 }
               : p
