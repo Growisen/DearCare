@@ -70,7 +70,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
             <p className="text-sm text-gray-600 mt-1">
               {basicInfo.category} • {basicInfo.experience || 0} years experience
             </p>
-
+            {/* Salary Per Month */}
+            <p className="text-sm text-gray-700 mt-1">
+              Salary Per Month: <span className="font-semibold">
+                {basicInfo.salary_per_month ? `₹${basicInfo.salary_per_month}` : 'N/A'}
+              </span>
+            </p>
             <div className="text-sm text-gray-700 mt-1">
               <span>
                 Joined: {basicInfo.joining_date 
