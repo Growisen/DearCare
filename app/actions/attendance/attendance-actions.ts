@@ -33,6 +33,7 @@ export interface AssignmentAttendanceDetails {
 }
 
 export interface AttendanceRecordById {
+  id?: number;
   date: string;
   checkIn: string | null;
   checkOut: string | null;
@@ -41,7 +42,10 @@ export interface AttendanceRecordById {
   notes?: string;
   location?: string | null;
   isAdminAction?: boolean;
-}
+  assignmentId?: number;
+  shiftStartTime?: string | null;
+  shiftEndTime?: string | null;
+} 
 
 export interface MarkAttendanceParams {
   assignmentId: number;
@@ -1022,6 +1026,7 @@ export async function getAttendanceRecords(
         }
         
         return {
+          id: record.id,
           date: record.date,
           checkIn: record.start_time ? record.start_time : null,
           checkOut: record.end_time ? record.end_time : null,
@@ -1054,6 +1059,7 @@ export async function getAttendanceRecords(
         }
         
         return {
+          id: undefined,
           date: date,
           checkIn: null,
           checkOut: null,
@@ -1077,6 +1083,176 @@ export async function getAttendanceRecords(
     };
   } catch (error) {
     logger.error('Failed to fetch attendance records:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+
+export async function getNurseAttendanceRecordsByDate(
+  nurseId: number,
+  startDate: string,
+  endDate: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{
+  success: boolean;
+  data?: AttendanceRecordById[];
+  count?: number;
+  totalPages?: number;
+  currentPage?: number;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // 1. Find all assignments for this nurse within the date range
+    const { data: assignments, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select('id, shift_start_time, shift_end_time, start_date, end_date')
+      .eq('nurse_id', nurseId)
+      .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
+
+    if (assignmentError) {
+      return { success: false, error: assignmentError.message };
+    }
+    if (!assignments || assignments.length === 0) {
+      return { success: true, data: [], count: 0, totalPages: 0, currentPage: page };
+    }
+
+    // 2. Build a map of date => assignment for each day in the range
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dateAssignmentMap: Record<string, any> = {};
+    const allDates: string[] = [];
+    const currentDate = new Date(startDate);
+    const lastDate = new Date(endDate);
+
+    while (currentDate <= lastDate) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      // Find assignment active on this date
+      const assignment = assignments.find(a =>
+        a.start_date <= dateStr && a.end_date >= dateStr
+      );
+      if (assignment) {
+        dateAssignmentMap[dateStr] = assignment;
+      }
+      allDates.push(dateStr);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // 3. Fetch all attendance records for this nurse in the date range
+    const assignmentIds = assignments.map(a => a.id);
+    const { data: attendanceData, error: attendanceError } = await supabase
+      .from('attendence_individual')
+      .select('id, date, start_time, end_time, total_hours, is_admin_action, location, assigned_id')
+      .in('assigned_id', assignmentIds)
+      .gte('date', startDate)
+      .lte('date', endDate);
+
+    if (attendanceError) {
+      return { success: false, error: attendanceError.message };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attendanceMap = new Map<string, any>();
+    attendanceData.forEach(record => {
+      attendanceMap.set(record.date, record);
+    });
+
+    const results: (AttendanceRecordById | null)[] = await Promise.all(allDates.map(async date => {
+      const assignment = dateAssignmentMap[date];
+      if (!assignment) {
+        return null;
+      }
+      const record = attendanceMap.get(date);
+
+      const shiftStartTime = assignment.shift_start_time || null;
+      const shiftEndTime = assignment.shift_end_time || null;
+
+      if (record) {
+        let status = 'Absent';
+        if (record.start_time) {
+          if (assignment.shift_start_time) {
+            const scheduledStart = assignment.shift_start_time.split(':').map(Number);
+            const actualStart = record.start_time.split(':').map(Number);
+            const scheduledMinutes = scheduledStart[0] * 60 + scheduledStart[1];
+            const actualMinutes = actualStart[0] * 60 + actualStart[1];
+            if (actualMinutes > scheduledMinutes + 15) {
+              status = 'Late';
+            } else {
+              status = record.end_time ? 'Present' : 'Checked In';
+            }
+          } else {
+            status = record.end_time ? 'Present' : 'Checked In';
+          }
+        }
+        return {
+          id: record.id,
+          date,
+          checkIn: record.start_time || null,
+          checkOut: record.end_time || null,
+          totalHours: calculateHoursWorked(
+            record.total_hours,
+            record.start_time,
+            record.end_time
+          ),
+          status,
+          location: parseLocation(record.location),
+          isAdminAction: !!record.is_admin_action,
+          notes: record.notes,
+          assignmentId: assignment.id,
+          shiftStartTime,
+          shiftEndTime
+        };
+      } else {
+        let status = 'Absent';
+        const { data: leaveData } = await supabase
+          .from('nurse_leave_requests')
+          .select('leave_type')
+          .eq('nurse_id', nurseId)
+          .eq('status', 'approved')
+          .lte('start_date', date)
+          .gte('end_date', date)
+          .maybeSingle();
+
+        if (leaveData) {
+          status = `On Leave (${formatLeaveType(leaveData.leave_type)})`;
+        }
+
+        return {
+          id: undefined,
+          date,
+          checkIn: null,
+          checkOut: null,
+          totalHours: 0,
+          status,
+          location: null,
+          isAdminAction: false,
+          assignmentId: assignment.id,
+          shiftStartTime,
+          shiftEndTime
+        };
+      }
+    }));
+    const filteredResults = results.filter(Boolean) as AttendanceRecordById[];
+    filteredResults.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // PAGINATION
+    const totalRecords = filteredResults.length;
+    const totalPages = Math.ceil(totalRecords / pageSize);
+    const paginatedResults = filteredResults.slice((page - 1) * pageSize, page * pageSize);
+
+    return {
+      success: true,
+      data: paginatedResults,
+      count: totalRecords,
+      totalPages,
+      currentPage: page
+    };
+  } catch (error) {
+    logger.error('Failed to fetch nurse attendance records:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'

@@ -64,20 +64,20 @@ export function AttendanceTable({
   handlePreviousPage: () => void;
   handleNextPage: () => void;
   handlePageChange: (page: number) => void;
-  handleUnmarkAttendance: (date: string) => Promise<void>;
+  handleUnmarkAttendance: (id: number) => Promise<void>;
 }) {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+  const [recordToDelete, setRecordToDelete] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  
-  const openDeleteConfirmation = (date: string) => {
-    setRecordToDelete(date);
+
+  const openDeleteConfirmation = (record: number) => {
+    setRecordToDelete(record);
     setConfirmationOpen(true);
   };
   
   const handleConfirmDelete = async () => {
     if (!recordToDelete) return;
-    
+
     setDeleteLoading(true);
     await handleUnmarkAttendance(recordToDelete);
     setDeleteLoading(false);
@@ -193,10 +193,10 @@ export function AttendanceTable({
                         Mark Attendance
                       </button>
                     )}
-                    {(record.status?.toLowerCase() !== 'absent') && (
+                    {(record.status?.toLowerCase() !== 'absent') && record.id !== undefined && (
                       <button
                         className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition"
-                        onClick={() => openDeleteConfirmation(record.date)}
+                        onClick={() => openDeleteConfirmation(record.id as number)}
                       >
                         Unmark Attendance
                       </button>

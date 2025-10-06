@@ -92,6 +92,7 @@ export interface SimplifiedNurseDetails {
     noc_status?: string | null;
     admitted_type?: string | null;
     created_at?: string | null;
+    salary_per_month?: number | string;
   };
   health: {
     health_status: string | null;
@@ -230,6 +231,7 @@ export async function createNurse(
         admitted_type: nurseData.admitted_type,
         nurse_prev_reg_no: nurseData.nurse_prev_reg_no,
         joining_date: nurseData.joining_date,
+        salary_per_month: nurseData.salary_per_month ? Number(nurseData.salary_per_month) : null,
         created_at: new Date().toISOString()
       })
       .select('nurse_id')
@@ -1075,6 +1077,7 @@ export async function updateNurse(
     noc_status: formData.basic.noc_status ?? null,
     admitted_type: formData.basic.admitted_type ?? null,
     created_at: formData.basic.created_at ?? undefined,
+    salary_per_month: formData.basic.salary_per_month ? Number(formData.basic.salary_per_month) : null,
   })
   .eq('nurse_id', nurseId);
 

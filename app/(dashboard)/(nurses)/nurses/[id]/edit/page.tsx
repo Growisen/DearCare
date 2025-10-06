@@ -714,6 +714,14 @@ const EditNurseProfilePage: React.FC = () => {
                     onChange={handleInputChange} 
                     type="number"
                   />
+                  {/* Add Salary Per Month field below experience */}
+                  <FormInput 
+                    label="Salary Per Month" 
+                    name="basic.salary_per_month" 
+                    value={formData?.basic.salary_per_month || ''} 
+                    onChange={handleInputChange} 
+                    type="number"
+                  />
                   <FormMultiSelect
                     label="Languages"
                     name="basic.languages"

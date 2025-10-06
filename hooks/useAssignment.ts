@@ -65,6 +65,7 @@ export interface FormattedAssignmentDetails {
 }
 
 export interface AttendanceRecord {
+  id?:number;
   date: string;
   checkIn: string | null;
   checkOut: string | null;
@@ -294,15 +295,12 @@ export function useAssignment(id: string) {
   }, [selectedRecord, checkIn, checkOut, assignmentDetails?.id, closeModal, refreshData]);
 
 
-  const handleUnmarkAttendance = useCallback(async (attendanceDate: string) => {
+  const handleUnmarkAttendance = useCallback(async (id: number) => {
     if (!assignmentDetails) return;
     
     setAttendanceLoading(true);
     try {
-      const res = await unmarkAttendance({
-        assignmentId: assignmentDetails.id,
-        date: attendanceDate
-      });
+      const res = await unmarkAttendance({ id });
 
       if (!res.success) {
         toast.error(res.message || 'Failed to delete attendance record');

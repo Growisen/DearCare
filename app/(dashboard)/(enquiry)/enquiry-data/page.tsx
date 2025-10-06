@@ -1,62 +1,99 @@
 'use client'
 
-import React, { useEffect, useState } from "react";
-import { fetchAllServiceEnquiries, ServiceEnquiryData } from "@/app/actions/enquiry/enquiry-actions";
+import React, { useEffect, useState, useCallback } from "react";
+import { fetchAllServiceEnquiries, ServiceEnquiryData, PaginationInfo } from "@/app/actions/enquiry/enquiry-actions";
 
 export default function EnquiryDataPage() {
   const [enquiries, setEnquiries] = useState<ServiceEnquiryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredEnquiries, setFilteredEnquiries] = useState<ServiceEnquiryData[]>([]);
+  
+  // Separate states for search input and actual search term
+  const [searchInput, setSearchInput] = useState(""); // What user types
+  const [searchTerm, setSearchTerm] = useState(""); // What's actually searched
+  const [isSearching, setIsSearching] = useState(false);
+  
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    totalCount: 0,
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 0
+  });
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      setError(null);
-      const result = await fetchAllServiceEnquiries();
-      if (result.success && result.data) {
-        setEnquiries(result.data);
-        setFilteredEnquiries(result.data);
-      } else {
-        setError(result.error || "Failed to fetch enquiries");
-      }
-      setLoading(false);
-    }
-    loadData();
+    loadData(1, 10, "");
   }, []);
 
-  // Filter enquiries based on search term
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredEnquiries(enquiries);
-    } else {
-      const filtered = enquiries.filter(enquiry =>
-        Object.values(enquiry).some(value =>
-          value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-      setFilteredEnquiries(filtered);
-    }
-  }, [searchTerm, enquiries]);
-
-  const handleRefresh = () => {
-    async function loadData() {
-      setLoading(true);
-      setError(null);
-      const result = await fetchAllServiceEnquiries();
+  // Load data with pagination and optional search
+  const loadData = useCallback(async (page: number = 1, pageSize: number = 10, search: string = "") => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await fetchAllServiceEnquiries(page, pageSize, search.trim() || undefined);
+      
       if (result.success && result.data) {
         setEnquiries(result.data);
-        setFilteredEnquiries(result.data);
+        if (result.pagination) {
+          setPagination(result.pagination);
+        }
       } else {
         setError(result.error || "Failed to fetch enquiries");
+        setEnquiries([]);
+        setPagination({
+          totalCount: 0,
+          currentPage: page,
+          pageSize,
+          totalPages: 0
+        });
       }
+    } catch {
+      setError("An unexpected error occurred");
+      setEnquiries([]);
+    } finally {
       setLoading(false);
+      setIsSearching(false);
     }
-    loadData();
-  };
+  }, []);
 
-  if (loading) {
+  // Handle search button click
+  const handleSearch = useCallback(() => {
+    if (searchInput.trim() === searchTerm.trim()) {
+      return; // No change, don't search again
+    }
+    
+    setIsSearching(true);
+    setSearchTerm(searchInput.trim());
+    loadData(1, pagination.pageSize, searchInput.trim());
+  }, [searchInput, searchTerm, pagination.pageSize, loadData]);
+
+  // Handle Enter key press in search input
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  }, [handleSearch]);
+
+  // Clear search
+  const handleClearSearch = useCallback(() => {
+    setSearchInput("");
+    setSearchTerm("");
+    loadData(1, pagination.pageSize, "");
+  }, [pagination.pageSize, loadData]);
+
+  // Handle refresh
+  const handleRefresh = useCallback(() => {
+    loadData(pagination.currentPage, pagination.pageSize, searchTerm);
+  }, [pagination.currentPage, pagination.pageSize, searchTerm, loadData]);
+
+  // Handle page change
+  const handlePageChange = useCallback((newPage: number) => {
+    if (newPage < 1 || newPage > pagination.totalPages || loading) return;
+    loadData(newPage, pagination.pageSize, searchTerm);
+  }, [pagination.totalPages, pagination.pageSize, searchTerm, loading, loadData]);
+
+  if (loading && pagination.currentPage === 1 && !isSearching) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -76,24 +113,72 @@ export default function EnquiryDataPage() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Service Enquiries</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Total: {filteredEnquiries.length} {filteredEnquiries.length === 1 ? 'enquiry' : 'enquiries'}
+                Total: {pagination.totalCount} {pagination.totalCount === 1 ? 'enquiry' : 'enquiries'}
+                {searchTerm && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    Filtered by: &quot;{searchTerm}&quot;
+                  </span>
+                )}
               </p>
             </div>
+            
+            {/* Search Controls */}
             <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search enquiries..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search enquiries..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 placeholder-gray-500"
+                    disabled={loading}
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                 </div>
+                
+                {/* Search Button */}
+                <button
+                  onClick={handleSearch}
+                  disabled={loading || isSearching}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSearching ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      Search
+                    </>
+                  )}
+                </button>
+                
+                {/* Clear Search Button (show only when there's a search) */}
+                {searchTerm && (
+                  <button
+                    onClick={handleClearSearch}
+                    disabled={loading}
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+                    title="Clear search"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
+              
+              {/* Refresh Button */}
               <button
                 onClick={handleRefresh}
                 disabled={loading}
@@ -120,6 +205,15 @@ export default function EnquiryDataPage() {
           </div>
         )}
 
+        {/* Loading Overlay when changing pages or searching */}
+        {(loading || isSearching) && pagination.currentPage > 1 && (
+          <div className="mb-6 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-lg flex items-center justify-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+            <p>{isSearching ? 'Searching...' : 'Loading data...'}</p>
+          </div>
+        )}
+
+        {/* Rest of your table and mobile view code remains the same */}
         {/* Desktop Table View */}
         <div className="hidden lg:block bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
@@ -134,7 +228,7 @@ export default function EnquiryDataPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredEnquiries.length === 0 ? (
+                {enquiries.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center">
@@ -146,7 +240,7 @@ export default function EnquiryDataPage() {
                         </p>
                         {searchTerm && (
                           <button
-                            onClick={() => setSearchTerm('')}
+                            onClick={handleClearSearch}
                             className="mt-2 text-blue-600 hover:text-blue-500 text-sm"
                           >
                             Clear search
@@ -156,7 +250,7 @@ export default function EnquiryDataPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredEnquiries.map((enquiry, idx) => (
+                  enquiries.map((enquiry, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{enquiry.name}</div>
@@ -181,11 +275,73 @@ export default function EnquiryDataPage() {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination Controls - Keep your existing pagination code */}
+          {pagination.totalPages > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Showing page {pagination.currentPage} of {pagination.totalPages}
+              </div>
+              <nav className="flex items-center space-x-2">
+                <button 
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1 || loading}
+                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                
+                {/* Page Number Buttons */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, i) => {
+                    // Logic to show pages around current page
+                    let pageNum: number;
+                    if (pagination.totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (pagination.currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                      pageNum = pagination.totalPages - 4 + i;
+                    } else {
+                      pageNum = pagination.currentPage - 2 + i;
+                    }
+                    
+                    if (pageNum <= pagination.totalPages) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          disabled={loading}
+                          className={`px-3 py-1 rounded text-sm ${
+                            pagination.currentPage === pageNum 
+                              ? 'bg-blue-600 text-white' 
+                              : 'border border-gray-300'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+                
+                <button 
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages || loading}
+                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
 
+        {/* Keep your existing mobile view code with the same handleClearSearch update */}
         {/* Mobile Card View */}
         <div className="lg:hidden space-y-4">
-          {filteredEnquiries.length === 0 ? (
+          {enquiries.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
               <svg className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -195,7 +351,7 @@ export default function EnquiryDataPage() {
               </p>
               {searchTerm && (
                 <button
-                  onClick={() => setSearchTerm('')}
+                  onClick={handleClearSearch}
                   className="mt-2 text-blue-600 hover:text-blue-500 text-sm"
                 >
                   Clear search
@@ -203,46 +359,77 @@ export default function EnquiryDataPage() {
               )}
             </div>
           ) : (
-            filteredEnquiries.map((enquiry, idx) => (
-              <div key={idx} className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">{enquiry.name}</h3>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {enquiry.service}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                      </svg>
-                      <a href={`mailto:${enquiry.email}`} className="hover:text-blue-600 transition-colors">
-                        {enquiry.email}
-                      </a>
+            <>
+              {enquiries.map((enquiry, idx) => (
+                <div key={idx} className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">{enquiry.name}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {enquiry.service}
+                      </span>
                     </div>
                     
-                    <div className="flex items-center text-sm text-gray-600">
-                      <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <a href={`tel:${enquiry.phone}`} className="hover:text-blue-600 transition-colors">
-                        {enquiry.phone}
-                      </a>
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-gray-600">
-                      <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {enquiry.location}
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                        </svg>
+                        <a href={`mailto:${enquiry.email}`} className="hover:text-blue-600 transition-colors">
+                          {enquiry.email}
+                        </a>
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-gray-600">
+                        <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        <a href={`tel:${enquiry.phone}`} className="hover:text-blue-600 transition-colors">
+                          {enquiry.phone}
+                        </a>
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-gray-600">
+                        <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {enquiry.location}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+
+              {/* Mobile Pagination */}
+              {pagination.totalPages > 0 && (
+                <div className="bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between">
+                  <button 
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1 || loading}
+                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  >
+                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {pagination.currentPage} of {pagination.totalPages}
+                  </span>
+                  <button 
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages || loading}
+                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  >
+                    Next
+                    <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
