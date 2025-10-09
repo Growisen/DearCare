@@ -37,16 +37,16 @@ const useOrgStore = create(
   )
 )
 
-// Example for Sidebar
+
 export function Sidebar(props) {
   const { branding, _hasHydrated } = useOrgStore()
 
   if (!_hasHydrated) {
-    // Optionally show a loading spinner or blank sidebar
+    
     return null
   }
 
-  // Now it's safe to use branding
+
   return (
     <div style={{ backgroundColor: branding?.color || '#1e40af' }}>
       {/* ... */}
