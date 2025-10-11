@@ -2,11 +2,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 const orgConfigs = {
-  DearCare: {
+  tcs: {
     color: '#11516F',
     logo: '/logo.png',
   },
-  tcs: {
+  DearCare: {
     color: '#BD6000',
     logo: '/TATA.png',
   }
@@ -36,22 +36,5 @@ const useOrgStore = create(
     }
   )
 )
-
-
-export function Sidebar(props) {
-  const { branding, _hasHydrated } = useOrgStore()
-
-  if (!_hasHydrated) {
-    
-    return null
-  }
-
-
-  return (
-    <div style={{ backgroundColor: branding?.color || '#1e40af' }}>
-      {/* ... */}
-    </div>
-  )
-}
 
 export default useOrgStore
