@@ -16,10 +16,12 @@ import {
   UserPlus,
 } from "lucide-react"
 import { useEffect } from "react"
+import useOrgStore from "@/app/stores/UseOrgStore"
 // import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
+  const { branding, _hasHydrated } = useOrgStore()
   // const { signOut } = useAuth()
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -44,12 +46,26 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
     }
   }, [isOpen, handleClickOutside])
 
+  if (!_hasHydrated) {
+    return null;
+  }
+
   return (
-    <div id="sidebar" className={`w-56 h-screen bg-dCblue fixed left-0 top-0 shadow-lg z-50 rounded-r-xl flex flex-col justify-between transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+    <div 
+      id="sidebar" 
+      className={`w-56 h-screen fixed left-0 top-0 shadow-lg z-50 rounded-r-xl flex flex-col justify-between transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+      style={{ backgroundColor: branding?.color || '#1e40af' }}
+    >
       <div className="flex flex-col h-full">
         <div className="h-16 border-b border-white/15 flex items-center gap-2 px-4">
           <div className="flex-1 min-w-0">
-            <Image src="/logo.png" alt="Logo" width={120} height={60} className="object-contain" />
+            <Image 
+              src={branding?.logo || "/logo.png"} 
+              alt="Organization Logo" 
+              width={120} 
+              height={60} 
+              className="object-contain" 
+            />
           </div>
           <button 
             onClick={onClose}

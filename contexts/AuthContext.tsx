@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase'
 import { signIn as serverSignIn, signUp as serverSignUp, signOut as serverSignOut } from '@/app/actions/authentication/auth'
+import useOrgStore from '@/app/stores/UseOrgStore'
 
 type AuthContextType = {
   user: User | null
@@ -12,6 +12,13 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<{
     error: string | null
     success: boolean
+    user?: {
+      id: string
+      email: string | undefined
+      role: string | null
+      organization: string | null
+      name: string
+    }
   }>
   signUp: (email: string, password: string) => Promise<{
     error: string | null
@@ -23,48 +30,56 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [user, setUser] = useState<User | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
+  const { setOrganization } = useOrgStore()
 
   useEffect(() => {
-    // Get session and user on mount
-    const getInitialSession = async () => {
-      setIsLoading(true)
-      
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      
-      setIsLoading(false)
-    }
+    setIsLoading(true)
 
-    getInitialSession()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session)
-        setUser(session?.user || null)
+    let organization = 'DearCare'
+    try {
+      const userDetails = sessionStorage.getItem('userDetails')
+      if (userDetails) {
+        const parsed = JSON.parse(userDetails)
+        if (parsed.organization) {
+          organization = parsed.organization
+        }
       }
-    )
+    } catch {}
 
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [supabase.auth])
+    setOrganization(organization)
+    setIsLoading(false)
+  }, [setOrganization])
 
-  // Authentication methods
   const signIn = async (email: string, password: string) => {
     const formData = new FormData()
     formData.append('email', email)
     formData.append('password', password)
-    
+
     try {
-      return await serverSignIn(formData)
+      const result = await serverSignIn(formData)
+
+      if (result.success) {
+        if (result.user?.organization) {
+          setOrganization(result.user.organization)
+        } else {
+          const userDetails = sessionStorage.getItem('userDetails')
+          if (userDetails) {
+            const parsed = JSON.parse(userDetails)
+            if (parsed.organization) {
+              setOrganization(parsed.organization)
+            }
+          } else {
+            setOrganization('DearCare')
+          }
+        }
+      }
+
+      return result
     } catch (error: Error | unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred';
       return { error: errorMessage, success: false }
@@ -85,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await serverSignOut()
+    sessionStorage.removeItem('userDetails')
   }
 
   return (
