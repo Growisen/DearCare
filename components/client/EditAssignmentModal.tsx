@@ -11,6 +11,7 @@ interface NurseAssignment {
   shiftEnd?: string;
   status: 'active' | 'completed' | 'cancelled';
   shiftType?: 'day' | 'night' | '24h';
+  salaryPerDay?: number;
 }
 
 interface EditAssignmentModalProps {
@@ -32,6 +33,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
   const [endDate, setEndDate] = useState('');
   const [shiftStart, setShiftStart] = useState('09:00');
   const [shiftEnd, setShiftEnd] = useState('17:00');
+  const [salaryPerDay, setSalaryPerDay] = useState<number | ''>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -48,6 +50,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
       
       setShiftStart(assignment.shiftStart?.substring(0, 5) || '09:00');
       setShiftEnd(assignment.shiftEnd?.substring(0, 5) || '17:00');
+      setSalaryPerDay(assignment.salaryPerDay ?? '');
     }
     // Reset submitting state when modal opens/closes
     setIsSubmitting(false);
@@ -57,22 +60,27 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (endDate && startDate && new Date(endDate) < new Date(startDate)) {
       toast.error('End date cannot be before start date');
       return;
     }
-    
+    if (salaryPerDay === '' || Number(salaryPerDay) <= 0) {
+      toast.error('Salary per day must be a positive number');
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     const updatedAssignment: NurseAssignment = {
       ...assignment,
       startDate,
       endDate,
       shiftStart: `${shiftStart}:00`,
       shiftEnd: `${shiftEnd}:00`,
+      salaryPerDay: Number(salaryPerDay),
     };
-    
+
     try {
       onSave(updatedAssignment);
     } catch {
@@ -142,6 +150,22 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
                 required
                 disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price Per Day
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={salaryPerDay}
+                onChange={(e) => setSalaryPerDay(e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                required
+                disabled={isSubmitting}
+                placeholder="Enter salary per day"
               />
             </div>
           </div>

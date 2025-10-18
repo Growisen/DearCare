@@ -530,7 +530,8 @@ export async function fetchNurseAssignments(
 
 
 export async function fetchBasicDetails(
-  pagination?: PaginationParams
+  pagination?: PaginationParams,
+  searchQuery?: string
 ): Promise<{ 
   data: NurseBasicDetails[] | null;
   count: number | null;
@@ -542,21 +543,12 @@ export async function fetchBasicDetails(
     const start = (page - 1) * limit
     const end = start + limit - 1
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return { data: null, count: null, error: 'Not authenticated' }
     }
 
-    // Get total count first
-    const { count, error: countError } = await supabase
-      .from('nurses')
-      .select('*', { count: 'exact', head: true })
-
-    if (countError) throw countError
-
-    // Fetch paginated nurse information
-    const { data, error } = await supabase
+    let nursesQuery = supabase
       .from('nurses')
       .select(`
         nurse_id,
@@ -567,14 +559,21 @@ export async function fetchBasicDetails(
         experience,
         status,
         nurse_reg_no
-        
-      `)
+      `, { count: 'exact' })
       .order('first_name')
       .range(start, end)
 
+    if (searchQuery && searchQuery.trim() !== '') {
+      const q = `%${searchQuery.trim()}%`
+      nursesQuery = nursesQuery.or(
+        `first_name.ilike.${q},last_name.ilike.${q},email.ilike.${q},phone_number.ilike.${q},nurse_reg_no.ilike.${q}`
+      )
+    }
+
+    const { data, error, count } = await nursesQuery
+
     if (error) throw error
 
-    // Transform the data
     const transformedData: NurseBasicDetails[] = data.map(nurse => ({
       nurse_id: nurse.nurse_id,
       name: {

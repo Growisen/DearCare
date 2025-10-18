@@ -5,14 +5,15 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/app/actions/authentication/auth"; 
+import { useAuth } from "@/contexts/AuthContext";
 
 const LoginPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const { signIn: contextSignIn } = useAuth();
+  
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -20,7 +21,9 @@ const LoginPage = () => {
   
     try {
       const formData = new FormData(e.currentTarget);
-      const { error, success, user } = await signIn(formData);
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+      const { error, success, user } = await contextSignIn(email, password);
       
       if (error) {
         if (error.includes('Invalid login credentials')) {

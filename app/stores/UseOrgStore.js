@@ -2,13 +2,13 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 const orgConfigs = {
-  tcs: {
-    color: '#11516F',
-    logo: '/logo.png',
-  },
-  DearCare: {
+  TataHomeNursing: {
     color: '#BD6000',
     logo: '/TATA.png',
+  },
+  DearCare: {
+    color: '#11516F',
+    logo: '/logo.png',
   }
 }
 

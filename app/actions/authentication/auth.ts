@@ -65,7 +65,7 @@ export async function signIn(formData: FormData) {
       id: user.id,
       email: user.email,
       role: user.user_metadata.role,
-      organization: user.user_metadata.organization, // Add this line
+      organization: user.user_metadata.organization,
       name: user.user_metadata.name || user.email
     }
   }
