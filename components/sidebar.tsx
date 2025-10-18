@@ -21,7 +21,7 @@ import useOrgStore from "@/app/stores/UseOrgStore"
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
-  const { branding } = useOrgStore()
+  const { branding, _hasHydrated } = useOrgStore()
   // const { signOut } = useAuth()
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -45,6 +45,10 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
       document.removeEventListener('click', handleClickOutside)
     }
   }, [isOpen, handleClickOutside])
+
+  if (!_hasHydrated) {
+    return null;
+  }
 
   return (
     <div 

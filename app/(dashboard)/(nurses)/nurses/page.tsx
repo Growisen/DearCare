@@ -109,7 +109,7 @@ export default function NursesPage() {
     const { data, count, error } = await fetchBasicDetails({
       page: currentPage,
       limit
-    })
+    }, searchQuery)
 
     if (error) {
       setError(error)
@@ -124,15 +124,7 @@ export default function NursesPage() {
 
   useEffect(() => {
     loadNurses()
-  }, [currentPage])
-  
-  // Handle page changes
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber)
-  }
-
-  // Calculate total pages based on the totalCount and limit
-  const totalPages = Math.ceil(totalCount / limit)
+  }, [currentPage, searchQuery])
 
   const filteredNurses = nurses.filter(nurse => {
     const matchesStatus = selectedStatus === "all" || nurse.status === selectedStatus
@@ -141,13 +133,14 @@ export default function NursesPage() {
       (selectedExperience === "less_than_5" && (nurse.experience ?? 0) < 5) ||
       (selectedExperience === "less_than_10" && (nurse.experience ?? 0) < 10) ||
       (selectedExperience === "greater_than_15" && (nurse.experience ?? 0) >= 10)
-    const matchesSearch = 
-      nurse.name.first.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      nurse.name.last.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (nurse.contact.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-    
-    return matchesStatus && matchesExperience && matchesSearch
+    return matchesStatus && matchesExperience
   })
+  
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+  }
+
+  const totalPages = Math.ceil(totalCount / limit)
   
   const handleReviewDetails = (nurse: NurseBasicInfo) => {
     setSelectedNurse(nurse)
@@ -156,13 +149,10 @@ export default function NursesPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   const handleAddNurse = async (nurseData: any) => {
     try {
-      // Handle adding new nurse here
       setShowAddNurse(false);
-      // Refetch nurses after successful addition
       await loadNurses();
     } catch (error) {
       console.error(error);
-      // Handle error case
     }
   };
 
@@ -202,6 +192,7 @@ export default function NursesPage() {
     setSearchQuery("");
     setSelectedStatus("all");
     setSelectedExperience("all");
+    setCurrentPage(1);
   };
 
   if (error) {
@@ -251,7 +242,6 @@ export default function NursesPage() {
           )}
         </div>
         
-        {/* Mobile card view */}
         <div className="sm:hidden divide-y divide-gray-200">
           {isLoading ? (
             <Loader />
@@ -265,7 +255,6 @@ export default function NursesPage() {
                 />
               ))}
               
-              {/* Mobile pagination controls */}
               {filteredNurses.length > 0 && (
                 <PaginationControls 
                   currentPage={currentPage}
@@ -280,10 +269,8 @@ export default function NursesPage() {
           )}
         </div>
       </div>
-      
-      {/* Fixed position for modals to ensure proper display */}
+
       <div className="fixed inset-0 z-50" style={{display: showAddNurse || selectedNurse ? 'block' : 'none', pointerEvents: 'none'}}>
-        {/* Add Nurse Overlay */}
         {showAddNurse && (
           <div style={{pointerEvents: 'auto'}}>
             <AddNurseOverlay 
@@ -293,7 +280,6 @@ export default function NursesPage() {
           </div>
         )}
 
-        {/* Nurse Details Overlay */}
         {selectedNurse && (
           <div style={{pointerEvents: 'auto'}}>
             <NurseDetailsOverlay 
