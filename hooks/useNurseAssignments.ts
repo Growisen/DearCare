@@ -219,6 +219,7 @@ export const useNurseAssignments = (clientId: string) => {
         end_date: updatedAssignment.endDate,
         shift_start_time: updatedAssignment.shiftStart,
         shift_end_time: updatedAssignment.shiftEnd,
+        salary_per_day: updatedAssignment.salaryPerDay,
       };
       
       const result = await updateNurseAssignment(updatedAssignment.id, updates);
