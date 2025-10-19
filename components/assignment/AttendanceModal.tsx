@@ -57,7 +57,6 @@ export function AttendanceModal({
         
         setCheckIn(formattedStartTime);
         setCheckOut(formattedEndTime);
-        console.log('Setting times (formatted):', formattedStartTime, formattedEndTime);
       } else {
         if (checkIn && checkOut) {
           setCheckIn('');

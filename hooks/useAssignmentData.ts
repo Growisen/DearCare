@@ -201,8 +201,6 @@ export function useAssignmentData() {
       const fileName = `nurse_assignments_${date}.csv`;
       
       downloadCSV(csvContent, fileName);
-      
-      console.log(`Exported ${response.data.length} assignments successfully`);
     } catch (error) {
       console.error('Export failed:', error)
     } finally {

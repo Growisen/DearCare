@@ -28,8 +28,6 @@ const SalarySettings: React.FC = () => {
         if (result.success && result.notification) {
           const n = result.notification;
 
-          console.log(n)
-
           setInitialDate(n.start_date || "");
           setSalaryIntervalDays(n.interval_days || 30);
           setIsActive(

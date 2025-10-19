@@ -41,9 +41,6 @@ const NurseProfilePage: React.FC = () => {
 
         setNurse(nurseResponse.data)
         setAssignments(assignmentsResponse.data)
-
-        console.log('Nurse:', nurseResponse.data)
-        console.log('Assignments:', assignmentsResponse.data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch data')
       } finally {

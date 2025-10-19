@@ -733,7 +733,8 @@ export async function fetchStaffAttendance(
   page: number = 1,
   pageSize: number = 50,
   includeAbsent: boolean = true,
-  admittedType?: string 
+  admittedType?: string,
+  searchTerm?: string
 ): Promise<{ 
   success: boolean; 
   data: AttendanceRecord[]; 
@@ -771,6 +772,9 @@ export async function fetchStaffAttendance(
             nurse_id,
             first_name,
             last_name,
+            full_name, 
+            nurse_reg_no,
+            nurse_prev_reg_no,
             admitted_type
           )
         )
@@ -787,6 +791,8 @@ export async function fetchStaffAttendance(
     }
     
     const { data: attendanceData, error: attendanceError } = await attendanceQuery;
+    logger.info('Attendance query result:', { error: attendanceError, dataLength: attendanceData });
+
     
     if (attendanceError) throw new Error(attendanceError.message);
     
@@ -911,6 +917,13 @@ export async function fetchStaffAttendance(
           });
         }
       }
+    }
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      const searchLower = searchTerm.trim().toLowerCase();
+      absentRecords = absentRecords.filter(record => 
+        record.nurseName.toLowerCase().includes(searchLower)
+      );
     }
     
     let allRecords = [...formattedAttendanceData, ...absentRecords];

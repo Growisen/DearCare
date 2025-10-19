@@ -16,23 +16,22 @@ export const useStaffAttendance = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
   useEffect(() => {
     loadAttendanceData();
-  }, [selectedDate, currentPage, pageSize, selectedCategory]);
-  
-  useEffect(() => {
-    const filtered = attendanceData.filter(record => 
-      searchTerm === '' || 
-      record.nurseName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    setFilteredData(filtered);
-    
-    if (filtered.length === 0 && searchTerm !== '') {
-      setCurrentPage(1);
-    }
-  }, [attendanceData, searchTerm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, currentPage, pageSize, selectedCategory, debouncedSearchTerm]);
 
   const loadAttendanceData = async () => {
     setLoading(true);
@@ -40,15 +39,17 @@ export const useStaffAttendance = () => {
       const date = new Date(selectedDate);
       const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       const result = await fetchStaffAttendance(
-        formattedDate, 
-        currentPage, 
+        formattedDate,
+        currentPage,
         pageSize,
         true,
-        selectedCategory
+        selectedCategory,
+        debouncedSearchTerm
       );
   
       if (result.success) {
         setAttendanceData(result.data);
+        setFilteredData(result.data);
         
         if (result.pagination) {
           setTotalPages(result.pagination.totalPages);
@@ -59,11 +60,13 @@ export const useStaffAttendance = () => {
       } else {
         setError(result.error || 'Failed to load attendance data');
         setAttendanceData([]);
+        setFilteredData([]);
         setTotalCount(0);
       }
     } catch {
       setError('An error occurred while fetching attendance data');
       setAttendanceData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
