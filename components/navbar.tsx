@@ -25,9 +25,7 @@ export default function Navbar({
   onSearch,
 }: NavbarProps) {
   const { notificationsQuery } = useDcWebNotifications();
-
-  console.log("Notifications Query:", notificationsQuery.data?.notifications);
-
+  
   const notifications = notificationsQuery.data?.notifications || [];
 
   const [searchQuery, setSearchQuery] = useState("")

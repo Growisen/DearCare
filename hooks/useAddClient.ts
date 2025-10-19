@@ -432,7 +432,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     // Validate form before submission
     if (!validateForm()) {
       toast.error("Please correct the errors in the form");
-      console.log(formErrors)
       return;
     }
 

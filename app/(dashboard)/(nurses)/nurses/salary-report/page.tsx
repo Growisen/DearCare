@@ -51,7 +51,6 @@ function SalaryReportContent() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openModal = (record: any) => {
-    console.log(record)
     setSelectedRecord(record);
     setCheckIn(record?.checkIn || "");
     setCheckOut(record?.checkOut || "");
@@ -81,7 +80,6 @@ function SalaryReportContent() {
         isAdminAction: true
       });
       if (res.success) {
-        console.log('Attendance marked successfully', res);
         closeModal();
         refetch();
       }
@@ -96,13 +94,8 @@ function SalaryReportContent() {
     setAttendanceLoading(true);
     setAttendanceError(null);
     try {
-      console.log("record", id, selectedRecord)
-      console.log('Unmarking attendance for record:', { id });
       const res = await unmarkAttendance({ id });
-
-      console.log('Unmark attendance response:', res);
       if (res.success) {
-        console.log('Attendance unmarked successfully', res);
         refetch();
       }
     } catch {

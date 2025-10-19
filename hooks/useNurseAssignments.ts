@@ -31,16 +31,13 @@ export const useNurseAssignments = (clientId: string) => {
   }>({});
 
   const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {
-    console.log(`🔍 INPUT: startTime="${startTime}", endTime="${endTime}"`);
     
     if (!startTime || !endTime) {
-      console.log('❌ Missing time inputs, returning default "day"');
       return 'day';
     }
     
     const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])(?::([0-5][0-9]))?$/;
     if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-      console.warn(`❌ Invalid time format: start=${startTime}, end=${endTime}`);
       return 'day';
     }
     
@@ -52,14 +49,10 @@ export const useNurseAssignments = (clientId: string) => {
     const endHourStr = endTimeParts[0];
     const endMinStr = endTimeParts[1];
     
-    console.log(`📊 PARSED: start="${startHourStr}:${startMinStr}", end="${endHourStr}:${endMinStr}"`);
-    
     const startHour = parseInt(startHourStr, 10);
     const startMin = parseInt(startMinStr, 10);
     const endHour = parseInt(endHourStr, 10);
     const endMin = parseInt(endMinStr, 10);
-    
-    console.log(`🔢 NUMBERS: startHour=${startHour}, startMin=${startMin}, endHour=${endHour}, endMin=${endMin}`);
     
     if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
       console.warn(`❌ Failed to parse time values: start=${startTime}, end=${endTime}`);
@@ -69,41 +62,32 @@ export const useNurseAssignments = (clientId: string) => {
     const startTotalMinutes = startHour * 60 + startMin;
     let endTotalMinutes = endHour * 60 + endMin;
     
-    console.log(`⏰ MINUTES: start=${startTotalMinutes}, end=${endTotalMinutes} (before midnight adjustment)`);
-    
     if (endTotalMinutes === 0) {
       endTotalMinutes = 24 * 60;
-      console.log(`🌙 Midnight adjustment: endTotalMinutes now = ${endTotalMinutes}`);
     }
     
     let durationMinutes;
     if (endTotalMinutes > startTotalMinutes) {
       durationMinutes = endTotalMinutes - startTotalMinutes;
-      console.log(`📅 Same day shift: ${durationMinutes} minutes`);
     } else if (endTotalMinutes === startTotalMinutes) {
       durationMinutes = 24 * 60;
-      console.log(`🔄 24-hour shift detected: ${durationMinutes} minutes`);
     } else {
       durationMinutes = (24 * 60 - startTotalMinutes) + endTotalMinutes;
-      console.log(`🌃 Overnight shift: ${durationMinutes} minutes`);
     }
     
     const durationHours = durationMinutes / 60;
     console.log(`⏳ DURATION: ${durationMinutes} minutes (${durationHours} hours)`);
     
     if (durationMinutes >= 22 * 60) {
-      console.log(`✅ RESULT: "24h" (duration >= 22 hours)`);
       return '24h';
     }
     
     if (durationMinutes >= 12 * 60) {
       const result = (startHour >= 6 && startHour < 18) ? 'day' : 'night';
-      console.log(`✅ RESULT: "${result}" (long shift, start hour = ${startHour})`);
       return result;
     }
     
     const result = (startHour >= 6 && startHour < 18) ? 'day' : 'night';
-    console.log(`✅ RESULT: "${result}" (regular shift, start hour = ${startHour})`);
     return result;
   };
 

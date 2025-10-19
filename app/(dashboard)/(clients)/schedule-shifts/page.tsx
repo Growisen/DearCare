@@ -28,7 +28,6 @@ interface ShiftData {
 const ScheduleShiftsContent = () => {  
   const searchParams = useSearchParams();
   const nurseIds = useMemo(() => {
-    console.log('Recalculating nurseIds');
     return searchParams.getAll('nurseIds');
   }, [searchParams]);
   

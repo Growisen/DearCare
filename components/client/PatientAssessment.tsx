@@ -19,8 +19,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
   const [error, setError] = useState<string | null>(null);
   const { userData } = useUserData();
 
-  console.log("userData", userData);
-
   const {
     formData,
     setFormData,

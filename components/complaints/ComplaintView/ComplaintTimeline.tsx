@@ -7,8 +7,6 @@ interface ComplaintTimelineProps {
 export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps) {
 
   const statusHistory = complaint.statusHistory || [];
-
-  console.log("resol", complaint)
   
   return (
     <div className="border rounded-lg p-4">
