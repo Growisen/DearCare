@@ -144,9 +144,12 @@ export async function calculateNurseSalary({
   }
 
   let totalSalary = 0;
-  let totalHours = 0;
+  let totalBillableHours = 0;
+  let totalActualHours = 0;
   let daysWorked = 0;
   const skippedRecords: Array<{ id: number; date: string; reason: string }> = [];
+
+  const salaryDayMap = new Map<number, number>();
 
   for (const record of attendanceRecords ?? []) {
     const assignment = assignmentMap.get(record.assigned_id);
@@ -191,16 +194,32 @@ export async function calculateNurseSalary({
     const dayEarnings = billableHours * hourlyRate;
 
     totalSalary += dayEarnings;
-    totalHours += billableHours;
+    totalBillableHours += billableHours;
+    totalActualHours += workedHours;
     daysWorked += 1;
+
+    const prev = salaryDayMap.get(assignment.salary_per_day) || 0;
+    salaryDayMap.set(assignment.salary_per_day, prev + 1);
   }
 
-  let info = `${daysWorked} days, ${totalHours.toFixed(2)} hours`;
+  let salaryBreakdown = "";
+  if (salaryDayMap.size > 0) {
+    salaryBreakdown = Array.from(salaryDayMap.entries())
+      .map(([salary, count]) => `${count} days (${salary}/day)`)
+      .join(", ");
+  }
+
+  let info = `${daysWorked} days`;
+  if (salaryBreakdown) {
+    info += ` [${salaryBreakdown}]`;
+  }
   if (skippedRecords.length > 0) {
     const missingDataCount = skippedRecords.filter(r => r.reason === "Missing attendance data").length;
     const invalidHoursCount = skippedRecords.filter(r => r.reason === "Invalid or zero worked hours").length;
     info += ` | SKIPPED: ${skippedRecords.length} records (${missingDataCount} missing data, ${invalidHoursCount} invalid hours)`;
   }
+
+  const averageHourlyRate = totalActualHours > 0 ? Number((totalSalary / totalActualHours).toFixed(2)) : 0;
 
   let upsertError;
   if (id) {
@@ -211,7 +230,7 @@ export async function calculateNurseSalary({
         pay_period_start: startDate,
         pay_period_end: endDate,
         days_worked: daysWorked,
-        hours_worked: Number(totalHours.toFixed(2)),
+        hours_worked: Number(totalBillableHours.toFixed(2)),
         salary: Number(totalSalary.toFixed(2)),
         net_salary: Number(totalSalary.toFixed(2)),
         payment_status: "pending",
@@ -219,6 +238,7 @@ export async function calculateNurseSalary({
         reviewed: false,
         skipped_records_count: skippedRecords.length,
         skipped_records_details: skippedRecords.length > 0 ? skippedRecords : null,
+        average_hourly_rate: averageHourlyRate,
       })
       .eq("id", id);
     upsertError = error;
@@ -231,7 +251,7 @@ export async function calculateNurseSalary({
           pay_period_start: startDate,
           pay_period_end: endDate,
           days_worked: daysWorked,
-          hours_worked: Number(totalHours.toFixed(2)),
+          hours_worked: Number(totalBillableHours.toFixed(2)),
           salary: Number(totalSalary.toFixed(2)),
           net_salary: Number(totalSalary.toFixed(2)),
           payment_status: "pending",
@@ -239,6 +259,7 @@ export async function calculateNurseSalary({
           reviewed: false,
           skipped_records_count: skippedRecords.length,
           skipped_records_details: skippedRecords.length > 0 ? skippedRecords : null,
+          average_hourly_rate: averageHourlyRate,
         }
       ]);
     upsertError = error;
@@ -250,7 +271,7 @@ export async function calculateNurseSalary({
       error: upsertError.message,
       salary: Number(totalSalary.toFixed(2)),
       daysWorked,
-      hoursWorked: Number(totalHours.toFixed(2)),
+      hoursWorked: Number(totalBillableHours.toFixed(2)),
       skippedRecords,
       info,
     };
@@ -264,7 +285,7 @@ export async function calculateNurseSalary({
     salary: Number(totalSalary.toFixed(2)),
     netSalary: Number(totalSalary.toFixed(2)),
     daysWorked,
-    hoursWorked: Number(totalHours.toFixed(2)),
+    hoursWorked: Number(totalBillableHours.toFixed(2)),
     skippedRecords,
     info,
   };

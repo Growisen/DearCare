@@ -552,6 +552,7 @@ export async function fetchBasicDetails(
       .from('nurses')
       .select(`
         nurse_id,
+        full_name,
         first_name,
         last_name,
         email,
@@ -560,17 +561,21 @@ export async function fetchBasicDetails(
         status,
         nurse_reg_no
       `, { count: 'exact' })
-      .order('first_name')
-      .range(start, end)
 
     if (searchQuery && searchQuery.trim() !== '') {
       const q = `%${searchQuery.trim()}%`
       nursesQuery = nursesQuery.or(
-        `first_name.ilike.${q},last_name.ilike.${q},email.ilike.${q},phone_number.ilike.${q},nurse_reg_no.ilike.${q}`
+        `full_name.ilike.${q},email.ilike.${q},phone_number.ilike.${q},nurse_reg_no.ilike.${q}`
       )
     }
 
+    nursesQuery = nursesQuery
+      .order('full_name')
+      .range(start, end)
+
     const { data, error, count } = await nursesQuery
+
+    console.log('Fetched Data:', data)
 
     if (error) throw error
 
