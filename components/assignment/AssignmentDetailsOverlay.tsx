@@ -147,9 +147,9 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
       return timeString
     }
   }
-  
-  const fullName = assignment.nurses?.first_name && assignment.nurses?.last_name 
-    ? `${assignment.nurses.first_name} ${assignment.nurses.last_name}`
+
+  const fullName = assignment.nurse_first_name && assignment.nurse_last_name
+    ? `${assignment.nurse_first_name} ${assignment.nurse_last_name}`
     : "Unknown Nurse"
   
   const clientName = assignment.client_name || "Unknown Client"

@@ -467,6 +467,9 @@ export async function getNurseAssignments(clientId: string): Promise<{
 export interface NurseAssignmentData {
   id: number;
   nurse_id: number;
+  nurse_first_name?: string;
+  nurse_last_name?: string;
+  nurse_full_name?: string;
   client_id: string;
   start_date: string;
   end_date: string;
@@ -502,18 +505,8 @@ export async function getAllNurseAssignments(
     const today = new Date().toISOString().split('T')[0];
 
     let query = supabase
-      .from('nurse_client')
-      .select(`
-        *,
-        nurses(first_name, last_name),
-        clients!inner(
-          id,
-          client_type,
-          client_category,
-          individual_clients(requestor_name),
-          organization_clients(organization_name)
-        )
-      `, { count: 'exact' });
+      .from('nurse_assignments_view')
+      .select('*', { count: 'exact' });
 
     if (filterStatus !== 'all') {
       switch (filterStatus) {
@@ -531,7 +524,6 @@ export async function getAllNurseAssignments(
       }
     }
 
-    // Apply date filter if provided
     if (dateFilter) {
       query = query
         .lte('start_date', dateFilter)
@@ -539,21 +531,18 @@ export async function getAllNurseAssignments(
     }
 
     if (categoryFilter && categoryFilter !== "all") {
-      query = query.eq('clients.client_category', categoryFilter);
+      query = query.eq('client_category', categoryFilter);
     }
 
-    if (searchQuery) {
-      try {
-        query = query.or(`nurse_id.eq.${parseInt(searchQuery) || 0}`);
-      } catch (searchError) {
-        logger.error('Search query error:', searchError);
-        return {
-          success: false,
-          error: 'Invalid search query format',
-          data: [],
-          count: 0
-        };
-      }
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = `%${searchQuery.trim().toLowerCase()}%`;
+      
+      query = query.or(
+        `nurse_full_name.ilike.${searchTerm},` +
+        `client_name.ilike.${searchTerm},` +
+        `patient_name.ilike.${searchTerm},` +
+        `nurse_id.eq.${parseInt(searchQuery) || 0}`
+      );
     }
     
     const from = (page - 1) * pageSize;
@@ -583,52 +572,21 @@ export async function getAllNurseAssignments(
 
     const processedData = data?.map(item => {
       let computedStatus: 'active' | 'upcoming' | 'completed';
-      const startDate = item.start_date;
-      const endDate = item.end_date;
       
-      if (startDate > today) {
+      if (item.start_date > today) {
         computedStatus = 'upcoming';
-      } else if (endDate < today) {
+      } else if (item.end_date < today) {
         computedStatus = 'completed';
       } else {
         computedStatus = 'active';
       }
 
-      let clientName = '';
-      const clientType = item.clients?.client_type || '';
-      
-      if (item.clients?.client_type === 'individual') {
-        const individualClient = item.clients.individual_clients;
-        
-        if (individualClient) {
-          if (Array.isArray(individualClient) && individualClient.length > 0) {
-            clientName = individualClient[0].requestor_name || '';
-          } else if (typeof individualClient === 'object') {
-            clientName = individualClient.requestor_name || '';
-          }
-        }
-      } 
-      else if (item.clients?.client_type === 'organization') {
-        const organizationClient = item.clients.organization_clients;
-        
-        if (organizationClient) {
-          if (Array.isArray(organizationClient) && organizationClient.length > 0) {
-            clientName = organizationClient[0].organization_name || '';
-          } else if (typeof organizationClient === 'object') {
-            clientName = organizationClient.organization_name || '';
-          }
-        }
-      }
-
-      const clientProfileUrl = getClientProfileUrl(item.client_id, clientType);
+      const clientProfileUrl = getClientProfileUrl(item.client_id, item.client_type);
       
       return {
         ...item,
         status: computedStatus,
-        client_type: clientType,
-        client_name: clientName,
         client_profile_url: clientProfileUrl,
-        clients: undefined,
       };
     });
 
