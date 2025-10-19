@@ -86,8 +86,8 @@ const shouldRunCalculation = (lastRun) => {
   
   console.log(`Last calculation: ${lastRun.run_date}, Days since: ${daysSinceLastRun}`)
   
-  if (daysSinceLastRun >= 28) {
-    console.log('28+ days have passed, running salary calculation')
+  if (daysSinceLastRun >= 30) {
+    console.log('30+ days have passed, running salary calculation')
     return true
   } else {
     console.log(`Only ${daysSinceLastRun} days since last calculation, skipping`)
@@ -130,7 +130,7 @@ Deno.serve(async () => {
         execution_status: 'skipped',
         execution_duration_ms: Date.now() - startTime,
         metadata: {
-          reason: 'Less than 28 days since last successful calculation',
+          reason: 'Less than 30 days since last successful calculation',
           last_calculation_date: lastRun?.run_date,
           days_since_last_run: lastRun ? Math.floor((new Date() - new Date(lastRun.run_date)) / (1000 * 60 * 60 * 24)) : null
         }
@@ -141,9 +141,9 @@ Deno.serve(async () => {
       return new Response(JSON.stringify({
         success: true,
         skipped: true,
-        message: 'Salary calculation skipped - less than 28 days since last run',
+        message: 'Salary calculation skipped - less than 30 days since last run',
         last_calculation: lastRun.run_date,
-        next_calculation_due: new Date(new Date(lastRun.run_date).getTime() + 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        next_calculation_due: new Date(new Date(lastRun.run_date).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         days_since_last_run: Math.floor((new Date() - new Date(lastRun.run_date)) / (1000 * 60 * 60 * 24))
       }), {
         status: 200,
@@ -152,7 +152,7 @@ Deno.serve(async () => {
     }
 
     // Proceed with salary calculation
-    const { startDate, endDate } = getDateRange(28)
+    const { startDate, endDate } = getDateRange(30)
     
     const [nurseClientsResult, attendanceResult] = await Promise.all([
       supabase
