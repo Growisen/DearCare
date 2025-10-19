@@ -52,7 +52,6 @@ const AnalyticsContent: React.FC<{ nurseId: number }> = ({ nurseId }) => {
       if (res.success && res.data) {
         setItems(mapAnalyticsToItems(res.data));
       }
-      console.log(res.data);
       setLoading(false);
     }
     fetchAnalytics();

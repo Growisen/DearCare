@@ -11,7 +11,6 @@ interface NurseDetailsProps {
 
 export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  console.log(nurse, 'nurse details overlay nurse data');
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };

@@ -51,8 +51,6 @@ const ServiceDetailsSection: React.FC<ServiceDetailsSectionProps> = ({
     );
   };
 
-  console.log(serviceDetails)
-
   return (
     <InfoSection title="Service Details">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

@@ -4,7 +4,8 @@ import Image from "next/image"
 import { Input } from "./ui/input"
 import AccountDropdown from "./Admin/Accounts/AccountDropdown"
 import { useState, useRef, useEffect } from "react"
-import { useNotifications } from "@/hooks/useNotifications"
+import { useDcWebNotifications } from "@/hooks/useDcWebNotifications" 
+import { WebNotification } from "@/types/notification.types"
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -15,45 +16,6 @@ interface NavbarProps {
     type?: string;
   }>
   onSearch?: (query: string) => void
-  notifications?: Array<{
-    id: string
-    title: string
-    message: string
-    time: string
-    unread: boolean
-    type?: string
-  }>
-  onNotificationRead?: (id: string) => void
-}
-
-function formatTitle(title: string): string {
-  return title
-    .replace(/_/g, " ")                // replace underscores with spaces
-    .replace(/\w\S*/g, (word) =>        // capitalize first letter of each word
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    );
-}
-
-
-export function getNotificationMessage(title: string): { formattedTitle: string, message: string } {
-  let message = "You have a new notification.";
-
-  switch (title) {
-    case "salary_notification":
-      message = "It's time to process salary payments.";
-      break;
-    case "meeting_reminder":
-      message = "You have an upcoming meeting.";
-      break;
-    case "leave_request":
-      message = "You have new leave requests pending approval.";
-      break;
-  }
-
-  return {
-    formattedTitle: formatTitle(title),
-    message,
-  };
 }
 
 export default function Navbar({ 
@@ -62,15 +24,17 @@ export default function Navbar({
   searchResults = [],
   onSearch,
 }: NavbarProps) {
-  const { todaysReminders } = useNotifications();
-  const reminderTitles = todaysReminders.data?.reminders?.map(r => r.title) || [];
+  const { notificationsQuery } = useDcWebNotifications();
+  
+  const notifications = notificationsQuery.data?.notifications || [];
+
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
 
-  const hasReminders = reminderTitles.length > 0;
+  const hasNotifications = notifications.length > 0;
 
   const handleSearch = (value: string) => {
     setSearchQuery(value)
@@ -87,13 +51,13 @@ export default function Navbar({
   }
 
   useEffect(() => {
-    if (hasReminders) {
+    if (hasNotifications) {
       const dismissed = localStorage.getItem("notificationsDismissed");
       if (!dismissed) {
         setShowNotifications(true);
       }
     }
-  }, [hasReminders]);
+  }, [hasNotifications]);
 
   const handleCloseNotifications = () => {
     setShowNotifications(false);
@@ -144,7 +108,7 @@ export default function Navbar({
           </button>
         </div>
 
-        {/* Search Bar with Results - Fixed responsive behavior */}
+        {/* Search Bar with Results */}
         <div className="flex-1 flex justify-end max-w-3xl ml-4 md:ml-8">
           <div className="relative w-full max-w-md" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -193,7 +157,7 @@ export default function Navbar({
               className="relative p-2 hover:bg-slate-50 rounded-lg transition-colors group"
             >
               <Bell className="w-5 h-5 text-slate-500 group-hover:text-slate-700" />
-              {hasReminders && (
+              {hasNotifications && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
               )}
             </button>
@@ -211,24 +175,21 @@ export default function Navbar({
                   </button>
                 </div>
                 
-                {reminderTitles.length > 0 ? (
+                {hasNotifications ? (
                   <div className="py-2">
-                    {reminderTitles.map((title, index) => {
-                      const { formattedTitle, message } = getNotificationMessage(title);
-                      return (
-                        <div
-                          key={index}
-                          className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="font-medium text-slate-900 text-sm">{formattedTitle}</div>
-                              <div className="text-sm text-slate-600 mt-1">{message}</div>
-                            </div>
+                    {notifications.map((notif: WebNotification, index: number) => (
+                      <div
+                        key={notif.id || index}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-slate-900 text-sm">{notif.title}</div>
+                            <div className="text-sm text-slate-600 mt-1">{notif.message}</div>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="px-4 py-6 text-center text-slate-500">
