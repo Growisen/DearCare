@@ -37,6 +37,8 @@ export default function AssignmentsPage() {
     handleExport
   } = useAssignmentData()
 
+  console.log('AssignmentsPage render', error, assignments)
+
   return (
     <div className="space-y-5 sm:space-y-7">
       <AssignmentHeader
