@@ -26,8 +26,6 @@ export default function StaffPage() {
     searchQuery,
     setSearchQuery,
     selectedCategory,
-    setSelectedCategory,
-    handleCategoryChange,
     handleSearch,
     currentPage,
     totalPages,
@@ -54,7 +52,6 @@ export default function StaffPage() {
   const handleResetFilters = () => {
     try {
       setSearchInput("");
-      setSelectedCategory("all")
       
       setSearchQuery(""); 
       
@@ -74,7 +71,6 @@ export default function StaffPage() {
           selectedCategory={selectedCategory}
           searchInput={searchInput}
           setSearchInput={setSearchInput}
-          handleCategoryChange={handleCategoryChange}
           handleSearch={handleSearch}
           handleResetFilters={handleResetFilters}
         />

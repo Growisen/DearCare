@@ -22,8 +22,7 @@ export default function LeaveRequestsPage() {
     setSearchTerm,
     statusFilter, 
     setStatusFilter,
-    admittedTypeFilter, 
-    setAdmittedTypeFilter,
+    admittedTypeFilter,
     dateRange,
     setDateRange,
     currentPage,
@@ -59,7 +58,6 @@ export default function LeaveRequestsPage() {
         handleResetFilters={handleResetFilters}
         statuses={statuses}
         admittedTypeFilter={admittedTypeFilter}
-        setAdmittedTypeFilter={setAdmittedTypeFilter}
       />
 
       <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">

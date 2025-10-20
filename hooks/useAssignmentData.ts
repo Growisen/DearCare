@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getAllNurseAssignments, NurseAssignmentData } from '@/app/actions/scheduling/shift-schedule-actions';
+import useOrgStore from '@/app/stores/UseOrgStore';
 
 function convertToCSV(assignments: NurseAssignmentData[]): string {
   const headers = [
@@ -72,15 +73,24 @@ function downloadCSV(csvContent: string, fileName: string): void {
 
 export function useAssignmentData() {
   const queryClient = useQueryClient();
+  const { organization } = useOrgStore();
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'upcoming'>('all')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFilter, setDateFilter] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [isExporting, setIsExporting] = useState(false)
 
+  // Map organization from store to category filter
+  const getCategoryFilter = (): string => {
+    if (!organization) return "all";
+    if (organization === "TataHomeNursing") return "Tata HomeNursing";
+    if (organization === "DearCare") return "DearCare LLP";
+    return "all";
+  };
+
+  const categoryFilter = getCategoryFilter();
 
   const [isFiltersLoaded, setIsFiltersLoaded] = useState(false);
 
@@ -89,19 +99,12 @@ export function useAssignmentData() {
     if (savedStatus && ['all', 'active', 'completed', 'upcoming'].includes(savedStatus)) {
       setFilterStatus(savedStatus as typeof filterStatus);
     }
-    const savedCategory = localStorage.getItem('assignmentsPageCategory');
-    if (savedCategory) {
-      setCategoryFilter(savedCategory);
-    }
     setIsFiltersLoaded(true);
   }, []);
 
   useEffect(() => {
     localStorage.setItem('assignmentsPageStatus', filterStatus);
   }, [filterStatus]);
-  useEffect(() => {
-    localStorage.setItem('assignmentsPageCategory', categoryFilter);
-  }, [categoryFilter]);
 
   const { 
     data, 
@@ -164,16 +167,10 @@ export function useAssignmentData() {
     setCurrentPage(1)
   }
 
-  const handleCategoryChange = (category: string) => {
-    setCategoryFilter(category)
-    setCurrentPage(1)
-  }
-
   const handleResetFilters = () => {
     setSearchInput('')
     setSearchQuery('')
     setFilterStatus('all')
-    setCategoryFilter('all')
     setDateFilter('')
     setCurrentPage(1)
   }
@@ -227,7 +224,6 @@ export function useAssignmentData() {
       handleSearch: () => {},
       handleStatusChange: () => {},
       handleDateFilterChange: () => {},
-      handleCategoryChange: () => {},
       handlePageChange: () => {},
       handlePreviousPage: () => {},
       handleNextPage: () => {},
@@ -257,7 +253,6 @@ export function useAssignmentData() {
     handleSearch,
     handleStatusChange,
     handleDateFilterChange,
-    handleCategoryChange,
     handlePageChange,
     handlePreviousPage,
     handleNextPage,

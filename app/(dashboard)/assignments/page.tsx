@@ -29,7 +29,6 @@ export default function AssignmentsPage() {
     handleSearch,
     handleStatusChange,
     handleDateFilterChange,
-    handleCategoryChange, 
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
@@ -52,7 +51,6 @@ export default function AssignmentsPage() {
         handleDateFilterChange={handleDateFilterChange}
         handleResetFilters={handleResetFilters}
         selectedCategory={categoryFilter}
-        handleCategoryChange={handleCategoryChange}
       />
 
 

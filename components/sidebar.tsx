@@ -21,8 +21,9 @@ import useOrgStore from "@/app/stores/UseOrgStore"
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname()
-  const { branding, _hasHydrated } = useOrgStore()
+  const { branding, organization, _hasHydrated } = useOrgStore()
   // const { signOut } = useAuth()
+const orgLabel = organization === 'TataHomeNursing' ? 'Tata Home Nursing' : (organization || 'DearCare')
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const sidebar = document.getElementById('sidebar')
@@ -129,7 +130,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
         
         <div className="mt-auto p-4 border-t border-white/15">
           <div className="bg-white/10 rounded-lg p-3 shadow-sm">
-            <div className="text-xs font-medium text-white/80 mb-1">DearCare Admin</div>
+            <div className="text-xs font-medium text-white/80 mb-1">{orgLabel} Admin</div>
             <div className="text-[11px] text-white/60">Care Management System</div>
           </div>
         </div>
