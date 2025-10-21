@@ -39,7 +39,7 @@ const LoginPage = () => {
       
       if (success) {
         if (user) {
-          sessionStorage.setItem('userDetails', JSON.stringify(user));
+          localStorage.setItem('userDetails', JSON.stringify(user));
         }
       
         const searchParams = new URLSearchParams(window.location.search);

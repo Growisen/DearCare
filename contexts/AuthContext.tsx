@@ -38,21 +38,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setOrganization } = useOrgStore()
 
   useEffect(() => {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    let organization = 'DearCare'
+    let organization = 'DearCare';
     try {
-      const userDetails = sessionStorage.getItem('userDetails')
+      const userDetails = localStorage.getItem('userDetails');
       if (userDetails) {
-        const parsed = JSON.parse(userDetails)
+        const parsed = JSON.parse(userDetails);
         if (parsed.organization) {
-          organization = parsed.organization
+          organization = parsed.organization;
         }
+      } else {
+        signOut();
       }
-    } catch {}
+    } catch {
+      signOut();
+    }
 
-    setOrganization(organization)
-    setIsLoading(false)
+    setOrganization(organization);
+    setIsLoading(false);
   }, [setOrganization])
 
   const signIn = async (email: string, password: string) => {
@@ -67,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (result.user?.organization) {
           setOrganization(result.user.organization)
         } else {
-          const userDetails = sessionStorage.getItem('userDetails')
+          const userDetails = localStorage.getItem('userDetails')
           if (userDetails) {
             const parsed = JSON.parse(userDetails)
             if (parsed.organization) {
@@ -99,8 +103,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    localStorage.removeItem('userDetails')
     await serverSignOut()
-    sessionStorage.removeItem('userDetails')
   }
 
   return (
