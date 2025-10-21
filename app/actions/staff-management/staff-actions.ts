@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { StaffRole, StaffOrganization } from '@/types/dearCareStaff.types';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { getOrgMappings } from '@/app/utils/org-utils';
 
 /**
  * Uploads a profile picture to Supabase storage
@@ -197,13 +198,17 @@ export async function getStaff(
 ) {
   try {
     const supabase = await createSupabaseServerClient();
-    
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { clientsOrg } = getOrgMappings(organization);
+
     let query = supabase
       .from('dearcare_staff')
       .select('*', { count: 'exact' });
     
-    if (category && category !== "all") {
-      query = query.eq('organization', category);
+    if (clientsOrg) {
+      query = query.eq('organization', clientsOrg);
     }
     
     if (searchQuery && searchQuery.trim() !== '') {

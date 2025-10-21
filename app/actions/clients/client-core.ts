@@ -6,16 +6,22 @@ import { logger } from '@/utils/logger';
 import { ClientCategory } from '@/types/client.types';
 import { getStorageUrl } from './files';
 import { Database } from '@/lib/database.types';
+import { getOrgMappings } from '@/app/utils/org-utils';
 
 export async function getClients(
   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
   searchQuery?: string,
   page: number = 1,
   pageSize: number = 10,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   category?: ClientCategory | 'all'
 ) {
   try {
     const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { clientsOrg } = getOrgMappings(organization);
     
     const selectFields = `
       id,
@@ -49,9 +55,9 @@ export async function getClients(
       dataQuery.eq('status', status)
     }
 
-    if (category && category !== "all") {
-      countQuery.eq('client_category', category)
-      dataQuery.eq('client_category', category)
+    if (clientsOrg) {
+      countQuery.eq('client_category', clientsOrg)
+      dataQuery.eq('client_category', clientsOrg)
     }
 
     if (searchQuery && searchQuery.trim() !== '') {

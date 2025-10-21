@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     localStorage.removeItem('userDetails')
+    localStorage.removeItem('organization-storage')
     await serverSignOut()
   }
 

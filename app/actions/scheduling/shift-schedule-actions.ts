@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { updateNurseStatus } from '@/app/actions/staff-management/add-nurse';
+import { getOrgMappings } from '@/app/utils/org-utils';
 import { getClientProfileUrl } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
 
@@ -504,6 +505,11 @@ export async function getAllNurseAssignments(
     const supabase = await createSupabaseServerClient();
     const today = new Date().toISOString().split('T')[0];
 
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { nursesOrg } = getOrgMappings(organization);
+
     let query = supabase
       .from('nurse_assignments_view')
       .select('*', { count: 'exact' });
@@ -530,8 +536,8 @@ export async function getAllNurseAssignments(
         .gte('end_date', dateFilter);
     }
 
-    if (categoryFilter && categoryFilter !== "all") {
-      query = query.eq('client_category', categoryFilter);
+    if (categoryFilter) {
+      query = query.eq('admitted_type', nursesOrg);
     }
 
     if (searchQuery && searchQuery.trim() !== '') {
