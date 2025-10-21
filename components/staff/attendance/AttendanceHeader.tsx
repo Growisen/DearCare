@@ -9,7 +9,6 @@ type AttendanceHeaderProps = {
   onExport: () => void
   isExporting: boolean
   selectedCategory: string
-  handleCategoryChange: (category: string) => void
 }
 
 export function AttendanceHeader({
@@ -19,15 +18,16 @@ export function AttendanceHeader({
   setSearchTerm,
   onExport,
   isExporting,
-  selectedCategory,
-  handleCategoryChange
+  selectedCategory
 }: AttendanceHeaderProps) {
 
-  const categoryMap = [
-    { value: "", display: "All Categories" },
-    { value: "Dearcare_Llp", display: "DearCare LLP" },
-    { value: "Tata_Homenursing", display: "Tata HomeNursing" }
-  ];
+  // Get display name for category (database enum to display format)
+  const getCategoryDisplay = (): string => {
+    if (!selectedCategory || selectedCategory === "") return "All Organizations";
+    if (selectedCategory === "Dearcare_Llp") return "DearCare LLP";
+    if (selectedCategory === "Tata_Homenursing") return "Tata HomeNursing";
+    return "All Organizations";
+  };
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
@@ -86,47 +86,13 @@ export function AttendanceHeader({
           </div>
         </div>
         
-        {/* Category filter section */}
+        {/* Organization badge - read only */}
         <div className="mt-2">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
-            <div className="flex gap-1.5 items-center flex-wrap">
-              {categoryMap.map((category) => (
-                <button
-                  key={category.value}
-                  onClick={() => handleCategoryChange(category.value)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    selectedCategory === category.value
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {category.display}
-                </button>
-              ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
+            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              {getCategoryDisplay()}
             </div>
-          </div>
-          
-          {/* Mobile view for category filter */}
-          <div className="sm:hidden mt-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: `right 0.5rem center`,
-                backgroundRepeat: `no-repeat`,
-                backgroundSize: `1.5em 1.5em`,
-                paddingRight: `2rem`
-              }}
-            >
-              {categoryMap.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.display}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
       </div>

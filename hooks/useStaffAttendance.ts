@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchStaffAttendance, AttendanceRecord } from '@/app/actions/attendance/attendance-actions';
+import useOrgStore from '@/app/stores/UseOrgStore';
 
 export const useStaffAttendance = () => {
+  const { organization } = useOrgStore();
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [filteredData, setFilteredData] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,16 @@ export const useStaffAttendance = () => {
   
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState("");
+  
+  // Map organization from store to category (database enum format)
+  const getCategoryFilter = (): string => {
+    if (!organization) return "";
+    if (organization === "TataHomeNursing") return "Tata_Homenursing";
+    if (organization === "DearCare") return "Dearcare_Llp";
+    return "";
+  };
+
+  const selectedCategory = getCategoryFilter();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -72,11 +83,6 @@ export const useStaffAttendance = () => {
     }
   };
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-  };
-  
   const handleSearchChange = (newSearchTerm: string) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1);
@@ -219,7 +225,6 @@ export const useStaffAttendance = () => {
     isExporting,
 
     loadAttendanceData,
-    handleCategoryChange,
     handleSearchChange,
     handleDateChange,
     handlePageSizeChange,

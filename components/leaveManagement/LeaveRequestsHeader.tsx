@@ -1,7 +1,6 @@
 import React from "react"
 import { Search, X, Download, Calendar, RefreshCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { AdmittedType } from "@/app/actions/staff-management/leave-management";
 
 type LeaveRequestsHeaderProps = {
   onAddLeaveRequest?: () => void
@@ -18,7 +17,6 @@ type LeaveRequestsHeaderProps = {
   handleResetFilters: () => void
   statuses: string[]
   admittedTypeFilter: 'Dearcare_Llp' | 'Tata_Homenursing' | ""
-  setAdmittedTypeFilter: (value: 'Dearcare_Llp' | 'Tata_Homenursing' | "") => void
 }
 
 export function LeaveRequestsHeader({ 
@@ -33,17 +31,18 @@ export function LeaveRequestsHeader({
   handleSearch,
   handleResetFilters,
   statuses,
-  admittedTypeFilter = "",
-  setAdmittedTypeFilter
+  admittedTypeFilter = ""
 }: LeaveRequestsHeaderProps) {
   
-  const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate || admittedTypeFilter
+  const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate
 
-  const admittedTypeMap = [
-    { value: "", display: "All Categories" },
-    { value: "Dearcare_Llp", display: "DearCare LLP" },
-    { value: "Tata_Homenursing", display: "Tata HomeNursing" }
-  ];
+  // Get display name for admitted type (database enum to display format)
+  const getAdmittedTypeDisplay = (): string => {
+    if (admittedTypeFilter === "") return "All Organizations";
+    if (admittedTypeFilter === "Dearcare_Llp") return "DearCare LLP";
+    if (admittedTypeFilter === "Tata_Homenursing") return "Tata HomeNursing";
+    return "All Organizations";
+  };
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
@@ -189,27 +188,15 @@ export function LeaveRequestsHeader({
         </div>
       </div>
       
-      {/* Combined Status and Category Filters Section with spacing below */}
+      {/* Combined Organization Badge and Status Filters Section with spacing below */}
       <div className="px-3 pb-5 mb-3 bg-gray-50">
         {/* Desktop view */}
         <div className="hidden sm:flex items-center gap-4 flex-wrap">
-          {/* Category filters */}
+          {/* Organization badge - read only */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
-            <div className="flex gap-1.5 items-center flex-wrap">
-              {admittedTypeMap.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => setAdmittedTypeFilter(type.value as AdmittedType)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    admittedTypeFilter === type.value
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {type.display}
-                </button>
-              ))}
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
+            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              {getAdmittedTypeDisplay()}
             </div>
           </div>
 
@@ -246,26 +233,14 @@ export function LeaveRequestsHeader({
           )}
         </div>
         
-        {/* Mobile view */}
+        {/* Mobile view - Organization badge */}
         <div className="sm:hidden mt-2">
-          <select
-            value={admittedTypeFilter}
-            onChange={(e) => setAdmittedTypeFilter(e.target.value as AdmittedType)}
-            className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: `right 0.5rem center`,
-              backgroundRepeat: `no-repeat`,
-              backgroundSize: `1.5em 1.5em`,
-              paddingRight: `2rem`
-            }}
-          >
-            {admittedTypeMap.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.display}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600">Organization:</span>
+            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              {getAdmittedTypeDisplay()}
+            </div>
+          </div>
         </div>
       </div>
     </div>

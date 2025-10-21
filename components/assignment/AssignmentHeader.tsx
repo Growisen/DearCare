@@ -14,7 +14,6 @@ type AssignmentHeaderProps = {
   handleDateFilterChange: (date: string) => void
   handleResetFilters: () => void
   selectedCategory: string
-  handleCategoryChange: (category: string) => void
 }
 
 export function AssignmentHeader({
@@ -28,8 +27,7 @@ export function AssignmentHeader({
   handleSearch,
   handleDateFilterChange,
   handleResetFilters,
-  selectedCategory,
-  handleCategoryChange
+  selectedCategory
 }: AssignmentHeaderProps) {
   
   // Function to set today's date
@@ -149,25 +147,13 @@ export function AssignmentHeader({
               </button>
             </div>
           </div>
-          {/* Second row: Category and Status */}
+          {/* Second row: Organization badge and Status */}
           <div className="hidden sm:flex flex-col sm:flex-row gap-6">
-            {/* Category filter */}
+            {/* Organization badge - read only */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
-              <div className="flex gap-1.5 items-center flex-wrap">
-                {["all", "DearCare LLP", "Tata HomeNursing"].map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryChange(category)}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                      selectedCategory === category
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                    }`}
-                  >
-                    {category === "all" ? "All Categories" : category}
-                  </button>
-                ))}
+              <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
+              <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                {selectedCategory === "all" ? "All Organizations" : selectedCategory}
               </div>
             </div>
             {/* Status filters */}
@@ -188,9 +174,9 @@ export function AssignmentHeader({
                 {/* Reset button */}
                 <button
                   onClick={handleResetFilters}
-                  disabled={selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter}
+                  disabled={selectedStatus === 'all' && !searchInput && !dateFilter}
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
-                    selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter
+                    selectedStatus === 'all' && !searchInput && !dateFilter
                       ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
                   }`}
@@ -201,8 +187,15 @@ export function AssignmentHeader({
               </div>
             </div>
           </div>
-          {/* Mobile: Dropdowns for category and status */}
+          {/* Mobile: Organization badge and status dropdown */}
           <div className="sm:hidden flex flex-col gap-2 w-full">
+            {/* Organization badge - read only for mobile */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-600">Organization:</span>
+              <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                {selectedCategory === "all" ? "All Organizations" : selectedCategory}
+              </div>
+            </div>
             <select
               value={selectedStatus}
               onChange={(e) => handleStatusChange(e.target.value as 'all' | 'active' | 'completed' | 'upcoming')}
@@ -220,28 +213,12 @@ export function AssignmentHeader({
               <option value="completed">Completed</option>
               <option value="upcoming">Upcoming</option>
             </select>
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: `right 0.5rem center`,
-                backgroundRepeat: `no-repeat`,
-                backgroundSize: `1.5em 1.5em`,
-                paddingRight: `2rem`
-              }}
-            >
-              <option value="all">All Categories</option>
-              <option value="DearCare LLP">DearCare LLP</option>
-              <option value="Tata HomeNursing">Tata HomeNursing</option>
-            </select>
             {/* Reset button for mobile view */}
             <button
               onClick={handleResetFilters}
-              disabled={selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter}
+              disabled={selectedStatus === 'all' && !searchInput && !dateFilter}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
-                selectedStatus === 'all' && selectedCategory === 'all' && !searchInput && !dateFilter
+                selectedStatus === 'all' && !searchInput && !dateFilter
                   ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
               }`}

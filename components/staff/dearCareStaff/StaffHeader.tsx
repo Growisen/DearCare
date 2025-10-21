@@ -10,7 +10,6 @@ type StaffHeaderProps = {
   searchInput: string
   setSearchInput: (value: string) => void
   selectedCategory: StaffOrganization | "all"
-  handleCategoryChange: (role: StaffOrganization | "all") => void
   handleSearch: () => void
   handleResetFilters: () => void
 }
@@ -22,7 +21,6 @@ export function StaffHeader({
   searchInput, 
   setSearchInput, 
   selectedCategory, 
-  handleCategoryChange, 
   handleSearch,
   handleResetFilters
 }: StaffHeaderProps) {
@@ -95,37 +93,18 @@ export function StaffHeader({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Organization badge - read only for desktop */}
           <span className="text-xs font-medium text-gray-600 whitespace-nowrap hidden sm:inline">Organization:</span>
           <div className="hidden sm:flex gap-1.5 items-center">
-            <button
-              onClick={() => handleCategoryChange("all")}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                selectedCategory === "all"
-                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-              }`}
-            >
-              All
-            </button>
-            {["DearCare LLP", "Tata HomeNursing"].map((org) => (
-              <button
-                key={org}
-                onClick={() => handleCategoryChange(org as StaffOrganization)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  selectedCategory === org
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
-              >
-                {org}
-              </button>
-            ))}
+            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              {selectedCategory === "all" ? "All Organizations" : selectedCategory}
+            </div>
             
             <button
               onClick={handleResetFilters}
-              disabled={selectedCategory === "all" && !searchInput}
+              disabled={!searchInput}
               className={`ml-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
-                selectedCategory === "all" && !searchInput
+                !searchInput
                   ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
               }`}
@@ -135,31 +114,22 @@ export function StaffHeader({
             </button>
           </div>
           
-          {/* Mobile view - role dropdown and reset button */}
+          {/* Mobile view - organization badge and reset button */}
           <div className="sm:hidden w-full flex flex-col gap-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value as StaffOrganization | "all")}
-              className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: `right 0.5rem center`,
-                backgroundRepeat: `no-repeat`,
-                backgroundSize: `1.5em 1.5em`,
-                paddingRight: `2rem`
-              }}
-            >
-              <option value="all">All Staff</option>
-              <option value="DearCare LLP">DearCare LLP</option>
-              <option value="Tata HomeNursing">Tata HomeNursing</option>
-            </select>
+            {/* Organization badge - read only for mobile */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-600">Organization:</span>
+              <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                {selectedCategory === "all" ? "All Organizations" : selectedCategory}
+              </div>
+            </div>
             
             {/* Reset button for mobile */}
             <button
               onClick={handleResetFilters}
-              disabled={selectedCategory === "all" && !searchInput}
+              disabled={!searchInput}
               className={`py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
-                selectedCategory === "all" && !searchInput
+                !searchInput
                   ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
               }`}
