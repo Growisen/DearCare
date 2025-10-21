@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts",  "app/actions/**/*", "supabase/functions/dc-salary-web-notifications/index.js", "supabase/functions/dc-shift-ending-notifications/index.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts",  "app/actions/**/*", "supabase/functions/dc-salary-web-notifications/index.js", "supabase/functions/dc-shift-ending-notifications/index.js", "supabase/functions/th-calculate-nurses-salary/index.js"],
   "exclude": ["node_modules"]
 }
