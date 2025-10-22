@@ -74,6 +74,7 @@ export interface AttendanceRecord {
   notes?: string;
   location?: string | null;
   isAdminAction?:boolean;
+  salaryPerDay?: number;
 }
 
 const calculateDuration = (startDate: string, endDate: string): string => {

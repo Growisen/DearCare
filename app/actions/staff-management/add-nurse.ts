@@ -768,13 +768,31 @@ interface FamilyReference {
   relation: string;
 }
 
+async function getAuthenticatedClient() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+  
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const web_user_id = user.user_metadata.user_id
+
+  const organization = user?.user_metadata?.organization;
+
+  const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+  return { supabase, userId: web_user_id, nursesOrg, clientsOrg };
+}
+
 
 export async function exportNurseData(): Promise<{ 
   data: ExcelNurseData[] | null;
   error: string | null;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase, nursesOrg } = await getAuthenticatedClient();
 
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession();
@@ -799,7 +817,8 @@ export async function exportNurseData(): Promise<{
           description,
           family_references
         )
-      `);
+      `)
+      .eq('admitted_type', nursesOrg);
 
     if (error) throw error;
 
