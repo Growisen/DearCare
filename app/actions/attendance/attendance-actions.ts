@@ -801,7 +801,7 @@ export async function fetchStaffAttendance(
       const nurse = nurseClient?.nurse &&
         (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
         
-      return nurse && nurse.first_name && nurse.last_name && 
+      return nurse && nurse.first_name && 
         (!admittedType || nurse.admitted_type === admittedType);
     });
     
@@ -848,10 +848,10 @@ export async function fetchStaffAttendance(
           const nurse = assignment.nurse && 
             (Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse);
           
-          return nurse && nurse.first_name && nurse.last_name && 
+          return nurse && nurse.first_name && 
             (!admittedType || nurse.admitted_type === admittedType);
         });
-        
+                
         const absentNurses = validScheduledNurses.filter(
           assignment => !presentAssignmentIds.has(assignment.id)
         );
