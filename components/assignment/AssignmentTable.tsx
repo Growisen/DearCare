@@ -26,7 +26,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
     }
   }
   
-  const fullName = assignment.nurse_first_name && assignment.nurse_last_name
+  const fullName = assignment.nurse_first_name
     ? `${assignment.nurse_first_name} ${assignment.nurse_last_name}`
     : "Unknown Nurse";
   
