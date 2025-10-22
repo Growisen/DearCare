@@ -4,11 +4,9 @@ import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Lock, Mail, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LoginPage = () => {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +43,7 @@ const LoginPage = () => {
         const searchParams = new URLSearchParams(window.location.search);
         const redirectTo = searchParams.get('redirectTo') || '/dashboard';
         
-        return router.push(redirectTo);
+        window.location.href = redirectTo;
       }
     } catch {
       setError('An unexpected error occurred');
