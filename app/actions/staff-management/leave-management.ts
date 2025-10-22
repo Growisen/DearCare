@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { revalidatePath } from 'next/cache'
 import { formatDate } from '@/utils/formatters'
 import { logger } from '@/utils/logger'
+import { getOrgMappings } from '@/app/utils/org-utils'
 
 export type LeaveRequest = {
   id: string
@@ -233,7 +234,10 @@ export async function exportLeaveRequests(
   endDate?: string | null
 ) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+    const { nursesOrg } = getOrgMappings(organization);
     
     let query = supabase
       .from('nurse_leave_requests')
@@ -248,7 +252,8 @@ export async function exportLeaveRequests(
         reason,
         status,
         rejection_reason,
-        applied_on
+        applied_on,
+        nurses!inner(admitted_type)
       `)
       .order('applied_on', { ascending: false })
     
@@ -262,6 +267,9 @@ export async function exportLeaveRequests(
     
     if (endDate) {
       query = query.lte('applied_on', endDate)
+    }
+    if (nursesOrg) {
+      query = query.eq('nurses.admitted_type', nursesOrg);
     }
     
     const { data: leaveData, error: leaveError } = await query
