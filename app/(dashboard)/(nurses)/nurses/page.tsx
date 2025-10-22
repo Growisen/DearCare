@@ -11,7 +11,6 @@ import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"
 
-// Pagination Controls Component
 const PaginationControls = ({ 
   currentPage, 
   totalPages, 

@@ -1,6 +1,7 @@
 "use server"
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
+import { getOrgMappings } from '@/app/utils/org-utils';
 import { Complaint, ComplaintStatus, ComplaintSource, StatusHistoryEntry } from '@/types/complaint.types'
 import { logger } from '@/utils/logger';
 
@@ -28,8 +29,12 @@ async function getAuthenticatedClient() {
   }
 
   const web_user_id = user.user_metadata.user_id
-  
-  return { supabase, userId: web_user_id };
+
+  const organization = user?.user_metadata?.organization;
+
+  const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+  return { supabase, userId: web_user_id, nursesOrg, clientsOrg };
 }
 
 export async function fetchComplaints(

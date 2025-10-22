@@ -5,9 +5,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getClients } from "@/app/actions/clients/client-actions"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Client, ClientFilters, ClientStatus, ClientCategory } from '@/types/client.types'
+import useOrgStore from '@/app/stores/UseOrgStore'
 
 export function useClientData() {
   const queryClient = useQueryClient();
+  const { organization } = useOrgStore();
   const [searchInput, setSearchInput] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<ClientFilters>("pending")
   const [searchQuery, setSearchQuery] = useState("")
@@ -16,17 +18,22 @@ export function useClientData() {
   const [currentPage, setCurrentPage] = useState(1)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(10)
-  const [selectedCategory, setSelectedCategory] = useState<ClientCategory | "all">("all");
+
+  // Map organization from store to client category
+  const getClientCategory = (): ClientCategory | "all" => {
+    if (!organization) return "all";
+    if (organization === "TataHomeNursing") return "Tata HomeNursing";
+    if (organization === "DearCare") return "DearCare LLP";
+    return "all";
+  };
+
+  const selectedCategory = getClientCategory();
 
   // Load status from localStorage after initial render
   useEffect(() => {
     const savedStatus = localStorage.getItem('clientsPageStatus');
     if (savedStatus && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(savedStatus)) {
       setSelectedStatus(savedStatus as ClientFilters);
-    }
-    const savedCategory = localStorage.getItem('clientsPageCategory');
-    if (savedCategory && (["DearCare LLP", "Tata HomeNursing", "all"].includes(savedCategory))) {
-      setSelectedCategory(savedCategory as ClientCategory | "all");
     }
     setIsStatusLoaded(true);
   }, []);
@@ -75,12 +82,6 @@ export function useClientData() {
     localStorage.setItem('clientsPageStatus', status);
   }
 
-  const handleCategoryChange = (category: ClientCategory | "all") => {
-    setSelectedCategory(category);
-    localStorage.setItem('clientsPageCategory', category);
-    setCurrentPage(1);
-  };
-
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize)
     setCurrentPage(1)
@@ -115,8 +116,6 @@ export function useClientData() {
     selectedStatus,
     setSelectedStatus,
     selectedCategory,
-    setSelectedCategory,
-    handleCategoryChange,
     handleSearch,
     handleStatusChange,
     currentPage,

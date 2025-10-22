@@ -5,17 +5,16 @@ import { fetchDashboardData, DashboardData } from "@/app/actions/dashboard/dashb
 
 export function useDashboardData() {
   const queryClient = useQueryClient();
-  
+
   const queryResult = useQuery<{
     success: boolean;
     data?: DashboardData;
     error?: string;
   }>({
     queryKey: ["dashboardData"],
-    queryFn: fetchDashboardData,
+    queryFn: () => fetchDashboardData(),
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 10,
     select: (data) => data,
     throwOnError: false,
   });

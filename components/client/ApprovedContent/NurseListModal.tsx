@@ -29,6 +29,7 @@ interface NurseListModalProps {
   onViewProfile: (nurse: Nurse) => void;
   currentPage: number;
   totalPages: number;
+  totalNurses: number;
   onPageChange: (page: number) => void;
   onFilterChange: (filters: { status?: string; city?: string; admittedType?: string }) => void;
   filters: { status?: string; city?: string; admittedType?: string };
@@ -44,6 +45,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
   onViewProfile,
   currentPage,
   totalPages,
+  totalNurses,
   onPageChange,
   onFilterChange,
   filters,
@@ -52,12 +54,13 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
   const [selectedNurses, setSelectedNurses] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const [cityFilter, setCityFilter] = useState(filters.city || '');
-  const [admittedTypeFilter, setAdmittedTypeFilter] = useState(filters.admittedType || '');
+  // const [admittedTypeFilter, setAdmittedTypeFilter] = useState(filters.admittedType || '');
+  const admittedTypeFilter = filters.admittedType;
   
   useEffect(() => {
     setStatusFilter(filters.status || '');
     setCityFilter(filters.city || '');
-    setAdmittedTypeFilter(filters.admittedType || '');
+    // setAdmittedTypeFilter(filters.admittedType || '');
   }, [filters]);
   
   if (!isOpen) return null;
@@ -84,18 +87,18 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
     onFilterChange({
       status: statusFilter || undefined,
       city: cityFilter || undefined,
-      admittedType: admittedTypeFilter || undefined
+      //admittedType: admittedTypeFilter || undefined
     });
   };
 
   const clearFilters = () => {
     setStatusFilter('');
     setCityFilter('');
-    setAdmittedTypeFilter('');
+    // setAdmittedTypeFilter('');
     onFilterChange({
       status: undefined,
       city: undefined,
-      admittedType: undefined
+      //admittedType: undefined
     });
   };
 
@@ -199,7 +202,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                   </select>
                 </div>
                 
-                <div>
+                {/* <div>
                   <label htmlFor="admittedTypeFilter" className="block text-xs font-medium text-gray-700 mb-1">Dearcare/Tata HomeNursing</label>
                   <select 
                     id="admittedTypeFilter"
@@ -211,6 +214,20 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                     <option value="Dearcare_Llp">Dearcare LLP</option>
                     <option value="Tata_Homenursing">Tata HomeNursing</option>
                   </select>
+                </div> */}
+
+                <div>
+                  <label htmlFor="admittedTypeDisplay" className="block text-xs font-medium text-gray-700 mb-1">
+                    Organization
+                  </label>
+                  <div
+                    id="admittedTypeDisplay"
+                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-gray-100"
+                  >
+                    {admittedTypeFilter === 'DearCare' && 'Dearcare LLP'}
+                    {admittedTypeFilter === 'TataHomeNursing' && 'Tata HomeNursing'}
+                    {admittedTypeFilter === '' && 'All'}
+                  </div>
                 </div>
                 
                 <div>
@@ -230,13 +247,14 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
               <div className="flex flex-col sm:flex-row gap-2 md:items-end md:self-end mt-3 md:mt-0">
                 <button 
                   onClick={applyFilters}
-                  className="px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                  // disabled={!statusFilter && !cityFilter /* && !admittedTypeFilter */}
+                  className="px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Apply Filters
                 </button>
                 <button 
                   onClick={clearFilters}
-                  disabled={!statusFilter && !cityFilter && !admittedTypeFilter}
+                  disabled={!statusFilter && !cityFilter /* && !admittedTypeFilter */}
                   className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 
                   transition-colors disabled:opacity-40 disabled:text-gray-400 disabled:border-gray-200
                   disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-gray-400 w-full sm:w-auto"
@@ -258,7 +276,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <p className="text-sm font-medium text-gray-700">
-                  {nurses.length} nurses available
+                  {`showing ${((currentPage - 1) * nurses.length) + 1}-${((currentPage - 1) * nurses.length) + nurses.length > totalNurses ? totalNurses : ((currentPage - 1) * nurses.length) + nurses.length} of ${totalNurses} nurses available`}
                 </p>
               </div>
               

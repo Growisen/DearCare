@@ -1,18 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
 import { getStaff } from "@/app/actions/staff-management/staff-actions";
 import { Staff, StaffOrganization } from "@/types/dearCareStaff.types";
+import useOrgStore from '@/app/stores/UseOrgStore';
 
 export function useStaffData() {
+  const { organization } = useOrgStore();
   const [staff, setStaff] = useState<Staff[]>([]);  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<StaffOrganization | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
+  // Map organization from store to staff organization
+  const getStaffOrganization = (): StaffOrganization | "all" => {
+    if (!organization) return "all";
+    if (organization === "TataHomeNursing") return "Tata HomeNursing";
+    if (organization === "DearCare") return "DearCare LLP";
+    return "all";
+  };
+
+  const selectedCategory = getStaffOrganization();
   
   const fetchData = useCallback(async () => {
     try {
@@ -63,11 +74,6 @@ export function useStaffData() {
     fetchData();
   }, [fetchData]);
   
-  const handleCategoryChange = useCallback((category: StaffOrganization | "all") => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-  }, []);
-  
   const handleSearch = useCallback(() => {
     setSearchQuery(searchInput);
     setCurrentPage(1);
@@ -103,9 +109,7 @@ export function useStaffData() {
     searchQuery,
     setSearchQuery,
     selectedCategory,
-    setSelectedCategory,
     handleSearch,
-    handleCategoryChange,
     currentPage,
     totalPages,
     totalCount,

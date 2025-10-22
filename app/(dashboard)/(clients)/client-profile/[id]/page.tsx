@@ -80,6 +80,7 @@ const PatientProfilePage = () => {
     totalPages,
     changePage,
     filters,
+    totalNurses,
     updateFilters,
     editingAssignment,
     showEditModal,
@@ -323,6 +324,7 @@ const PatientProfilePage = () => {
         onViewProfile={() => {}}
         currentPage={currentPage}
         totalPages={totalPages}
+        totalNurses={totalNurses}
         onPageChange={changePage}
         onFilterChange={updateFilters}
         filters={filters}

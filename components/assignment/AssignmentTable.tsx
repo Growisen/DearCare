@@ -26,12 +26,10 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
     }
   }
   
-  // Format nurse name and ID
-  const fullName = assignment.nurses?.first_name && assignment.nurses?.last_name 
-    ? `${assignment.nurses.first_name} ${assignment.nurses.last_name}`
+  const fullName = assignment.nurse_first_name && assignment.nurse_last_name
+    ? `${assignment.nurse_first_name} ${assignment.nurse_last_name}`
     : "Unknown Nurse";
   
-  // Client info
   const clientName = assignment.client_name || "Unknown Client";
   const clientType = assignment.client_type;
   const clientProfileUrl = assignment.client_profile_url || `/${assignment.client_id}`;

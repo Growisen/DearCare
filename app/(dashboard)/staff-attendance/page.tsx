@@ -21,7 +21,6 @@ export default function StaffAttendancePage() {
     totalCount,
     isExporting,
     loadAttendanceData,
-    handleCategoryChange,
     handleSearchChange,
     handleDateChange,
     handlePageSizeChange,
@@ -42,7 +41,6 @@ export default function StaffAttendancePage() {
         onExport={handleExport}
         isExporting={isExporting}
         selectedCategory={selectedCategory}
-        handleCategoryChange={handleCategoryChange}
       />
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">

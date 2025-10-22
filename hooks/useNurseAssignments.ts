@@ -5,9 +5,11 @@ import { NurseAssignment } from '@/types/client.types';
 import { Nurse } from '@/types/staff.types';
 import toast from 'react-hot-toast';
 import { useDashboardData } from './useDashboardData';
+import useOrgStore from '@/app/stores/UseOrgStore';
 
 export const useNurseAssignments = (clientId: string) => {
   const { invalidateDashboardCache } = useDashboardData();
+  const { organization } = useOrgStore(); 
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
@@ -28,7 +30,8 @@ export const useNurseAssignments = (clientId: string) => {
     status?: string;
     city?: string;
     serviceType?: string;
-  }>({});
+    admittedType?: string;
+  }>({admittedType: organization});
 
   const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {
     

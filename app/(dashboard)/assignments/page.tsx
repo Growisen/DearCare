@@ -29,7 +29,6 @@ export default function AssignmentsPage() {
     handleSearch,
     handleStatusChange,
     handleDateFilterChange,
-    handleCategoryChange, 
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
@@ -37,6 +36,8 @@ export default function AssignmentsPage() {
     refreshData,
     handleExport
   } = useAssignmentData()
+
+  console.log('AssignmentsPage render', error, assignments)
 
   return (
     <div className="space-y-5 sm:space-y-7">
@@ -52,7 +53,6 @@ export default function AssignmentsPage() {
         handleDateFilterChange={handleDateFilterChange}
         handleResetFilters={handleResetFilters}
         selectedCategory={categoryFilter}
-        handleCategoryChange={handleCategoryChange}
       />
 
 

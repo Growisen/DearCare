@@ -3,12 +3,24 @@ import { getLeaveRequests, updateLeaveRequestStatus, exportLeaveRequests } from 
 import { toast } from 'react-hot-toast';
 import { LeaveRequestStatus, LeaveRequest } from '@/types/leave.types';
 import { useQuery } from "@tanstack/react-query";
+import useOrgStore from '@/app/stores/UseOrgStore';
 
 export function useLeaveRequestData() {
+  const { organization } = useOrgStore();
   const [searchInput, setSearchInput] = useState('')
   const [appliedSearchTerm, setAppliedSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const [admittedTypeFilter, setAdmittedTypeFilter] = useState<'Dearcare_Llp' | 'Tata_Homenursing' | "">("");
+  
+  // Map organization from store to admitted type filter (database enum format)
+  const getAdmittedTypeFilter = (): 'Dearcare_Llp' | 'Tata_Homenursing' | "" => {
+    if (!organization) return "";
+    if (organization === "TataHomeNursing") return "Tata_Homenursing";
+    if (organization === "DearCare") return "Dearcare_Llp";
+    return "";
+  };
+
+  const admittedTypeFilter = getAdmittedTypeFilter();
+  
   const [dateRange, setDateRange] = useState<{startDate: string | null, endDate: string | null}>({
     startDate: null,
     endDate: null
@@ -274,8 +286,7 @@ export function useLeaveRequestData() {
     applySearch,
     statusFilter, 
     setStatusFilter,
-    admittedTypeFilter, 
-    setAdmittedTypeFilter,
+    admittedTypeFilter,
     dateRange,
     setDateRange,
     currentPage,

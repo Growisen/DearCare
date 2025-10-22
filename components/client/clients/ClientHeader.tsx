@@ -12,7 +12,6 @@ type ClientHeader = {
   selectedStatus: string
   handleStatusChange: (status: ClientStatus) => void
   selectedCategory: ClientCategory | "all" 
-  handleCategoryChange: (category: ClientCategory | "all") => void
   handleSearch: () => void
   handleResetFilters: () => void
 }
@@ -26,7 +25,6 @@ export function ClientHeader({
   selectedStatus, 
   handleStatusChange,
   selectedCategory,
-  handleCategoryChange, 
   handleSearch,
   handleResetFilters
 }: ClientHeader) {
@@ -103,23 +101,11 @@ export function ClientHeader({
 
         {/* Filters section - desktop view */}
         <div className="hidden sm:flex flex-wrap items-center gap-3">
-          {/* Category filter - desktop */}
+          {/* Organization badge - read only */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Category:</span>
-            <div className="flex gap-1.5 items-center">
-              {["all", "DearCare LLP", "Tata HomeNursing"].map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category as ClientCategory | "all")}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    selectedCategory === category
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {category === "all" ? "All Categories" : category}
-                </button>
-              ))}
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
+            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              {selectedCategory === "all" ? "All Organizations" : selectedCategory}
             </div>
           </div>
 
@@ -146,9 +132,9 @@ export function ClientHeader({
           {/* Reset button for desktop - pushed to right */}
           <button
             onClick={handleResetFilters}
-            disabled={selectedStatus === "all" && selectedCategory === "all" && !searchInput}
+            disabled={selectedStatus === "all" && !searchInput}
             className={`ml-auto px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
-              selectedStatus === "all" && selectedCategory === "all" && !searchInput
+              selectedStatus === "all" && !searchInput
                 ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
             }`}
@@ -158,55 +144,43 @@ export function ClientHeader({
           </button>
         </div>
         
-        {/* Mobile view - status and category dropdowns with reset button */}
+        {/* Mobile view - status dropdown with organization badge and reset button */}
         <div className="sm:hidden space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            {/* Status dropdown */}
-            <select
-              value={selectedStatus}
-              onChange={(e) => handleStatusChange(e.target.value as ClientStatus)}
-              className="rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: `right 0.5rem center`,
-                backgroundRepeat: `no-repeat`,
-                backgroundSize: `1.5em 1.5em`,
-                paddingRight: `2rem`
-              }}
-            >
-              <option value="all">All Clients</option>
-              {["approved", "pending", "under_review", "rejected"].map((status) => (
-                <option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
-                </option>
-              ))}
-            </select>
-            
-            {/* Category dropdown for mobile */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value as ClientCategory | "all")}
-              className="rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: `right 0.5rem center`,
-                backgroundRepeat: `no-repeat`,
-                backgroundSize: `1.5em 1.5em`,
-                paddingRight: `2rem`
-              }}
-            >
-              <option value="all">All Categories</option>
-              <option value="DearCare LLP">DearCare LLP</option>
-              <option value="Tata HomeNursing">Tata HomeNursing</option>
-            </select>
+          {/* Organization badge - read only for mobile */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600">Organization:</span>
+            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              {selectedCategory === "all" ? "All Organizations" : selectedCategory}
+            </div>
           </div>
+          
+          {/* Status dropdown */}
+          <select
+            value={selectedStatus}
+            onChange={(e) => handleStatusChange(e.target.value as ClientStatus)}
+            className="w-full rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+            style={{ 
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: `right 0.5rem center`,
+              backgroundRepeat: `no-repeat`,
+              backgroundSize: `1.5em 1.5em`,
+              paddingRight: `2rem`
+            }}
+          >
+            <option value="all">All Clients</option>
+            {["approved", "pending", "under_review", "rejected"].map((status) => (
+              <option key={status} value={status}>
+                {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+              </option>
+            ))}
+          </select>
           
           {/* Reset button for mobile */}
           <button
             onClick={handleResetFilters}
-            disabled={selectedStatus === "all" && selectedCategory === "all" && !searchInput}
+            disabled={selectedStatus === "all" && !searchInput}
             className={`w-full py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
-              selectedStatus === "all" && selectedCategory === "all" && !searchInput
+              selectedStatus === "all" && !searchInput
                 ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
             }`}
