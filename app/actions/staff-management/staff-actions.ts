@@ -406,6 +406,9 @@ export async function exportStaff(
 ) {
   try {
     const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+    const { clientsOrg } = getOrgMappings(organization);
     
     let query = supabase
       .from('dearcare_staff')
@@ -422,18 +425,22 @@ export async function exportStaff(
         district,
         state,
         pincode,
+        organization,
         created_at,
-        updated_at,
-        status
+        updated_at
       `);
+
+    if (clientsOrg) {
+      query = query.eq('organization', clientsOrg);
+    }
     
     if (role && role !== "all") {
-      query = query.eq('role', role);
+      //query = query.eq('role', role);
     }
     
     if (searchQuery && searchQuery.trim() !== '') {
-      const searchTerm = searchQuery.toLowerCase().trim();
-      query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+      // const searchTerm = searchQuery.toLowerCase().trim();
+      // query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });

@@ -130,6 +130,7 @@ export function AttendanceTable({
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Total Hours</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Status</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Location</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Salary Per Day</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Entry Type</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Actions</th>
             </tr>
@@ -170,6 +171,9 @@ export function AttendanceTable({
                     ) : (
                       <span className="text-slate-500">—</span>
                     )}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-slate-700">
+                    {record.salaryPerDay ? `₹${record.salaryPerDay.toFixed(2)}` : '—'}
                   </td>
                   <td className="px-4 py-4 text-sm">
                     {record.status === 'Absent' ? (

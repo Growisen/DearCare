@@ -1110,7 +1110,7 @@ export async function getNurseAttendanceRecordsByDate(
   pageSize: number = 10
 ): Promise<{
   success: boolean;
-  data?: AttendanceRecordById[];
+  data?: (AttendanceRecordById & { salaryPerDay?: number })[];
   count?: number;
   totalPages?: number;
   currentPage?: number;
@@ -1122,7 +1122,7 @@ export async function getNurseAttendanceRecordsByDate(
     // 1. Find all assignments for this nurse within the date range
     const { data: assignments, error: assignmentError } = await supabase
       .from('nurse_client')
-      .select('id, shift_start_time, shift_end_time, start_date, end_date')
+      .select('id, shift_start_time, shift_end_time, start_date, end_date, salary_per_day')
       .eq('nurse_id', nurseId)
       .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
 
@@ -1168,11 +1168,11 @@ export async function getNurseAttendanceRecordsByDate(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const attendanceMap = new Map<string, any>();
-    attendanceData.forEach(record => {
-      attendanceMap.set(record.date, record);
-    });
+      attendanceData.forEach(record => {
+        attendanceMap.set(record.date, record);
+      });
 
-    const results: (AttendanceRecordById | null)[] = await Promise.all(allDates.map(async date => {
+    const results: ((AttendanceRecordById & { salaryPerDay?: number }) | null)[] = await Promise.all(allDates.map(async date => {
       const assignment = dateAssignmentMap[date];
       if (!assignment) {
         return null;
@@ -1181,6 +1181,7 @@ export async function getNurseAttendanceRecordsByDate(
 
       const shiftStartTime = assignment.shift_start_time || null;
       const shiftEndTime = assignment.shift_end_time || null;
+      const salaryPerDay = assignment.salary_per_day ?? null;
 
       if (record) {
         let status = 'Absent';
@@ -1215,7 +1216,8 @@ export async function getNurseAttendanceRecordsByDate(
           notes: record.notes,
           assignmentId: assignment.id,
           shiftStartTime,
-          shiftEndTime
+          shiftEndTime,
+          salaryPerDay
         };
       } else {
         let status = 'Absent';
@@ -1243,11 +1245,12 @@ export async function getNurseAttendanceRecordsByDate(
           isAdminAction: false,
           assignmentId: assignment.id,
           shiftStartTime,
-          shiftEndTime
+          shiftEndTime,
+          salaryPerDay
         };
       }
     }));
-    const filteredResults = results.filter(Boolean) as AttendanceRecordById[];
+    const filteredResults = results.filter(Boolean) as (AttendanceRecordById & { salaryPerDay?: number })[];
     filteredResults.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     // PAGINATION

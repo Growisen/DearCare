@@ -37,7 +37,6 @@ export function useExportStaff(selectedRole: StaffRole | "all", searchQuery: str
         item.phone?.replace(/,/g, ' ') || '',
         item.role?.replace(/,/g, ' ') || '',
         item.join_date || '',
-        item.status?.replace(/,/g, ' ') || '',
         `${item.address_line1?.replace(/,/g, ' ')}${item.address_line2 ? ` ${item.address_line2?.replace(/,/g, ' ')}` : ''}`,
         item.city?.replace(/,/g, ' ') || '',
         item.district?.replace(/,/g, ' ') || '',

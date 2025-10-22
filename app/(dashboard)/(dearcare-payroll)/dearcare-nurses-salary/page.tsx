@@ -83,7 +83,7 @@ export default function NursesSalaryPage() {
             <h2 className="text-lg font-semibold text-gray-800">Salary Payments</h2>
             <p className="text-xs text-gray-500">Manage nurse salary payments and calculations</p>
           </div>
-          <div className="flex gap-2 self-start sm:self-auto">
+          <div className="hidden  gap-2 self-start sm:self-auto">
             <button 
               onClick={handleExport}
               disabled={isExporting || salaryRecords.length === 0}

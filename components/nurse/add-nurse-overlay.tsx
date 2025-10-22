@@ -4,6 +4,7 @@ import { AddNurseProps, DropdownProps, NurseFormData, NurseReferenceData, NurseH
 import { createNurse } from '@/app/actions/staff-management/add-nurse';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
+import useOrgStore from '@/app/stores/UseOrgStore'; 
 
 import { getTodayDDMMYYYY, formatDateToDDMMYYYY, formatDateToISO } from '@/utils/dateUtils';
 
@@ -226,22 +227,22 @@ const StepContent = {
       setFormData(prev => ({ ...prev, age: calculatedAge }));
     };
 
+    const admittedTypeLabelMap: Record<string, string> = {
+      Tata_Homenursing: 'Tata Home Nursing',
+      Dearcare_Llp: 'Dearcare LLP'
+    };
+
     return (
       <FormLayout>
         <Fields.Input label="First Name" placeholder="Enter first name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
         <Fields.Input label="Last Name" placeholder="Enter last name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
         <FormField label="Admitted Type">
-          <select
+          <input
             className={FORM_CONFIG.styles.input}
-            value={formData.admitted_type}
-            onChange={e => setFormData({ ...formData, admitted_type: e.target.value as 'Tata_Homenursing' | 'Dearcare_Llp' })}
-            required
-          >
-            <option value="">Select admitted type</option>
-            {FORM_CONFIG.options.admittedTypes.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+            value={admittedTypeLabelMap[formData.admitted_type] || ''}
+            disabled
+            readOnly
+          />
         </FormField>
         <Fields.Input 
           label="Previous Register Number" 
@@ -563,7 +564,14 @@ const validateStep = (step: number, data: StepData): boolean => {
 
 
 export function AddNurseOverlay({ onClose }: AddNurseProps) {
+  const { organization } = useOrgStore();
   const [currentStep, setCurrentStep] = useState(0);
+
+  const orgToAdmittedType: Record<string, 'Tata_Homenursing' | 'Dearcare_Llp'> = {
+    TataHomeNursing: 'Tata_Homenursing',
+    DearCare: 'Dearcare_Llp',
+  };
+  const admittedTypeValue = organization ? orgToAdmittedType[organization] : 'Tata_Homenursing';
   // const [selectedImage, setSelectedImage] = useState<File | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [documents, setDocuments] =  useState<NurseDocuments>({
@@ -598,7 +606,7 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
     mother_tongue: '',
     age: '',
     nurse_reg_no: '',
-    admitted_type: 'Tata_Homenursing',
+    admitted_type: admittedTypeValue,
     nurse_prev_reg_no: '',
     joining_date: getTodayDDMMYYYY(),
     salary_per_month: ''
@@ -632,6 +640,13 @@ export function AddNurseOverlay({ onClose }: AddNurseProps) {
   //     setSelectedImage(e.target.files[0]);
   //   }
   // };
+
+  useEffect(() => {
+    if (admittedTypeValue && nurseData.admitted_type !== admittedTypeValue) {
+      setNurseData(prev => ({ ...prev, admitted_type: admittedTypeValue }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [admittedTypeValue]);
 
   
 
