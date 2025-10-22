@@ -65,6 +65,7 @@ const OrganizationClientProfile = () => {
     showConfirmation,
     currentPage,
     totalPages,
+    totalNurses,
     filters,
     setShowNurseList,
     setShowConfirmation,
@@ -540,6 +541,7 @@ const OrganizationClientProfile = () => {
         onViewProfile={() => {}}
         currentPage={currentPage}
         totalPages={totalPages}
+        totalNurses={totalNurses}
         onPageChange={changePage}
         onFilterChange={updateFilters}
         filters={filters}

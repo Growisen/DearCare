@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import { User, UserCircle, LogOut, AlertCircle, Loader2 } from "lucide-react"
 import { useAuth } from '@/contexts/AuthContext'
 import ModalPortal from '@/components/ui/ModalPortal'
+import { useQueryClient } from "@tanstack/react-query"
 
 export default function AccountDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function AccountDropdown() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuth();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     setIsOpen(false); 
@@ -19,6 +21,7 @@ export default function AccountDropdown() {
   const confirmSignOut = async () => {
     try {
       setIsSigningOut(true);
+      queryClient.clear();
       await signOut();
     } catch (error) {
       console.error("Error signing out:", error);

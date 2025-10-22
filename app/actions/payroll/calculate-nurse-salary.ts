@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/app/actions/authentication/auth";
+import { getOrgMappings } from "@/app/utils/org-utils";
 
 function calculateShiftHours(startTime: string, endTime: string): number {
   try {
@@ -498,26 +499,36 @@ export async function fetchSalaryPaymentsWithNurseInfo({
 }) {
   const supabase = await createSupabaseServerClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const organization = user?.user_metadata?.organization;
+  const { nursesOrg } = getOrgMappings(organization);
+
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  console.log("Fetching salary payments for nursesOrg:", nursesOrg);
+
   let query = supabase
-    .from("salary_payments")
-    .select(
-      `
-      *,
-      nurses (
-        nurse_id,
-        first_name,
-        last_name,
-        nurse_reg_no
-      )
-    `
-    );
+  .from("salary_payments")
+  .select(`
+    *,
+    nurses!inner (
+      nurse_id,
+      first_name,
+      last_name,
+      nurse_reg_no,
+      admitted_type
+    )
+  `)
+  .eq("nurses.admitted_type", nursesOrg);
+
 
   query = query.range(from, to);
 
   const { data, error } = await query;
+
+
+  console.log("Fetched salary payments data:", data, "Error:", error);
 
   if (error) {
     return {

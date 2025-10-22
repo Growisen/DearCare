@@ -1,4 +1,5 @@
 'use server'
+import { getOrgMappings } from '@/app/utils/org-utils';
 
 
 type NurseDocuments = {
@@ -539,6 +540,11 @@ export async function fetchBasicDetails(
 }> {
   try {
     const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { nursesOrg } = getOrgMappings(organization);
+
     const { page = 1, limit = 10 } = pagination || {}
     const start = (page - 1) * limit
     const end = start + limit - 1
@@ -561,6 +567,7 @@ export async function fetchBasicDetails(
         status,
         nurse_reg_no
       `, { count: 'exact' })
+      .eq('admitted_type', nursesOrg)
 
     if (searchQuery && searchQuery.trim() !== '') {
       const q = `%${searchQuery.trim()}%`
@@ -574,8 +581,6 @@ export async function fetchBasicDetails(
       .range(start, end)
 
     const { data, error, count } = await nursesQuery
-
-    console.log('Fetched Data:', data)
 
     if (error) throw error
 
@@ -1179,9 +1184,10 @@ export async function listNursesWithAssignments(
 
     const page = paginationParams?.page || 1;
     const pageSize = paginationParams?.pageSize || 25;
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize - 1;
 
+    const { nursesOrg } = getOrgMappings(filterParams?.admittedType ?? '');
+
+    // Build base query with filters
     let nursesQuery = supabase
       .from('nurses')
       .select(`
@@ -1193,32 +1199,26 @@ export async function listNursesWithAssignments(
         experience,
         city,
         admitted_type
-      `);
+      `, { count: 'exact' });
 
     if (filterParams?.city) {
       nursesQuery = nursesQuery.like('city', filterParams.city);
     }
     if (filterParams?.admittedType) {
-      nursesQuery = nursesQuery.eq('admitted_type', filterParams.admittedType);
+      nursesQuery = nursesQuery.eq('admitted_type', nursesOrg);
     }
 
-    const { count, error: countError } = await supabase
-      .from('nurses')
-      .select('*', { count: 'exact', head: true });
-    
-    if (countError) throw countError;
-    const totalCount = count;
+    // First, fetch ALL nurses matching the base filters (without pagination)
+    // to properly calculate status-based filtering
+    const { data: allNursesData, error: allNursesError } = await nursesQuery
+      .order('first_name');
 
-    const { data: nursesData, error: nursesError } = await nursesQuery
-      .order('first_name')
-      .range(start, end);
+    if (allNursesError) throw allNursesError;
 
-    if (nursesError) throw nursesError;
-
-    const nurseIds = nursesData.map(nurse => nurse.nurse_id);
+    const allNurseIds = allNursesData.map(nurse => nurse.nurse_id);
     const currentDate = new Date().toISOString().split('T')[0];
 
-    // Fetch leave data (unchanged)
+    // Fetch leave data
     const { data: leaveData, error: leaveError } = await supabase
       .from('nurse_leave_requests')
       .select(`
@@ -1228,11 +1228,11 @@ export async function listNursesWithAssignments(
         end_date,
         reason
       `)
-      .in('nurse_id', nurseIds)
+      .in('nurse_id', allNurseIds)
       .eq('status', 'approved')
-      .gte('end_date', currentDate)
+      .gte('end_date', currentDate);
 
-    console.log("leave", leaveData)
+    console.log("leave", leaveData);
 
     if (leaveError) throw leaveError;
 
@@ -1241,7 +1241,7 @@ export async function listNursesWithAssignments(
       leaveByNurseId.set(leave.nurse_id, leave);
     }
 
-    // FIXED: Fetch all non-completed assignments (current + upcoming)
+    // Fetch all non-completed assignments (current + upcoming)
     const { data: assignmentsData, error: assignmentsError } = await supabase
       .from('nurse_client')
       .select(`
@@ -1256,7 +1256,7 @@ export async function listNursesWithAssignments(
           registration_number
         )
       `)
-      .in('nurse_id', nurseIds)
+      .in('nurse_id', allNurseIds)
       .or(`end_date.is.null,end_date.gt.${currentDate}`) 
       .order('start_date');
 
@@ -1270,7 +1270,8 @@ export async function listNursesWithAssignments(
       assignmentsByNurseId.get(assignment.nurse_id).push(assignment);
     }
 
-    let transformedData: Nurse[] = nursesData.map(nurse => {
+    // Transform all nurses to include status
+    let allTransformedData: Nurse[] = allNursesData.map(nurse => {
       const nurseLeave = leaveByNurseId.get(nurse.nurse_id);
       const nurseAssignments = assignmentsByNurseId.get(nurse.nurse_id) || [];
       
@@ -1320,7 +1321,7 @@ export async function listNursesWithAssignments(
         gender: '',
         dob: '',
         status: nurseStatus,
-        assignments: assignments, // CHANGED: Now plural and contains all assignments
+        assignments: assignments,
         leaveInfo: leaveInfo,
         location: nurse.city || '',
         rating: 3,
@@ -1329,17 +1330,24 @@ export async function listNursesWithAssignments(
       };
     });
 
+    // Apply status filter if provided
     if (filterParams?.status) {
-      transformedData = transformedData.filter(nurse => nurse.status === filterParams.status);
+      allTransformedData = allTransformedData.filter(nurse => nurse.status === filterParams.status);
     }
     
-    const adjustedCount = filterParams?.status ? transformedData.length : totalCount;
-    const totalPages = Math.ceil((adjustedCount || 0) / pageSize);
+    // Calculate pagination after filtering
+    const totalCount = allTransformedData.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    
+    // Apply pagination slice
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedData = allTransformedData.slice(start, end);
 
     return { 
-      data: transformedData, 
+      data: paginatedData, 
       error: null,
-      totalCount: adjustedCount || 0,
+      totalCount: totalCount,
       totalPages
     };
   } catch (error) {

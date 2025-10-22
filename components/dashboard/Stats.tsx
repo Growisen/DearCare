@@ -16,7 +16,7 @@ interface StatsProps {
 export default function Stats({ statsData }: StatsProps) {
   const [stats, setStats] = useState<Stat[]>([
     { title: "Active Nurses", value: 0, icon: Users, trend: "0%", trendUp: true, bgColor: "bg-blue-100", iconColor: "text-blue-600" },
-    { title: "Current Assignments", value: 0, icon: Calendar, trend: "0%", trendUp: true, bgColor: "bg-emerald-100", iconColor: "text-emerald-600" },
+    { title: "Total Assignments", value: 0, icon: Calendar, trend: "0%", trendUp: true, bgColor: "bg-emerald-100", iconColor: "text-emerald-600" },
     { title: "Open Requests", value: 0, icon: Activity, trend: "0%", trendUp: true, bgColor: "bg-amber-100", iconColor: "text-amber-600" },
     { title: "Approved Clients", value: 0, icon: Building2, trend: "0%", trendUp: true, bgColor: "bg-purple-100", iconColor: "text-purple-600" },
   ]);
@@ -28,7 +28,7 @@ export default function Stats({ statsData }: StatsProps) {
       setStats(prevStats => prevStats.map(stat => {
         if (stat.title === "Active Nurses") {
           return { ...stat, value: statsData.activeNurses.count, trend: statsData.activeNurses.trend, trendUp: statsData.activeNurses.trendUp };
-        } else if (stat.title === "Current Assignments") {
+        } else if (stat.title === "Total Assignments") {
           return { ...stat, value: statsData.currentAssignments.count, trend: statsData.currentAssignments.trend, trendUp: statsData.currentAssignments.trendUp };
         } else if (stat.title === "Open Requests") {
           return { ...stat, value: statsData.openRequests.count, trend: statsData.openRequests.trend, trendUp: statsData.openRequests.trendUp };

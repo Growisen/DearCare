@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { Client } from '@/types/client.types';
 import { logger } from '@/utils/logger';
+import { getOrgMappings } from '@/app/utils/org-utils';
 
 export interface Todo {
   id: string;
@@ -58,8 +59,12 @@ export async function fetchDashboardData(): Promise<{
 }> {
   try {
     const { supabase, userId } = await getAuthenticatedClient();
-    
     const today = new Date().toISOString().split('T')[0];
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { nursesOrg, clientsOrg } = getOrgMappings(organization);
 
     const [
       statsResults,
@@ -70,18 +75,36 @@ export async function fetchDashboardData(): Promise<{
     ] = await Promise.all([
 
       Promise.all([
-        supabase.from('nurses').select('count').neq('status', 'leave').single(),
-        supabase.from('nurse_client').select('count').single(),
-        supabase.from('clients').select('count').eq('status', 'pending').single(),
-        supabase.from('clients').select('count').eq('status', 'approved').single()
+        supabase
+          .from('nurses')
+          .select('count')
+          .neq('status', 'leave')
+          .eq('admitted_type', nursesOrg) 
+          .single(),
+        supabase
+          .from('nurse_client')
+          .select('*, nurse_id!inner(*)')
+          .eq('nurse_id.admitted_type', nursesOrg),
+        supabase
+          .from('clients')
+          .select('count')
+          .eq('status', 'pending')
+          .eq('client_category', clientsOrg)
+          .single(),
+        supabase
+          .from('clients')
+          .select('count')
+          .eq('status', 'approved')
+          .eq('client_category', clientsOrg)
+          .single()
       ]),
-    
+
       supabase
         .from('admin_dashboard_todos')
         .select('id, text, time, date, location, urgent, completed')
         .eq('user_id', userId)
         .order('created_at', { ascending: false }),
-        
+
       supabase
         .from('clients')
         .select(`
@@ -104,11 +127,12 @@ export async function fetchDashboardData(): Promise<{
           )
         `)
         .eq('status', 'pending')
+        .eq('client_category', clientsOrg)
         .limit(5)
         .order('created_at', { ascending: false }),
-    
-      supabase.rpc('get_attendance_data', { curr_date: today }),
-      
+
+      supabase.rpc('get_attendance_data_by_org', { curr_date: today, organization:nursesOrg }),
+
       Promise.all([
         supabase.from('dearcare_complaints').select('count').single(),
         supabase.from('dearcare_complaints').select('count').eq('status', 'open').single(),
@@ -116,6 +140,7 @@ export async function fetchDashboardData(): Promise<{
         supabase.from('dearcare_complaints').select('count').eq('status', 'resolved').single()
       ])
     ]);
+
 
     const [nursesResult, assignmentsResult, requestsResult, clientsResult] = statsResults;
     const [totalComplaintsResult, openComplaintsResult, underReviewComplaintsResult, resolvedComplaintsResult] = complaintsResults;
@@ -160,6 +185,7 @@ export async function fetchDashboardData(): Promise<{
     // Process attendance data from our RPC
     const attendanceData = attendanceResult.data || { total: 0, present: 0, onLeave: 0 };
     const totalStaff = attendanceData.total || 0;
+    console.log('Attendance Data:', attendanceData);
     const presentStaff = attendanceData.present || 0;
     const onLeaveStaff = attendanceData.onLeave || 0;
     const absentStaff = totalStaff - presentStaff - onLeaveStaff;
@@ -180,7 +206,7 @@ export async function fetchDashboardData(): Promise<{
             trendUp: true 
           },
           currentAssignments: { 
-            count: parseInt(String(assignmentsResult.data?.count)) || 0, 
+            count: parseInt(String(assignmentsResult.data?.length)) || 0, 
             trend: '+2%', 
             trendUp: true 
           },

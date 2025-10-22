@@ -791,8 +791,6 @@ export async function fetchStaffAttendance(
     }
     
     const { data: attendanceData, error: attendanceError } = await attendanceQuery;
-    logger.info('Attendance query result:', { error: attendanceError, dataLength: attendanceData });
-
     
     if (attendanceError) throw new Error(attendanceError.message);
     
