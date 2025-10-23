@@ -1217,7 +1217,9 @@ export async function listNursesWithAssignments(
         phone_number,
         experience,
         city,
-        admitted_type
+        admitted_type,
+        salary_per_month,
+        joining_date
       `, { count: 'exact' });
 
     if (filterParams?.city) {
@@ -1336,6 +1338,9 @@ export async function listNursesWithAssignments(
         phoneNumber: nurse.phone_number || '',
         experience: nurse.experience || 0,
         salaryPerHour: 0,
+        salaryPerMonth: nurse.salary_per_month || 0,
+        joiningDate: nurse.joining_date || null,
+        admittedType: nurse.admitted_type || '',
         salaryCap: 0,
         gender: '',
         dob: '',

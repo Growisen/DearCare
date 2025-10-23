@@ -1,6 +1,7 @@
 import React from 'react';
 import { Nurse } from '@/types/staff.types';
 import Link from 'next/link';
+import { getExperienceFromJoiningDate } from '@/utils/dateUtils';
 
 interface NurseCardProps {
   nurse: Nurse;
@@ -19,6 +20,8 @@ const NurseCard: React.FC<NurseCardProps> = ({
   isSelected = false, 
   onSelectChange 
 }) => {
+
+  console.log('Rendering NurseCard for nurse:', nurse);
   return (
     <div className="border border-gray-200 rounded-lg p-2 sm:p-3 hover:shadow-sm transition-shadow duration-300 bg-white h-full">
       <div className="flex flex-row items-start justify-between gap-2">
@@ -65,11 +68,23 @@ const NurseCard: React.FC<NurseCardProps> = ({
             <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-xs rounded-full text-blue-700">
               {nurse.experience} yrs exp
             </span>
+
+            {
+              nurse.joiningDate && (
+                <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-xs rounded-full text-blue-700">
+                  {getExperienceFromJoiningDate(nurse.joiningDate ?? '')} in {nurse.admittedType === 'Tata_Homenursing' ? 'Tata Homenursing' : 'Dearcare Llp'}
+                </span>
+              )
+            }
             <span className="inline-flex items-center px-1.5 py-0.5 bg-yellow-50 text-xs rounded-full text-yellow-700">
               {nurse.rating}/5 ★
             </span>
+            {/* <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-xs rounded-full text-green-700">
+              ₹{nurse.salaryPerHour}/hr AVG
+            </span> */}
+
             <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-xs rounded-full text-green-700">
-              ₹{nurse.salaryPerHour}/hr
+              ₹{nurse.salaryPerMonth}/month
             </span>
             {nurse.status === 'leave' && (
               <span className="inline-flex items-center px-1.5 py-0.5 bg-orange-50 text-xs rounded-full text-orange-700">
