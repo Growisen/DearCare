@@ -107,6 +107,12 @@ export interface SimplifiedNurseDetails {
     relation: string | null;
     description: string | null;
     family_references: FamilyReference[] | null; 
+    staff_reference?: {
+      name: string | null;
+      phone: string | null;
+      relation: string | null;
+      recommendation_details: string | null;
+    } | null;
   } | null;
   documents: {
     profile_image: string | null;
@@ -1122,6 +1128,7 @@ export async function updateNurse(
           relation: formData.references.relation,
           description: formData.references.description,
           family_references: formData.references.family_references,
+          staff_reference: formData.references.staff_reference,
         })
         .eq('nurse_id', nurseId);
     }
