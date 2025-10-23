@@ -100,7 +100,14 @@ export async function getClientContactInfo(
 
 
 /**
- * Helper function to create a user account if needed
+ * Creates a user account for a client if one does not already exist.
+ * If created, sends credentials via email only in production environment.
+ *
+ * @param supabase - Supabase admin client instance
+ * @param clientEmail - Email address of the client
+ * @param clientName - Name of the client
+ * @param clientId - Unique client identifier
+ * @returns Promise<void>
  */
 export async function createUserAccountIfNeeded(
   supabase: SupabaseClient<Database>,
@@ -109,13 +116,13 @@ export async function createUserAccountIfNeeded(
   clientId: string
 ): Promise<void> {
   const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
-  
+
   if (userListError) {
     logger.error('Error listing users:', userListError);
     return;
   }
-  
-  const existingUser = userList?.users?.find(user => 
+
+  const existingUser = userList?.users?.find(user =>
     user.email?.toLowerCase() === clientEmail.toLowerCase()
   );
 
@@ -124,16 +131,16 @@ export async function createUserAccountIfNeeded(
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
       const timestamp = Date.now().toString(36);
       let password = timestamp.slice(0, 4);
-      
+
       for (let i = 0; i < 8; i++) {
         password += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      
+
       return password;
     };
-    
+
     const password = generateUniquePassword();
-    
+
     const { error: createError } = await supabase.auth.admin.createUser({
       email: clientEmail,
       password: password,
@@ -145,20 +152,25 @@ export async function createUserAccountIfNeeded(
         requiresPasswordChange: true
       }
     });
-    
+
     if (createError) {
       logger.error('Error creating user account:', createError);
     } else {
-      const emailResult = await sendClientCredentials(clientEmail, {
-        name: clientName,
-        password: password,
-        appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download'
-      });
-      
-      if (emailResult.error) {
-        logger.error('Error sending welcome email:', emailResult.error);
+      const env = process.env.NODE_ENV;
+      if (env === 'production') {
+        const emailResult = await sendClientCredentials(clientEmail, {
+          name: clientName,
+          password: password,
+          appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download'
+        });
+
+        if (emailResult.error) {
+          logger.error('Error sending welcome email:', emailResult.error);
+        } else {
+          logger.info(`Welcome email sent to ${clientEmail}`);
+        }
       } else {
-        logger.info(`Welcome email sent to ${clientEmail}`);
+        logger.info(`Skipped sending welcome email to ${clientEmail} (env: ${env})`);
       }
     }
   }

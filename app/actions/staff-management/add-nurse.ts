@@ -1,5 +1,6 @@
 'use server'
 import { getOrgMappings } from '@/app/utils/org-utils';
+import { getProtectedDocumentUrl } from '@/app/utils/supabase-storage-utils';
 
 
 type NurseDocuments = {
@@ -106,6 +107,12 @@ export interface SimplifiedNurseDetails {
     relation: string | null;
     description: string | null;
     family_references: FamilyReference[] | null; 
+    staff_reference?: {
+      name: string | null;
+      phone: string | null;
+      relation: string | null;
+      recommendation_details: string | null;
+    } | null;
   } | null;
   documents: {
     profile_image: string | null;
@@ -249,8 +256,8 @@ export async function createNurse(
         phone_number: referenceData.reference_phone,
         relation: referenceData.reference_relation,
         description: referenceData.recommendation_details,
-        family_references: referenceData.family_references
-        
+        family_references: referenceData.family_references,
+        staff_reference: referenceData.staff_reference
       })
 
     if (referenceError) throw referenceError
@@ -350,12 +357,16 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       return { data: null, error: 'Not authenticated' }
     }
 
+    console.log('Fetching details for nurse ID:', nurseId)
+
     // Fetch basic nurse information
     const { data: basicData, error: basicError } = await supabase
       .from('nurses')
       .select('*')
       .eq('nurse_id', nurseId)
       .single()
+
+    console.log('Basic Data Fetched:', basicData)
 
     if (basicError) throw basicError
 
@@ -366,41 +377,25 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       .eq('nurse_id', nurseId)
       .single()
 
+    console.log('Health Data Fetched:', healthData)
+
     // Fetch reference information
     const { data: referenceData } = await supabase
       .from('nurse_references')
-      .select('referer_name, phone_number, relation, description, family_references')
+      .select('referer_name, phone_number, relation, description, family_references, staff_reference')
       .eq('nurse_id', nurseId)
       .single()
-
-    // Fetch document URLs
-    const getDocumentUrl = async (folder: string): Promise<string | null> => {
-      const { data: files } = await supabase
-        .storage
-        .from('DearCare')
-        .list(`Nurses/${folder}`, {
-          limit: 1,
-          search: nurseId.toString(),
-        })
-
-      if (files && files.length > 0) {
-        const { data: url } = supabase
-          .storage
-          .from('DearCare')
-          .getPublicUrl(`Nurses/${folder}/${files[0].name}`)
-        return url.publicUrl
-      }
-      return null
-    }
+    
+    console.log('Reference Data Fetched:', referenceData)
 
     const documents = {
-      profile_image: await getDocumentUrl('image'),
-      adhar: await getDocumentUrl('adhar'),
-      educational: await getDocumentUrl('Educational_Certificates'),
-      experience: await getDocumentUrl('Experience_Certificates'),
-      noc: await getDocumentUrl('Noc_Certificate'),
-      ration: await getDocumentUrl('ration_card')
-    }
+      profile_image: await getProtectedDocumentUrl(supabase, nurseId, 'image'),
+      adhar: await getProtectedDocumentUrl(supabase, nurseId, 'adhar'),
+      educational: await getProtectedDocumentUrl(supabase, nurseId, 'Educational_Certificates'),
+      experience: await getProtectedDocumentUrl(supabase, nurseId, 'Experience_Certificates'),
+      noc: await getProtectedDocumentUrl(supabase, nurseId, 'Noc_Certificate'),
+      ration: await getProtectedDocumentUrl(supabase, nurseId, 'ration_card')
+    };
 
     console.log('Documents:', documents)
 
@@ -1133,6 +1128,7 @@ export async function updateNurse(
           relation: formData.references.relation,
           description: formData.references.description,
           family_references: formData.references.family_references,
+          staff_reference: formData.references.staff_reference,
         })
         .eq('nurse_id', nurseId);
     }
@@ -1217,7 +1213,9 @@ export async function listNursesWithAssignments(
         phone_number,
         experience,
         city,
-        admitted_type
+        admitted_type,
+        salary_per_month,
+        joining_date
       `, { count: 'exact' });
 
     if (filterParams?.city) {
@@ -1336,6 +1334,9 @@ export async function listNursesWithAssignments(
         phoneNumber: nurse.phone_number || '',
         experience: nurse.experience || 0,
         salaryPerHour: 0,
+        salaryPerMonth: nurse.salary_per_month || 0,
+        joiningDate: nurse.joining_date || null,
+        admittedType: nurse.admitted_type || '',
         salaryCap: 0,
         gender: '',
         dob: '',

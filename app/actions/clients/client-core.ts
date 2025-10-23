@@ -194,7 +194,6 @@ export async function getClientDetails(clientId: string) {
   try {
     const supabase = await createSupabaseServerClient()
     
-    // Get the base client record first to determine the type
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('*')
@@ -208,8 +207,7 @@ export async function getClientDetails(clientId: string) {
     if (!client) {
       return { success: false, error: 'Client not found' }
     }
-    
-    // Based on client type, fetch the appropriate details
+
     if (client.client_type === 'individual') {
       const { data: individualClient, error: individualError } = await supabase
         .from('individual_clients')
@@ -234,14 +232,12 @@ export async function getClientDetails(clientId: string) {
             ...individualClient,
             patient_profile_pic_url: patientPicUrl,
             requestor_profile_pic_url: requestorPicUrl,
-            // Keep original paths for reference
             patient_profile_pic: individualClient.patient_profile_pic,
             requestor_profile_pic: individualClient.requestor_profile_pic,
           }
         }
       }
     } else {
-      // For organization, hospital, or carehome clients
       const { data: organizationClient, error: organizationError } = await supabase
         .from('organization_clients')
         .select('*')

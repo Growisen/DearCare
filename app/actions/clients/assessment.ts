@@ -185,62 +185,72 @@ export async function getClientAssessmentFormStatus(clientId: string) {
   }
 }
 
-export async function sendClientAssessmentFormLink(clientId: string) {
-    try {
-      const supabase = await createSupabaseServerClient();
-      
-      // First get the client type to determine where to look for contact info
-      const { error: clientError } = await supabase
-        .from('clients')
-        .select('client_type')
-        .eq('id', clientId)
-        .single();
-      
-      if (clientError) {
-        return { success: false, error: `Client not found: ${clientError.message}` };
-      }
-      
-      let clientEmail = '';
-      let clientName = '';
-      
-        const { data: individualData, error: individualError } = await supabase
-          .from('individual_clients')
-          .select('requestor_email, requestor_name, patient_name')
-          .eq('client_id', clientId)
-          .single();
-          
-        if (individualError) {
-          return { success: false, error: `Client details not found: ${individualError.message}` };
-        }
-        
-        clientEmail = individualData.requestor_email;
-        clientName = individualData.requestor_name || individualData.patient_name;
-      
-      if (!clientEmail) {
-        return { success: false, error: 'Client email not found' };
-      }
-  
-      // Generate form link with client ID
-      const formBaseUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://dearcare.com';
-      const formLink = `${formBaseUrl}/patient-assessment/${clientId}`;
-  
-      // Send email
+/**
+ * Sends the client assessment form link to the client's email address.
+ * Only sends the email in production environment.
+ *
+ * @param clientId - Unique client identifier
+ * @returns Promise<{ success: boolean; error?: string }>
+ */
+export async function sendClientAssessmentFormLink(clientId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // First get the client type to determine where to look for contact info
+    const { error: clientError } = await supabase
+      .from('clients')
+      .select('client_type')
+      .eq('id', clientId)
+      .single();
+
+    if (clientError) {
+      return { success: false, error: `Client not found: ${clientError.message}` };
+    }
+
+    let clientEmail = '';
+    let clientName = '';
+
+    const { data: individualData, error: individualError } = await supabase
+      .from('individual_clients')
+      .select('requestor_email, requestor_name, patient_name')
+      .eq('client_id', clientId)
+      .single();
+
+    if (individualError) {
+      return { success: false, error: `Client details not found: ${individualError.message}` };
+    }
+
+    clientEmail = individualData.requestor_email;
+    clientName = individualData.requestor_name || individualData.patient_name;
+
+    if (!clientEmail) {
+      return { success: false, error: 'Client email not found' };
+    }
+
+    const formBaseUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://dearcare.com';
+    const formLink = `${formBaseUrl}/patient-assessment/${clientId}`;
+
+    const env = process.env.NODE_ENV;
+    if (env === 'production') {
       const emailResult = await sendClientFormLink(clientEmail, {
         name: clientName,
         clientId: clientId,
         formLink: formLink
       });
-  
+
       if (!emailResult.success) {
         throw new Error('Failed to send email');
       }
-  
       return { success: true };
-    } catch (error) {
-      logger.error('Error sending client assessment form:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred' 
-      };
+    } else {
+      logger.info(`Skipped sending assessment form email to ${clientEmail} (env: ${env})`);
+      return { success: true };
     }
+  } catch (error) {
+    logger.error('Error sending client assessment form:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An error occurred'
+    };
+  }
 }

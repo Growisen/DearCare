@@ -8,7 +8,13 @@ import { logger } from '@/utils/logger';
 
 
 /**
- * Updates a client's status
+ * Updates a client's status.
+ * Sends rejection notification email only in production environment.
+ *
+ * @param clientId - Unique client identifier
+ * @param newStatus - New status for the client
+ * @param rejectionReason - Reason for rejection (if applicable)
+ * @returns Promise<{ success: boolean; client?: any; error?: string }>
  */
 export async function updateClientStatus(
     clientId: string,
@@ -53,19 +59,20 @@ export async function updateClientStatus(
           return { success: false, error: error.message };
         }
         
-        // Send rejection email if email is available
-        if (clientEmail && clientName) {
+        // Send rejection email only in production environments
+        const env = process.env.NODE_ENV;
+        if ((env === 'production') && clientEmail && clientName) {
           try {
             await sendClientRejectionNotification(clientEmail, {
               name: clientName,
               rejectionReason: rejectionReason
             });
-            logger.error(`Rejection notification sent to ${clientEmail}`);
+            logger.info(`Rejection notification sent to ${clientEmail}`);
           } catch (emailError) {
             logger.error('Error sending rejection email:', emailError);
           }
         } else {
-          logger.warn('Unable to send rejection email: Missing client email or name');
+          logger.info(`Skipped sending rejection email to ${clientEmail} (env: ${env})`);
         }
         
         revalidatePath('/clients');
@@ -123,4 +130,3 @@ export async function updateClientStatus(
       };
     }
 }
-  

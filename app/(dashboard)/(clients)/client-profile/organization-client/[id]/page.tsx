@@ -531,7 +531,6 @@ const OrganizationClientProfile = () => {
         onClose={() => setIsImageViewerOpen(false)}
       />
 
-      {/* Modals - Updated to use hook's state and functions */}
       <NurseListModal
         isOpen={showNurseList}
         nurses={nurses}
