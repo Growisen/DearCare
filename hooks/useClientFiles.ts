@@ -11,7 +11,7 @@ export type FileItem = {
   type: string;
   url: string;
   uploadedAt: string;
-  tag?: string; // Add tag field
+  tag?: string;
 };
 
 export const useClientFiles = (clientId: string) => {
@@ -27,14 +27,13 @@ export const useClientFiles = (clientId: string) => {
       const response = await getClientFiles(clientId);
       
       if (response.success && response.data) {
-        // Map database records to FileItem format
         const mappedFiles: FileItem[] = response.data.map(file => ({
           id: file.id,
           name: file.name,
           type: file.type,
           url: file.url,
           uploadedAt: file.uploaded_at,
-          tag: file.tag // Add tag field
+          tag: file.tag
         }));
         setFiles(mappedFiles);
       } else {
@@ -43,36 +42,6 @@ export const useClientFiles = (clientId: string) => {
     } catch (err) {
       console.error('Error fetching client files:', err);
       setError('Failed to load files');
-      
-      // For development only, use mockup data
-      if (process.env.NODE_ENV === 'development') {
-        setFiles([
-          {
-            id: '1',
-            name: 'patient_report.pdf',
-            type: 'application/pdf',
-            url: '#',
-            uploadedAt: new Date().toISOString(),
-            tag: 'Annual checkup report'
-          },
-          {
-            id: '2',
-            name: 'medical_history.docx',
-            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            url: '#',
-            uploadedAt: new Date().toISOString(),
-            tag: 'Previous treatments'
-          },
-          {
-            id: '3',
-            name: 'xray_scan.jpg',
-            type: 'image/jpeg',
-            url: '#',
-            uploadedAt: new Date().toISOString(),
-            tag: 'Spine X-ray'
-          }
-        ]);
-      }
     } finally {
       setLoading(false);
     }

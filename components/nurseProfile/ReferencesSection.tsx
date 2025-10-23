@@ -1,9 +1,16 @@
-import React from 'react';
+import React from 'react'
 
 interface FamilyReference {
   name: string | null;
   relation: string | null;
   phone: string | null;
+}
+
+interface StaffReference {
+  name: string | null;
+  relation: string | null;
+  phone: string | null;
+  recommendation_details?: string | null;
 }
 
 interface ReferencesInfo {
@@ -12,6 +19,7 @@ interface ReferencesInfo {
   phone_number: string | null;
   description: string | null;
   family_references?: FamilyReference[] | null;
+  staff_reference?: StaffReference | null;
 }
 
 interface ReferencesSectionProps {
@@ -51,6 +59,33 @@ const ReferencesSection: React.FC<ReferencesSectionProps> = ({ referencesInfo })
             </div>
           </div>
         </div>
+
+        {referencesInfo.staff_reference && (
+          <div>
+            <h3 className="text-sm font-medium mb-3 text-gray-700 flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+              Staff Reference
+            </h3>
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="space-y-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Name:</span> {referencesInfo.staff_reference.name}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Relation:</span> {referencesInfo.staff_reference.relation}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Phone:</span> {referencesInfo.staff_reference.phone}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Description:</span> {referencesInfo.staff_reference.recommendation_details}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {referencesInfo.family_references && (
           <div>

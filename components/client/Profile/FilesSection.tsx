@@ -229,7 +229,7 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
                           <a 
                             href={file.url} 
                             download
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 cursor-pointer"
                             target="_blank"
                             rel="noopener noreferrer"
                           >
