@@ -376,7 +376,7 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
     // Fetch reference information
     const { data: referenceData } = await supabase
       .from('nurse_references')
-      .select('referer_name, phone_number, relation, description, family_references')
+      .select('referer_name, phone_number, relation, description, family_references, staff_reference')
       .eq('nurse_id', nurseId)
       .single()
     
