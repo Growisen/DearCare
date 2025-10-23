@@ -1,5 +1,7 @@
 import React from 'react';
 import { NurseAssignmentWithClient } from '@/app/actions/staff-management/add-nurse';
+import { format12HourTime, formatDate, getServiceLabel } from '@/utils/formatters';
+import { serviceOptions } from '@/utils/constants';
 
 interface AssignmentCardProps {
   assignment: NurseAssignmentWithClient;
@@ -84,7 +86,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                   Start Date:
                 </span>
                 <span className="text-sm text-gray-700">
-                  {new Date(assignment.assignment.start_date).toLocaleDateString()}
+                  {formatDate(assignment.assignment.start_date)}
                 </span>
               </div>
               
@@ -97,7 +99,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                     End Date:
                   </span>
                   <span className="text-sm text-gray-700">
-                    {new Date(assignment.assignment.end_date).toLocaleDateString()}
+                    {formatDate(assignment.assignment.end_date)}
                   </span>
                 </div>
               )}
@@ -111,7 +113,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                     Shift Time:
                   </span>
                   <span className="text-sm text-gray-700">
-                    {assignment.assignment.shift_start_time} - {assignment.assignment.shift_end_time}
+                    {format12HourTime(assignment.assignment.shift_start_time)} - {format12HourTime(assignment.assignment.shift_end_time)}
                   </span>
                 </div>
               )}
@@ -125,6 +127,17 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                     Hourly Rate:
                   </span>
                   <span className="text-sm text-gray-700 font-medium">₹{assignment.assignment.salary_hour}</span>
+                </div>
+              )}
+              {assignment.assignment.salary_per_day && (
+                <div className="flex">
+                  <span className="text-sm font-medium w-32 text-gray-500 flex items-center">
+                    <svg className="w-3.5 h-3.5 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Salary Per Day:
+                  </span>
+                  <span className="text-sm text-gray-700 font-medium">₹{assignment.assignment.salary_per_day}</span>
                 </div>
               )}
             </div>
@@ -160,7 +173,12 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                     Patient:
                   </span>
                   <span className="text-sm text-gray-700">
-                    {assignment.client.details.individual?.patient_name}, {assignment.client.details.individual?.patient_age} years
+                    {assignment.client.details.individual?.patient_name
+                      ? assignment.client.details.individual.patient_name
+                      : 'N/A'}
+                    {assignment.client.details.individual?.patient_age != null
+                      ? `, ${assignment.client.details.individual.patient_age} years`
+                      : ''}
                   </span>
                 </div>
                 
@@ -172,7 +190,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                     Gender:
                   </span>
                   <span className="text-sm text-gray-700">
-                    {assignment.client.details.individual?.patient_gender}
+                    {assignment.client.details.individual?.patient_gender || 'N/A'}
                   </span>
                 </div>
                 
@@ -184,7 +202,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
                     Service:
                   </span>
                   <span className="text-sm text-gray-700">
-                    {assignment.client.details.individual?.service_required}
+                    {getServiceLabel(serviceOptions, assignment.client.details.individual?.service_required || 'N/A')}
                   </span>
                 </div>
                 

@@ -31,6 +31,7 @@ export interface NurseAssignmentWithClient {
     shift_start_time: string | null;
     shift_end_time: string | null;
     salary_hour: number | null;
+    salary_per_day?: number | null;
   };
   client: {
     type: 'individual' | 'hospital' | 'carehome' | 'organization';
@@ -357,16 +358,12 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       return { data: null, error: 'Not authenticated' }
     }
 
-    console.log('Fetching details for nurse ID:', nurseId)
-
     // Fetch basic nurse information
     const { data: basicData, error: basicError } = await supabase
       .from('nurses')
       .select('*')
       .eq('nurse_id', nurseId)
       .single()
-
-    console.log('Basic Data Fetched:', basicData)
 
     if (basicError) throw basicError
 
@@ -377,16 +374,12 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       .eq('nurse_id', nurseId)
       .single()
 
-    console.log('Health Data Fetched:', healthData)
-
     // Fetch reference information
     const { data: referenceData } = await supabase
       .from('nurse_references')
       .select('referer_name, phone_number, relation, description, family_references, staff_reference')
       .eq('nurse_id', nurseId)
       .single()
-    
-    console.log('Reference Data Fetched:', referenceData)
 
     const documents = {
       profile_image: await getProtectedDocumentUrl(supabase, nurseId, 'image'),
@@ -396,14 +389,6 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       noc: await getProtectedDocumentUrl(supabase, nurseId, 'Noc_Certificate'),
       ration: await getProtectedDocumentUrl(supabase, nurseId, 'ration_card')
     };
-
-    console.log('Documents:', documents)
-
-    console.log('Basic Data:', basicData)
-
-    console.log('Health Data:', healthData)
-
-    console.log('Reference Data:', referenceData)
 
     return {
       data: {
@@ -434,6 +419,7 @@ interface AssignmentResponse {
   shift_end_time: string | null;
   salary_hour: number | null;
   client_id: string;
+  salary_per_day?: number | null;
   clients: {
     client_type: 'individual' | 'hospital' | 'carehome' | 'organization';
   };
@@ -464,6 +450,7 @@ export async function fetchNurseAssignments(
         shift_start_time,
         shift_end_time,
         salary_hour,
+        salary_per_day,
         client_id,
         clients!inner (
           client_type
@@ -499,6 +486,7 @@ export async function fetchNurseAssignments(
             shift_start_time: assignment.shift_start_time,
             shift_end_time: assignment.shift_end_time,
             salary_hour: assignment.salary_hour,
+            salary_per_day: assignment.salary_per_day
           },
           client: {
             type: assignment.clients.client_type,
