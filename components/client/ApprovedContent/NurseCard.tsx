@@ -21,7 +21,6 @@ const NurseCard: React.FC<NurseCardProps> = ({
   onSelectChange 
 }) => {
 
-  console.log('Rendering NurseCard for nurse:', nurse);
   return (
     <div className="border border-gray-200 rounded-lg p-2 sm:p-3 hover:shadow-sm transition-shadow duration-300 bg-white h-full">
       <div className="flex flex-row items-start justify-between gap-2">

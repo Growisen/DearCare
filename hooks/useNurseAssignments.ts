@@ -104,8 +104,6 @@ export const useNurseAssignments = (clientId: string) => {
         { page: currentPage, pageSize },
         filters
       );
-
-      console.log('Fetched nurses response:', response);
       
       if (response.data) {
         setNurses(response.data);
