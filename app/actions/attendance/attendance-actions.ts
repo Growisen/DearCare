@@ -1253,7 +1253,6 @@ export async function getNurseAttendanceRecordsByDate(
     const filteredResults = results.filter(Boolean) as (AttendanceRecordById & { salaryPerDay?: number })[];
     filteredResults.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    // PAGINATION
     const totalRecords = filteredResults.length;
     const totalPages = Math.ceil(totalRecords / pageSize);
     const paginatedResults = filteredResults.slice((page - 1) * pageSize, page * pageSize);

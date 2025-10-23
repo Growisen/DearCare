@@ -1,9 +1,9 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { Client } from '@/types/client.types';
 import { logger } from '@/utils/logger';
 import { getOrgMappings } from '@/app/utils/org-utils';
+import { getAuthenticatedClient } from '@/app/utils/auth-utils';
 
 export interface Todo {
   id: string;
@@ -14,18 +14,6 @@ export interface Todo {
   urgent: boolean;
   completed: boolean;
   user_id?: string;
-}
-
-async function getAuthenticatedClient() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const userId = user?.id;
-  
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-  
-  return { supabase, userId };
 }
 
 export interface DashboardData {
@@ -51,6 +39,12 @@ export interface DashboardData {
     total: number;
   };
 }
+
+// ==============================
+// Function: fetchDashboardData
+// Description: Fetches dashboard statistics, todos, recent clients, attendance, and complaints data for the authenticated user and organization.
+// Returns: Promise<{ success: boolean; data?: DashboardData; error?: string }>
+// ==============================
 
 export async function fetchDashboardData(): Promise<{
   success: boolean;
@@ -182,7 +176,6 @@ export async function fetchDashboardData(): Promise<{
       };
     });
 
-    // Process attendance data from our RPC
     const attendanceData = attendanceResult.data || { total: 0, present: 0, onLeave: 0 };
     const totalStaff = attendanceData.total || 0;
     console.log('Attendance Data:', attendanceData);
@@ -248,6 +241,12 @@ export async function fetchDashboardData(): Promise<{
   }
 }
 
+
+// ==============================
+// Function: addTodo
+// Description: Adds a new todo item for the authenticated user.
+// Returns: Promise<{ success: boolean; todo?: Todo; error?: string }>
+// ==============================
 export async function addTodo(todo: Omit<Todo, 'id'>): Promise<{ success: boolean; todo?: Todo; error?: string }> {
   try {
     const { supabase, userId } = await getAuthenticatedClient();
@@ -281,6 +280,12 @@ export async function addTodo(todo: Omit<Todo, 'id'>): Promise<{ success: boolea
   }
 }
 
+
+// ==============================
+// Function: updateTodoStatus
+// Description: Updates the completion status of a todo item for the authenticated user.
+// Returns: Promise<{ success: boolean; error?: string }>
+// ==============================
 export async function updateTodoStatus(id: string, completed: boolean): Promise<{ success: boolean; error?: string }> {
   try {
     const { supabase, userId } = await getAuthenticatedClient();
@@ -305,6 +310,12 @@ export async function updateTodoStatus(id: string, completed: boolean): Promise<
   }
 }
 
+
+// ==============================
+// Function: deleteTodo
+// Description: Deletes a todo item for the authenticated user.
+// Returns: Promise<{ success: boolean; error?: string }>
+// ==============================
 export async function deleteTodo(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const { supabase, userId } = await getAuthenticatedClient();
