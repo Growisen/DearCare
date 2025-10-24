@@ -87,7 +87,7 @@ const NurseProfilePage: React.FC = () => {
 
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          <div className="p-6">
+          <div className="p-0">
             {activeTab === 'profile' ? (
               <ProfileContent nurse={nurse} calculateAge={calculateAge} />
             ) : activeTab === 'assignments' ? (
