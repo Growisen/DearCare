@@ -734,7 +734,7 @@ export async function fetchStaffAttendance(
   pageSize: number = 50,
   includeAbsent: boolean = true,
   admittedType?: string,
-  searchTerm?: string
+  debouncedSearchTerm?: string
 ): Promise<{ 
   success: boolean; 
   data: AttendanceRecord[]; 
@@ -811,7 +811,7 @@ export async function fetchStaffAttendance(
         .map(record => record.assigned_id)
     );
     
-    const formattedAttendanceData = validAttendanceData.map(processAttendanceRecord);
+    let formattedAttendanceData = validAttendanceData.map(processAttendanceRecord);
     
     let absentRecords: AttendanceRecord[] = [];
     if (includeAbsent) {
@@ -917,9 +917,12 @@ export async function fetchStaffAttendance(
       }
     }
 
-    if (searchTerm && searchTerm.trim() !== "") {
-      const searchLower = searchTerm.trim().toLowerCase();
-      absentRecords = absentRecords.filter(record => 
+    if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
+      const searchLower = debouncedSearchTerm.trim().toLowerCase();
+      formattedAttendanceData = formattedAttendanceData.filter(record =>
+        record.nurseName.toLowerCase().includes(searchLower)
+      );
+      absentRecords = absentRecords.filter(record =>
         record.nurseName.toLowerCase().includes(searchLower)
       );
     }
@@ -945,6 +948,83 @@ export async function fetchStaffAttendance(
     };
   } catch (error) {
     logger.error('Error fetching attendance records:', error);
+    return {
+      success: false,
+      data: [],
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+
+export async function fetchStaffAttendanceFromView(
+  date?: string,
+  page: number = 1,
+  pageSize: number = 50,
+  admittedType?: string,
+  debouncedSearchTerm?: string
+): Promise<{ 
+  success: boolean; 
+  data: AttendanceRecord[]; 
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalRecords: number;
+    pageSize: number;
+  };
+  error?: string 
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const from = (page - 1) * pageSize;
+
+    let query = supabase
+      .from('nurse_attendance_view')
+      .select('*', { count: 'exact' })
+      .eq('date', targetDate);
+
+    if (admittedType) {
+      query = query.eq('admitted_type', admittedType);
+    }
+
+    if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
+      const searchLower = debouncedSearchTerm.trim().toLowerCase();
+      query = query.ilike('full_name', `%${searchLower}%`);
+    }
+
+    query = query.range(from, from + pageSize - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) throw new Error(error.message);
+
+    const formattedData: AttendanceRecord[] = (data || []).map(record => ({
+      id: record.attendance_id,
+      nurseName: record.full_name || `${record.first_name} ${record.last_name}`,
+      date: record.date,
+      shiftStart: record.start_time ? convertTo12HourFormat(record.start_time) : '',
+      shiftEnd: record.end_time ? convertTo12HourFormat(record.end_time) : '',
+      scheduledStart: record.scheduled_start_time ? convertTo12HourFormat(record.scheduled_start_time) : '',
+      scheduledEnd: record.scheduled_end_time ? convertTo12HourFormat(record.scheduled_end_time) : '',
+      hoursWorked: calculateHoursWorked(record.total_hours, record.start_time, record.end_time),
+      status: record.start_time ? 'Present' : 'Absent',
+      location: parseLocation(record.location),
+      nurseId: record.nurse_id || null
+    }));
+
+    return {
+      success: true,
+      data: formattedData,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil((count ?? 0) / pageSize),
+        totalRecords: count ?? 0,
+        pageSize
+      }
+    };
+  } catch (error) {
+    logger.error('Error fetching attendance records from view:', error);
     return {
       success: false,
       data: [],

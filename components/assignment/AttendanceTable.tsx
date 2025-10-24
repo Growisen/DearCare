@@ -1,9 +1,9 @@
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
 import { PaginationControls } from '@/components/client/clients/PaginationControls';
 import { AttendanceRecord } from '@/hooks/useAssignment';
 import { useState } from 'react';
 import ConfirmationModal from '@/components/common/ConfirmationModal';
+import { formatDate } from '@/utils/formatters';
 
 function formatTime(timeString: string | null) {
   if (!timeString) return "—";
@@ -146,7 +146,7 @@ export function AttendanceTable({
               return (
                 <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-slate-50 transition-colors' : 'bg-slate-50 hover:bg-slate-100 transition-colors'}>
                   <td className="px-4 py-4 text-sm text-slate-900 font-medium">
-                    {format(new Date(record.date), 'EEE, MMM d, yyyy')}
+                    {formatDate(record.date)}
                   </td>
                   <td className="px-4 py-4 text-sm text-slate-700">
                     {record.checkIn ? formatTime(record.checkIn) : '—'}
@@ -187,11 +187,11 @@ export function AttendanceTable({
                       '—'
                     ) : record.isAdminAction ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-                        Admin Entry
+                        Admin
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                        Self Check-in
+                        Self
                       </span>
                     )}
                   </td>
