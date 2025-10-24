@@ -1,9 +1,9 @@
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
 import { PaginationControls } from '@/components/client/clients/PaginationControls';
 import { AttendanceRecord } from '@/hooks/useAssignment';
 import { useState } from 'react';
 import ConfirmationModal from '@/components/common/ConfirmationModal';
+import { formatDate } from '@/utils/formatters';
 
 function formatTime(timeString: string | null) {
   if (!timeString) return "—";
@@ -52,6 +52,7 @@ export function AttendanceTable({
   handleNextPage,
   handlePageChange,
   handleUnmarkAttendance,
+  displaySalaryPerDay = true
 }: {
   attendanceRecords: AttendanceRecord[];
   tableLoading: boolean;
@@ -65,6 +66,7 @@ export function AttendanceTable({
   handleNextPage: () => void;
   handlePageChange: (page: number) => void;
   handleUnmarkAttendance: (id: number) => Promise<void>;
+  displaySalaryPerDay?: boolean;
 }) {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<number | null>(null);
@@ -130,7 +132,10 @@ export function AttendanceTable({
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Total Hours</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Status</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Location</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Salary Per Day</th>
+              { 
+                displaySalaryPerDay && 
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Salary Per Day</th>
+              }
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Entry Type</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Actions</th>
             </tr>
@@ -141,7 +146,7 @@ export function AttendanceTable({
               return (
                 <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-slate-50 transition-colors' : 'bg-slate-50 hover:bg-slate-100 transition-colors'}>
                   <td className="px-4 py-4 text-sm text-slate-900 font-medium">
-                    {format(new Date(record.date), 'EEE, MMM d, yyyy')}
+                    {formatDate(record.date)}
                   </td>
                   <td className="px-4 py-4 text-sm text-slate-700">
                     {record.checkIn ? formatTime(record.checkIn) : '—'}
@@ -172,19 +177,21 @@ export function AttendanceTable({
                       <span className="text-slate-500">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-sm text-slate-700">
-                    {record.salaryPerDay ? `₹${record.salaryPerDay.toFixed(2)}` : '—'}
-                  </td>
+                  {displaySalaryPerDay && (
+                    <td className="px-4 py-4 text-sm text-slate-700">
+                      {record.salaryPerDay ? `₹${record.salaryPerDay.toFixed(2)}` : '—'}
+                    </td>
+                  )}
                   <td className="px-4 py-4 text-sm">
                     {record.status === 'Absent' ? (
                       '—'
                     ) : record.isAdminAction ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-                        Admin Entry
+                        Admin
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                        Self Check-in
+                        Self
                       </span>
                     )}
                   </td>

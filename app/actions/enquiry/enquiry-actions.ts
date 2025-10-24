@@ -1,6 +1,7 @@
 'use server'
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { getOrgMappings } from '@/app/utils/org-utils';
 import { logger } from '@/utils/logger';
 
 /**
@@ -83,22 +84,27 @@ export async function fetchAllServiceEnquiries(
       data: { user },
       error: authError
     } = await supabase.auth.getUser();
+        
+    const organization = user?.user_metadata?.organization;
+    const { clientsOrg } = getOrgMappings(organization);
 
     if (authError || !user) {
       return { success: false, error: 'Authentication required.' };
     }
 
-    // Create a count query to get total number of records
     let countQuery = supabase
       .from('dearcare_services_enquiries')
       .select('*', { count: 'exact', head: true });
-    
-    // Create the data query
+
     let dataQuery = supabase
       .from('dearcare_services_enquiries')
       .select('*');
-    
-    // Apply search filter if provided
+      
+    if (clientsOrg) {
+      countQuery = countQuery.eq('organization', clientsOrg);
+      dataQuery = dataQuery.eq('organization', clientsOrg);
+    }
+
     if (searchQuery && searchQuery.trim() !== '') {
       const searchTerm = searchQuery.toLowerCase().trim();
       const searchFilter = `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,service.ilike.%${searchTerm}%`;
@@ -106,16 +112,14 @@ export async function fetchAllServiceEnquiries(
       countQuery = countQuery.or(searchFilter);
       dataQuery = dataQuery.or(searchFilter);
     }
-    
-    // Get the total count
+
     const { count, error: countError } = await countQuery;
     
     if (countError) {
       logger.error('Error counting service enquiries:', countError);
       return { success: false, error: countError.message };
     }
-    
-    // If no records found, return early
+
     if (count === 0) {
       return {
         success: true,
@@ -128,8 +132,7 @@ export async function fetchAllServiceEnquiries(
         }
       };
     }
-    
-    // Get paginated data
+
     const { data, error } = await dataQuery
       .range((page - 1) * pageSize, (page * pageSize) - 1)
       .order('created_at', { ascending: false });
@@ -182,16 +185,22 @@ export async function exportServiceEnquiries(
       return { success: false, error: 'Authentication required.' };
     }
 
+    const organization = user?.user_metadata?.organization;
+    const { clientsOrg } = getOrgMappings(organization);
+
     let query = supabase
       .from('dearcare_services_enquiries')
       .select('*');
-    
-    // Apply search filter if provided
+
     if (searchQuery && searchQuery.trim() !== '') {
       const searchTerm = searchQuery.toLowerCase().trim();
       query = query.or(
         `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,service.ilike.%${searchTerm}%`
       );
+    }
+
+    if (clientsOrg) {
+      query = query.eq('organization', clientsOrg);
     }
     
     const { data, error } = await query

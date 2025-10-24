@@ -13,13 +13,11 @@ export default function DashboardPage() {
   const { data: result, isLoading, error } = useDashboardData()
   const dashboardData = result?.success ? result.data : null
 
-  // Timer for clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date().toLocaleTimeString()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -30,7 +28,6 @@ export default function DashboardPage() {
     )
   }
 
-  // Show error state
   if (error || (result && !result.success)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -44,28 +41,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 min-h-screen p-4 custom-scrollbar">
-      {/* Main Content Section */}
+    <div className="flex flex-col gap-5 min-h-screen pt-4 md:p-4 custom-scrollbar">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Stats Section */}
           <Stats statsData={dashboardData?.stats} />
-
-          {/* Staff Attendance */}
           <StaffAttendance 
             currentTime={currentTime} 
             attendanceData={dashboardData?.attendance} 
           />
-
-          {/* Recent Activities */}
           <RecentActivities complaintsData={dashboardData?.complaints} />
         </div>
-
-        {/* Upcoming Schedules Sidebar */}
         <UpcomingSchedules todosData={dashboardData?.todos} />
       </div>
-
-      {/* Recent Clients Section */}
       <RecentClients clientsData={dashboardData?.recentClients} />
     </div>
   )
