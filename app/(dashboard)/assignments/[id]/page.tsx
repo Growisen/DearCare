@@ -116,6 +116,7 @@ export default function AssignmentDetailsPage() {
             handleNextPage={handleNextPage}
             handlePageChange={handlePageChange}
             handleUnmarkAttendance={handleUnmarkAttendance}
+            displaySalaryPerDay={false}
           />
         </div>
       </div>

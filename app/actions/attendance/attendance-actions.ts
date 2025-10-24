@@ -970,7 +970,7 @@ export async function getAttendanceRecords(
     
     const { data: assignmentData, error: assignmentError } = await supabase
       .from('nurse_client')
-      .select('nurse_id, shift_start_time, shift_end_time, start_date, end_date')
+      .select('nurse_id, shift_start_time, shift_end_time, start_date, end_date, salary_per_day')
       .eq('id', assignmentId)
       .single();
     
@@ -1049,7 +1049,8 @@ export async function getAttendanceRecords(
           status: status,
           location: parseLocation(record.location),
           isAdminAction: !!record.is_admin_action,
-          notes: record.notes
+          notes: record.notes,
+          salaryPerDay: assignmentData.salary_per_day || null
         };
       } else {
         let status = 'Absent';
