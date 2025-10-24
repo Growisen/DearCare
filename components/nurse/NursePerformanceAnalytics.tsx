@@ -60,7 +60,7 @@ const AnalyticsContent: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   if (loading) return <Loader message='Loading analytics...' />;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-5">
       {items.map((item, idx) => (
         <div
           key={idx}
