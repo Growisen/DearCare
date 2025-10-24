@@ -68,7 +68,6 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     fetchPayments();
   }, [nurseId]);
 
-  // Handler to recalculate salary for a payment
   const handleRecalculate = async (payment: SalaryPayment) => {
     setRecalculatingId(payment.id);
     try {
@@ -79,7 +78,6 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         id: payment.id,
       });
       if (result.success) {
-        // Update the payment in the list with recalculated values
         setPayments((prev) =>
           prev.map((p) =>
             p.id === payment.id
@@ -105,25 +103,21 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     }
   };
 
-  // Handler to open confirmation modal
   const handleOpenConfirm = (payment: SalaryPayment) => {
     setSelectedPayment(payment);
     setShowConfirm(true);
   };
 
-  // Handler to open bonus modal
   const handleOpenBonusModal = (payment: SalaryPayment) => {
     setSelectedPayment(payment);
     setShowBonusModal(true);
   };
 
-  // Handler to open deduction modal
   const handleOpenDeductionModal = (payment: SalaryPayment) => {
     setSelectedPayment(payment);
     setShowDeductionModal(true);
   };
 
-  // Handler to actually recalculate after confirmation
   const handleConfirmRecalculate = async () => {
     if (!selectedPayment) return;
     setShowConfirm(false);
@@ -131,7 +125,6 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     setSelectedPayment(null);
   };
 
-  // Handler to add bonus
   const handleAddBonus = async (paymentId: number, bonusAmount: number, bonusReason: string) => {
     setProcessingBonus(true);
     try {
@@ -166,7 +159,6 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     }
   };
 
-  // Handler to add deduction
   const handleAddDeduction = async (paymentId: number, deductionAmount: number, deductionReason: string) => {
     setProcessingDeduction(true);
     try {
@@ -229,7 +221,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-5">
       <HourlySalaryCard hourlySalary={hourlySalary} />
 
       <PaymentHistoryTable

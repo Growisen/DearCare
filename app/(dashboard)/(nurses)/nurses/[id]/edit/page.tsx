@@ -236,8 +236,8 @@ const EditNurseProfilePage: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <form onSubmit={handleSubmit} className="max-w-full">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b border-gray-100">
             <div className="flex items-center justify-between">
@@ -247,22 +247,34 @@ const EditNurseProfilePage: React.FC = () => {
               <div className="flex gap-3">
                 <Link
                   href={`/nurses/${nurse.basic.nurse_id}`}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-medium"
+                  className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-lg transition-all duration-200 text-sm font-medium ${
+                    saving ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-gray-200"
+                  }`}
+                  tabIndex={saving ? -1 : 0}
+                  aria-disabled={saving}
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg transition-all duration-200 text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
                 >
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving ? (
+                    <span>
+                      <svg className="inline mr-2 h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      Saving...
+                    </span>
+                  ) : "Save Changes"}
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="space-y-6">
             
             <ProfileImageSection
               formData={formData}
