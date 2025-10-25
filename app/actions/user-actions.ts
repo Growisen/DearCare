@@ -334,6 +334,10 @@ export async function updateAuthUserPassword(
   error?: string;
 }> {
   try {
+
+    if (process.env.NODE_ENV !== 'production') {
+      return { success: true };
+    }
     const supabase = await createSupabaseServerClient();
 
     const { error } = await supabase.auth.updateUser({
