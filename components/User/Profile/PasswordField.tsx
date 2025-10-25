@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lock, Edit2, Check, X, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { usePasswordValidation } from "@/hooks/useValidation";
 
@@ -19,6 +19,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
     confirmPassword,
     setConfirmPassword,
     passwordError,
+    setPasswordError,
     passwordsMatch,
     checkPasswordValidity
   } = usePasswordValidation();
@@ -38,7 +39,17 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
     setIsEditing(false);
     setIsNewPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
+    setPasswordError("");
   };
+
+  useEffect(() => {
+    if (passwordError) {
+      const timer = setTimeout(() => {
+        setPasswordError("");
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [passwordError, setPasswordError]);
 
   return (
     <div className="p-3 sm:p-4 border border-gray-200 hover:border-gray-300 rounded-xl bg-white shadow-sm transition-all duration-300">

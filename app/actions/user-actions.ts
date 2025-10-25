@@ -311,3 +311,51 @@ export async function getCurrentUser(): Promise<{
     };
   }
 }
+
+
+/**
+ * Updates the password of the currently authenticated Supabase Auth user.
+ *
+ * @param newPassword - The new password to set.
+ * @returns An object with the following properties:
+ *   - `success`: `true` if the password was updated, otherwise `false`.
+ *   - `error`: A string describing the error if the update failed, otherwise `undefined`.
+ *
+ * @example
+ * ```ts
+ * const result = await updateAuthUserPassword("newStrongPassword123");
+ * if (result.success) console.log("Password updated!");
+ * ```
+ */
+export async function updateAuthUserPassword(
+  newPassword: string
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      logger.error('Error updating auth user password:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    logger.error('Unexpected error updating auth user password:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update password'
+    };
+  }
+}
