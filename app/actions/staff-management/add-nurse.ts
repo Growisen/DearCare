@@ -2,7 +2,6 @@
 import { getOrgMappings } from '@/app/utils/org-utils';
 import { getProtectedDocumentUrl } from '@/app/utils/supabase-storage-utils';
 
-
 type NurseDocuments = {
   adhar: File | null
   educational: File | null
@@ -1551,5 +1550,35 @@ function determineShiftType(startTime: string, endTime: string): 'day' | 'night'
     return 'day';
   } else {
     return 'night';
+  }
+}
+
+export async function fetchNurseNamesForOrg(searchTerm?: string): Promise<{ data: { nurse_id: number, full_name: string, nurse_reg_no: string }[] | null, error: string | null }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+    const { nursesOrg } = getOrgMappings(organization);
+
+    let query = supabase
+      .from('nurses')
+      .select('nurse_id, full_name, nurse_reg_no')
+      .eq('admitted_type', nursesOrg);
+
+    if (searchTerm && searchTerm.trim() !== '') {
+      const q = `%${searchTerm.trim()}%`;
+      query = query.or(`full_name.ilike.${q},nurse_reg_no.ilike.${q}`);
+    }
+
+    query = query.order('full_name');
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching nurse names:', error);
+    return { data: null, error: error instanceof Error ? error.message : 'Failed to fetch nurse names' };
   }
 }

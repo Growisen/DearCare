@@ -397,3 +397,84 @@ function formatLeaveMode(mode: string): string {
   }
   return mapping[mode] || mode
 }
+
+/**
+ * Creates a new leave request by admin for a nurse.
+ *
+ * Inserts a leave request into the `nurse_leave_requests` table with status set to 'pending'.
+ * All required fields must be provided. The function will revalidate the leave requests page after insertion.
+ *
+ * @param nurseId - The nurse's unique identifier.
+ * @param leaveType - The type of leave (must match the enum in the database).
+ * @param leaveMode - The mode of leave (default is 'full_day').
+ * @param startDate - The start date of the leave (YYYY-MM-DD).
+ * @param endDate - The end date of the leave (YYYY-MM-DD).
+ * @param days - The number of leave days.
+ * @param reason - The reason for the leave (optional).
+ * @returns An object with `success: true` if inserted, or `success: false` and error message if failed.
+ */
+export async function createLeaveRequestByAdmin({
+  nurseId,
+  leaveType,
+  leaveMode = 'full_day',
+  startDate,
+  endDate,
+  days,
+  reason = ''
+}: {
+  nurseId: number,
+  leaveType: string,
+  leaveMode?: string,
+  startDate: string,
+  endDate: string,
+  days: number,
+  reason?: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: overlapping, error: overlapError } = await supabase
+      .from('nurse_leave_requests')
+      .select('id')
+      .eq('nurse_id', nurseId)
+      .not('status', 'eq', 'rejected')
+      .gte('end_date', startDate)
+      .lte('start_date', endDate);
+
+    if (overlapError) {
+      logger.error('Error checking overlapping leave requests:', overlapError);
+      return { success: false, error: overlapError.message };
+    }
+
+    if (overlapping && overlapping.length > 0) {
+      return { success: false, error: 'A leave request already exists for these dates.' };
+    }
+
+    const { error } = await supabase
+      .from('nurse_leave_requests')
+      .insert([{
+        nurse_id: nurseId,
+        leave_type: leaveType,
+        leave_mode: leaveMode,
+        start_date: startDate,
+        end_date: endDate,
+        days,
+        reason,
+        status: 'pending'
+      }]);
+
+    if (error) {
+      logger.error('Error inserting leave request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/leave-requests');
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error in createLeaveRequestByAdmin:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
