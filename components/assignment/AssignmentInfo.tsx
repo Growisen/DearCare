@@ -3,131 +3,14 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { FormattedAssignmentDetails } from '@/hooks/useAssignment';
 import { formatName } from '@/utils/formatters';
-import jsPDF from 'jspdf';
+import useOrgStore from '@/app/stores/UseOrgStore';
+import { generateAssignmentPDF } from '@/utils/generateAssignmentPDF';
 
 export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: FormattedAssignmentDetails }) {
-  console.log('Rendering AssignmentInfo with details:', assignmentDetails);
+  const { organization } = useOrgStore();
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.rect(margin - 5, margin - 5, pageWidth - 2 * (margin - 5), pageHeight - 2 * (margin - 5));
-    
-    let yPosition = margin + 10;
-    
-    // Add logo (if you have a logo URL or base64 string)
-    // Replace 'logoDataURL' with your actual logo data
-    // doc.addImage(logoDataURL, 'PNG', pageWidth / 2 - 25, yPosition, 50, 20);
-    // yPosition += 30;
-
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    const title = 'ASSIGNMENT INFORMATION';
-    const titleWidth = doc.getTextWidth(title);
-    doc.text(title, (pageWidth - titleWidth) / 2, yPosition);
-    yPosition += 15;
-
-    doc.setDrawColor(100, 100, 100);
-    doc.setLineWidth(0.3);
-    doc.line(margin + 10, yPosition, pageWidth - margin - 10, yPosition);
-    yPosition += 15;
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    const nurseHeader = 'Nurse Details';
-    const nurseHeaderWidth = doc.getTextWidth(nurseHeader);
-    doc.text(nurseHeader, (pageWidth - nurseHeaderWidth) / 2, yPosition);
-    yPosition += 10;
-    
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    
-    const nurseNameText = `Name: ${formatName(assignmentDetails.nurseDetails.name)}`;
-    const nurseNameWidth = doc.getTextWidth(nurseNameText);
-    doc.text(nurseNameText, (pageWidth - nurseNameWidth) / 2, yPosition);
-    yPosition += 7;
-    
-    const nurseIdText = `Reg No: ${assignmentDetails.nurseDetails.nurseRegNo || 'N/A'}`;
-    const nurseIdWidth = doc.getTextWidth(nurseIdText);
-    doc.text(nurseIdText, (pageWidth - nurseIdWidth) / 2, yPosition);
-    yPosition += 7;
-    
-    const nurseOrg = assignmentDetails.nurseDetails.admittedType
-      ? assignmentDetails.nurseDetails.admittedType.toUpperCase()
-      : 'N/A';
-    const nurseOrgText = `Organization: ${nurseOrg}`;
-    const nurseOrgWidth = doc.getTextWidth(nurseOrgText);
-    doc.text(nurseOrgText, (pageWidth - nurseOrgWidth) / 2, yPosition);
-    yPosition += 15;
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    const clientHeader = 'Client Details';
-    const clientHeaderWidth = doc.getTextWidth(clientHeader);
-    doc.text(clientHeader, (pageWidth - clientHeaderWidth) / 2, yPosition);
-    yPosition += 10;
-    
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    
-    const clientNameText = `Name: ${formatName(assignmentDetails.clientDetails.name)}`;
-    const clientNameWidth = doc.getTextWidth(clientNameText);
-    doc.text(clientNameText, (pageWidth - clientNameWidth) / 2, yPosition);
-    yPosition += 7;
-    
-    const clientTypeText = `Type: ${assignmentDetails.clientDetails.type}`;
-    const clientTypeWidth = doc.getTextWidth(clientTypeText);
-    doc.text(clientTypeText, (pageWidth - clientTypeWidth) / 2, yPosition);
-    yPosition += 15;
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    const periodHeader = 'Assignment Period';
-    const periodHeaderWidth = doc.getTextWidth(periodHeader);
-    doc.text(periodHeader, (pageWidth - periodHeaderWidth) / 2, yPosition);
-    yPosition += 10;
-    
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    
-    const periodText = `${format(new Date(assignmentDetails.assignmentPeriod.startDate), 'MMMM d, yyyy')} - ${format(new Date(assignmentDetails.assignmentPeriod.endDate), 'MMMM d, yyyy')}`;
-    const periodWidth = doc.getTextWidth(periodText);
-    doc.text(periodText, (pageWidth - periodWidth) / 2, yPosition);
-    yPosition += 15;
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    const shiftHeader = 'Shift Details';
-    const shiftHeaderWidth = doc.getTextWidth(shiftHeader);
-    doc.text(shiftHeader, (pageWidth - shiftHeaderWidth) / 2, yPosition);
-    yPosition += 10;
-    
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    
-    const shiftHoursText = `Hours: ${assignmentDetails.shiftDetails.startTime} - ${assignmentDetails.shiftDetails.endTime}`;
-    const shiftHoursWidth = doc.getTextWidth(shiftHoursText);
-    doc.text(shiftHoursText, (pageWidth - shiftHoursWidth) / 2, yPosition);
-    yPosition += 7;
-    
-    const salaryText = `Salary per Day: ${assignmentDetails.shiftDetails.salaryPerDay ? `INR ${assignmentDetails.shiftDetails.salaryPerDay}` : 'N/A'}`;
-    const salaryWidth = doc.getTextWidth(salaryText);
-    doc.text(salaryText, (pageWidth - salaryWidth) / 2, yPosition);
-    yPosition += 15;
-
-    doc.setFontSize(9);
-    doc.setTextColor(128, 128, 128);
-    const footerText = `Generated on ${format(new Date(), 'MMMM d, yyyy HH:mm')}`;
-    const footerWidth = doc.getTextWidth(footerText);
-    doc.text(footerText, (pageWidth - footerWidth) / 2, pageHeight - margin);
-    
-    doc.save('assignment-info.pdf');
+  const handleDownloadPDF = async () => {
+    await generateAssignmentPDF(assignmentDetails, organization);
   };
 
   return (
