@@ -143,7 +143,7 @@ export default function NursesSalaryPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-2 text-center py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-8 text-left py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nurse
                   </th>
                   <th scope="col" className="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
@@ -175,7 +175,7 @@ export default function NursesSalaryPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {salaryRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-6 py-4 whitespace-nowrap text-left">
                       <div className="text-sm font-medium text-gray-900">{record.name}</div>
                       <div className="text-xs text-gray-500">{record.nurse_reg_no}</div>
                     </td>

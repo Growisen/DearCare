@@ -213,11 +213,24 @@ const ScheduleShiftsContent = () => {
               salaryPerDay: '',
             };
             
+            let estimatedSalary = '';
+            if (nurseShift.startDate && nurseShift.endDate && nurseShift.salaryPerDay) {
+              const start = new Date(nurseShift.startDate);
+              const end = new Date(nurseShift.endDate);
+              const days =
+                Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              const salary = parseFloat(nurseShift.salaryPerDay);
+              if (!isNaN(days) && !isNaN(salary) && days > 0) {
+                estimatedSalary = `Estimated Salary: ₹${(days * salary).toFixed(2)} for ${days} day${days > 1 ? 's' : ''}`;
+              }
+            }
+
             return (
               <div key={nurse._id} className="border-b pb-4">
-                <div className="flex items-center mb-4">
-                  <div className="h-12 w-12 rounded-full bg-blue-100 mr-3 overflow-hidden relative">
-                    {nurse.profileImage ? (
+                <div className="flex items-center mb-4 justify-between">
+                  <div className="flex items-center">
+                    <div className="h-12 w-12 rounded-full bg-blue-100 mr-3 overflow-hidden relative">
+                      {nurse.profileImage ? (
                         <Image 
                             src={nurse.profileImage} 
                             alt={`${nurse.firstName} ${nurse.lastName}`} 
@@ -232,14 +245,20 @@ const ScheduleShiftsContent = () => {
                         </span>
                     )}
                     </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {nurse.firstName} {nurse.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {nurse.specialty} • {nurse.experience} years exp. • {nurse.rating}/5 rating
-                    </p>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {nurse.firstName} {nurse.lastName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {nurse.specialty} • {nurse.experience} years exp. • {nurse.rating}/5 rating
+                      </p>
+                    </div>
                   </div>
+                  {estimatedSalary && (
+                    <div className="text-green-700 text-base font-medium ml-4 whitespace-nowrap">
+                      {estimatedSalary}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -307,6 +326,11 @@ const ScheduleShiftsContent = () => {
                       required
                       placeholder="Enter salary amount"
                     />
+                    {estimatedSalary && (
+                      <div className="text-green-700 text-sm mt-1 font-medium">
+                        {estimatedSalary}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
