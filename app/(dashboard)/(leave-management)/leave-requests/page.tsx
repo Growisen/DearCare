@@ -1,11 +1,14 @@
 "use client"
 
 import { Check } from 'lucide-react'
+import { useState } from 'react'
 import { useLeaveRequestData } from '@/hooks/useLeaveRequestData'
 import { LeaveRequestsHeader } from '@/components/leaveManagement/LeaveRequestsHeader'
 import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTable'
 import { PaginationControls } from '@/components/client/clients/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
+import AddLeaveModal from '@/components/leaveManagement/AddLeaveModal'
+
 
 export default function LeaveRequestsPage() {
 
@@ -40,8 +43,16 @@ export default function LeaveRequestsPage() {
     handlePageSizeChange,
     handleSearch,
     handleResetFilters,
-    selectedLeaveRequest
+    selectedLeaveRequest,
+    invalidateLeaveRequests
   } = useLeaveRequestData()
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+
+  const handleOnAddLeave = () => {
+    invalidateLeaveRequests();
+  }
 
   return (
     <div className="space-y-8 pb-10">
@@ -58,6 +69,13 @@ export default function LeaveRequestsPage() {
         handleResetFilters={handleResetFilters}
         statuses={statuses}
         admittedTypeFilter={admittedTypeFilter}
+        onAddLeaveRequest={() => setIsAddModalOpen(true)}
+      />
+
+      <AddLeaveModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddLeave={handleOnAddLeave}
       />
 
       <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
@@ -85,7 +103,6 @@ export default function LeaveRequestsPage() {
         )}
       </div>
 
-      {/* Leave Request Modal */}
       {selectedLeaveRequest && (
         <LeaveRequestModal 
           isOpen={isModalOpen}
@@ -96,7 +113,6 @@ export default function LeaveRequestsPage() {
         />
       )}
 
-      {/* Approval Confirmation Modal */}
       {confirmationModal.isOpen && confirmationModal.action === 'approve' && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full m-4 border border-gray-100">

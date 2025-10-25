@@ -431,8 +431,8 @@ export function ClientDetailsOverlay({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between relative">
+      <div className="bg-white w-full max-w-7xl max-h-[90vh] flex flex-col rounded-md pb-4">
+        <div className="top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between relative rounded-md">
           {isEditMode ? (
             <>
               <div className="flex-1 flex items-center justify-center sm:justify-start">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getLeaveRequests, updateLeaveRequestStatus, exportLeaveRequests } from '@/app/actions/staff-management/leave-management';
 import { toast } from 'react-hot-toast';
 import { LeaveRequestStatus, LeaveRequest } from '@/types/leave.types';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useOrgStore from '@/app/stores/UseOrgStore';
 
 export function useLeaveRequestData() {
@@ -11,7 +11,6 @@ export function useLeaveRequestData() {
   const [appliedSearchTerm, setAppliedSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   
-  // Map organization from store to admitted type filter (database enum format)
   const getAdmittedTypeFilter = (): 'Dearcare_Llp' | 'Tata_Homenursing' | "" => {
     if (!organization) return "";
     if (organization === "TataHomeNursing") return "Tata_Homenursing";
@@ -272,6 +271,12 @@ export function useLeaveRequestData() {
     }
   }
 
+  const queryClient = useQueryClient();
+
+  const invalidateLeaveRequests = () => {
+    queryClient.invalidateQueries({ queryKey: ['leaveRequests'] });
+  };
+
   return {
     statuses,
     isModalOpen, 
@@ -309,6 +314,7 @@ export function useLeaveRequestData() {
     handlePageSizeChange,
     handleSearch,
     handleResetFilters,
-    selectedLeaveRequest
+    selectedLeaveRequest,
+    invalidateLeaveRequests,
   }
 }
