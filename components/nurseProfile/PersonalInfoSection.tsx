@@ -41,7 +41,9 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
             <div>
               <p className="text-xs text-gray-500 font-medium">Name</p>
               <p className="text-sm text-gray-700 truncate">
-                {basicInfo.first_name} {basicInfo.last_name}
+                {basicInfo.first_name && basicInfo.last_name 
+                  ? `${basicInfo.first_name} ${basicInfo.last_name}` 
+                  : 'N/A'}
               </p>
             </div>
             <div>
@@ -49,40 +51,40 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
               <p className="text-sm text-gray-700">
                 {basicInfo.date_of_birth
                   ? new Date(basicInfo.date_of_birth).toLocaleDateString()
-                  : 'Not specified'}
+                  : 'N/A'}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Age</p>
               <p className="text-sm text-gray-700">
-                {basicInfo.date_of_birth ? calculateAge(basicInfo.date_of_birth) : 'Not specified'}
+                {basicInfo.date_of_birth ? calculateAge(basicInfo.date_of_birth) : 'N/A'}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Gender</p>
-              <p className="text-sm text-gray-700">{basicInfo.gender}</p>
+              <p className="text-sm text-gray-700">{basicInfo.gender || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Marital Status</p>
-              <p className="text-sm text-gray-700">{basicInfo.marital_status}</p>
+              <p className="text-sm text-gray-700">{basicInfo.marital_status || 'N/A'}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-fit h-full flex flex-col">
+        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-fit min-w-full h-full flex flex-col">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Contact Information</h3>
           <div className="grid gap-3">
             <div>
               <p className="text-xs text-gray-500 font-medium">Phone Number</p>
-              <p className="text-sm text-gray-700">{basicInfo.phone_number}</p>
+              <p className="text-sm text-gray-700">{basicInfo.phone_number || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Email</p>
-              <p className="text-sm text-gray-700">{basicInfo.email}</p>
+              <p className="text-sm text-gray-700">{basicInfo.email || 'N/A'}</p>
             </div>
             <div className="md:col-span-2">
               <p className="text-xs text-gray-500 font-medium">Address</p>
-              <p className="text-sm text-gray-700 break-words max-w-full overflow-hidden">{basicInfo.address}</p>
+              <p className="text-sm text-gray-700 break-words max-w-full overflow-hidden">{basicInfo.address || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -92,15 +94,15 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <p className="text-xs text-gray-500 font-medium">City</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.city}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.city || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">State</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.state}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.state || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">PIN Code</p>
-              <p className="text-sm text-gray-700">{basicInfo.pin_code}</p>
+              <p className="text-sm text-gray-700">{basicInfo.pin_code || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -110,20 +112,20 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <p className="text-xs text-gray-500 font-medium">Religion</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.religion}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.religion || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Mother Tongue</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.mother_tongue}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.mother_tongue || 'N/A'}</p>
             </div>
             <div className="md:col-span-2">
               <p className="text-xs text-gray-500 font-medium">Known Languages</p>
               <p className="text-sm text-gray-700 break-words">
                 {Array.isArray(basicInfo.languages)
-                  ? basicInfo.languages.join(', ')
+                  ? basicInfo.languages.length > 0 ? basicInfo.languages.join(', ') : 'N/A'
                   : typeof basicInfo.languages === 'object' && basicInfo.languages
-                  ? Object.values(basicInfo.languages).join(', ')
-                  : 'Not specified'}
+                  ? Object.values(basicInfo.languages).length > 0 ? Object.values(basicInfo.languages).join(', ') : 'N/A'
+                  : 'N/A'}
               </p>
             </div>
           </div>
@@ -134,19 +136,19 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <p className="text-xs text-gray-500 font-medium">Service Type</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.service_type}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.service_type || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Staff Category</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.category}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.category || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Experience</p>
-              <p className="text-sm text-gray-700">{basicInfo.experience} years</p>
+              <p className="text-sm text-gray-700">{basicInfo.experience ? `${basicInfo.experience} years` : 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Shift Pattern</p>
-              <p className="text-sm text-gray-700 truncate">{basicInfo.shift_pattern}</p>
+              <p className="text-sm text-gray-700 truncate">{basicInfo.shift_pattern || 'N/A'}</p>
             </div>
           </div>
         </div>
