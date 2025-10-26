@@ -78,7 +78,7 @@ export function AttendanceHeader({
             </svg>
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder="start typing to search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 w-full bg-white text-sm text-gray-800 placeholder:text-gray-400 border-gray-200 h-10 focus-visible:ring-blue-400 focus-visible:ring-offset-2 shadow-sm rounded-lg border px-4 py-2"

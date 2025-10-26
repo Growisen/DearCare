@@ -27,7 +27,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     setIsProcessing(true);
     try {
       await onConfirm();
-      // Don't set isProcessing to false here - let the redirect happen
     } catch (error) {
       console.error('Error during confirmation:', error);
       setIsProcessing(false);
@@ -37,7 +36,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex text-center items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 w-full max-w-md">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
         <div className="text-gray-600 mb-6">{message}</div>

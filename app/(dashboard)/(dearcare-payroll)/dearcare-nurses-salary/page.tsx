@@ -56,7 +56,6 @@ export default function NursesSalaryPage() {
 
   const handleExport = () => {
     setIsExporting(true);
-    // Implement export functionality here
     setTimeout(() => {
       setIsExporting(false);
     }, 2000);
@@ -77,7 +76,6 @@ export default function NursesSalaryPage() {
   return (
     <div className="container mx-auto py-1 space-y-6">
       <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-        {/* Header with search and export */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Salary Payments</h2>
@@ -104,12 +102,11 @@ export default function NursesSalaryPage() {
           </div>
         </div>
 
-        {/* Search section */}
         <div className="p-4 bg-gray-50 space-y-3">
           <div className="relative w-full">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by nurse name or registration number..."
+              placeholder="Enter search term and press Enter"
               className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800 w-full"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}

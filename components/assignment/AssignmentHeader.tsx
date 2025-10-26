@@ -30,20 +30,17 @@ export function AssignmentHeader({
   selectedCategory
 }: AssignmentHeaderProps) {
   
-  // Function to set today's date
   const setTodayDate = () => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    const formattedDate = today.toISOString().split('T')[0];
     handleDateFilterChange(formattedDate);
   };
-  
-  // Check if the current dateFilter is set to today's date
+
   const isTodaySelected = () => {
-    const today = new Date().toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0]; 
     return dateFilter === today;
   };
   
-  // Common button styles
   const buttonStyles = {
     selected: "bg-blue-50 text-blue-700 border border-blue-200",
     unselected: "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200",
@@ -51,7 +48,6 @@ export function AssignmentHeader({
   
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      {/* Header with title and action buttons */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Nurse Assignments</h1>
@@ -81,16 +77,13 @@ export function AssignmentHeader({
         </div>
       </div>
 
-      {/* Search and filters section */}
       <div className="p-3 bg-gray-50">
         <div className="flex flex-col gap-3">
-          {/* First row: Search and Date */}
           <div className="flex flex-col sm:flex-row gap-2">
-            {/* Search input */}
             <div className="relative w-full sm:max-w-2xl">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by Nurse ID..."
+                placeholder="Enter search term and press Enter"
                 className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -115,7 +108,6 @@ export function AssignmentHeader({
                 Search
               </button>
             </div>
-            {/* Date filter */}
             <div className="flex gap-2 items-center w-full sm:w-auto">
               <div className="relative flex items-center w-full sm:w-auto">
                 <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -147,16 +139,13 @@ export function AssignmentHeader({
               </button>
             </div>
           </div>
-          {/* Second row: Organization badge and Status */}
           <div className="hidden sm:flex flex-col sm:flex-row gap-6">
-            {/* Organization badge - read only */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
               <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                 {selectedCategory === "all" ? "All Organizations" : selectedCategory}
               </div>
             </div>
-            {/* Status filters */}
             <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-8">
               <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
               <div className="flex gap-1.5 items-center flex-wrap">
@@ -171,7 +160,6 @@ export function AssignmentHeader({
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </button>
                 ))}
-                {/* Reset button */}
                 <button
                   onClick={handleResetFilters}
                   disabled={selectedStatus === 'all' && !searchInput && !dateFilter}
@@ -187,9 +175,7 @@ export function AssignmentHeader({
               </div>
             </div>
           </div>
-          {/* Mobile: Organization badge and status dropdown */}
           <div className="sm:hidden flex flex-col gap-2 w-full">
-            {/* Organization badge - read only for mobile */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-gray-600">Organization:</span>
               <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -213,7 +199,6 @@ export function AssignmentHeader({
               <option value="completed">Completed</option>
               <option value="upcoming">Upcoming</option>
             </select>
-            {/* Reset button for mobile view */}
             <button
               onClick={handleResetFilters}
               disabled={selectedStatus === 'all' && !searchInput && !dateFilter}
