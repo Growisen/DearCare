@@ -14,12 +14,14 @@ export type FileItem = {
   tag?: string;
 };
 
-export const useClientFiles = (clientId: string) => {
+export const useClientFiles = (clientId: string, shouldFetch: boolean = false) => {
   const [files, setFiles] = useState<FileItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchFiles = async () => {
+    if (!shouldFetch) return;
+    
     setLoading(true);
     setError(null);
     
@@ -49,14 +51,12 @@ export const useClientFiles = (clientId: string) => {
 
   const uploadFiles = async (files: File[], tags: Record<string, string>): Promise<void> => {
     try {
-      // You'll need to modify your uploadClientFiles action to accept tags
       const response = await uploadClientFiles(clientId, files, tags);
       
       if (!response.success) {
         throw new Error(response.error || 'Upload failed');
       }
       
-      // After successful upload, refresh the files list
       fetchFiles();
     } catch (err) {
       console.error('Error uploading files:', err);
@@ -72,7 +72,6 @@ export const useClientFiles = (clientId: string) => {
         throw new Error(response.error || 'Delete failed');
       }
       
-      // After successful deletion, refresh the files list
       fetchFiles();
     } catch (err) {
       console.error('Error deleting file:', err);
@@ -83,7 +82,7 @@ export const useClientFiles = (clientId: string) => {
   useEffect(() => {
     fetchFiles();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId]);
+  }, [clientId, shouldFetch]);
 
   return {
     files,

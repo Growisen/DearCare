@@ -37,6 +37,7 @@ const PatientProfilePage = () => {
   const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams();
   const id = params.id as string;
+  const { activeTab, handleTabChange } = useTabManagement(id);
 
 
   React.useEffect(() => {
@@ -57,6 +58,7 @@ const PatientProfilePage = () => {
   const {
     patient,
     loading,
+    isLoadingAssessment,
     error,
     status,
     isEditing,
@@ -68,12 +70,13 @@ const PatientProfilePage = () => {
     handleEditProfile,
     handleCloseProfileEdit,
     handleDeleteClient
-  } = usePatientData(id);
+  } = usePatientData(id, activeTab);
 
   const {
     nurseAssignments,
     nurses,
     isLoadingNurses,
+    isLoadingAssignments,
     currentPage,
     totalPages,
     changePage,
@@ -101,15 +104,15 @@ const PatientProfilePage = () => {
     confirmEndAssignment,
     endDate,
     setEndDate,
-  } = useNurseAssignments(id);
+  } = useNurseAssignments(id, activeTab);
 
   const {
     files,
+    loading: isLoadingFiles,
     uploadFiles,
     deleteFile
-  } = useClientFiles(id);
+  } = useClientFiles(id, activeTab === 'files');
 
-  const { activeTab, handleTabChange } = useTabManagement(id);
   
   const { showDeleteConfirmation, setShowDeleteConfirmation } = useModalManagement();
 
@@ -134,7 +137,7 @@ const PatientProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full max-w-[98%] sm:max-w-[95%] lg:max-w-[1200px] mx-auto py-2 sm:py-4">
+      <div className="w-full pb-2">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-3 sm:mb-4">
           <ProfileHeader
             patient={patient}
@@ -236,17 +239,31 @@ const PatientProfilePage = () => {
             
             {activeTab === 'medical' && (
               <div className="space-y-6">
-                <MedicalInfo assessment={latestAssessment} />
+                {isLoadingAssessment ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader />
+                  </div>
+                ) : (
+                  <MedicalInfo assessment={latestAssessment} />
+                )}
               </div>
             )}
 
             {activeTab === 'files' && (
-              <FileSection 
-                clientId={id}
-                files={files}
-                onUpload={uploadFiles}
-                onDelete={deleteFile}
-              />
+              <>
+                {isLoadingFiles ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader />
+                  </div>
+                ) : (
+                  <FileSection 
+                    clientId={id}
+                    files={files}
+                    onUpload={uploadFiles}
+                    onDelete={deleteFile}
+                  />
+                )}
+              </>
             )}
             
             {activeTab === 'assignments' && status === 'approved' && (
@@ -260,15 +277,21 @@ const PatientProfilePage = () => {
                     Assign New Nurse
                   </button>
                 </div>
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <NurseAssignmentsList
-                    assignments={nurseAssignments}
-                    nurses={nurses}
-                    onEditAssignment={handleEditAssignment}
-                    onEndAssignment={handleEndAssignment}
-                    onDeleteAssignment={handleDeleteAssignment}
-                  />
-                </div>
+                {isLoadingAssignments ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader />
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <NurseAssignmentsList
+                      assignments={nurseAssignments}
+                      nurses={nurses}
+                      onEditAssignment={handleEditAssignment}
+                      onEndAssignment={handleEndAssignment}
+                      onDeleteAssignment={handleDeleteAssignment}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
