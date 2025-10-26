@@ -30,7 +30,6 @@ export function ClientHeader({
 }: ClientHeader) {
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      {/* Header with title and action buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Client Requests</h1>
@@ -67,13 +66,11 @@ export function ClientHeader({
         </div>
       </div>
 
-      {/* Search and filters section */}
       <div className="p-4 bg-gray-50 space-y-3">
-        {/* Search input - full width on all screens */}
         <div className="relative w-full">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name, contact or location..."
+            placeholder="Enter search term and press Enter"
             className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800 w-full"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -99,9 +96,7 @@ export function ClientHeader({
           </button>
         </div>
 
-        {/* Filters section - desktop view */}
         <div className="hidden sm:flex flex-wrap items-center gap-3">
-          {/* Organization badge - read only */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
             <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -109,7 +104,6 @@ export function ClientHeader({
             </div>
           </div>
 
-          {/* Status filters */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
             <div className="flex gap-1.5 items-center flex-wrap">
@@ -129,7 +123,6 @@ export function ClientHeader({
             </div>
           </div>
           
-          {/* Reset button for desktop - pushed to right */}
           <button
             onClick={handleResetFilters}
             disabled={selectedStatus === "all" && !searchInput}
@@ -144,17 +137,14 @@ export function ClientHeader({
           </button>
         </div>
         
-        {/* Mobile view - status dropdown with organization badge and reset button */}
         <div className="sm:hidden space-y-2">
-          {/* Organization badge - read only for mobile */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600">Organization:</span>
             <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
               {selectedCategory === "all" ? "All Organizations" : selectedCategory}
             </div>
           </div>
-          
-          {/* Status dropdown */}
+
           <select
             value={selectedStatus}
             onChange={(e) => handleStatusChange(e.target.value as ClientStatus)}
@@ -174,8 +164,7 @@ export function ClientHeader({
               </option>
             ))}
           </select>
-          
-          {/* Reset button for mobile */}
+
           <button
             onClick={handleResetFilters}
             disabled={selectedStatus === "all" && !searchInput}

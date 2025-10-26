@@ -25,8 +25,8 @@ interface AttendanceRecord {
   total_hours: string | null;
   assigned_id: number;
   nurse_client: NurseClient | NurseClient[] | null;
-  start_time?: string | null; // This is check_in time
-  end_time?: string | null;   // This is check_out time
+  start_time?: string | null;
+  end_time?: string | null;
 }
 
 export async function fetchNurseHoursWorked(
@@ -46,7 +46,6 @@ export async function fetchNurseHoursWorked(
   try {
     const supabase = await createSupabaseServerClient();
 
-    // Normalize organization
     let normalizedOrganization = "all";
     if (organization) {
       const lowerOrg = organization.toLowerCase();
@@ -57,7 +56,6 @@ export async function fetchNurseHoursWorked(
       }
     }
 
-    // Build query - Include all fields you want to check for missing values
     let attendanceQuery = supabase
       .from("attendence_individual")
       .select(`
@@ -90,7 +88,6 @@ export async function fetchNurseHoursWorked(
       );
     }
 
-    // Execute query
     const { data: attendanceRecords, error: attendanceError } =
       await attendanceQuery;
     if (attendanceError) throw new Error(attendanceError.message);
@@ -168,7 +165,6 @@ export async function fetchNurseHoursWorked(
     }>();
 
     if (nurseIds.length > 0 && dateFrom && dateTo) {
-      // Get all salary payments that might overlap with the query range
       const { data: salaryPayments, error: salaryError } = await supabase
         .from('salary_payments')
         .select('nurse_id, pay_period_start, pay_period_end')
@@ -178,7 +174,6 @@ export async function fetchNurseHoursWorked(
       if (!salaryError && salaryPayments) {
         type SalaryPayment = { nurse_id: number; pay_period_start: string; pay_period_end: string };
         
-        // Group payments by nurse_id for easier processing
         const paymentsByNurse = new Map<number, SalaryPayment[]>();
         (salaryPayments as SalaryPayment[]).forEach((payment) => {
           if (!paymentsByNurse.has(payment.nurse_id)) {
@@ -191,7 +186,6 @@ export async function fetchNurseHoursWorked(
         const queryEnd = new Date(dateTo);
         const totalQueryDays = Math.ceil((queryEnd.getTime() - queryStart.getTime()) / (24 * 60 * 60 * 1000)) + 1;
 
-        // Check each nurse's payment coverage
         paymentsByNurse.forEach((payments, nurseId) => {
           const paidPeriods: Array<{ start: string; end: string }> = [];
           let totalPaidDays = 0;
@@ -200,7 +194,6 @@ export async function fetchNurseHoursWorked(
             const paymentStart = new Date(payment.pay_period_start);
             const paymentEnd = new Date(payment.pay_period_end);
 
-            // Get the overlapping portion with query range
             const overlapStart = paymentStart > queryStart ? paymentStart : queryStart;
             const overlapEnd = paymentEnd < queryEnd ? paymentEnd : queryEnd;
 
@@ -215,7 +208,6 @@ export async function fetchNurseHoursWorked(
             }
           });
 
-          // Determine payment status
           let status: 'none' | 'partial' | 'full';
           if (totalPaidDays === 0) {
             status = 'none';
@@ -313,7 +305,6 @@ export async function upsertSalaryConfig({
   const user = await supabase.auth.getUser();
   
   if (configId) {
-    // Update existing config
     const { data, error } = await supabase
       .from('salary_configurations')
       .update({
@@ -331,7 +322,6 @@ export async function upsertSalaryConfig({
     }
     return data;
   } else {
-    // Create new config
     const { data, error } = await supabase
       .from('salary_configurations')
       .insert([{
@@ -449,10 +439,8 @@ export async function saveSalaryPaymentWithConfig({
   notes?: string;
 }) {  
   try {
-    // Start a transaction-like approach
     let salaryConfigId = currentConfigId;
     
-    // Update or create salary config if needed
     if (shouldUpdateConfig || hourlyRate > 0) {
       const configData = await upsertSalaryConfig({
         nurseId,

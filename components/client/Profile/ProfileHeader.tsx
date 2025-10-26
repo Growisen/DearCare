@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { FiEdit2, FiSave, FiX, FiTrash2, FiEye } from 'react-icons/fi';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
 import ImageViewer from '@/components/common/ImageViewer';
 import { ClientCategory } from '@/types/client.types';
@@ -42,7 +43,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
-  // Get category-specific border color
   const getCategoryBorderColor = () => {
     switch (patient.clientCategory) {
       case 'DearCare LLP':
@@ -59,11 +59,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   return (
     <div className={`bg-gray-100 border-b border-gray-200 px-4 sm:px-6 py-4 ${patient.clientCategory ? `border-l-4 ${borderColor}` : ''}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        {/* Left Section: Profile Image and Details */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
-          {/* Profile Image */}
           <div
-            className={`relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden border-2 ${borderColor} flex-shrink-0`}
+            className={`relative h-20 w-20 sm:h-24 sm:w-24 rounded-lg overflow-hidden border-3 border-white shadow-md flex-shrink-0`}
             onClick={() => patient.profileImage && setIsImageViewerOpen(true)}
             style={{ cursor: patient.profileImage ? 'pointer' : 'default' }}
           >
@@ -77,16 +75,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 sizes="(max-width: 768px) 96px, 128px"
               />
             ) : (
-              <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                <div className="text-center text-gray-600 font-medium text-xl">
-                  <div>{formatName(patient.firstName[0])}</div>
-                  <div>{formatName(patient.lastName[0])}</div>
+              <div className="h-full w-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+                <div className="text-center text-blue-600 font-semibold text-xl">
+                  {formatName(patient.firstName[0]) + formatName(patient.lastName[0])}
                 </div>
               </div>
             )}
           </div>
-  
-          {/* Profile Details */}
+
           <div className="mt-2 sm:mt-0">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
               {formatName(`${patient.firstName} ${patient.lastName}`)}
@@ -94,8 +90,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <p className="text-sm text-gray-600 mt-1">
               {patient.age} years • {patient.gender} • {patient.bloodGroup}
             </p>
-  
-            {/* Additional Info */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start mt-3 gap-2">
               <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
                 Reg.No: {patient.registrationNumber || "Not Available"}
@@ -107,65 +101,33 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
           </div>
         </div>
-  
-        {/* Right Section: Buttons */}
+
         <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto mt-3 md:mt-0">
           {!isEditing ? (
             <>
               {onEditProfile && (
                 <button
                   onClick={onEditProfile}
-                  className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center"
+                  className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50/80 backdrop-blur-sm border border-indigo-200 rounded-md hover:bg-indigo-100/80 transition-all flex items-center justify-center shadow-sm"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-1"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                  </svg>
+                  <FiEye className="h-4 w-4 mr-1 text-indigo-600" />
                   Edit Profile
                 </button>
               )}
               
               <button
                 onClick={handleEdit}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-md hover:bg-blue-100/80 transition-all flex items-center justify-center shadow-sm"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-10 10a2 2 0 01-1.414.586H4V15a2 2 0 01-.586-1.414l10-10z" />
-                  <path
-                    fillRule="evenodd"
-                    d="M12.293 2.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-12 12a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l12-12z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <FiEdit2 className="h-4 w-4 mr-1 text-blue-600" />
                 Edit Assessment
               </button>
 
               <button
                 onClick={onDelete}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-red-700 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-md hover:bg-red-100/80 transition-all flex items-center justify-center shadow-sm"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <FiTrash2 className="h-4 w-4 mr-1 text-red-600" />
                 Delete Client
               </button>
             </>
@@ -173,46 +135,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <>
               <button
                 onClick={handleSave}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-green-700 bg-green-50/80 backdrop-blur-sm border border-green-200 rounded-md hover:bg-green-100/80 transition-all flex items-center justify-center shadow-sm"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <FiSave className="h-4 w-4 mr-1 text-green-600" />
                 Save Changes
               </button>
               <button
                 onClick={handleCancel}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-md hover:bg-gray-100/80 transition-all flex items-center justify-center shadow-sm"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 011.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <FiX className="h-4 w-4 mr-1 text-gray-600" />
                 Cancel
               </button>
             </>
           )}
         </div>
       </div>
-  
-      {/* Image Viewer */}
       {patient.profileImage && (
         <ImageViewer
           src={patient.profileImage}

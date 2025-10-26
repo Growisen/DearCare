@@ -7,12 +7,13 @@ import toast from 'react-hot-toast';
 import { useDashboardData } from './useDashboardData';
 import useOrgStore from '@/app/stores/UseOrgStore';
 
-export const useNurseAssignments = (clientId: string) => {
+export const useNurseAssignments = (clientId: string, activeTab?: string) => {
   const { invalidateDashboardCache } = useDashboardData();
   const { organization } = useOrgStore(); 
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false); // Add this line
   const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNurseList, setShowNurseList] = useState(false);
@@ -124,6 +125,7 @@ export const useNurseAssignments = (clientId: string) => {
   };
 
   const fetchAssignments = async () => {
+    setIsLoadingAssignments(true);
     try {
       const assignmentsResponse = await getNurseAssignments(clientId);
 
@@ -146,6 +148,9 @@ export const useNurseAssignments = (clientId: string) => {
       }
     } catch (error) {
       console.error('Error fetching nurse assignments:', error);
+      toast.error('Failed to load nurse assignments');
+    } finally {
+      setIsLoadingAssignments(false);
     }
   };
 
@@ -279,8 +284,10 @@ export const useNurseAssignments = (clientId: string) => {
   };
 
   useEffect(() => {
-    fetchAssignments();
-  }, [clientId]); 
+    if (activeTab === 'assignments') {
+      fetchAssignments();
+    }
+  }, [clientId, activeTab]); 
   
   useEffect(() => {
     if (showNurseList) {
@@ -292,6 +299,7 @@ export const useNurseAssignments = (clientId: string) => {
     nurseAssignments,
     nurses,
     isLoadingNurses,
+    isLoadingAssignments,
     editingAssignment,
     showEditModal,
     showNurseList,

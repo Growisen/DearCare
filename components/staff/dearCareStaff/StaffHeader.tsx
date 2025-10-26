@@ -66,7 +66,7 @@ export function StaffHeader({
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name, email or designation..."
+            placeholder="Enter search term and press Enter..."
             className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

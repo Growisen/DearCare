@@ -93,7 +93,8 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
-              className="border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 pr-10 text-gray-800"
+              className="border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2
+               focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 pr-10 text-gray-800"
               autoFocus
             />
             <button
@@ -120,7 +121,8 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
                 passwordError && confirmPassword ? 'border-red-400 focus:ring-red-500/30' : 
                 passwordsMatch === true ? 'border-green-400 focus:ring-green-500/30' :
                 'border-gray-300'
-              } rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2 focus:border-blue-500 transition-all duration-200 pr-10 ${
+              } rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2 focus:border-blue-500 
+               transition-all duration-200 pr-10 ${
                 confirmPassword && passwordsMatch === true ? 'bg-green-50' : 
                 confirmPassword && passwordsMatch === false ? 'bg-red-50' : ''
               }`}
@@ -161,7 +163,8 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
           <div className="flex flex-wrap justify-end gap-2">
             <button
               onClick={handleSave}
-              className={`px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm order-2 sm:order-1 ${
+              className={`px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm 
+                transition-colors duration-200 flex items-center gap-1 text-sm order-2 sm:order-1 ${
                 !newPassword || !confirmPassword ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={!newPassword || !confirmPassword}
@@ -172,7 +175,8 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
             </button>
             <button
               onClick={handleCancel}
-              className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors duration-200 flex items-center gap-1 text-sm order-1 sm:order-2"
+              className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors
+               duration-200 flex items-center gap-1 text-sm order-1 sm:order-2"
               aria-label="Cancel edit"
             >
               <X className="w-4 h-4" />
