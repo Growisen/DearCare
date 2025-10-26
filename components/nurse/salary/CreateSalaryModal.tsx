@@ -17,10 +17,8 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
   const [endDate, setEndDate] = useState("");
   const [errors, setErrors] = useState({ startDate: "", endDate: "" });
   
-  // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
-  
-  // Reset form when modal opens/closes
+
   useEffect(() => {
     if (isOpen) {
       setStartDate("");
@@ -29,12 +27,10 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
     }
   }, [isOpen]);
   
-  // Validate dates whenever they change
   useEffect(() => {
     const newErrors = { startDate: "", endDate: "" };
     
     if (startDate && endDate) {
-      // Validate end date is after start date
       if (new Date(endDate) < new Date(startDate)) {
         newErrors.endDate = "End date must be after start date";
       }
@@ -44,7 +40,6 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
   }, [startDate, endDate]);
   
   const handleSubmit = () => {
-    // Validate required fields
     const newErrors = { startDate: "", endDate: "" };
     let isValid = true;
     
