@@ -42,7 +42,7 @@ export function LeaveRequestsFilters({
               </div>
               <input
                 type="text"
-                placeholder="Search by name, ID, leave type..."
+                placeholder="start typing to search..."
                 className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

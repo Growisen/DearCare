@@ -5,15 +5,17 @@ import toast from 'react-hot-toast';
 import { getServiceLabel } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
 
-export const usePatientData = (id: string) => {
+export const usePatientData = (id: string, activeTab?: string) => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoadingAssessment, setIsLoadingAssessment] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [assessmentLoaded, setAssessmentLoaded] = useState(false);
 
-  const fetchPatientData = async () => {
+  const fetchBasicClientData = async () => {
     if (!id) return;
     
     setLoading(true);
@@ -24,11 +26,9 @@ export const usePatientData = (id: string) => {
       }
       
       const clientResponse = await getClientDetails(id) as ClientResponse;
-      const assessmentResponse = await getPatientAssessment(id);
 
       if (clientResponse.success && clientResponse.client) {
         const clientData = clientResponse.client;
-        const assessmentData = assessmentResponse.success ? assessmentResponse.assessment : null;
 
         const transformedPatient: Patient = {
             _id: clientData.details?.client_id,
@@ -39,7 +39,7 @@ export const usePatientData = (id: string) => {
             gender: clientData.details?.patient_gender || '',
             bloodGroup: '',
             location: clientData.details?.complete_address || '',
-            email: '', // Patient's email if available
+            email: '',
             phoneNumber: clientData.details?.patient_phone || '',
             clientCategory: clientData.client_category || 'DearCare LLP',
             profileImage: clientData.details?.patient_profile_pic_url || '',
@@ -50,35 +50,59 @@ export const usePatientData = (id: string) => {
               status: statusResult.status,
             },
             address: {
-            fullAddress: clientData.details?.patient_address || '',
-            city: clientData.details?.patient_city || '',
-            district: clientData.details?.patient_district || '',
-            pincode: clientData.details?.patient_pincode || '',
-            state: clientData.details?.patient_state || '',
+              fullAddress: clientData.details?.patient_address || '',
+              city: clientData.details?.patient_city || '',
+              district: clientData.details?.patient_district || '',
+              pincode: clientData.details?.patient_pincode || '',
+              state: clientData.details?.patient_state || '',
             },
             requestor: {
-            name: clientData.details?.requestor_name || '',
-            relation: clientData.details?.relation_to_patient || '',
-            phone: clientData.details?.requestor_phone || '',
-            email: clientData.details?.requestor_email || '',
-            profileImage: clientData.details?.requestor_profile_pic_url || '',
-            emergencyPhone: clientData.details?.requestor_emergency_phone || '',
-            jobDetails: clientData.details?.requestor_job_details || '',
-            
-            address: {
-                fullAddress: clientData.details?.requestor_address || '',
-                city: clientData.details?.requestor_city || '',
-                district: clientData.details?.requestor_district || '',
-                pincode: clientData.details?.requestor_pincode || '',
-                state: clientData.details?.requestor_state || '',
-            }
+              name: clientData.details?.requestor_name || '',
+              relation: clientData.details?.relation_to_patient || '',
+              phone: clientData.details?.requestor_phone || '',
+              email: clientData.details?.requestor_email || '',
+              profileImage: clientData.details?.requestor_profile_pic_url || '',
+              emergencyPhone: clientData.details?.requestor_emergency_phone || '',
+              jobDetails: clientData.details?.requestor_job_details || '',
+              
+              address: {
+                  fullAddress: clientData.details?.requestor_address || '',
+                  city: clientData.details?.requestor_city || '',
+                  district: clientData.details?.requestor_district || '',
+                  pincode: clientData.details?.requestor_pincode || '',
+                  state: clientData.details?.requestor_state || '',
+              }
             },
             emergencyContact: {
-            name: clientData.details?.requestor_name || '',
-            relation: clientData.details?.relation_to_patient || '',
-            phone: clientData.details?.requestor_phone || ''
+              name: clientData.details?.requestor_name || '',
+              relation: clientData.details?.relation_to_patient || '',
+              phone: clientData.details?.requestor_phone || ''
             },
-            assessments: assessmentData ? [{
+            assessments: []
+        };
+
+        setPatient(transformedPatient);
+      }
+    } catch (error) {
+      console.error('Error fetching patient data:', error);
+      setError('Failed to load patient data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAssessmentData = async () => {
+    if (!id || assessmentLoaded) return;
+    
+    setIsLoadingAssessment(true); 
+    try {
+      const assessmentResponse = await getPatientAssessment(id);
+      const assessmentData = assessmentResponse.success ? assessmentResponse.assessment : null;
+
+      if (assessmentData) {
+        setPatient(prev => prev ? {
+          ...prev,
+          assessments: [{
             guardianOccupation: assessmentData.guardian_occupation || '',
             maritalStatus: assessmentData.marital_status || '',
             height: assessmentData.height || '',
@@ -119,16 +143,15 @@ export const usePatientData = (id: string) => {
                 familyRelationship: '',
                 recorderTimestamp: ''
             }
-            }] : []
-        };
-
-        setPatient(transformedPatient);
+          }]
+        } : prev);
+        setAssessmentLoaded(true);
       }
     } catch (error) {
-      console.error('Error fetching patient data:', error);
-      setError('Failed to load patient data');
+      console.error('Error fetching assessment data:', error);
+      toast.error('Failed to load assessment data');
     } finally {
-      setLoading(false);
+      setIsLoadingAssessment(false); 
     }
   };
 
@@ -136,7 +159,11 @@ export const usePatientData = (id: string) => {
   
   const handleSave = async () => {
     setIsEditing(false);
-    await fetchPatientData();
+    await fetchBasicClientData();
+    if (assessmentLoaded) {
+      setAssessmentLoaded(false);
+      await fetchAssessmentData();
+    }
     toast.success('Patient details updated successfully');
   };
   
@@ -190,12 +217,20 @@ export const usePatientData = (id: string) => {
   };
 
   useEffect(() => {
-    fetchPatientData();
+    fetchBasicClientData();
   }, [id]);
+
+
+  useEffect(() => {
+    if (activeTab === 'medical' && !assessmentLoaded) {
+      fetchAssessmentData();
+    }
+  }, [activeTab, id]);
 
   return {
     patient,
     loading,
+    isLoadingAssessment,
     error,
     status,
     isEditing,
@@ -207,5 +242,6 @@ export const usePatientData = (id: string) => {
     handleEditProfile,
     handleCloseProfileEdit,
     handleDeleteClient,
+    fetchAssessmentData,
   };
 };

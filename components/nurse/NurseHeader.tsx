@@ -62,7 +62,6 @@ export function NurseHeader({
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      {/* Header with title and action buttons */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Nurse Management</h1>
@@ -99,13 +98,11 @@ export function NurseHeader({
         </div>
       </div>
 
-      {/* Search and filters section */}
       <div className="p-3 bg-gray-50 grid gap-2 grid-cols-1">
-        {/* Search input */}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search nurses by name, email or location..."
+            placeholder="start typing to search...."
             className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -128,9 +125,7 @@ export function NurseHeader({
           </button>
         </div>
 
-        {/* Filters section */}
         <div className="flex flex-wrap gap-3 mt-2">
-          {/* Status filter */}
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-gray-600">Status:</span>
             <div className="hidden sm:flex gap-1.5 items-center">
@@ -168,7 +163,6 @@ export function NurseHeader({
             </select>
           </div>
 
-          {/* Experience filter */}
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-gray-600">Experience:</span>
             <div className="hidden sm:flex gap-1.5 items-center">

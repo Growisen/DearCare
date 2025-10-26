@@ -15,7 +15,6 @@ export default function StaffAttendance({ currentTime, attendanceData }:
   }) {
   const router = useRouter()
   
-  // Use default values if data is not available
   const present = attendanceData?.present ?? 0
   const absent = attendanceData?.absent ?? 0
   const onLeave = attendanceData?.onLeave ?? 0
@@ -44,11 +43,9 @@ export default function StaffAttendance({ currentTime, attendanceData }:
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-        {/* Percentage circle - reduced size and improved display */}
         <div className="col-span-1 sm:col-span-2 flex justify-center items-center">
           <div className="relative w-32 h-32">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              {/* Background circle */}
               <circle 
                 className="text-slate-200" 
                 strokeWidth="8" 
@@ -58,7 +55,6 @@ export default function StaffAttendance({ currentTime, attendanceData }:
                 cx="50" 
                 cy="50" 
               />
-              {/* Progress circle with smooth animation and improved styling */}
               <circle 
                 className="text-emerald-500 transition-all duration-1000 ease-out" 
                 strokeWidth="8" 
@@ -82,7 +78,6 @@ export default function StaffAttendance({ currentTime, attendanceData }:
           </div>
         </div>
 
-        {/* Attendance stats - with improved spacing */}
         <div className="col-span-1 sm:col-span-3 space-y-3 flex flex-col justify-center">
           <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
             <div className="flex items-center justify-between">
