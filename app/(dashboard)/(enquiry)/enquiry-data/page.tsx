@@ -7,10 +7,9 @@ export default function EnquiryDataPage() {
   const [enquiries, setEnquiries] = useState<ServiceEnquiryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Separate states for search input and actual search term
-  const [searchInput, setSearchInput] = useState(""); // What user types
-  const [searchTerm, setSearchTerm] = useState(""); // What's actually searched
+
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -24,7 +23,6 @@ export default function EnquiryDataPage() {
     loadData(1, 10, "");
   }, []);
 
-  // Load data with pagination and optional search
   const loadData = useCallback(async (page: number = 1, pageSize: number = 10, search: string = "") => {
     setLoading(true);
     setError(null);
@@ -56,10 +54,9 @@ export default function EnquiryDataPage() {
     }
   }, []);
 
-  // Handle search button click
   const handleSearch = useCallback(() => {
     if (searchInput.trim() === searchTerm.trim()) {
-      return; // No change, don't search again
+      return;
     }
     
     setIsSearching(true);
@@ -67,7 +64,6 @@ export default function EnquiryDataPage() {
     loadData(1, pagination.pageSize, searchInput.trim());
   }, [searchInput, searchTerm, pagination.pageSize, loadData]);
 
-  // Handle Enter key press in search input
   const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -75,19 +71,16 @@ export default function EnquiryDataPage() {
     }
   }, [handleSearch]);
 
-  // Clear search
   const handleClearSearch = useCallback(() => {
     setSearchInput("");
     setSearchTerm("");
     loadData(1, pagination.pageSize, "");
   }, [pagination.pageSize, loadData]);
 
-  // Handle refresh
   const handleRefresh = useCallback(() => {
     loadData(pagination.currentPage, pagination.pageSize, searchTerm);
   }, [pagination.currentPage, pagination.pageSize, searchTerm, loadData]);
 
-  // Handle page change
   const handlePageChange = useCallback((newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages || loading) return;
     loadData(newPage, pagination.pageSize, searchTerm);
@@ -106,12 +99,11 @@ export default function EnquiryDataPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Service Enquiries</h1>
+              <h1 className="text-lg font-semibold text-gray-800">Service Enquiries</h1>
               <p className="mt-1 text-sm text-gray-500">
                 Total: {pagination.totalCount} {pagination.totalCount === 1 ? 'enquiry' : 'enquiries'}
                 {searchTerm && (
@@ -121,8 +113,7 @@ export default function EnquiryDataPage() {
                 )}
               </p>
             </div>
-            
-            {/* Search Controls */}
+
             <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -141,8 +132,7 @@ export default function EnquiryDataPage() {
                     </svg>
                   </div>
                 </div>
-                
-                {/* Search Button */}
+
                 <button
                   onClick={handleSearch}
                   disabled={loading || isSearching}
@@ -162,8 +152,7 @@ export default function EnquiryDataPage() {
                     </>
                   )}
                 </button>
-                
-                {/* Clear Search Button (show only when there's a search) */}
+
                 {searchTerm && (
                   <button
                     onClick={handleClearSearch}
@@ -177,8 +166,7 @@ export default function EnquiryDataPage() {
                   </button>
                 )}
               </div>
-              
-              {/* Refresh Button */}
+
               <button
                 onClick={handleRefresh}
                 disabled={loading}
@@ -194,7 +182,6 @@ export default function EnquiryDataPage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
@@ -205,7 +192,6 @@ export default function EnquiryDataPage() {
           </div>
         )}
 
-        {/* Loading Overlay when changing pages or searching */}
         {(loading || isSearching) && pagination.currentPage > 1 && (
           <div className="mb-6 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-lg flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
@@ -213,8 +199,6 @@ export default function EnquiryDataPage() {
           </div>
         )}
 
-        {/* Rest of your table and mobile view code remains the same */}
-        {/* Desktop Table View */}
         <div className="hidden lg:block bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -275,8 +259,7 @@ export default function EnquiryDataPage() {
               </tbody>
             </table>
           </div>
-          
-          {/* Pagination Controls - Keep your existing pagination code */}
+
           {pagination.totalPages > 0 && (
             <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
               <div className="text-sm text-gray-500">
@@ -290,11 +273,10 @@ export default function EnquiryDataPage() {
                 >
                   Previous
                 </button>
-                
-                {/* Page Number Buttons */}
+
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, i) => {
-                    // Logic to show pages around current page
+
                     let pageNum: number;
                     if (pagination.totalPages <= 5) {
                       pageNum = i + 1;
@@ -338,8 +320,6 @@ export default function EnquiryDataPage() {
           )}
         </div>
 
-        {/* Keep your existing mobile view code with the same handleClearSearch update */}
-        {/* Mobile Card View */}
         <div className="lg:hidden space-y-4">
           {enquiries.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
@@ -401,7 +381,6 @@ export default function EnquiryDataPage() {
                 </div>
               ))}
 
-              {/* Mobile Pagination */}
               {pagination.totalPages > 0 && (
                 <div className="bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between">
                   <button 

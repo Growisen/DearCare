@@ -33,7 +33,7 @@ export function AttendanceHeader({
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between p-4 border-b border-gray-200">
         <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Staff Attendance</h1>
+          <h1 className="text-lg font-semibold text-gray-800">Staff Attendance</h1>
           <p className="text-xs text-gray-500 mt-0.5">Track and manage nursing staff attendance records</p>
         </div>
         <div>
