@@ -18,6 +18,8 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
   const [errors, setErrors] = useState({ startDate: "", endDate: "" });
   
   const today = new Date().toISOString().split('T')[0];
+  const minYear = 2025;
+  const maxYear = new Date().getFullYear();
 
   useEffect(() => {
     if (isOpen) {
@@ -30,7 +32,21 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
   useEffect(() => {
     const newErrors = { startDate: "", endDate: "" };
     
-    if (startDate && endDate) {
+    if (startDate) {
+      const startYear = new Date(startDate).getFullYear();
+      if (startYear < minYear || startYear > maxYear) {
+        newErrors.startDate = `Year must be between ${minYear} and ${maxYear}`;
+      }
+    }
+    
+    if (endDate) {
+      const endYear = new Date(endDate).getFullYear();
+      if (endYear < minYear || endYear > maxYear) {
+        newErrors.endDate = `Year must be between ${minYear} and ${maxYear}`;
+      }
+    }
+    
+    if (startDate && endDate && !newErrors.startDate && !newErrors.endDate) {
       if (new Date(endDate) < new Date(startDate)) {
         newErrors.endDate = "End date must be after start date";
       }
@@ -46,14 +62,26 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
     if (!startDate) {
       newErrors.startDate = "Start date is required";
       isValid = false;
+    } else {
+      const startYear = new Date(startDate).getFullYear();
+      if (startYear < minYear || startYear > maxYear) {
+        newErrors.startDate = `Year must be between ${minYear} and ${maxYear}`;
+        isValid = false;
+      }
     }
     
     if (!endDate) {
       newErrors.endDate = "End date is required";
       isValid = false;
-    } else if (new Date(endDate) < new Date(startDate)) {
-      newErrors.endDate = "End date must be after start date";
-      isValid = false;
+    } else {
+      const endYear = new Date(endDate).getFullYear();
+      if (endYear < minYear || endYear > maxYear) {
+        newErrors.endDate = `Year must be between ${minYear} and ${maxYear}`;
+        isValid = false;
+      } else if (new Date(endDate) < new Date(startDate)) {
+        newErrors.endDate = "End date must be after start date";
+        isValid = false;
+      }
     }
     
     setErrors(newErrors);
