@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from "@/app/actions/authentication/auth";
 import { getOrgMappings } from "@/app/utils/org-utils";
 import { SupabaseClient } from '@supabase/supabase-js';
+import { differenceInCalendarDays, max, min } from "date-fns";
 
 function calculateShiftHours(startTime: string, endTime: string): number {
   try {
@@ -748,5 +749,136 @@ export async function fetchSalaryPaymentsWithNurseInfo({
     page,
     pageSize,
     total: records.length,
+  };
+}
+
+
+
+interface AdvanceSalaryPayment {
+  id: number;
+  pay_period_start: string;
+  pay_period_end: string;
+  is_advance: boolean;
+}
+
+interface NurseClientAssignment {
+  id: number;
+  salary_per_day: number;
+  start_date: string;
+  end_date: string;
+}
+
+export async function createAdvanceSalaryPayment({
+  nurseId,
+  startDate,
+  endDate,
+}: {
+  nurseId: number;
+  startDate: string;
+  endDate: string;
+}) {
+  const supabase = await createSupabaseServerClient();
+
+  const dateError = validateDateRange(startDate, endDate);
+  if (dateError) {
+    return {
+      success: false,
+      error: dateError,
+    };
+  }
+
+  const { data: payments, error: overlapError } = await supabase
+    .from("salary_payments")
+    .select("id, pay_period_start, pay_period_end, is_advance")
+    .eq("nurse_id", nurseId)
+    .eq("is_advance", true);
+
+  if (overlapError) {
+    return {
+      success: false,
+      error: overlapError.message,
+    };
+  }
+
+  const overlapping = (payments as AdvanceSalaryPayment[] ?? []).filter(
+    (p) =>
+      hasDateOverlap(startDate, endDate, p.pay_period_start, p.pay_period_end)
+  );
+
+  if (overlapping.length > 0) {
+    return {
+      success: false,
+      error: "Advance salary already exists for an overlapping period.",
+      overlappingPayments: overlapping,
+    };
+  }
+
+  const { data: nurseClients, error: nurseClientError } = await supabase
+    .from("nurse_client")
+    .select("id, salary_per_day, start_date, end_date")
+    .eq("nurse_id", nurseId);
+
+  if (nurseClientError) {
+    return {
+      success: false,
+      error: nurseClientError.message,
+    };
+  }
+
+  const assignments = nurseClients as NurseClientAssignment[] ?? [];
+
+  let totalSalary = 0;
+  let assignedDays = 0;
+
+  for (const assignment of assignments) {
+    const overlapStart = max([
+      new Date(startDate),
+      new Date(assignment.start_date),
+    ]);
+    const overlapEnd = min([
+      new Date(endDate),
+      new Date(assignment.end_date),
+    ]);
+
+    if (overlapStart > overlapEnd) continue;
+
+    const days = differenceInCalendarDays(overlapEnd, overlapStart) + 1;
+    totalSalary += days * assignment.salary_per_day;
+    assignedDays += days;
+  }
+
+  const { error: insertError } = await supabase
+    .from("salary_payments")
+    .insert([
+      {
+        nurse_id: nurseId,
+        pay_period_start: startDate,
+        pay_period_end: endDate,
+        salary: totalSalary,
+        net_salary: totalSalary,
+        days_worked: assignedDays,
+        hours_worked: null,
+        payment_status: "pending",
+        info: 'Advance Salary',
+        is_advance: true,
+        reviewed: false,
+      },
+    ]);
+
+  if (insertError) {
+    return {
+      success: false,
+      error: insertError.message,
+    };
+  }
+
+  return {
+    success: true,
+    nurseId,
+    startDate,
+    endDate,
+    advanceAmount: totalSalary,
+    assignedDays,
+    info: 'Advance Salary',
   };
 }
