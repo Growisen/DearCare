@@ -1,9 +1,10 @@
-CREATE VIEW nurse_assignments_view AS
+CREATE OR REPLACE VIEW nurse_assignments_view AS
 SELECT 
   nc.*,
   n.first_name AS nurse_first_name,
   n.last_name AS nurse_last_name,
   n.first_name || ' ' || n.last_name AS nurse_full_name,
+  n.admitted_type,
   c.client_type,
   c.client_category,
   COALESCE(

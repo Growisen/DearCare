@@ -72,7 +72,13 @@ export async function calculateNurseSalary({
       nurse_id,
       salary_per_day,
       shift_start_time,
-      shift_end_time
+      shift_end_time,
+      attendance_mode,
+      calculated_attendance_days,
+      shift_start_datetime,
+      shift_end_datetime,
+      start_date,
+      end_date
     `
     )
     .eq("nurse_id", nurseId);
@@ -91,27 +97,45 @@ export async function calculateNurseSalary({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const assignmentMap = new Map<number, any>();
   const assignmentIds: number[] = [];
+  const shiftBasedAssignments: number[] = [];
   for (const assignment of nurseClients ?? []) {
-    if (
-      !assignment.shift_start_time ||
-      !assignment.shift_end_time ||
-      !assignment.salary_per_day
-    ) {
-      continue;
+    // Check if this is a shift-based assignment
+    if (assignment.attendance_mode === 'shift_based') {
+      // Handle shift-based attendance
+      if (!assignment.salary_per_day) continue;
+      
+      assignmentMap.set(assignment.id, {
+        salary_per_day: assignment.salary_per_day,
+        attendance_mode: 'shift_based',
+        calculated_attendance_days: assignment.calculated_attendance_days || 0,
+        shift_start_datetime: assignment.shift_start_datetime,
+        shift_end_datetime: assignment.shift_end_datetime,
+      });
+      shiftBasedAssignments.push(assignment.id);
+    } else {
+      // Handle daily attendance (existing logic)
+      if (
+        !assignment.shift_start_time ||
+        !assignment.shift_end_time ||
+        !assignment.salary_per_day
+      ) {
+        continue;
+      }
+      const shiftHours = calculateShiftHours(
+        assignment.shift_start_time,
+        assignment.shift_end_time
+      );
+      if (shiftHours <= 0) continue;
+      assignmentMap.set(assignment.id, {
+        salary_per_day: assignment.salary_per_day,
+        standard_shift_hours: shiftHours,
+        attendance_mode: 'daily',
+      });
+      assignmentIds.push(assignment.id);
     }
-    const shiftHours = calculateShiftHours(
-      assignment.shift_start_time,
-      assignment.shift_end_time
-    );
-    if (shiftHours <= 0) continue;
-    assignmentMap.set(assignment.id, {
-      salary_per_day: assignment.salary_per_day,
-      standard_shift_hours: shiftHours,
-    });
-    assignmentIds.push(assignment.id);
   }
 
-  if (assignmentIds.length === 0) {
+  if (assignmentIds.length === 0 && shiftBasedAssignments.length === 0) {
     return {
       success: true,
       nurseId,
@@ -124,100 +148,175 @@ export async function calculateNurseSalary({
     };
   }
 
-  const { data: attendanceRecords, error: attendanceError } = await supabase
-    .from("attendence_individual")
-    .select(
-      "id, date, total_hours, assigned_id, start_time, end_time"
-    )
-    .in("assigned_id", assignmentIds)
-    .gte("date", startDate)
-    .lte("date", endDate);
-
-  if (attendanceError) {
-    return {
-      success: false,
-      error: attendanceError.message,
-      salary: 0,
-      daysWorked: 0,
-      hoursWorked: 0,
-      skippedRecords: [],
-    };
-  }
-
+  // Initialize calculation variables
   let totalSalary = 0;
   let totalBillableHours = 0;
   let totalActualHours = 0;
   let daysWorked = 0;
   const skippedRecords: Array<{ id: number; date: string; reason: string }> = [];
-
   const salaryDayMap = new Map<number, number>();
 
-  for (const record of attendanceRecords ?? []) {
-    const assignment = assignmentMap.get(record.assigned_id);
-    if (!assignment) {
-      skippedRecords.push({
-        id: record.id,
-        date: record.date,
-        reason: "No valid nurse_client assignment",
-      });
-      continue;
-    }
-    if (
-      !record.start_time ||
-      !record.end_time ||
-      !record.total_hours ||
-      record.start_time.trim() === "" ||
-      record.end_time.trim() === "" ||
-      record.total_hours.trim() === ""
-    ) {
-      skippedRecords.push({
-        id: record.id,
-        date: record.date,
-        reason: "Missing attendance data",
-      });
-      continue;
-    }
-    const workedHours = parseWorkedHours(record.total_hours);
-    if (workedHours <= 0) {
-      skippedRecords.push({
-        id: record.id,
-        date: record.date,
-        reason: "Invalid or zero worked hours",
-      });
-      continue;
-    }
-    const billableHours = Math.min(
-      workedHours,
-      assignment.standard_shift_hours
-    );
-    const hourlyRate =
-      assignment.salary_per_day / assignment.standard_shift_hours;
-    const dayEarnings = billableHours * hourlyRate;
+  // ============================================================================
+  // PART 1: Calculate salary for SHIFT-BASED assignments
+  // ============================================================================
+  
+  for (const assignmentId of shiftBasedAssignments) {
+    const assignment = assignmentMap.get(assignmentId);
+    if (!assignment) continue;
 
-    totalSalary += dayEarnings;
-    totalBillableHours += billableHours;
-    totalActualHours += workedHours;
-    daysWorked += 1;
+    // Check if shift is within the salary calculation period
+    if (assignment.shift_start_datetime && assignment.shift_end_datetime) {
+      const shiftStart = new Date(assignment.shift_start_datetime);
+      const shiftEnd = new Date(assignment.shift_end_datetime);
+      const periodStart = new Date(startDate);
+      const periodEnd = new Date(endDate);
 
-    const prev = salaryDayMap.get(assignment.salary_per_day) || 0;
-    salaryDayMap.set(assignment.salary_per_day, prev + 1);
+      // Only include shifts that overlap with the calculation period
+      if (shiftEnd >= periodStart && shiftStart <= periodEnd) {
+        const attendanceDays = assignment.calculated_attendance_days || 0;
+        
+        if (attendanceDays > 0) {
+          const shiftSalary = attendanceDays * assignment.salary_per_day;
+          totalSalary += shiftSalary;
+          
+          // Convert days to hours for display (assuming 24 hours per day)
+          const shiftHours = attendanceDays * 24;
+          totalBillableHours += shiftHours;
+          totalActualHours += shiftHours;
+          
+          // Track days worked
+          daysWorked += attendanceDays;
+          
+          // Track salary breakdown
+          const prev = salaryDayMap.get(assignment.salary_per_day) || 0;
+          salaryDayMap.set(assignment.salary_per_day, prev + attendanceDays);
+        }
+      }
+    } else if (!assignment.shift_start_datetime) {
+      // Shift not started yet - skip with reason
+      skippedRecords.push({
+        id: assignmentId,
+        date: startDate,
+        reason: "Shift-based assignment not started",
+      });
+    } else if (!assignment.shift_end_datetime) {
+      // Shift in progress - skip with reason
+      skippedRecords.push({
+        id: assignmentId,
+        date: startDate,
+        reason: "Shift-based assignment still in progress",
+      });
+    }
+  }
+
+  // ============================================================================
+  // PART 2: Calculate salary for DAILY attendance assignments
+  // ============================================================================
+
+  if (assignmentIds.length > 0) {
+    const { data: attendanceRecords, error: attendanceError } = await supabase
+      .from("attendence_individual")
+      .select(
+        "id, date, total_hours, assigned_id, start_time, end_time"
+      )
+      .in("assigned_id", assignmentIds)
+      .gte("date", startDate)
+      .lte("date", endDate);
+
+    if (attendanceError) {
+      return {
+        success: false,
+        error: attendanceError.message,
+        salary: Number(totalSalary.toFixed(2)),
+        daysWorked,
+        hoursWorked: Number(totalBillableHours.toFixed(2)),
+        skippedRecords,
+      };
+    }
+
+    for (const record of attendanceRecords ?? []) {
+      const assignment = assignmentMap.get(record.assigned_id);
+      if (!assignment || assignment.attendance_mode !== 'daily') {
+        skippedRecords.push({
+          id: record.id,
+          date: record.date,
+          reason: "No valid nurse_client assignment",
+        });
+        continue;
+      }
+      if (
+        !record.start_time ||
+        !record.end_time ||
+        !record.total_hours ||
+        record.start_time.trim() === "" ||
+        record.end_time.trim() === "" ||
+        record.total_hours.trim() === ""
+      ) {
+        skippedRecords.push({
+          id: record.id,
+          date: record.date,
+          reason: "Missing attendance data",
+        });
+        continue;
+      }
+      const workedHours = parseWorkedHours(record.total_hours);
+      if (workedHours <= 0) {
+        skippedRecords.push({
+          id: record.id,
+          date: record.date,
+          reason: "Invalid or zero worked hours",
+        });
+        continue;
+      }
+      const billableHours = Math.min(
+        workedHours,
+        assignment.standard_shift_hours
+      );
+      const hourlyRate =
+        assignment.salary_per_day / assignment.standard_shift_hours;
+      const dayEarnings = billableHours * hourlyRate;
+
+      totalSalary += dayEarnings;
+      totalBillableHours += billableHours;
+      totalActualHours += workedHours;
+      daysWorked += 1;
+
+      const prev = salaryDayMap.get(assignment.salary_per_day) || 0;
+      salaryDayMap.set(assignment.salary_per_day, prev + 1);
+    }
   }
 
   let salaryBreakdown = "";
   if (salaryDayMap.size > 0) {
     salaryBreakdown = Array.from(salaryDayMap.entries())
-      .map(([salary, count]) => `${count} days (${salary}/day)`)
+      .map(([salary, count]) => {
+        // Format fractional days properly (e.g., 1.5 days instead of 1.50 days)
+        const formattedCount = count % 1 === 0 ? count.toString() : count.toFixed(2);
+        return `${formattedCount} days (${salary}/day)`;
+      })
       .join(", ");
   }
 
-  let info = `${daysWorked} days`;
+  // Round daysWorked for display
+  const roundedDaysWorked = Math.round(daysWorked * 100) / 100;
+
+  let info = `${roundedDaysWorked} days`;
   if (salaryBreakdown) {
     info += ` [${salaryBreakdown}]`;
   }
   if (skippedRecords.length > 0) {
     const missingDataCount = skippedRecords.filter(r => r.reason === "Missing attendance data").length;
     const invalidHoursCount = skippedRecords.filter(r => r.reason === "Invalid or zero worked hours").length;
-    info += ` | SKIPPED: ${skippedRecords.length} records (${missingDataCount} missing data, ${invalidHoursCount} invalid hours)`;
+    const shiftNotStartedCount = skippedRecords.filter(r => r.reason === "Shift-based assignment not started").length;
+    const shiftInProgressCount = skippedRecords.filter(r => r.reason === "Shift-based assignment still in progress").length;
+    
+    const skipReasons: string[] = [];
+    if (missingDataCount > 0) skipReasons.push(`${missingDataCount} missing data`);
+    if (invalidHoursCount > 0) skipReasons.push(`${invalidHoursCount} invalid hours`);
+    if (shiftNotStartedCount > 0) skipReasons.push(`${shiftNotStartedCount} shift not started`);
+    if (shiftInProgressCount > 0) skipReasons.push(`${shiftInProgressCount} shift in progress`);
+    
+    info += ` | SKIPPED: ${skippedRecords.length} records (${skipReasons.join(", ")})`;
   }
 
   const averageHourlyRate = totalActualHours > 0 ? Number((totalSalary / totalActualHours).toFixed(2)) : 0;
@@ -230,7 +329,7 @@ export async function calculateNurseSalary({
         nurse_id: nurseId,
         pay_period_start: startDate,
         pay_period_end: endDate,
-        days_worked: daysWorked,
+        days_worked: roundedDaysWorked,
         hours_worked: Number(totalBillableHours.toFixed(2)),
         salary: Number(totalSalary.toFixed(2)),
         net_salary: Number(totalSalary.toFixed(2)),

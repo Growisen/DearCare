@@ -14,6 +14,7 @@ import Link from "next/link"
 import ConfirmationModal from "@/components/common/ConfirmationModal"
 import { useDashboardData } from "@/hooks/useDashboardData"
 import { formatName } from "@/utils/formatters"
+import ShiftAttendanceCard from "@/components/attendance/ShiftAttendanceCard"
 
 const LONG_SHIFT_HOUR_THRESHOLD = 22;
 
@@ -260,7 +261,24 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
               </div>
             </div>
             
-            {isAssignmentActive && (
+            {/* Conditional rendering based on organization */}
+            {isAssignmentActive && assignment.admitted_type === 'Tata_Homenursing' ? (
+              // Shift-based attendance for Tata Home Nursing
+              <div className="mt-6">
+                <ShiftAttendanceCard
+                  nurseId={assignment.nurse_id.toString()}
+                  assignmentId={assignment.id}
+                  clientName={clientName}
+                  assignmentStartDate={assignment.start_date}
+                  assignmentEndDate={assignment.end_date}
+                  onShiftChange={() => {
+                    invalidateDashboardCache()
+                    fetchAttendanceData()
+                  }}
+                />
+              </div>
+            ) : isAssignmentActive ? (
+              // Daily attendance for DearCare LLP (existing logic)
               <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
                 <h4 className="text-sm font-medium text-blue-800 mb-2">Today&apos;s Check-in Status</h4>
                 {loading ? (
@@ -380,7 +398,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
                   </div>
                 )}
               </div>
-            )}
+            ) : null}
             
             {isAssignmentUpcoming && (
               <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">

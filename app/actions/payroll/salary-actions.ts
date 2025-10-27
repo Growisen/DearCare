@@ -57,7 +57,12 @@ export async function fetchNurseHoursWorked(
       }
     }
 
-    // Build query - Include all fields you want to check for missing values
+    // ========== DUAL ATTENDANCE MODE CALCULATION ==========
+    // This function now supports both daily and shift-based attendance modes
+    // - Daily Mode (DearCare LLP): Uses attendence_individual records (existing logic)
+    // - Shift-based Mode (Tata Home Nursing): Uses calculated_attendance_days from nurse_client
+
+    // Build query for daily attendance (existing logic)
     let attendanceQuery = supabase
       .from("attendence_individual")
       .select(`
@@ -90,14 +95,56 @@ export async function fetchNurseHoursWorked(
       );
     }
 
-    // Execute query
+    // Execute query for daily attendance
     const { data: attendanceRecords, error: attendanceError } =
       await attendanceQuery;
     if (attendanceError) throw new Error(attendanceError.message);
 
+    // Query for shift-based attendance (Tata Home Nursing)
+    let shiftQuery = supabase
+      .from("nurse_client")
+      .select(`
+        id,
+        nurse_id,
+        calculated_attendance_days,
+        shift_start_datetime,
+        shift_end_datetime,
+        attendance_mode,
+        nurse:nurse_id (
+          nurse_id,
+          first_name,
+          last_name,
+          nurse_reg_no,
+          admitted_type
+        )
+      `)
+      .eq('attendance_mode', 'shift_based')
+      .not('shift_end_datetime', 'is', null); // Only completed shifts
+
+    // Apply date filters for shift-based attendance
+    if (dateFrom) shiftQuery = shiftQuery.gte('shift_end_datetime', dateFrom);
+    if (dateTo) shiftQuery = shiftQuery.lte('shift_end_datetime', dateTo);
+    if (normalizedOrganization !== "all") {
+      shiftQuery = shiftQuery.eq('nurse.admitted_type', normalizedOrganization);
+    }
+
+    const { data: shiftRecords, error: shiftError } = await shiftQuery;
+    if (shiftError) {
+      // If shift columns don't exist yet (migration not applied), log warning and continue
+      logger.warn('Shift-based attendance query failed (migration may not be applied yet):', shiftError);
+    }
+
     const nurseHoursMap = new Map<
       number,
-      { id: number; name: string; regNo: string; hours: number; organization: string }
+      { 
+        id: number; 
+        name: string; 
+        regNo: string; 
+        hours: number; 
+        organization: string;
+        attendanceMode?: 'daily' | 'shift_based' | 'mixed';
+        shiftDays?: number; // For shift-based attendance
+      }
     >();
     const nurseMissingFieldsMap = new Map<number, Array<{ field: string, date: string }>>();
 
@@ -114,6 +161,7 @@ export async function fetchNurseHoursWorked(
       return value === null || value === undefined || value === '';
     };
 
+    // Process daily attendance records (existing logic for DearCare LLP)
     attendanceRecords.forEach((record: AttendanceRecord) => {
       if (!record.nurse_client) return;
 
@@ -137,6 +185,8 @@ export async function fetchNurseHoursWorked(
             regNo: nurse.nurse_reg_no || "",
             hours: 0,
             organization: nurse.admitted_type || "",
+            attendanceMode: 'daily',
+            shiftDays: 0,
           });
         }
 
@@ -160,6 +210,72 @@ export async function fetchNurseHoursWorked(
         }
       });
     });
+
+    // Process shift-based attendance records (new logic for Tata Home Nursing)
+    if (shiftRecords && shiftRecords.length > 0) {
+      interface ShiftRecord {
+        id: number;
+        nurse_id: number;
+        calculated_attendance_days: number | null;
+        shift_start_datetime: string | null;
+        shift_end_datetime: string | null;
+        attendance_mode: string;
+        nurse: {
+          nurse_id: number;
+          first_name: string;
+          last_name: string;
+          nurse_reg_no: string | null;
+          admitted_type: string | null;
+        } | Array<{
+          nurse_id: number;
+          first_name: string;
+          last_name: string;
+          nurse_reg_no: string | null;
+          admitted_type: string | null;
+        }>;
+      }
+
+      (shiftRecords as ShiftRecord[]).forEach((shift) => {
+        if (!shift.nurse) return;
+
+        const nurse = Array.isArray(shift.nurse) ? shift.nurse[0] : shift.nurse;
+        if (!nurse) return;
+
+        const nurseId = nurse.nurse_id;
+        const attendanceDays = shift.calculated_attendance_days || 0;
+        
+        // Convert attendance days to hours (1 day = 24 hours for calculation purposes)
+        const hoursFromShift = attendanceDays * 24;
+
+        if (!nurseHoursMap.has(nurseId)) {
+          nurseHoursMap.set(nurseId, {
+            id: nurseId,
+            name: `${nurse.first_name} ${nurse.last_name}`,
+            regNo: nurse.nurse_reg_no || "",
+            hours: hoursFromShift,
+            organization: nurse.admitted_type || "",
+            attendanceMode: 'shift_based',
+            shiftDays: attendanceDays,
+          });
+        } else {
+          // Nurse has both daily and shift-based attendance (mixed mode)
+          const existing = nurseHoursMap.get(nurseId)!;
+          existing.hours += hoursFromShift;
+          existing.shiftDays = (existing.shiftDays || 0) + attendanceDays;
+          existing.attendanceMode = 'mixed';
+        }
+
+        // Check for missing fields in shift records
+        const missingFields: string[] = [];
+        if (!shift.shift_start_datetime) missingFields.push("shift_start_datetime");
+        if (!shift.shift_end_datetime) missingFields.push("shift_end_datetime");
+        if (!shift.calculated_attendance_days) missingFields.push("calculated_attendance_days");
+
+        if (missingFields.length > 0 && shift.shift_end_datetime) {
+          addMissingFields(nurseId, missingFields, shift.shift_end_datetime.split('T')[0]);
+        }
+      });
+    }
 
     const nurseIds = Array.from(nurseHoursMap.keys());
     const salaryPaymentsMap = new Map<number, {

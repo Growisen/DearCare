@@ -287,3 +287,126 @@ export const useAddressValidation = (initialAddress?: {
     validateAddress
   };
 };
+
+// ============================================================================
+// Shift-Based Attendance Validation
+// ============================================================================
+
+/**
+ * Validates shift start operation
+ * 
+ * @param assignmentStartDate - Assignment start date
+ * @param assignmentEndDate - Assignment end date (optional)
+ * @returns Validation result with error message if invalid
+ */
+export const validateShiftStart = (
+  assignmentStartDate: string,
+  assignmentEndDate?: string | null
+): { isValid: boolean; error?: string } => {
+  const today = new Date().toISOString().split('T')[0];
+  const startDate = new Date(assignmentStartDate).toISOString().split('T')[0];
+  const endDate = assignmentEndDate 
+    ? new Date(assignmentEndDate).toISOString().split('T')[0]
+    : startDate;
+
+  // Check if today is within assignment period
+  if (today < startDate) {
+    return {
+      isValid: false,
+      error: 'Cannot start shift before assignment start date',
+    };
+  }
+
+  if (today > endDate) {
+    return {
+      isValid: false,
+      error: 'Cannot start shift after assignment end date',
+    };
+  }
+
+  return { isValid: true };
+};
+
+/**
+ * Validates shift end operation
+ * 
+ * @param shiftStartDatetime - When the shift was started
+ * @param assignmentEndDate - Assignment end date (optional)
+ * @returns Validation result with warning if after assignment end
+ */
+export const validateShiftEnd = (
+  shiftStartDatetime: string,
+  assignmentEndDate?: string | null
+): { isValid: boolean; warning?: string } => {
+  if (!shiftStartDatetime) {
+    return {
+      isValid: false,
+      warning: 'Shift has not been started yet',
+    };
+  }
+
+  // Check if ending after assignment period (warning only, allow operation)
+  if (assignmentEndDate) {
+    const today = new Date().toISOString().split('T')[0];
+    const endDate = new Date(assignmentEndDate).toISOString().split('T')[0];
+    
+    if (today > endDate) {
+      return {
+        isValid: true,
+        warning: 'Ending shift after assignment end date',
+      };
+    }
+  }
+
+  return { isValid: true };
+};
+
+/**
+ * Hook for shift location validation
+ * 
+ * @returns Location validation state and methods
+ */
+export const useLocationValidation = () => {
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  const validateLocation = (location: GeolocationPosition | null): boolean => {
+    if (!location) {
+      setLocationError('Location is required to start/end shift');
+      return false;
+    }
+
+    setLocationError(null);
+    return true;
+  };
+
+  const checkLocationPermission = async (): Promise<boolean> => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser');
+      return false;
+    }
+
+    try {
+      const permission = await navigator.permissions.query({ name: 'geolocation' });
+      
+      if (permission.state === 'denied') {
+        setLocationError('Location permission denied. Please enable in browser settings.');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      // If permissions API not supported, assume permission check will happen on getLocation
+      return true;
+    }
+  };
+
+  return {
+    locationError,
+    setLocationError,
+    isGettingLocation,
+    setIsGettingLocation,
+    validateLocation,
+    checkLocationPermission,
+  };
+};

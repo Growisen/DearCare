@@ -478,9 +478,11 @@ export interface NurseAssignmentData {
   shift_end_time: string;
   status: 'active' | 'completed' | 'cancelled';
   assigned_type: string;
+  admitted_type?: string; // Added for shift-based attendance
   nurses?: {
     first_name: string;
     last_name: string;
+    admitted_type?: string;
   };
   client_type?: string;
   client_name?: string;
