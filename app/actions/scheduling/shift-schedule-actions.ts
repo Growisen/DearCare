@@ -741,6 +741,21 @@ export async function deleteNurseAssignment(
     
     const nurseId = assignment.nurse_id;
 
+    // Delete related shift_summary records first
+    const { error: shiftSummaryDeleteError } = await supabase
+      .from('shift_summary')
+      .delete()
+      .eq('assigned_id', assignmentId);
+
+    if (shiftSummaryDeleteError) {
+      logger.error('Error deleting related shift summary records:', shiftSummaryDeleteError);
+      return {
+        success: false,
+        message: `Failed to delete related shift summary records: ${shiftSummaryDeleteError.message}`
+      };
+    }
+
+    // Delete related attendance records
     const { error: attendanceDeleteError } = await supabase
       .from('attendence_individual')
       .delete()
