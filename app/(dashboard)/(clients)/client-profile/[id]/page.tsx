@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import Loader from '@/components/Loader';
 import EditProfileModal from '@/components/client/Profile/EditProfileModal';
+import ProfileError from '@/components/client/Profile/ProfileError';
 
 declare global {
   interface Window {
@@ -24,7 +24,6 @@ import EditAssignmentModal from '@/components/client/EditAssignmentModal';
 import FileSection from '@/components/client/Profile/FilesSection';
 import ClientPaymentHistory from '@/components/client/Profile/PaymentDetails'
 
-// Custom hooks
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
 import { useTabManagement } from '@/hooks/useTabManagement';
@@ -38,6 +37,7 @@ const PatientProfilePage = () => {
   const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams();
   const id = params.id as string;
+  const { activeTab, handleTabChange } = useTabManagement(id);
 
 
   React.useEffect(() => {
@@ -55,10 +55,10 @@ const PatientProfilePage = () => {
     };
   });
   
-  // Use our custom hooks
   const {
     patient,
     loading,
+    isLoadingAssessment,
     error,
     status,
     isEditing,
@@ -70,12 +70,13 @@ const PatientProfilePage = () => {
     handleEditProfile,
     handleCloseProfileEdit,
     handleDeleteClient
-  } = usePatientData(id);
+  } = usePatientData(id, activeTab);
 
   const {
     nurseAssignments,
     nurses,
     isLoadingNurses,
+    isLoadingAssignments,
     currentPage,
     totalPages,
     changePage,
@@ -103,15 +104,15 @@ const PatientProfilePage = () => {
     confirmEndAssignment,
     endDate,
     setEndDate,
-  } = useNurseAssignments(id);
+  } = useNurseAssignments(id, activeTab);
 
   const {
     files,
+    loading: isLoadingFiles,
     uploadFiles,
     deleteFile
-  } = useClientFiles(id);
+  } = useClientFiles(id, activeTab === 'files');
 
-  const { activeTab, handleTabChange } = useTabManagement(id);
   
   const { showDeleteConfirmation, setShowDeleteConfirmation } = useModalManagement();
 
@@ -120,19 +121,7 @@ const PatientProfilePage = () => {
   }
 
   if (error || !patient) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-6xl mx-auto bg-white p-8 rounded-md shadow">
-          <div className="text-center">
-            <h1 className="text-2xl font-semibold text-red-700">Error Loading Profile</h1>
-            <p className="mt-2 text-gray-600">{error || "Patient profile not found"}</p>
-            <Link href="/" className="inline-block text-indigo-600 hover:underline mt-4">
-              Return to Dashboard
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    return <ProfileError error={error} />;
   }
 
   const latestAssessment = patient.assessments[0];
@@ -148,7 +137,7 @@ const PatientProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full max-w-[98%] sm:max-w-[95%] lg:max-w-[1200px] mx-auto py-2 sm:py-4">
+      <div className="w-full pb-2">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-3 sm:mb-4">
           <ProfileHeader
             patient={patient}
@@ -163,7 +152,6 @@ const PatientProfilePage = () => {
             onEditProfile={handleEditProfile}
           />
 
-          {/* Tabs Navigation */}
           <div className="border-b border-gray-200 px-3 sm:px-6">
             <div className="overflow-x-auto pb-1">
               <nav className="-mb-px flex space-x-2 sm:space-x-8">
@@ -187,7 +175,7 @@ const PatientProfilePage = () => {
                 >
                   Medical Info
                 </button>
-                {/* Add the Files tab button */}
+
                 <button
                   onClick={() => handleTabChange('files')}
                   className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
@@ -227,7 +215,6 @@ const PatientProfilePage = () => {
             </div>
           </div>
           
-          {/* Main Content */}
           <div className="p-3 sm:p-4 md:p-6">
             <EditProfileModal 
               isOpen={isEditingProfile}
@@ -243,7 +230,6 @@ const PatientProfilePage = () => {
               handleCancel={handleCancel}
             />
             
-            {/* Tab Content */}
             {activeTab === 'profile' && (
               <div className="space-y-6">
                 <ServiceDetailsSection serviceDetails={patient.serviceDetails} />
@@ -253,18 +239,31 @@ const PatientProfilePage = () => {
             
             {activeTab === 'medical' && (
               <div className="space-y-6">
-                <MedicalInfo assessment={latestAssessment} />
+                {isLoadingAssessment ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader />
+                  </div>
+                ) : (
+                  <MedicalInfo assessment={latestAssessment} />
+                )}
               </div>
             )}
 
-            {/* Add the Files tab content */}
             {activeTab === 'files' && (
-              <FileSection 
-                clientId={id}
-                files={files}
-                onUpload={uploadFiles}
-                onDelete={deleteFile}
-              />
+              <>
+                {isLoadingFiles ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader />
+                  </div>
+                ) : (
+                  <FileSection 
+                    clientId={id}
+                    files={files}
+                    onUpload={uploadFiles}
+                    onDelete={deleteFile}
+                  />
+                )}
+              </>
             )}
             
             {activeTab === 'assignments' && status === 'approved' && (
@@ -278,15 +277,21 @@ const PatientProfilePage = () => {
                     Assign New Nurse
                   </button>
                 </div>
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <NurseAssignmentsList
-                    assignments={nurseAssignments}
-                    nurses={nurses}
-                    onEditAssignment={handleEditAssignment}
-                    onEndAssignment={handleEndAssignment}
-                    onDeleteAssignment={handleDeleteAssignment}
-                  />
-                </div>
+                {isLoadingAssignments ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader />
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <NurseAssignmentsList
+                      assignments={nurseAssignments}
+                      nurses={nurses}
+                      onEditAssignment={handleEditAssignment}
+                      onEndAssignment={handleEndAssignment}
+                      onDeleteAssignment={handleDeleteAssignment}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -298,22 +303,6 @@ const PatientProfilePage = () => {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      {/* <NurseListModal 
-        isOpen={showNurseList}
-        nurses={nurses}
-        clientId={id}
-        onClose={() => setShowNurseList(false)}
-        onAssignNurse={(nurseId) => {
-          const nurse = nurses.find(n => n._id === nurseId);
-          if (nurse) {
-            setSelectedNurse(nurse);
-            setShowConfirmation(true);
-          }
-        }}
-        onViewProfile={() => {}}
-      /> */}
 
       <NurseListModal
         isOpen={showNurseList}
@@ -380,7 +369,6 @@ const PatientProfilePage = () => {
         confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
 
-      {/* End Assignment Confirmation Modal */}
       <ConfirmationModal
         isOpen={showEndModal}
         title="End Assignment"

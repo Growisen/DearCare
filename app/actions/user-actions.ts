@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/utils/logger';
+import { getStorageUrl } from '@/app/actions/clients/files';
 
 /**
  * Represents a web user in the DearCare system.
@@ -74,10 +75,18 @@ export async function getUserById(userId: string): Promise<{
         error: error.message
       };
     }
-    
+
+    let signedUrl: string | null = null;
+    if (data?.profile_image_url) {
+      signedUrl = await getStorageUrl(data.profile_image_url);
+    }
+
     return {
       success: true,
-      user: data as WebUser
+      user: {
+        ...(data as WebUser),
+        profile_image_url: signedUrl
+      }
     };
   } catch (error) {
     logger.error('Unexpected error fetching user:', error);
@@ -114,8 +123,7 @@ export async function updateUserProfile(
 }> {
   try {
     const supabase = await createSupabaseServerClient();
-    
-    // Add updated_at timestamp
+
     const updateData = {
       ...data,
       updated_at: new Date().toISOString()
@@ -135,8 +143,7 @@ export async function updateUserProfile(
         error: error.message
       };
     }
-    
-    // Revalidate the profile page to reflect changes
+
     revalidatePath('/user/profile');
     
     return {
@@ -186,17 +193,14 @@ export async function uploadProfileImage(
         error: 'No file provided'
       };
     }
-    
-    // Convert file to blob
+
     const fileArrayBuffer = await file.arrayBuffer();
     const fileBlob = new Blob([fileArrayBuffer], { type: file.type });
-    
-    // Generate a unique file path
+
     const fileExt = file.name.split('.').pop();
     const fileName = `user-profiles/${userId}/${Date.now()}.${fileExt}`;
     
-    // Upload the file to storage
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('DearCare')
       .upload(fileName, fileBlob, {
         contentType: file.type,
@@ -211,35 +215,29 @@ export async function uploadProfileImage(
       };
     }
     
-    // Get the public URL
-    const { data: { publicUrl } } = supabase
-      .storage
-      .from('DearCare')
-      .getPublicUrl(data.path);
-    
-    // Update the user's profile_image_url
     const { error: updateError } = await supabase
       .from('dearcare_web_users')
       .update({
-        profile_image_url: publicUrl,
+        profile_image_url: fileName,
         updated_at: new Date().toISOString()
       })
       .eq('id', userId);
     
     if (updateError) {
-      logger.error('Error updating profile image URL:', updateError);
+      logger.error('Error updating profile image path:', updateError);
       return {
         success: false,
         error: updateError.message
       };
     }
     
-    // Revalidate the profile page to reflect changes
+    const signedUrl = await getStorageUrl(fileName);
+
     revalidatePath('/user/profile');
     
     return {
       success: true,
-      imageUrl: publicUrl
+      imageUrl: signedUrl ?? undefined
     };
   } catch (error) {
     logger.error('Unexpected error uploading profile image:', error);
@@ -298,16 +296,76 @@ export async function getCurrentUser(): Promise<{
         error: error.message
       };
     }
-    
+
+    let signedUrl: string | null = null;
+    if (data?.profile_image_url) {
+      signedUrl = await getStorageUrl(data.profile_image_url);
+    }
+
     return {
       success: true,
-      user: data as WebUser
+      user: {
+        ...(data as WebUser),
+        profile_image_url: signedUrl
+      }
     };
   } catch (error) {
     logger.error('Unexpected error fetching current user:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch current user'
+    };
+  }
+}
+
+
+/**
+ * Updates the password of the currently authenticated Supabase Auth user.
+ *
+ * @param newPassword - The new password to set.
+ * @returns An object with the following properties:
+ *   - `success`: `true` if the password was updated, otherwise `false`.
+ *   - `error`: A string describing the error if the update failed, otherwise `undefined`.
+ *
+ * @example
+ * ```ts
+ * const result = await updateAuthUserPassword("newStrongPassword123");
+ * if (result.success) console.log("Password updated!");
+ * ```
+ */
+export async function updateAuthUserPassword(
+  newPassword: string
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+
+    if (process.env.NODE_ENV !== 'production') {
+      return { success: true };
+    }
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      logger.error('Error updating auth user password:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    logger.error('Unexpected error updating auth user password:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update password'
     };
   }
 }

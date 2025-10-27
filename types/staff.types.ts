@@ -26,8 +26,11 @@ export interface stp1BaseNurseFields {
 export interface Nurse extends BaseNurseFields {
     _id: string;
     salaryCap: number;
-    salaryPerHour: number; // Remove optional marker
+    salaryPerHour: number;
+    salaryPerMonth?: number;
     hiringDate?: string;
+    joiningDate?: string | null;
+    admittedType?: 'Tata_Homenursing' | 'Dearcare_Llp';
     status: "assigned" | "leave" | "unassigned" | "pending" | "under_review" | "rejected";
     rating?: number;
     reviews?: Array<{
@@ -132,6 +135,13 @@ export interface NurseExcelRecord {
   'Family References': string;
 }
 
+export interface StaffReference {
+  name: string;
+  relation: string;
+  phone: string;
+  recommendation_details: string;
+}
+
 export interface NurseReferenceData {
   reference_name: string;
   reference_phone: string;
@@ -143,6 +153,7 @@ export interface NurseReferenceData {
     relation: string;
     phone: string;
   }>;
+  staff_reference?: StaffReference;
 }
 
 export interface NurseHealthData {

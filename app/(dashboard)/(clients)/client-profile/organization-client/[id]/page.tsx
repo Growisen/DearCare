@@ -40,6 +40,7 @@ const OrganizationClientProfile = () => {
   const { invalidateAssignmentsCache } = useAssignmentData()
   const params = useParams()
   const id = params.id as string
+  const { activeTab, handleTabChange } = useTabManagement(id);
   
   const {
     client,
@@ -58,6 +59,7 @@ const OrganizationClientProfile = () => {
     nurseAssignments,
     nurses,
     isLoadingNurses,
+    isLoadingAssignments,
     editingAssignment,
     showEditModal: showNurseEditModal,
     showNurseList,
@@ -70,6 +72,7 @@ const OrganizationClientProfile = () => {
     setShowNurseList,
     setShowConfirmation,
     handleAssignNurse,
+    handleOpenNurseList,
     handleEditAssignment,
     handleUpdateAssignment,
     handleDeleteAssignment,
@@ -77,10 +80,14 @@ const OrganizationClientProfile = () => {
     setEditingAssignment,
     changePage,
     updateFilters,
-    refetch
-  } = useNurseAssignments(id)
-
-  const { activeTab, handleTabChange } = useTabManagement(id);
+    refetch,
+    showEndModal,
+    setShowEndModal,
+    handleEndAssignment,
+    confirmEndAssignment,
+    endDate,
+    setEndDate,
+  } = useNurseAssignments(id, activeTab)
 
   const formatValue = (value: string | undefined | null, defaultText = 'Not specified'): string => {
     return value ? value.trim() : defaultText
@@ -99,7 +106,7 @@ const OrganizationClientProfile = () => {
     return () => {
       window.onNurseAssignmentComplete = null;
     };
-  }, []);
+  }, [invalidateDashboardCache, invalidateAssignmentsCache, setShowNurseList, refetch]);
 
   const handleSave = async (updatedData: { details: UpdateOrganizationClientData, general_notes?: string }) => {
     try {
@@ -162,7 +169,7 @@ const OrganizationClientProfile = () => {
     }
   }
 
-  if (loading) return <Loader />
+  if (loading) return <Loader skeleton={true} />
 
   if (error || !client) {
     return (
@@ -195,8 +202,7 @@ const OrganizationClientProfile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[95%] mx-auto py-4">
-        {/* Profile Header */}
+      <div className="max-w-[95%]">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
           <div className="bg-gray-100 border-b border-gray-200 px-6 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -245,7 +251,7 @@ const OrganizationClientProfile = () => {
                   </div>
                 </div>
               </div>
-              {/* Action buttons */}
+\
               <div className="flex flex-wrap items-center gap-3">
                 <button 
                   onClick={() => setShowEditModal(true)}
@@ -263,7 +269,6 @@ const OrganizationClientProfile = () => {
             </div>
           </div>
 
-          {/* Tab Navigation */}
           <div className="border-b border-gray-200 px-4 sm:px-6">
             <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide whitespace-nowrap">
               <button
@@ -302,16 +307,11 @@ const OrganizationClientProfile = () => {
           </div>
         </div>
 
-        {/* Main Content - Details and Requirements tabs remain the same */}
         <div className="p-4 sm:p-6">
-          {/* Organization Details Tab */}
           {activeTab === 'profile' && (
             <div className="space-y-6">
-              {/* Same as before - Details content */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Contact Information */}
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                  {/* Same as before */}
                   <h2 className="text-lg font-bold text-gray-900 pb-2 border-b border-gray-200 mb-3">
                     Contact Information
                   </h2>
@@ -329,9 +329,7 @@ const OrganizationClientProfile = () => {
                   </div>
                 </div>
 
-                {/* Address Information */}
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                  {/* Address content remains the same */}
                   <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
                     Address
                   </h2>
@@ -415,9 +413,7 @@ const OrganizationClientProfile = () => {
                   </div>
                 </div>
                 
-                {/* Additional Notes */}
                 <div className="bg-white rounded-lg shadow-sm p-6 md:col-span-2 border border-gray-200">
-                  {/* Additional notes content remains the same */}
                   <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
                     Additional Information
                   </h2>
@@ -437,7 +433,6 @@ const OrganizationClientProfile = () => {
             </div>
           )}
 
-          {/* Staff Requirements Tab */}
           {activeTab === 'requirements' && (
             <div className="space-y-6">
               <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
@@ -477,7 +472,6 @@ const OrganizationClientProfile = () => {
                 )}
               </div>
 
-              {/* Staff Statistics */}
               <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
                   Staff Statistics
@@ -496,29 +490,32 @@ const OrganizationClientProfile = () => {
             </div>
           )}
 
-          {/* Staff Assignments Tab - Updated to use hook's state and functions */}
           {activeTab === 'assignments' && status === 'approved' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-gray-800">Staff Assignments</h2>
                 <button
-                  onClick={() => setShowNurseList(true)}
+                  onClick={handleOpenNurseList}
                   className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
                 >
                   Assign New Staff
                 </button>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <NurseAssignmentsList
-                  assignments={nurseAssignments}
-                  nurses={nurses}
-                  onEditAssignment={handleEditAssignment}
-                  onEndAssignment={(assignmentId) => {
-                    logger.debug('End assignment:', assignmentId);
-                  }}
-                  onDeleteAssignment={handleDeleteAssignment}
-                />
-              </div>
+              {isLoadingAssignments ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader />
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <NurseAssignmentsList
+                    assignments={nurseAssignments}
+                    nurses={nurses}
+                    onEditAssignment={handleEditAssignment}
+                    onEndAssignment={handleEndAssignment}
+                    onDeleteAssignment={handleDeleteAssignment}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -531,7 +528,6 @@ const OrganizationClientProfile = () => {
         onClose={() => setIsImageViewerOpen(false)}
       />
 
-      {/* Modals - Updated to use hook's state and functions */}
       <NurseListModal
         isOpen={showNurseList}
         nurses={nurses}
@@ -605,6 +601,34 @@ const OrganizationClientProfile = () => {
           details: client.details,
           general_notes: client.general_notes
         } : null}
+      />
+
+      <ConfirmationModal
+        isOpen={showEndModal}
+        title="End Assignment"
+        message={
+          <div>
+            <p>
+              Are you sure you want to end this staff assignment?
+            </p>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
+              <input
+                type="date"
+                className="border rounded px-2 py-1"
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                max={new Date().toISOString().slice(0, 10)}
+              />
+            </div>
+          </div>
+        }
+        onConfirm={confirmEndAssignment}
+        onCancel={() => setShowEndModal(false)}
+        confirmText="End Assignment"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
     </div>
   )

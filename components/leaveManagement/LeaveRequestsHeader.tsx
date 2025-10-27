@@ -1,5 +1,5 @@
 import React from "react"
-import { Search, X, Download, Calendar, RefreshCw } from "lucide-react"
+import { Search, X, Download, Calendar, RefreshCw, Plus } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type LeaveRequestsHeaderProps = {
@@ -20,6 +20,7 @@ type LeaveRequestsHeaderProps = {
 }
 
 export function LeaveRequestsHeader({ 
+  onAddLeaveRequest,
   onExport,
   isExporting = false,
   searchTerm, 
@@ -36,7 +37,6 @@ export function LeaveRequestsHeader({
   
   const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate
 
-  // Get display name for admitted type (database enum to display format)
   const getAdmittedTypeDisplay = (): string => {
     if (admittedTypeFilter === "") return "All Organizations";
     if (admittedTypeFilter === "Dearcare_Llp") return "DearCare LLP";
@@ -46,13 +46,23 @@ export function LeaveRequestsHeader({
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      {/* Header with title and action buttons */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Leave Requests</h1>
           <p className="text-xs text-gray-500">Manage and review leave requests</p>
         </div>
         <div className="flex gap-2">
+
+          {onAddLeaveRequest && (
+            <button
+              onClick={onAddLeaveRequest}
+              className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
+            >
+              <Plus size={16} />
+              Add Leave
+            </button>
+          )}
+
           {onExport && (
             <button 
               onClick={onExport}
@@ -78,13 +88,11 @@ export function LeaveRequestsHeader({
         </div>
       </div>
 
-      {/* Search and filters section */}
       <div className="p-3 bg-gray-50 grid gap-2 grid-cols-1 sm:grid-cols-[1fr_auto]">
-        {/* Search input */}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name, ID, leave type..."
+            placeholder="Enter search term and press Enter"
             className="pl-9 pr-16 py-1 h-9 bg-white text-sm text-gray-800 border-gray-200 focus-visible:ring-blue-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -110,7 +118,6 @@ export function LeaveRequestsHeader({
           </button>
         </div>
 
-        {/* Date filters */}
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-2">
             <div className="relative">
@@ -130,8 +137,7 @@ export function LeaveRequestsHeader({
               onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
             />
           </div>
-          
-          {/* Mobile view - compact select dropdowns */}
+
           <div className="sm:hidden flex flex-col w-full gap-2">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -172,8 +178,7 @@ export function LeaveRequestsHeader({
                   </option>
                 ))}
               </select>
-              
-              {/* Mobile Reset Button */}
+
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
@@ -187,12 +192,11 @@ export function LeaveRequestsHeader({
           </div>
         </div>
       </div>
-      
-      {/* Combined Organization Badge and Status Filters Section with spacing below */}
+
       <div className="px-3 pb-5 mb-3 bg-gray-50">
-        {/* Desktop view */}
+
         <div className="hidden sm:flex items-center gap-4 flex-wrap">
-          {/* Organization badge - read only */}
+
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
             <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -200,7 +204,6 @@ export function LeaveRequestsHeader({
             </div>
           </div>
 
-          {/* Status filters */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
             <div className="flex gap-1.5 items-center">
@@ -219,8 +222,7 @@ export function LeaveRequestsHeader({
               ))}
             </div>
           </div>
-          
-          {/* Reset button */}
+
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
@@ -232,8 +234,7 @@ export function LeaveRequestsHeader({
             </button>
           )}
         </div>
-        
-        {/* Mobile view - Organization badge */}
+
         <div className="sm:hidden mt-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600">Organization:</span>

@@ -8,6 +8,24 @@ import { getStorageUrl } from './files';
 import { Database } from '@/lib/database.types';
 import { getOrgMappings } from '@/app/utils/org-utils';
 
+async function getAuthenticatedClient() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+  
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const web_user_id = user.user_metadata.user_id
+
+  const organization = user?.user_metadata?.organization;
+
+  const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+  return { supabase, userId: web_user_id, nursesOrg, clientsOrg };
+}
+
 export async function getClients(
   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
   searchQuery?: string,
@@ -176,7 +194,6 @@ export async function getClientDetails(clientId: string) {
   try {
     const supabase = await createSupabaseServerClient()
     
-    // Get the base client record first to determine the type
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('*')
@@ -190,8 +207,7 @@ export async function getClientDetails(clientId: string) {
     if (!client) {
       return { success: false, error: 'Client not found' }
     }
-    
-    // Based on client type, fetch the appropriate details
+
     if (client.client_type === 'individual') {
       const { data: individualClient, error: individualError } = await supabase
         .from('individual_clients')
@@ -216,14 +232,12 @@ export async function getClientDetails(clientId: string) {
             ...individualClient,
             patient_profile_pic_url: patientPicUrl,
             requestor_profile_pic_url: requestorPicUrl,
-            // Keep original paths for reference
             patient_profile_pic: individualClient.patient_profile_pic,
             requestor_profile_pic: individualClient.requestor_profile_pic,
           }
         }
       }
     } else {
-      // For organization, hospital, or carehome clients
       const { data: organizationClient, error: organizationError } = await supabase
         .from('organization_clients')
         .select('*')
@@ -418,7 +432,7 @@ export async function exportClients(
   searchQuery?: string
 ) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const { supabase, clientsOrg } = await getAuthenticatedClient();
     
     let query = supabase
       .from('clients')
@@ -427,6 +441,7 @@ export async function exportClients(
         client_type,
         status,
         created_at,
+        client_category,
         general_notes,
         individual_clients:individual_clients(
           requestor_name,
@@ -459,43 +474,47 @@ export async function exportClients(
           start_date
         )
       `)
+
+    if (clientsOrg) {
+      query = query.eq('client_category', clientsOrg);
+    }
     
     if (status && status !== "all") {
-      query = query.eq('status', status)
+      //query = query.eq('status', status)
     }
     
     if (searchQuery && searchQuery.trim() !== '') {
-      const searchTerm = searchQuery.toLowerCase().trim();
+      // const searchTerm = searchQuery.toLowerCase().trim();
       
-      const individualClientsQuery = supabase
-        .from('individual_clients')
-        .select('client_id')
-        .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
+      // const individualClientsQuery = supabase
+      //   .from('individual_clients')
+      //   .select('client_id')
+      //   .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
       
-      const organizationClientsQuery = supabase
-        .from('organization_clients')
-        .select('client_id')
-        .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
+      // const organizationClientsQuery = supabase
+      //   .from('organization_clients')
+      //   .select('client_id')
+      //   .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
         
-      const [individualResults, organizationResults] = await Promise.all([
-        individualClientsQuery,
-        organizationClientsQuery
-      ]);
+      // const [individualResults, organizationResults] = await Promise.all([
+      //   individualClientsQuery,
+      //   organizationClientsQuery
+      // ]);
       
-      const individualClientIds = (individualResults.data || []).map(item => item.client_id);
-      const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
+      // const individualClientIds = (individualResults.data || []).map(item => item.client_id);
+      // const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
       
-      const matchingClientIds = [...individualClientIds, ...organizationClientIds];
+      // const matchingClientIds = [...individualClientIds, ...organizationClientIds];
       
-      if (matchingClientIds.length > 0) {
-        query = query.in('id', matchingClientIds);
-      } else {
-        return { 
-          success: true, 
-          clients: [],
-          clientsData: []
-        };
-      }
+      // if (matchingClientIds.length > 0) {
+      //   query = query.in('id', matchingClientIds);
+      // } else {
+      //   return { 
+      //     success: true, 
+      //     clients: [],
+      //     clientsData: []
+      //   };
+      // }
     }
     
     const { data, error } = await query

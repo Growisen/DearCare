@@ -165,8 +165,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded-md">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-md">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Staff Details</h2>
           </div>

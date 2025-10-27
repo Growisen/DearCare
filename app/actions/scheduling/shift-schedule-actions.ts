@@ -811,11 +811,11 @@ export async function getAssignmentById(
       .from('nurse_client')
       .select(`
         *,
-        nurses(first_name, last_name, phone_number, email),
+        nurses(first_name, last_name, phone_number, email, nurse_reg_no, admitted_type),
         clients(
           id,
           client_type,
-          individual_clients(requestor_name, requestor_address, requestor_phone),
+          individual_clients(requestor_name, requestor_address, requestor_phone, requestor_state),
           organization_clients(organization_name, organization_address, contact_person_name)
         )
       `)
@@ -892,7 +892,10 @@ export async function getAssignmentById(
         client_contact: contactPerson,
         nurse_full_name: `${data.nurses?.first_name || ''} ${data.nurses?.last_name || ''}`.trim(),
         nurse_phone: data.nurses?.phone || '',
-        nurse_email: data.nurses?.email || ''
+        nurse_email: data.nurses?.email || '',
+        nurse_reg_no: data.nurses?.nurse_reg_no || '',
+        admitted_type: data.nurses?.admitted_type || '',
+        salaryPerDay: data.salary_per_day
       }
     };
   } catch (error) {

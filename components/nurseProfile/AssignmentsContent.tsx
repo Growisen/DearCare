@@ -8,7 +8,7 @@ interface AssignmentsContentProps {
 
 const AssignmentsContent: React.FC<AssignmentsContentProps> = ({ assignments }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-5">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Current and Past Assignments</h2>
       
       {assignments && assignments.length > 0 ? (

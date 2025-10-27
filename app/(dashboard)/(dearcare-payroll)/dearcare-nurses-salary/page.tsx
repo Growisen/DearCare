@@ -56,7 +56,6 @@ export default function NursesSalaryPage() {
 
   const handleExport = () => {
     setIsExporting(true);
-    // Implement export functionality here
     setTimeout(() => {
       setIsExporting(false);
     }, 2000);
@@ -77,13 +76,12 @@ export default function NursesSalaryPage() {
   return (
     <div className="container mx-auto py-1 space-y-6">
       <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-        {/* Header with search and export */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Salary Payments</h2>
             <p className="text-xs text-gray-500">Manage nurse salary payments and calculations</p>
           </div>
-          <div className="flex gap-2 self-start sm:self-auto">
+          <div className="hidden  gap-2 self-start sm:self-auto">
             <button 
               onClick={handleExport}
               disabled={isExporting || salaryRecords.length === 0}
@@ -104,12 +102,11 @@ export default function NursesSalaryPage() {
           </div>
         </div>
 
-        {/* Search section */}
         <div className="p-4 bg-gray-50 space-y-3">
           <div className="relative w-full">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by nurse name or registration number..."
+              placeholder="Enter search term and press Enter"
               className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800 w-full"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -143,7 +140,7 @@ export default function NursesSalaryPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-2 text-center py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-8 text-left py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nurse
                   </th>
                   <th scope="col" className="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
@@ -175,7 +172,7 @@ export default function NursesSalaryPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {salaryRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-6 py-4 whitespace-nowrap text-left">
                       <div className="text-sm font-medium text-gray-900">{record.name}</div>
                       <div className="text-xs text-gray-500">{record.nurse_reg_no}</div>
                     </td>

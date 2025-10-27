@@ -5,7 +5,8 @@ import { useUserData, UserFieldType } from "@/hooks/useUserData";
 import ProfilePhoto from "@/components/User/Profile/ProfilePhoto";
 import EmailField from "@/components/User/Profile/EmailField";
 import EditableField from "@/components/User/Profile/EditableField";
-import { updateUserProfile, uploadProfileImage } from "@/app/actions/user-actions";
+import PasswordField from "@/components/User/Profile/PasswordField";
+import { updateUserProfile, uploadProfileImage, updateAuthUserPassword } from "@/app/actions/user-actions";
 import { toast } from "react-hot-toast";
 import { Briefcase } from "lucide-react";
 import Loader from '@/components/Loader';
@@ -73,6 +74,22 @@ export default function ProfilePage() {
         toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`);
       } else {
         toast.error(result.error || `Failed to update ${field}`);
+      }
+    } catch {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (newPassword: string) => {
+    setIsSubmitting(true);
+    try {
+      const result = await updateAuthUserPassword(newPassword);
+      if (result.success) {
+        toast.success("Password updated successfully");
+      } else {
+        toast.error(result.error || "Failed to update password");
       }
     } catch {
       toast.error("An unexpected error occurred");
@@ -152,10 +169,14 @@ export default function ProfilePage() {
                       isDisabled={isSubmitting}
                       fieldType="tel"
                     />
+
+                    <PasswordField
+                      currentPassword="••••••••"
+                      onPasswordChange={handlePasswordUpdate}
+                    />
                   </div>
                 </div>
 
-                {/* Address Information */}
                 <div>
                   <h3 className="text-md font-medium text-gray-700 mb-3">Address Information</h3>
                   <div className="space-y-3">

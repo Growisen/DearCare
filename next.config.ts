@@ -8,14 +8,17 @@ const nextConfig: NextConfig = {
     }
   },
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', '127.0.0.1'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
-  }
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 };
 
 export default nextConfig;

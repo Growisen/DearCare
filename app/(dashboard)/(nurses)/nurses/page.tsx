@@ -10,6 +10,7 @@ import Loader from "@/components/Loader"
 import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"
+import { EmptyState } from "@/components/client/clients/EmptyState"
 
 const PaginationControls = ({ 
   currentPage, 
@@ -96,6 +97,7 @@ export default function NursesPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [selectedExperience, setSelectedExperience] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
   const [selectedNurse, setSelectedNurse] = useState<NurseBasicInfo | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -103,12 +105,26 @@ export default function NursesPage() {
   const [isExporting, setIsExporting] = useState(false)
   const limit = 10
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 400)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [searchQuery])
+
+  useEffect(() => {
+    loadNurses()
+  }, [currentPage, debouncedSearch])
+
   const loadNurses = async () => {
     setIsLoading(true)
     const { data, count, error } = await fetchBasicDetails({
       page: currentPage,
       limit
-    }, searchQuery)
+    }, debouncedSearch)
 
     if (error) {
       setError(error)
@@ -120,10 +136,6 @@ export default function NursesPage() {
     
     setIsLoading(false)
   }
-
-  useEffect(() => {
-    loadNurses()
-  }, [currentPage, searchQuery])
 
   const filteredNurses = nurses.filter(nurse => {
     const matchesStatus = selectedStatus === "all" || nurse.status === selectedStatus
@@ -239,6 +251,14 @@ export default function NursesPage() {
               onPageChange={handlePageChange}
             />
           )}
+
+          {!isLoading && filteredNurses.length === 0 && (
+            <EmptyState
+              title="No nurses found"
+              message="Try adjusting your filters or search to find nurses."
+              handleResetFilters={handleResetFilters}
+            />
+          )}
         </div>
         
         <div className="sm:hidden divide-y divide-gray-200">
@@ -262,6 +282,14 @@ export default function NursesPage() {
                   itemsPerPage={limit}
                   onPageChange={handlePageChange}
                   isMobile={true}
+                />
+              )}
+
+              {filteredNurses.length === 0 && (
+                <EmptyState
+                  title="No nurses found"
+                  message="Try adjusting your filters or search to find nurses."
+                  handleResetFilters={handleResetFilters}
                 />
               )}
             </>

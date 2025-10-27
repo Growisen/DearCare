@@ -32,7 +32,7 @@ export function ComplaintHeader({
     <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
       <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200">
         <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Complaints Management</h1>
+          <h1 className="text-lg font-semibold text-gray-800">Complaints Management</h1>
           <p className="text-xs sm:text-sm text-gray-500">Track and resolve complaints</p>
         </div>
         <button 

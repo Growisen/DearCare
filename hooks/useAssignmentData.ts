@@ -185,7 +185,8 @@ export function useAssignmentData() {
         10000,
         filterStatus,
         searchQuery,
-        dateFilter
+        dateFilter,
+        categoryFilter,
       );
       
       if (!response.success || !response.data) {

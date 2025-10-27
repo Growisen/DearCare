@@ -1,6 +1,6 @@
 'use server'
 import { getOrgMappings } from '@/app/utils/org-utils';
-
+import { getProtectedDocumentUrl } from '@/app/utils/supabase-storage-utils';
 
 type NurseDocuments = {
   adhar: File | null
@@ -30,6 +30,7 @@ export interface NurseAssignmentWithClient {
     shift_start_time: string | null;
     shift_end_time: string | null;
     salary_hour: number | null;
+    salary_per_day?: number | null;
   };
   client: {
     type: 'individual' | 'hospital' | 'carehome' | 'organization';
@@ -106,6 +107,12 @@ export interface SimplifiedNurseDetails {
     relation: string | null;
     description: string | null;
     family_references: FamilyReference[] | null; 
+    staff_reference?: {
+      name: string | null;
+      phone: string | null;
+      relation: string | null;
+      recommendation_details: string | null;
+    } | null;
   } | null;
   documents: {
     profile_image: string | null;
@@ -249,8 +256,8 @@ export async function createNurse(
         phone_number: referenceData.reference_phone,
         relation: referenceData.reference_relation,
         description: referenceData.recommendation_details,
-        family_references: referenceData.family_references
-        
+        family_references: referenceData.family_references,
+        staff_reference: referenceData.staff_reference
       })
 
     if (referenceError) throw referenceError
@@ -369,46 +376,18 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
     // Fetch reference information
     const { data: referenceData } = await supabase
       .from('nurse_references')
-      .select('referer_name, phone_number, relation, description, family_references')
+      .select('referer_name, phone_number, relation, description, family_references, staff_reference')
       .eq('nurse_id', nurseId)
       .single()
 
-    // Fetch document URLs
-    const getDocumentUrl = async (folder: string): Promise<string | null> => {
-      const { data: files } = await supabase
-        .storage
-        .from('DearCare')
-        .list(`Nurses/${folder}`, {
-          limit: 1,
-          search: nurseId.toString(),
-        })
-
-      if (files && files.length > 0) {
-        const { data: url } = supabase
-          .storage
-          .from('DearCare')
-          .getPublicUrl(`Nurses/${folder}/${files[0].name}`)
-        return url.publicUrl
-      }
-      return null
-    }
-
     const documents = {
-      profile_image: await getDocumentUrl('image'),
-      adhar: await getDocumentUrl('adhar'),
-      educational: await getDocumentUrl('Educational_Certificates'),
-      experience: await getDocumentUrl('Experience_Certificates'),
-      noc: await getDocumentUrl('Noc_Certificate'),
-      ration: await getDocumentUrl('ration_card')
-    }
-
-    console.log('Documents:', documents)
-
-    console.log('Basic Data:', basicData)
-
-    console.log('Health Data:', healthData)
-
-    console.log('Reference Data:', referenceData)
+      profile_image: await getProtectedDocumentUrl(supabase, nurseId, 'image'),
+      adhar: await getProtectedDocumentUrl(supabase, nurseId, 'adhar'),
+      educational: await getProtectedDocumentUrl(supabase, nurseId, 'Educational_Certificates'),
+      experience: await getProtectedDocumentUrl(supabase, nurseId, 'Experience_Certificates'),
+      noc: await getProtectedDocumentUrl(supabase, nurseId, 'Noc_Certificate'),
+      ration: await getProtectedDocumentUrl(supabase, nurseId, 'ration_card')
+    };
 
     return {
       data: {
@@ -439,6 +418,7 @@ interface AssignmentResponse {
   shift_end_time: string | null;
   salary_hour: number | null;
   client_id: string;
+  salary_per_day?: number | null;
   clients: {
     client_type: 'individual' | 'hospital' | 'carehome' | 'organization';
   };
@@ -469,6 +449,7 @@ export async function fetchNurseAssignments(
         shift_start_time,
         shift_end_time,
         salary_hour,
+        salary_per_day,
         client_id,
         clients!inner (
           client_type
@@ -504,6 +485,7 @@ export async function fetchNurseAssignments(
             shift_start_time: assignment.shift_start_time,
             shift_end_time: assignment.shift_end_time,
             salary_hour: assignment.salary_hour,
+            salary_per_day: assignment.salary_per_day
           },
           client: {
             type: assignment.clients.client_type,
@@ -768,13 +750,31 @@ interface FamilyReference {
   relation: string;
 }
 
+async function getAuthenticatedClient() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+  
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const web_user_id = user.user_metadata.user_id
+
+  const organization = user?.user_metadata?.organization;
+
+  const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+  return { supabase, userId: web_user_id, nursesOrg, clientsOrg };
+}
+
 
 export async function exportNurseData(): Promise<{ 
   data: ExcelNurseData[] | null;
   error: string | null;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase, nursesOrg } = await getAuthenticatedClient();
 
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession();
@@ -799,7 +799,8 @@ export async function exportNurseData(): Promise<{
           description,
           family_references
         )
-      `);
+      `)
+      .eq('admitted_type', nursesOrg);
 
     if (error) throw error;
 
@@ -1114,6 +1115,7 @@ export async function updateNurse(
           relation: formData.references.relation,
           description: formData.references.description,
           family_references: formData.references.family_references,
+          staff_reference: formData.references.staff_reference,
         })
         .eq('nurse_id', nurseId);
     }
@@ -1198,7 +1200,9 @@ export async function listNursesWithAssignments(
         phone_number,
         experience,
         city,
-        admitted_type
+        admitted_type,
+        salary_per_month,
+        joining_date
       `, { count: 'exact' });
 
     if (filterParams?.city) {
@@ -1317,6 +1321,9 @@ export async function listNursesWithAssignments(
         phoneNumber: nurse.phone_number || '',
         experience: nurse.experience || 0,
         salaryPerHour: 0,
+        salaryPerMonth: nurse.salary_per_month || 0,
+        joiningDate: nurse.joining_date || null,
+        admittedType: nurse.admitted_type || '',
         salaryCap: 0,
         gender: '',
         dob: '',
@@ -1543,5 +1550,35 @@ function determineShiftType(startTime: string, endTime: string): 'day' | 'night'
     return 'day';
   } else {
     return 'night';
+  }
+}
+
+export async function fetchNurseNamesForOrg(searchTerm?: string): Promise<{ data: { nurse_id: number, full_name: string, nurse_reg_no: string }[] | null, error: string | null }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+    const { nursesOrg } = getOrgMappings(organization);
+
+    let query = supabase
+      .from('nurses')
+      .select('nurse_id, full_name, nurse_reg_no')
+      .eq('admitted_type', nursesOrg);
+
+    if (searchTerm && searchTerm.trim() !== '') {
+      const q = `%${searchTerm.trim()}%`;
+      query = query.or(`full_name.ilike.${q},nurse_reg_no.ilike.${q}`);
+    }
+
+    query = query.order('full_name');
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching nurse names:', error);
+    return { data: null, error: error instanceof Error ? error.message : 'Failed to fetch nurse names' };
   }
 }

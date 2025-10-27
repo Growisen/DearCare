@@ -18,29 +18,20 @@ const NurseProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'profile' | 'assignments' | 'analytics' | 'salaryDetails'>('profile')
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false)
 
   useEffect(() => {
-    async function loadData() {
+    async function loadDetails() {
       if (!params.id) return
 
       setLoading(true)
       try {
-        const [nurseResponse, assignmentsResponse] = await Promise.all([
-          fetchNurseDetailsmain(Number(params.id)),
-          fetchNurseAssignments(Number(params.id))
-        ])
-        
+        const nurseResponse = await fetchNurseDetailsmain(Number(params.id))
         if (nurseResponse.error) {
           setError(nurseResponse.error)
           return
         }
-
-        if (assignmentsResponse.error) {
-          console.error('Error fetching assignments:', assignmentsResponse.error)
-        }
-
         setNurse(nurseResponse.data)
-        setAssignments(assignmentsResponse.data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch data')
       } finally {
@@ -48,8 +39,27 @@ const NurseProfilePage: React.FC = () => {
       }
     }
 
-    loadData()
+    loadDetails()
   }, [params.id])
+
+  useEffect(() => {
+    async function loadAssignments() {
+      if (!params.id || assignments || activeTab !== 'assignments') return
+      setAssignmentsLoading(true)
+      try {
+        const assignmentsResponse = await fetchNurseAssignments(Number(params.id))
+        if (assignmentsResponse.error) {
+          console.error('Error fetching assignments:', assignmentsResponse.error)
+        }
+        setAssignments(assignmentsResponse.data)
+      } catch {
+        console.error('Error fetching assignments:')
+      } finally {
+        setAssignmentsLoading(false)
+      }
+    }
+    loadAssignments()
+  }, [activeTab, params.id])
 
   const calculateAge = (dateOfBirth: string | null): number => {
     if (!dateOfBirth) return 0;
@@ -80,21 +90,23 @@ const NurseProfilePage: React.FC = () => {
   if (!nurse) return <div className="p-4">No nurse found</div>
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-1">
       <div className="max-w-[100%]">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <ProfileHeader nurse={nurse} onDelete={handleDelete} />
 
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          <div className="p-6">
+          <div className="p-0">
             {activeTab === 'profile' ? (
               <ProfileContent nurse={nurse} calculateAge={calculateAge} />
             ) : activeTab === 'assignments' ? (
-              <AssignmentsContent assignments={assignments} />
+              assignmentsLoading ? <Loader /> : <AssignmentsContent assignments={assignments} />
             ) : activeTab === 'analytics' ? (
               <AnalyticsContent nurseId={Number(params.id)} />
-            ) : <SalaryDetails nurseId={Number(params.id)}/>}
+            ) : activeTab === 'salaryDetails' ? (
+              <SalaryDetails nurseId={Number(params.id)} />
+            ) : null}
           </div>
         </div>
       </div>

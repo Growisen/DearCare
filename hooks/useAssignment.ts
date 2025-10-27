@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAssignmentById } from '@/app/actions//scheduling/shift-schedule-actions';
 import { getAttendanceRecords, markAttendance, unmarkAttendance } from '@/app/actions/attendance/attendance-actions';
 import { differenceInMonths, parseISO } from 'date-fns';
-import { format12HourTime } from '@/utils/formatters';
+import { format12HourTime, formatOrganizationName } from '@/utils/formatters';
 import { getProfileUrl } from '@/app/actions/complaints-management/complaints-actions';
 import toast from 'react-hot-toast';
 
@@ -22,6 +22,8 @@ interface RawAssignmentData {
   nurse_full_name: string;
   nurse_phone: string;
   nurse_email: string;
+  nurse_reg_no: string;
+  admitted_type: string;
   client_id: string;
   client_name: string;
   client_type: string;
@@ -32,6 +34,7 @@ interface RawAssignmentData {
   shift_start_time: string;
   shift_end_time: string;
   status: 'active' | 'upcoming' | 'completed';
+  salary_per_day?: number;
 }
 
 export interface FormattedAssignmentDetails {
@@ -41,6 +44,8 @@ export interface FormattedAssignmentDetails {
     name: string;
     phone: string;
     email: string;
+    nurseRegNo: string;
+    admittedType: string;
   };
   clientDetails: {
     clientId: string;
@@ -60,6 +65,7 @@ export interface FormattedAssignmentDetails {
     endTime: string;
     daysOfWeek: string;
     weeklyHours: string;
+    salaryPerDay?: number; 
   };
   status: 'active' | 'upcoming' | 'completed';
 }
@@ -74,6 +80,7 @@ export interface AttendanceRecord {
   notes?: string;
   location?: string | null;
   isAdminAction?:boolean;
+  salaryPerDay?: number;
 }
 
 const calculateDuration = (startDate: string, endDate: string): string => {
@@ -152,7 +159,9 @@ export function useAssignment(id: string) {
           id: data.nurse_id,
           name: data.nurse_full_name,
           phone: data.nurse_phone,
-          email: data.nurse_email
+          email: data.nurse_email,
+          nurseRegNo: data.nurse_reg_no,
+          admittedType: formatOrganizationName(data.admitted_type)
         },
         clientDetails: {
           clientId: data.client_id,
@@ -173,7 +182,8 @@ export function useAssignment(id: string) {
           startTime: format12HourTime(data.shift_start_time),
           endTime: format12HourTime(data.shift_end_time),
           daysOfWeek: "Monday to Friday",
-          weeklyHours: calculateWeeklyHours(data.shift_start_time, data.shift_end_time)
+          weeklyHours: calculateWeeklyHours(data.shift_start_time, data.shift_end_time),
+          salaryPerDay: data.salary_per_day
         },
         status: data.status
       };
