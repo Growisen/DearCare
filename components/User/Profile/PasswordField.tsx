@@ -52,7 +52,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
   }, [passwordError, setPasswordError]);
 
   return (
-    <div className="p-3 sm:p-4 border border-gray-200 hover:border-gray-300 rounded-xl bg-white shadow-sm transition-all duration-300">
+    <div className="hidden p-3 sm:p-4 border border-gray-200 hover:border-gray-300 rounded-xl bg-white shadow-sm transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg">
