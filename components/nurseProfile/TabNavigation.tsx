@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface TabNavigationProps {
-  activeTab: 'profile' | 'assignments' | 'analytics' | 'salaryDetails';
-  setActiveTab: (tab: 'profile' | 'assignments' | 'analytics' | 'salaryDetails') => void;
+  activeTab: 'profile' | 'assignments' | 'analytics' | 'salaryDetails' | 'advancePayments';
+  setActiveTab: (tab: 'profile' | 'assignments' | 'analytics' | 'salaryDetails' | 'advancePayments') => void;
 }
 
 const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }) => {
@@ -50,6 +50,16 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }
       >
         Salary Details
       </button>
+       <button
+          onClick={() => setActiveTab('advancePayments')}
+          className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+            activeTab === 'advancePayments'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          Advance Payments
+        </button>
     </div>
   );
 };

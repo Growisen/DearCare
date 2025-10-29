@@ -63,13 +63,11 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         </div>
       )}
 
-      {/* Client Type Selection */}
       <ClientTypeSelector 
         clientType={clientType} 
         onClientTypeChange={handleClientTypeChange} 
       />
 
-      {/* Old Register Number - Only shown when in overlay mode */}
       {isInOverlay && (
         <div className="mb-6 p-4 bg-gray-50 rounded-md border border-gray-200">
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="oldRegisterNumber">
@@ -90,10 +88,8 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         </div>
       )}
 
-      {/* Conditional Form Fields */}
       {clientType === 'individual' ? (
         <>
-          {/* Care Requirements - Moved to top */}
           <div className="mb-8 border-b border-gray-200 pb-6">
             <IndividualCareRequirements 
               formData={formData}
@@ -102,8 +98,7 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
               handleInputChange={handleInputChange} 
             />
           </div>
-          
-          {/* Requestor Information */}
+
           <RequestorInfoForm 
             formData={formData} 
             formErrors={formErrors}
@@ -112,8 +107,7 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
             handleProfileImageChange={handleProfileImageChange}
             serviceType={formData.serviceRequired}
           />
-          
-          {/* Patient Information - Only show if service is NOT home_maid */}
+
           {formData.serviceRequired !== 'home_maid' && (
             <PatientInfoForm 
               formData={formData}
@@ -137,7 +131,6 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         />
       )}
 
-      {/* Staff Requirements section for non-individual clients */}
       {clientType !== 'individual' && (
         <div className="mb-8 border-b border-gray-200 pb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Staff Requirements</h2>
@@ -176,7 +169,6 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         ></textarea>
       </div>
 
-      {/* Form Actions */}
       <div className="mt-8 flex justify-end">
         <button
           type="submit"
