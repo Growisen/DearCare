@@ -150,10 +150,8 @@ export default function ProfilePage() {
               </h2>
             </div>
 
-            {/* User Details Section */}
             <div className="lg:w-4/5">
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-10">
-                {/* Contact Information */}
                 <div className="mb-2">
                   <h3 className="text-md font-medium text-gray-700 mb-3">Contact Information</h3>
                   <div className="space-y-3">
