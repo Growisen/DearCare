@@ -4,6 +4,8 @@ export interface LeaveRequest {
   id: string;
   nurseId: string;
   nurseName: string;
+  admittedType: string;
+  registrationNumber?: string;
   leaveType: string;
   startDate: string;
   endDate: string;

@@ -41,7 +41,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
             <span className="font-medium">{formatName(fullName)}</span>
-            <p className="text-xs text-gray-500">ID: {assignment.nurse_id}</p>
+            <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
           </div>
         </div>
       </td>

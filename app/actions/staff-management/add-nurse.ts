@@ -135,22 +135,18 @@ async function generateNurseRegNo(
 ): Promise<string> {
   const currentYear = new Date().getFullYear();
   const prefix = admittedType === 'Tata_Homenursing' ? 'TH' : 'DC';
-  
-  // Get current timestamp in milliseconds and take last 4 digits
+
   const timestamp = new Date().getTime();
   const uniqueSequence = String(timestamp % 10000).padStart(4, '0');
-  
-  // Format: PREFIX + YEAR + TIMESTAMP_SEQUENCE
+
   const nurseRegNo = `${prefix}${currentYear}${uniqueSequence}`;
 
-  // Verify uniqueness
   const { data: existingNurse } = await supabase
     .from('nurses')
     .select('nurse_reg_no')
     .eq('nurse_reg_no', nurseRegNo)
     .single();
 
-  // If a collision occurs (extremely rare), try again with new timestamp
   if (existingNurse) {
     return generateNurseRegNo(supabase, admittedType);
   }
@@ -169,29 +165,21 @@ export async function createNurse(
   
 
   try {
-    
-    // 1. Upload nurse profile image if exists
+
     const supabase = await createSupabaseServerClient()
     const nurseRegNo = await generateNurseRegNo(supabase, nurseData.admitted_type);
-    // // Verify authentication first
-    // const { data: { session } } = await supabase.auth.getSession();
-    // if (!session) {
-    //   return { success: false, error: 'Not authenticated' };
-    // }
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       return { success: false, error: 'Not authenticated' };
     }
 
-    // Add role verification
     const { data: { user } } = await supabase.auth.getUser();
     console.log(user?.user_metadata?.role)
     if (user?.user_metadata?.role !== 'admin') {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
-    // First check if email already exists
     if (nurseData.email) {
       const { data: existingNurse, error: checkError } = await supabase
         .from('nurses')
@@ -206,12 +194,11 @@ export async function createNurse(
         }
       }
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
+      if (checkError && checkError.code !== 'PGRST116') {
         throw checkError;
       }
     }
 
-    // Insert nurse base data
     const { data: nurse, error: nurseError } = await supabase
       .from('nurses')
       .insert({
@@ -224,13 +211,13 @@ export async function createNurse(
         city: nurseData.city,
         taluk: nurseData.taluk,
         state: nurseData.state,
-        pin_code: Number(nurseData.pin_code), // Convert to number
+        pin_code: Number(nurseData.pin_code),
         phone_number: nurseData.phone_number,
-        languages: nurseData.languages, // This is Json type
+        languages: nurseData.languages,
         service_type: nurseData.service_type,
-        shift_pattern: nurseData.shift_pattern, // Convert to number
+        shift_pattern: nurseData.shift_pattern,
         category: nurseData.category,
-        experience: Number(nurseData.experience), // Convert to number
+        experience: Number(nurseData.experience),
         marital_status: nurseData.marital_status,
         religion: nurseData.religion,
         mother_tongue: nurseData.mother_tongue,
@@ -246,8 +233,7 @@ export async function createNurse(
       .single()
 
     if (nurseError) throw nurseError
-    
-    // 4. Insert reference data
+
     const { error: referenceError } = await supabase
       .from('nurse_references')
       .insert({
@@ -262,7 +248,6 @@ export async function createNurse(
 
     if (referenceError) throw referenceError
 
-    // 5. Insert health data
     const { error: healthError } = await supabase
       .from('nurse_health')
       .insert({
@@ -328,7 +313,6 @@ export async function createNurse(
 
   } catch (error) {
     console.error('Error creating nurse:', error)
-    // Handle specific database errors
     if (error instanceof Error) {
       if ('code' in error && error.code === '23505') {
         return { 
@@ -351,13 +335,11 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
   try {
     const supabase = await createSupabaseServerClient()
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return { data: null, error: 'Not authenticated' }
     }
 
-    // Fetch basic nurse information
     const { data: basicData, error: basicError } = await supabase
       .from('nurses')
       .select('*')
@@ -366,14 +348,12 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
 
     if (basicError) throw basicError
 
-    // Fetch health information
     const { data: healthData } = await supabase
       .from('nurse_health')
       .select('health_status, disability, source')
       .eq('nurse_id', nurseId)
       .single()
 
-    // Fetch reference information
     const { data: referenceData } = await supabase
       .from('nurse_references')
       .select('referer_name, phone_number, relation, description, family_references, staff_reference')
@@ -433,13 +413,11 @@ export async function fetchNurseAssignments(
   try {
     const supabase = await createSupabaseServerClient();
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       return { data: null, error: 'Not authenticated' };
     }
 
-    // First fetch assignments with client type
     const { data: assignments, error: assignmentError } = await supabase
       .from('nurse_client')
       .select<string, AssignmentResponse>(`
@@ -460,12 +438,10 @@ export async function fetchNurseAssignments(
     if (assignmentError) throw assignmentError;
     if (!assignments) return { data: null, error: 'No assignments found' };
 
-    // Fetch detailed client information for each assignment
     const assignmentsWithDetails = await Promise.all(
       assignments.map(async (assignment) => {
         const isIndividual = assignment.clients.client_type === 'individual';
 
-        // Fetch client details based on type
         const { data: clientDetails, error: clientError } = await supabase
           .from(isIndividual ? 'individual_clients' : 'organization_clients')
           .select('*')
@@ -497,7 +473,6 @@ export async function fetchNurseAssignments(
       })
     );
 
-    // Filter out any null values from failed client detail fetches
     const validAssignments = assignmentsWithDetails.filter(
       (assignment): assignment is NurseAssignmentWithClient => assignment !== null
     );
@@ -607,7 +582,6 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
   try {
     const supabase = await createSupabaseServerClient()
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return { data: null, error: 'Not authenticated' }
@@ -644,7 +618,7 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
           salary_hour,
           created_at
         `)
-        .eq('nurse_id', nurseId)  // Add this line to filter by nurse_id
+        .eq('nurse_id', nurseId)
     
       if (error) {
         console.error('Error fetching nurse_client:', error)
@@ -654,13 +628,6 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
       console.log('Nurse 47 Assignments:', data)
       return data
     }
-    
-    // Call the function to test
-    
-
-
-   
-    
 
     const getNurseImageUrl = async (nurseId: number): Promise<string | null> => {
       const { data: files } = await supabase
@@ -682,7 +649,6 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
       return null
     }
 
-    // Transform the data to include a default status
     const transformedData = await Promise.all(data.map(async nurse => ({
       nurse_id: nurse.nurse_id,
       first_name: nurse.first_name,
@@ -691,10 +657,10 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
       email: nurse.email,
       phone_number: nurse.phone_number,
       experience: nurse.experience,
-      photo: await getNurseImageUrl(nurse.nurse_id)  // This now matches the interface
+      photo: await getNurseImageUrl(nurse.nurse_id) 
     } as NurseBasicInfo)))
 
-    await get47(transformedData[0].nurse_id) // Example call to get47 with the first nurse's ID
+    await get47(transformedData[0].nurse_id) 
 
     return { 
       data: transformedData, 
@@ -776,13 +742,11 @@ export async function exportNurseData(): Promise<{
   try {
     const { supabase, nursesOrg } = await getAuthenticatedClient();
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       return { data: null, error: 'Not authenticated' };
     }
 
-    // Fetch joined data from all three tables
     const { data, error } = await supabase
       .from('nurses')
       .select(`
@@ -804,7 +768,6 @@ export async function exportNurseData(): Promise<{
 
     if (error) throw error;
 
-    // Transform data for Excel format
     const excelData = data.map(nurse => ({
       'Nurse ID': nurse.nurse_id,
       'First Name': nurse.first_name || '',
@@ -830,19 +793,16 @@ export async function exportNurseData(): Promise<{
       'Mother Tongue': nurse.mother_tongue || '',
       'NOC Status': nurse.noc_status || '',
       'Created Date': nurse.created_at ? new Date(nurse.created_at).toLocaleDateString() : '',
-      
-      // Health Information
+
       'Health Status': nurse.nurse_health?.health_status || '',
       'Disability': nurse.nurse_health?.disability || '',
       'Source of Information': nurse.nurse_health?.source || '',
-      
-      // Reference Information
+
       'Reference Name': nurse.nurse_references?.referer_name || '',
       'Reference Phone': nurse.nurse_references?.phone_number || '',
       'Reference Relation': nurse.nurse_references?.relation || '',
       'Recommendation Details': nurse.nurse_references?.description || '',
-      
-      // Family References (formatted as a string)
+
       'Family References': nurse.nurse_references?.family_references ? 
         nurse.nurse_references.family_references.map((ref: FamilyReference) => 
           `Name: ${ref.name}, Phone: ${ref.phone}, Relation: ${ref.relation}`
@@ -873,7 +833,6 @@ export async function listNurses(): Promise<{ data: Nurse[] | null, error: strin
   try {
     const supabase = await createSupabaseServerClient()
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return { data: null, error: 'Not authenticated' }
@@ -909,7 +868,6 @@ export async function listNurses(): Promise<{ data: Nurse[] | null, error: strin
 
     if (error) throw error
 
-    // Transform the data to match the Nurse interface
     const transformedData: Nurse[] = data.map(nurse => ({
       _id: nurse.nurse_id.toString(),
       firstName: nurse.first_name || '',
@@ -927,14 +885,12 @@ export async function listNurses(): Promise<{ data: Nurse[] | null, error: strin
       salaryCap:  0,
       salaryPerHour:   0,
       status: (nurse.status as Nurse['status']) || 'pending',
-      // Add missing required fields
-      location: nurse.city || '', // or construct from address fields
-      dob: nurse.date_of_birth || '', // use existing dateOfBirth field
-      preferredLocations:[], // Add to database query if not present
-      // Optional fields
+      location: nurse.city || '', 
+      dob: nurse.date_of_birth || '', 
+      preferredLocations: [],
       hiringDate: nurse.created_at,
       rating: 3,
-      reviews:[],
+      reviews: [],
       serviceType: nurse.service_type || '',
       shiftPattern: nurse.shift_pattern || '',
       category: nurse.category || '',
@@ -966,13 +922,11 @@ export async function updateNurseStatus(
   try {
     const supabase = await createSupabaseServerClient();
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       return { success: false, error: 'Not authenticated' };
     }
 
-    // Update the nurse status
     const { error } = await supabase
       .from('nurses')
       .update({ status })
@@ -994,7 +948,6 @@ export async function deleteNurse(nurseId: number): Promise<{ success: boolean; 
   try {
     const supabase = await createSupabaseServerClient();
 
-    // 1. Delete nurse images/documents from storage
     const folders = [
       'image',
       'adhar',
@@ -1004,7 +957,6 @@ export async function deleteNurse(nurseId: number): Promise<{ success: boolean; 
       'ration_card'
     ];
     for (const folder of folders) {
-      // List files for this nurse in the folder
       const { data: files, error: listError } = await supabase
         .storage
         .from('DearCare')
@@ -1019,19 +971,16 @@ export async function deleteNurse(nurseId: number): Promise<{ success: boolean; 
       }
     }
 
-    // 2. Delete from nurse_health
     await supabase
       .from('nurse_health')
       .delete()
       .eq('nurse_id', nurseId);
 
-    // 3. Delete from nurse_references
     await supabase
       .from('nurse_references')
       .delete()
       .eq('nurse_id', nurseId);
 
-    // 4. Delete from nurses (main table)
     const { error } = await supabase
       .from('nurses')
       .delete()
@@ -1057,7 +1006,6 @@ export async function updateNurse(
   try {
     const supabase = await createSupabaseServerClient();
 
-    // 1. Update nurse basic info (all fields from your Row type)
    const { error: basicError } = await supabase
   .from('nurses')
   .update({
@@ -1093,7 +1041,6 @@ export async function updateNurse(
 
     if (basicError) throw basicError;
 
-    // 2. Update health info
     if (formData.health) {
       await supabase
         .from('nurse_health')
@@ -1105,7 +1052,6 @@ export async function updateNurse(
         .eq('nurse_id', nurseId);
     }
 
-    // 3. Update references
     if (formData.references) {
       await supabase
         .from('nurse_references')
@@ -1120,7 +1066,6 @@ export async function updateNurse(
         .eq('nurse_id', nurseId);
     }
 
-    // 4. Handle document uploads (if any)
     if (tempFiles) {
       const uploadFile = async (file: File, folder: string) => {
         const extension = file.name.split('.').pop();
@@ -1135,7 +1080,6 @@ export async function updateNurse(
 
       for (const [docType, files] of Object.entries(tempFiles)) {
         if (files && files.length > 0) {
-          // Only upload the first file for single-file fields
           let folder = docType;
           if (docType === 'profile_image') folder = 'image';
           if (docType === 'educational') folder = 'Educational_Certificates';
@@ -1189,7 +1133,6 @@ export async function listNursesWithAssignments(
 
     const { nursesOrg } = getOrgMappings(filterParams?.admittedType ?? '');
 
-    // Build base query with filters
     let nursesQuery = supabase
       .from('nurses')
       .select(`
@@ -1212,8 +1155,6 @@ export async function listNursesWithAssignments(
       nursesQuery = nursesQuery.eq('admitted_type', nursesOrg);
     }
 
-    // First, fetch ALL nurses matching the base filters (without pagination)
-    // to properly calculate status-based filtering
     const { data: allNursesData, error: allNursesError } = await nursesQuery
       .order('first_name');
 
@@ -1222,7 +1163,6 @@ export async function listNursesWithAssignments(
     const allNurseIds = allNursesData.map(nurse => nurse.nurse_id);
     const currentDate = new Date().toISOString().split('T')[0];
 
-    // Fetch leave data
     const { data: leaveData, error: leaveError } = await supabase
       .from('nurse_leave_requests')
       .select(`
@@ -1245,7 +1185,6 @@ export async function listNursesWithAssignments(
       leaveByNurseId.set(leave.nurse_id, leave);
     }
 
-    // Fetch all non-completed assignments (current + upcoming)
     const { data: assignmentsData, error: assignmentsError } = await supabase
       .from('nurse_client')
       .select(`
@@ -1274,7 +1213,6 @@ export async function listNursesWithAssignments(
       assignmentsByNurseId.get(assignment.nurse_id).push(assignment);
     }
 
-    // Transform all nurses to include status
     let allTransformedData: Nurse[] = allNursesData.map(nurse => {
       const nurseLeave = leaveByNurseId.get(nurse.nurse_id);
       const nurseAssignments = assignmentsByNurseId.get(nurse.nurse_id) || [];
@@ -1337,16 +1275,13 @@ export async function listNursesWithAssignments(
       };
     });
 
-    // Apply status filter if provided
     if (filterParams?.status) {
       allTransformedData = allTransformedData.filter(nurse => nurse.status === filterParams.status);
     }
-    
-    // Calculate pagination after filtering
+
     const totalCount = allTransformedData.length;
     const totalPages = Math.ceil(totalCount / pageSize);
-    
-    // Apply pagination slice
+
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     const paginatedData = allTransformedData.slice(start, end);

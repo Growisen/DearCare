@@ -17,7 +17,7 @@ import { formatName, getServiceLabel } from '../utils/formatters';
 import ImageViewer from './common/ImageViewer';
 import ClientEditForm from './client/ClientEditFormOverlay';
 import { relationOptions } from '@/utils/constants';
-import { getRelationLabel } from '@/utils/formatters';
+import { getRelationLabel, formatDate } from '@/utils/formatters';
 
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
@@ -295,7 +295,7 @@ export function ClientDetailsOverlay({
           <DetailItem label="Service Required" value={getServiceLabel(serviceOptions, client.details?.service_required || '')} />
           <DetailItem label="Care Duration" value={client.details?.care_duration || 'Not specified'} />
           <DetailItem label="Duty Period" value={getServiceLabel(dutyPeriodOptions, client.duty_period || '')} />
-          <DetailItem label="Start Date" value={client.details?.start_date || 'Not specified'} />
+          <DetailItem label="Start Date" value={formatDate(client.details?.start_date || '') || 'Not specified'} />
           <DetailItem label="Period Reason" value={client.duty_period_reason} columns={3} />
         </div>
       </div>
@@ -327,7 +327,6 @@ export function ClientDetailsOverlay({
         </div>
       </div>
       
-      {/* Organization Address Section */}
       <div className="mb-6">
         <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Organization Address</h5>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

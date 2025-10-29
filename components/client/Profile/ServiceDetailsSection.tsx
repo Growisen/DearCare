@@ -1,6 +1,7 @@
 import React from 'react';
 import InfoSection from './InfoSection';
 import InfoField from './InfoField';
+import { formatDate } from '@/utils/formatters';
 
 interface ServiceDetails {
   serviceRequired?: string;
@@ -67,7 +68,7 @@ const ServiceDetailsSection: React.FC<ServiceDetailsSectionProps> = ({
         {startDate && (
           <div>
             <p className="text-xs text-gray-500 font-medium">Service Start Date</p>
-            <p className="text-sm text-gray-700">{new Date(startDate).toLocaleDateString()}</p>
+            <p className="text-sm text-gray-700">{formatDate(startDate)}</p>
           </div>
         )}
 

@@ -192,17 +192,17 @@ const ScheduleShiftsContent = () => {
   }
   
   return (
-    <div className="container mx-auto p-3 sm:p-4 max-w-full">
-      <div className="bg-white shadow-md rounded-lg p-6 border border-gray-100">
-        <div className="mb-6 bg-blue-50 p-4 rounded-md border-l-4 border-blue-500">
-          <h2 className="text-blue-800 font-medium">Assignment Information</h2>
-          <p className="text-blue-700 text-sm mt-1">
+    <div className="container max-w-full">
+      <div className="bg-white shadow-sm rounded-lg p-8 border border-gray-200">
+        <div className="mb-8 bg-gray-50 p-5 rounded-lg border border-gray-200">
+          <h2 className="text-gray-800 font-semibold text-lg mb-2">Assignment Information</h2>
+          <p className="text-gray-600 text-sm leading-relaxed">
             You are scheduling shifts for {nurses.length} nurse{nurses.length > 1 ? 's' : ''}. 
             Please specify the start date, end date, and daily shift times for each nurse.
           </p>
         </div>
         
-        <div className="space-y-5">
+        <div className="space-y-6">
           {nurses.map(nurse => {
             const nurseShift = shifts.find(s => s.nurseId === nurse._id) || {
               nurseId: nurse._id,
@@ -226,27 +226,27 @@ const ScheduleShiftsContent = () => {
             }
 
             return (
-              <div key={nurse._id} className="border-b pb-4">
-                <div className="flex items-center mb-4 justify-between">
+              <div key={nurse._id} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <div className="flex items-center mb-5 justify-between">
                   <div className="flex items-center">
-                    <div className="h-12 w-12 rounded-full bg-blue-100 mr-3 overflow-hidden relative">
+                    <div className="h-14 w-14 rounded-full bg-gray-200 mr-4 overflow-hidden relative border border-gray-300">
                       {nurse.profileImage ? (
                         <Image 
                             src={nurse.profileImage} 
                             alt={`${nurse.firstName} ${nurse.lastName}`} 
                             className="object-cover"
                             fill={true}
-                            sizes="48px"
+                            sizes="56px"
                             priority={false}
                         />
                         ) : (
-                        <span className="text-blue-700 font-semibold text-lg flex items-center justify-center h-full">
+                        <span className="text-gray-700 font-semibold text-lg flex items-center justify-center h-full">
                             {nurse.firstName.charAt(0)}{nurse.lastName.charAt(0)}
                         </span>
                     )}
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {nurse.firstName} {nurse.lastName}
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -255,65 +255,65 @@ const ScheduleShiftsContent = () => {
                     </div>
                   </div>
                   {estimatedSalary && (
-                    <div className="text-green-700 text-base font-medium ml-4 whitespace-nowrap">
+                    <div className="text-gray-700 text-sm font-semibold ml-4 whitespace-nowrap bg-white px-4 py-2 rounded-md border border-gray-300">
                       {estimatedSalary}
                     </div>
                   )}
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 bg-white p-5 rounded-lg border border-gray-200">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Start Date *
                     </label>
                     <input
                       type="date"
                       value={nurseShift.startDate}
                       onChange={(e) => handleShiftChange(nurse._id, 'startDate', e.target.value)}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
                       required
                       min={today}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       End Date *
                     </label>
                     <input
                       type="date"
                       value={nurseShift.endDate}
                       onChange={(e) => handleShiftChange(nurse._id, 'endDate', e.target.value)}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
                       required
                       min={nurseShift.startDate || today}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Shift Start Time *
                     </label>
                     <input
                       type="time"
-                      value={nurseShift.shiftStart.substring(0, 5)} // Display only HH:MM part
+                      value={nurseShift.shiftStart.substring(0, 5)}
                       onChange={(e) => handleShiftChange(nurse._id, 'shiftStart', e.target.value)}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Shift End Time *
                     </label>
                     <input
                       type="time"
                       value={nurseShift.shiftEnd.substring(0, 5)}
                       onChange={(e) => handleShiftChange(nurse._id, 'shiftEnd', e.target.value)}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Salary Per Day *
                     </label>
                     <input
@@ -322,12 +322,12 @@ const ScheduleShiftsContent = () => {
                       step="0.01"
                       value={nurseShift.salaryPerDay}
                       onChange={(e) => handleShiftChange(nurse._id, 'salaryPerDay', e.target.value)}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
                       required
                       placeholder="Enter salary amount"
                     />
                     {estimatedSalary && (
-                      <div className="text-green-700 text-sm mt-1 font-medium">
+                      <div className="text-gray-700 text-sm mt-2 font-medium">
                         {estimatedSalary}
                       </div>
                     )}
@@ -338,16 +338,16 @@ const ScheduleShiftsContent = () => {
           })}
         </div>
         
-        <div className="mt-8 flex justify-end space-x-4">
+        <div className="mt-8 flex justify-end space-x-3 pt-6 border-t border-gray-200">
           <button
             onClick={() => window.close()}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-5 py-2.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors font-medium"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
           >
             Confirm Assignments
           </button>
