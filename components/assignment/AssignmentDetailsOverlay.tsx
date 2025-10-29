@@ -186,7 +186,6 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
         
         <div className="p-3 space-y-6"> 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-gray-100 py-6">
-            {/* Nurse Details */}
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-gray-700">Nurse Details</h3>
               <div className="space-y-3">
@@ -194,13 +193,12 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
                   <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
                   <div>
                     <div className="text-gray-900 font-medium">{formatName(fullName)}</div>
-                    <p className="text-sm text-gray-500">ID: {assignment.nurse_id}</p>
+                    <p className="text-sm text-gray-500">Reg No: {assignment.nurse_reg_no}</p>
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* Client Details */}
+
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-gray-700">Client Details</h3>
               <div className="space-y-3">
@@ -311,8 +309,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
                         )}
                       </div>
                     </div>
-                    
-                    {/* Show check-out button if nurse is checked in but not checked out */}
+
                     {!hasCheckedOut && (
                       <div className="mt-3">
                         <button
@@ -344,8 +341,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
                         <p className="text-sm text-blue-700">Expected check-in: {formatTime(assignment.shift_start_time)}</p>
                       </div>
                     </div>
-                    
-                    {/* Add check-in button for admin */}
+
                     <div className="mt-3">
                     {(() => {
                       const shiftDuration = calculateShiftDurationInHours(
@@ -430,7 +426,6 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
         </div>
       </div>
 
-      {/* Check-in Confirmation Modal */}
       <ConfirmationModal
         isOpen={showCheckInConfirmation}
         title={(() => {
@@ -468,7 +463,6 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
         isLoading={actionLoading === 'check-in'}
       />
 
-      {/* Check-out Confirmation Modal */}
       <ConfirmationModal
         isOpen={showCheckOutConfirmation}
         title="Confirm Check-out"

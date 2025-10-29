@@ -10,6 +10,8 @@ import ProfileContent from '@/components/nurseProfile/ProfileContent';
 import AssignmentsContent from '@/components/nurseProfile/AssignmentsContent';
 import AnalyticsContent from '@/components/nurse/NursePerformanceAnalytics'; 
 import SalaryDetails from '@/components/nurse/SalaryDetails';
+import AdvancePayments from '@/components/nurse/advancePayments/AdvancePayments';
+import ProfileSkeletonLoader from '@/components/ProfileSkeletonLoader';
 
 const NurseProfilePage: React.FC = () => {
   const params = useParams();
@@ -17,7 +19,7 @@ const NurseProfilePage: React.FC = () => {
   const [assignments, setAssignments] = useState<NurseAssignmentWithClient[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'profile' | 'assignments' | 'analytics' | 'salaryDetails'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'assignments' | 'analytics' | 'salaryDetails' | 'advancePayments'>('profile')
   const [assignmentsLoading, setAssignmentsLoading] = useState(false)
 
   useEffect(() => {
@@ -85,7 +87,7 @@ const NurseProfilePage: React.FC = () => {
     }
   };
 
-  if (loading) return <Loader />
+  if (loading) return <ProfileSkeletonLoader />
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>
   if (!nurse) return <div className="p-4">No nurse found</div>
 
@@ -106,6 +108,8 @@ const NurseProfilePage: React.FC = () => {
               <AnalyticsContent nurseId={Number(params.id)} />
             ) : activeTab === 'salaryDetails' ? (
               <SalaryDetails nurseId={Number(params.id)} />
+            ) : activeTab === 'advancePayments' ? (
+              <AdvancePayments nurseId={Number(params.id)} />
             ) : null}
           </div>
         </div>

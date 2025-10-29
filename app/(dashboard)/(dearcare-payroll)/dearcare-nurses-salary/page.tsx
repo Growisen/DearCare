@@ -178,7 +178,7 @@ export default function NursesSalaryPage() {
                     </td>
                     <td className="px-1 py-4 text-center text-gray-500">
                       <div className="text-sm">
-                        {formatDate(record.pay_period_start)} - {formatDate(record.pay_period_end)}
+                        {formatDate(record.pay_period_start)} to {formatDate(record.pay_period_end)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">

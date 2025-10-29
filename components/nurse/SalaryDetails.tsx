@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../Loader";
 import { fetchNurseSalaryPayments } from "@/app/actions/payroll/salary-actions";
-import { calculateNurseSalary, addNurseBonus, addNurseSalaryDeduction, createAdvanceSalaryPayment } from "@/app/actions/payroll/calculate-nurse-salary";
+import { calculateNurseSalary, addNurseBonus, addNurseSalaryDeduction } from "@/app/actions/payroll/calculate-nurse-salary";
 import ConfirmationModal from "../common/ConfirmationModal";
 import ModalPortal from "../ui/ModalPortal";
 import HourlySalaryCard from "./salary/HourlySalaryCard";
@@ -196,25 +196,14 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const handleCreateSalary = async (
     startDate: string,
     endDate: string,
-    includeAdvance: boolean,
-    isAdvance: boolean
   ) => {
     setCreating(true);
     try {
-      let result;
-      if (includeAdvance || isAdvance) {
-        result = await createAdvanceSalaryPayment({
-          nurseId,
-          startDate,
-          endDate,
-        });
-      } else {
-        result = await calculateNurseSalary({
-          nurseId,
-          startDate,
-          endDate,
-        });
-      }
+      const result = await calculateNurseSalary({
+        nurseId,
+        startDate,
+        endDate,
+      });
 
       if (result.success) {
         await fetchPayments();

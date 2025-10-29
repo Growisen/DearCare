@@ -31,7 +31,7 @@ const LeaveRequestRow = memo(({
       <td className="py-4 px-6">
         <div>
           <div className="text-gray-800 font-medium">{formatName(request.nurseName)}</div>
-          <div className="text-xs text-gray-500">{request.nurseId}</div>
+          <div className="text-xs text-gray-500">{request.registrationNumber}</div>
         </div>
       </td>
       <td className="py-4 px-6 text-gray-600">{request.leaveType}</td>
@@ -109,8 +109,8 @@ const LeaveRequestMobileCard = memo(({
         <p className="text-gray-800 font-medium">{request.days}</p>
         <p className="text-gray-500">Applied On:</p>
         <p className="text-gray-800">{format(parseISO(request.appliedOn), 'MMM dd, yyyy')}</p>
-        <p className="text-gray-500">Employee ID:</p>
-        <p className="text-gray-800">{request.nurseId}</p>
+        <p className="text-gray-500">Nurse Reg No:</p>
+        <p className="text-gray-800">{request.registrationNumber}</p>
       </div>
       
       <div className="flex gap-2">
@@ -163,7 +163,7 @@ export function LeaveRequestsTable({
         <table className="w-full">
           <thead className="bg-gray-100 border-b border-gray-200">
             <tr className="text-left">
-              <th className="py-4 px-6 font-medium text-gray-700">Employee</th>
+              <th className="py-4 px-6 font-medium text-gray-700">Nurse</th>
               <th className="py-4 px-6 font-medium text-gray-700">Leave Type</th>
               <th className="py-4 px-6 font-medium text-gray-700">Leave Mode</th>
               <th className="py-4 px-6 font-medium text-gray-700">Period</th>

@@ -23,6 +23,7 @@ import ServiceDetailsSection from '@/components/client/Profile/ServiceDetailsSec
 import EditAssignmentModal from '@/components/client/EditAssignmentModal';
 import FileSection from '@/components/client/Profile/FilesSection';
 import ClientPaymentHistory from '@/components/client/Profile/PaymentDetails'
+import ProfileSkeletonLoader from '@/components/ProfileSkeletonLoader';
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -117,7 +118,7 @@ const PatientProfilePage = () => {
   const { showDeleteConfirmation, setShowDeleteConfirmation } = useModalManagement();
 
   if (loading) {
-    return <Loader skeleton={true}/>;
+    return <ProfileSkeletonLoader />;
   }
 
   if (error || !patient) {
