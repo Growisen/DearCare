@@ -81,7 +81,7 @@ export default function AdvancePayments({ nurseId }: { nurseId: number }) {
 
   const columns: TableColumn<AdvancePayment>[] = [
     { key: "date", header: "Date", render: (v) => formatDate(v as string) },
-    { key: "advance_amount", header: "Amount", align: "left", render: (v) => `₹${v}` },
+    { key: "advance_amount", header: "Advance Payment", align: "left", render: (v) => `₹${v}` },
     { key: "return_amount", header: "Return Amount", align: "left", render: (v) => v ? `₹${v}` : "-" },
     { key: "return_type", header: "Return Type" },
     { key: "installment_amount", header: "Installment Amount", align: "left", render: (v) => v ? `₹${v}` : "-" },
