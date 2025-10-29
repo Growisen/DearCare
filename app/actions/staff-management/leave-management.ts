@@ -118,7 +118,7 @@ export async function getLeaveRequests(
     
     const { data: nursesData, error: nursesError } = await supabase
       .from('nurses')
-      .select('nurse_id, first_name, last_name, admitted_type')
+      .select('nurse_id, first_name, last_name, admitted_type, nurse_reg_no')
       .in('nurse_id', nurseIds)
     
     if (nursesError) {
@@ -130,7 +130,8 @@ export async function getLeaveRequests(
       nursesData.forEach(nurse => {
         nurseMap.set(nurse.nurse_id, {
           name: `${nurse.first_name || ''} ${nurse.last_name || ''}`.trim(),
-          admittedType: nurse.admitted_type
+          admittedType: nurse.admitted_type,
+          registrationNumber: nurse.nurse_reg_no
         })
       })
     }
@@ -143,6 +144,7 @@ export async function getLeaveRequests(
         nurseId: String(item.nurse_id),
         nurseName: nurseInfo.name,
         admittedType: nurseInfo.admittedType || '',
+        registrationNumber: nurseInfo.registrationNumber || '',
         leaveType: formatLeaveType(item.leave_type),
         leaveMode: formatLeaveMode(item.leave_mode),
         startDate: item.start_date,

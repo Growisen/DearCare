@@ -418,6 +418,7 @@ export interface NurseAssignmentData {
   status: 'active' | 'completed' | 'cancelled';
   assigned_type: string;
   salary_per_day?: number;
+  nurse_reg_no?: string;
 }
 
 export async function getNurseAssignments(clientId: string): Promise<{
@@ -511,7 +512,7 @@ export async function getAllNurseAssignments(
     const { nursesOrg } = getOrgMappings(organization);
 
     let query = supabase
-      .from('nurse_assignments_view')
+      .from('nurse_assignments_view_with_reg_no')
       .select('*', { count: 'exact' });
 
     if (filterStatus !== 'all') {
