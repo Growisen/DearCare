@@ -479,9 +479,11 @@ export interface NurseAssignmentData {
   shift_end_time: string;
   status: 'active' | 'completed' | 'cancelled';
   assigned_type: string;
+  admitted_type?: string; // Added for shift-based attendance
   nurses?: {
     first_name: string;
     last_name: string;
+    admitted_type?: string;
   };
   client_type?: string;
   client_name?: string;
@@ -740,6 +742,21 @@ export async function deleteNurseAssignment(
     
     const nurseId = assignment.nurse_id;
 
+    // Delete related shift_summary records first
+    const { error: shiftSummaryDeleteError } = await supabase
+      .from('shift_summary')
+      .delete()
+      .eq('assigned_id', assignmentId);
+
+    if (shiftSummaryDeleteError) {
+      logger.error('Error deleting related shift summary records:', shiftSummaryDeleteError);
+      return {
+        success: false,
+        message: `Failed to delete related shift summary records: ${shiftSummaryDeleteError.message}`
+      };
+    }
+
+    // Delete related attendance records
     const { error: attendanceDeleteError } = await supabase
       .from('attendence_individual')
       .delete()

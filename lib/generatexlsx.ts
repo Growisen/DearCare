@@ -33,6 +33,15 @@ interface ExcelNurseData {
   'Reference Relation': string;
   'Recommendation Details': string;
   'Family References': string;
+  // Shift-Based Attendance Fields (for Tata Home Nursing)
+  'Organization': string;
+  'Attendance Mode': string;
+  'Total Shifts': number;
+  'Total Attendance Days': number;
+  'Active Shifts': number;
+  'Completed Shifts': number;
+  'Total Hours Worked': number;
+  'Average Shift Duration (hrs)': number;
 }
 
 export function generateNurseExcel(data: ExcelNurseData[]): Blob {
@@ -72,7 +81,16 @@ export function generateNurseExcel(data: ExcelNurseData[]): Blob {
     { wch: 15 },  // Reference Phone
     { wch: 15 },  // Reference Relation
     { wch: 30 },  // Recommendation
-    { wch: 50 }   // Family References
+    { wch: 50 },  // Family References
+    // Shift-Based Attendance Columns
+    { wch: 18 },  // Organization
+    { wch: 15 },  // Attendance Mode
+    { wch: 12 },  // Total Shifts
+    { wch: 18 },  // Total Attendance Days
+    { wch: 12 },  // Active Shifts
+    { wch: 15 },  // Completed Shifts
+    { wch: 18 },  // Total Hours Worked
+    { wch: 22 }   // Average Shift Duration
   ];
 
   worksheet['!cols'] = columnWidths;

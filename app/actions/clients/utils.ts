@@ -72,7 +72,7 @@ export async function getClientContactInfo(
         }
         
         clientEmail = individualData.requestor_email;
-        clientName = individualData.requestor_name || individualData.patient_name;
+        clientName = individualData.requestor_name || individualData.patient_name || 'Unknown Client';
       } else {
         const { data: orgData, error: orgError } = await supabase
           .from('organization_clients')
@@ -85,7 +85,7 @@ export async function getClientContactInfo(
         }
         
         clientEmail = orgData.contact_email;
-        clientName = orgData.contact_person_name || orgData.organization_name;
+        clientName = orgData.contact_person_name || orgData.organization_name || 'Unknown Organization';
       }
       
       return { clientEmail, clientName, error: null };

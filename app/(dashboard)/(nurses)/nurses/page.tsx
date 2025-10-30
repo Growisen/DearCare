@@ -177,7 +177,7 @@ export default function NursesPage() {
         return;
       }
   
-      const blob = generateNurseExcel(result.data);
+      const blob = generateNurseExcel(result.data as any[]);
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
