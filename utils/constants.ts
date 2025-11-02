@@ -1,3 +1,5 @@
+import { FormPage } from '@/types/agreement.types';
+
 export const dutyPeriodOptions = [
   { value: '', label: 'Select duty period' },
   { value: '1_month', label: '1 Month' },
@@ -86,3 +88,38 @@ export const relationOptions = [
   { value: 'sibling', label: 'Sibling' },
   { value: 'other', label: 'Other' },
 ];
+
+export const FORM_STEPS: Record<FormPage, { title: string; description: string }> = {
+  1: {
+    title: 'Client Information',
+    description: 'Please fill in your details below'
+  },
+  2:{
+    title: 'Assignment Details',
+    description: 'Please provide the details of the assignment'
+  },
+  3: {
+    title: 'Dietary Habits',
+    description: 'Please provide details about your dietary habits'
+  },
+  4: {
+    title: 'Terms & Agreements',
+    description: 'Review and accept our policies'
+  },
+};
+
+export const TOTAL_STEPS = 4;
+
+export const INITIAL_FORM_DATA = {
+  name: '',
+  state: '',
+  district: '',
+  city: '',
+  type: '',
+  startDate: '',
+  endDate: '',
+  startTime: '',
+  endTime: '',
+  agreedToTerms: false,
+  agreedToPrivacy: false
+};
