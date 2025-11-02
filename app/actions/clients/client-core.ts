@@ -620,3 +620,44 @@ export async function updateClientCategory(
       };
     }
 }
+
+
+export async function fetchApprovedClientNames(searchTerm?: string): Promise<{
+  data: { client_id: string; registration_number: string; patient_name: string, patient_state: string, patient_district: string, patient_city: string, client_type: string }[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { clientsOrg } = getOrgMappings(organization);
+
+    let query = supabase
+      .from('approved_clients_view')
+      .select('client_id, registration_number, patient_name, patient_state, patient_district, patient_city, client_type');
+
+    if (clientsOrg) {
+      query = query.eq('client_category', clientsOrg);
+    }
+
+    if (searchTerm && searchTerm.trim() !== '') {
+      const q = `%${searchTerm.trim()}%`;
+      query = query.or(`registration_number.ilike.${q},patient_name.ilike.${q}`);
+    }
+
+    query = query.order('patient_name');
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return { data, error: null };
+  } catch (error) {
+    logger.error('Error fetching approved client names:', error);
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Failed to fetch client names'
+    };
+  }
+}

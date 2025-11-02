@@ -3,10 +3,10 @@
 import "./globals.css";
 import { AuthProvider } from '@/contexts/AuthContext'
 import { NetworkProvider } from '@/contexts/NetworkContext'
-import { Toaster } from 'react-hot-toast';
 import { Providers } from "./providers";
 import useOrgStore from '@/app/stores/UseOrgStore';
 import { useEffect } from 'react';
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -29,18 +29,14 @@ export default function RootLayout({
           <AuthProvider>
             <NetworkProvider>
               <Providers>
+                <Toaster 
+                  position="top-center"
+                  toastOptions={{
+                    duration: 3000,
+                  }}
+                />
                 {children}
               </Providers>
-              <Toaster 
-                position="top-right"
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: branding?.color || '#333',
-                    color: '#fff',
-                  },
-                }} 
-              />
             </NetworkProvider>
           </AuthProvider>
         ) : (
