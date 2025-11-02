@@ -1,5 +1,6 @@
 import React from "react"
-import { Search, X, Download, Calendar } from "lucide-react"
+import { Search, X, Download, Calendar, FilePlus } from "lucide-react" 
+import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 
 type AssignmentHeaderProps = {
@@ -30,6 +31,8 @@ export function AssignmentHeader({
   selectedCategory
 }: AssignmentHeaderProps) {
   
+  const router = useRouter(); // Initialize router
+
   const setTodayDate = () => {
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
@@ -54,6 +57,13 @@ export function AssignmentHeader({
           <p className="text-xs text-gray-500">Manage and view all nurse scheduling assignments</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => router.push("/assignment-agreement")}
+            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
+          >
+            <FilePlus size={16} />
+            New Agreement
+          </button>
           <button 
             onClick={onExport}
             disabled={isExporting}
