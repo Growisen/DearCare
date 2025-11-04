@@ -688,18 +688,19 @@ export async function fetchSalaryPaymentsWithNurseInfo({
   console.log("Fetching salary payments for nursesOrg:", nursesOrg);
 
   let query = supabase
-  .from("salary_payments")
-  .select(`
-    *,
-    nurses!inner (
-      nurse_id,
-      first_name,
-      last_name,
-      nurse_reg_no,
-      admitted_type
-    )
-  `)
-  .eq("nurses.admitted_type", nursesOrg);
+    .from("salary_payments")
+    .select(`
+      *,
+      nurses!inner (
+        nurse_id,
+        first_name,
+        last_name,
+        nurse_reg_no,
+        admitted_type
+      )
+    `)
+    .eq("nurses.admitted_type", nursesOrg)
+    .order("created_at", { ascending: false });
 
 
   query = query.range(from, to);
