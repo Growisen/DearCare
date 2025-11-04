@@ -73,6 +73,8 @@ export default function NursesSalaryPage() {
     setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(totalCount / pageSize)));
   };
 
+  console.log("Salary Records:", salaryRecords);
+
   return (
     <div className="container mx-auto py-1 space-y-6">
       <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
@@ -167,6 +169,9 @@ export default function NursesSalaryPage() {
                   <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created At
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -188,10 +193,10 @@ export default function NursesSalaryPage() {
                       {record.hours_worked}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                      ₹{record.salary.toLocaleString()}
+                      ₹{record.salary}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="text-sm font-semibold text-gray-900">₹{record.net_salary.toLocaleString()}</div>
+                      <div className="text-sm font-semibold text-gray-900">₹{record.net_salary}</div>
                     </td>
                     <td className="max-w-xs px-3 py-4 whitespace- flex-wrap text-center">
                       <div className="text-sm font-semibold text-gray-500">{record.info}</div>
@@ -227,6 +232,9 @@ export default function NursesSalaryPage() {
                             Approve
                         </button>
                       </div>
+                    </td>
+                    <td className="max-w-xs px-3 py-4 whitespace- flex-wrap text-center">
+                      <div className="text-sm font-semibold text-gray-500">{formatDate(record?.created_at as string)}</div>
                     </td>
                   </tr>
                 ))}
