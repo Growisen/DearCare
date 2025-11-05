@@ -689,7 +689,8 @@ export async function fetchSalaryPaymentsWithNurseInfo({
 
   let query = supabase
     .from("salary_payments")
-    .select(`
+    .select(
+      `
       *,
       nurses!inner (
         nurse_id,
@@ -698,15 +699,15 @@ export async function fetchSalaryPaymentsWithNurseInfo({
         nurse_reg_no,
         admitted_type
       )
-    `)
+    `,
+      { count: "exact" }
+    )
     .eq("nurses.admitted_type", nursesOrg)
     .order("created_at", { ascending: false });
 
-
   query = query.range(from, to);
 
-  const { data, error } = await query;
-
+  const { data, error, count } = await query;
 
   console.log("Fetched salary payments data:", data, "Error:", error);
 
@@ -744,15 +745,16 @@ export async function fetchSalaryPaymentsWithNurseInfo({
     nurse_id: record.nurses?.nurse_id ?? record.nurse_id,
   }));
 
+  const total = search.trim() ? records.length : (count ?? records.length);
+
   return {
     success: true,
     records,
     page,
     pageSize,
-    total: records.length,
+    total,
   };
 }
-
 
 
 interface AdvanceSalaryPayment {
