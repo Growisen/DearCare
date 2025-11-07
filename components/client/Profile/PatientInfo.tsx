@@ -3,13 +3,16 @@ import Image from 'next/image';
 import InfoSection from './InfoSection';
 import InfoField from './InfoField';
 import ImageViewer from '@/components/common/ImageViewer';
+import LocationLinkModal from '@/components/common/LocationLinkModal';
 import { Json, LabInvestigations, RecorderInfo } from '@/types/client.types'; 
 import { MapPin, Phone, Mail, Briefcase, User, Heart, Ruler, Weight, Users } from 'lucide-react';
 import { createMapLink } from '../../../utils/mapUtils';
 import { formatName } from '@/utils/formatters';
+import { updateIndividualClientLocationLink } from '@/app/actions/clients/client-actions';
 
 interface PatientInfoProps {
   patient: {
+    _id?: string;
     email: string;
     phoneNumber: string;
     serviceRequired?: string;
@@ -19,6 +22,7 @@ interface PatientInfoProps {
       district: string;
       pincode: string;
       state?: string;
+      patientLocationLink: string;
     };
     emergencyContact: {
       name: string;
@@ -50,20 +54,64 @@ interface PatientInfoProps {
         district: string;
         pincode: string;
         state?: string;
+        requestorLocationLink: string;
       };
     };
   };
+  refetchClientData?: () => void;
 }
 
-const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
+const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData }) => {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
-  const latestAssessment = patient.assessments[0];
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'patient' | 'requestor' | null>(null);
   
+  const [patientMapLink, setPatientMapLink] = useState(
+    patient.address?.patientLocationLink
+      ? patient.address.patientLocationLink
+      : createMapLink(patient.address)
+  );
 
+  const [requestorMapLink, setRequestorMapLink] = useState(
+    patient.requestor.address?.requestorLocationLink
+      ? patient.requestor.address.requestorLocationLink
+      : createMapLink(patient.requestor.address)
+  );
 
+  const latestAssessment = patient.assessments[0];
 
-  const patientMapLink = createMapLink(patient.address);
-  const requestorMapLink = createMapLink(patient.requestor.address);
+  const handleEditLink = (type: 'patient' | 'requestor') => {
+    setModalType(type);
+    setModalOpen(true);
+  };
+
+  const handleSaveLink = async (link: string) => {
+    if (modalType === 'patient') {
+      setPatientMapLink(link);
+      if (patient._id) {
+        await updateIndividualClientLocationLink(patient._id, 'patient_location_link', link);
+      }
+    }
+    if (modalType === 'requestor') {
+      setRequestorMapLink(link);
+      if (patient._id) {
+        await updateIndividualClientLocationLink(patient._id, 'requestor_location_link', link);
+      }
+    }
+    setModalOpen(false);
+    setModalType(null);
+    if (refetchClientData) {
+      refetchClientData();
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setModalType(null);
+  };
+
+  console.log('PatientInfo component rendered with patient:', patient);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -113,7 +161,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
           <InfoField label="Pincode" value={patient.address?.pincode} />
           
           {patient.address && (
-            <div className="mt-2 pt-3 border-t border-gray-100">
+            <div className="mt-2 pt-3 border-t border-gray-100 flex items-center gap-3">
               <a 
                 href={patientMapLink || '#'} 
                 target="_blank" 
@@ -125,6 +173,13 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
                 </svg>
                 View on Google Maps
               </a>
+              <button
+                type="button"
+                className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-200 transition"
+                onClick={() => handleEditLink('patient')}
+              >
+                Edit
+              </button>
             </div>
           )}
         </div>
@@ -221,7 +276,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
           <InfoField label="Pincode" value={patient.requestor.address?.pincode} />
           
           {patient.requestor.address && (
-            <div className="mt-2 pt-3 border-t border-gray-100">
+            <div className="mt-2 pt-3 border-t border-gray-100 flex items-center gap-3">
               <a 
                 href={requestorMapLink || '#'} 
                 target="_blank" 
@@ -233,11 +288,18 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
                 </svg>
                 View on Google Maps
               </a>
+              <button
+                type="button"
+                className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-200 transition"
+                onClick={() => handleEditLink('requestor')}
+              >
+                Edit
+              </button>
             </div>
           )}
         </div>
       </InfoSection>
-      
+
       {patient.requestor.profileImage && (
         <ImageViewer
           src={patient.requestor.profileImage}
@@ -246,6 +308,18 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient }) => {
           onClose={() => setIsImageViewerOpen(false)}
         />
       )}
+
+      <LocationLinkModal
+        isOpen={modalOpen}
+        initialLink={
+          modalType === 'patient'
+            ? patientMapLink ?? undefined
+            : requestorMapLink ?? undefined
+        }
+        onClose={handleCloseModal}
+        onSave={handleSaveLink}
+        title={modalType === 'patient' ? 'Edit Patient Location Link' : 'Edit Requestor Location Link'}
+      />
     </div>
   );
 };

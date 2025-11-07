@@ -661,3 +661,38 @@ export async function fetchApprovedClientNames(searchTerm?: string): Promise<{
     };
   }
 }
+
+
+/**
+ * Updates either patient_location_link or requestor_location_link for an individual client.
+ * @param clientId - The client_id of the individual client.
+ * @param field - Either 'patient_location_link' or 'requestor_location_link'.
+ * @param value - The new value to set for the field.
+ */
+export async function updateIndividualClientLocationLink(
+  clientId: string,
+  field: 'patient_location_link' | 'requestor_location_link',
+  value: string
+) {
+  if (!['patient_location_link', 'requestor_location_link'].includes(field)) {
+    return { success: false, error: 'Invalid field name' };
+  }
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase
+      .from('individual_clients')
+      .update({ [field]: value })
+      .eq('client_id', clientId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating location link:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}

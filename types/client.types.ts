@@ -191,6 +191,8 @@ export interface DetailedClientIndividual {
     requestor_profile_pic?: string | null;
     patient_profile_pic?: string | null;
     patient_profile_pic_url?: string | null;
+    patient_location_link?: string;
+    requestor_location_link?: string;
   };
   general_notes?: string;
   created_at?: string;
@@ -370,6 +372,7 @@ export interface Patient {
     state?: string;
     district: string;
     pincode: string;
+    patientLocationLink: string;
   };
   requestor: { 
     name: string;
@@ -385,6 +388,7 @@ export interface Patient {
       city: string;
       district: string;
       pincode: string;
+      requestorLocationLink: string;
     };
   }
   emergencyContact: {
