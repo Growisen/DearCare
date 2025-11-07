@@ -475,6 +475,8 @@ export interface NurseAssignmentData {
   client_id: string;
   start_date: string;
   end_date: string;
+  salary_per_day?: number;
+  salary_per_month?: number;
   shift_start_time: string;
   shift_end_time: string;
   status: 'active' | 'completed' | 'cancelled';
@@ -512,7 +514,7 @@ export async function getAllNurseAssignments(
     const { nursesOrg } = getOrgMappings(organization);
 
     let query = supabase
-      .from('nurse_assignments_view_with_reg_no')
+      .from('nurse_assignments_view_with_salary')
       .select('*', { count: 'exact' });
 
     if (filterStatus !== 'all') {
