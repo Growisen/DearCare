@@ -16,6 +16,7 @@ interface NurseAssignment {
   nurse_first_name?: string;
   nurse_last_name?: string;
   salaryPerDay?: number;
+  salaryPerMonth?: number;
 }
 
 interface NurseAssignmentsListProps {
@@ -106,6 +107,9 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   )}
                   {assignment.salaryPerDay !== undefined && (
                     <p>Salary per Day: ₹{assignment.salaryPerDay ? assignment.salaryPerDay : 0}</p>
+                  )}
+                  {assignment.salaryPerMonth !== undefined && (
+                    <p>Salary per Month: ₹{assignment.salaryPerMonth ? assignment.salaryPerMonth : 0}</p>
                   )}
                   <span
                     className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${

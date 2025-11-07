@@ -13,7 +13,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
   const [nurseAssignments, setNurseAssignments] = useState<NurseAssignment[]>([]);
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [isLoadingNurses, setIsLoadingNurses] = useState(false);
-  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false); // Add this line
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<NurseAssignment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNurseList, setShowNurseList] = useState(false);
@@ -128,6 +128,8 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     setIsLoadingAssignments(true);
     try {
       const assignmentsResponse = await getNurseAssignments(clientId);
+
+      console.log("Assignments Response:", assignmentsResponse);
 
       if (assignmentsResponse.success && assignmentsResponse.data) {
         const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({

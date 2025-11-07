@@ -433,7 +433,7 @@ export async function getNurseAssignments(clientId: string): Promise<{
       .from('nurse_client')
       .select(`
         *,
-        nurses:nurse_id(first_name, last_name)
+        nurses:nurse_id(first_name, last_name, salary_per_month)
       `)
       .eq('client_id', clientId);
     

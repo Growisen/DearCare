@@ -350,6 +350,8 @@ export interface NurseAssignment {
   nurse_last_name?: string;
   salary_per_day?: number;
   salaryPerDay?: number;
+  salaryPerMonth?: number;
+  salary_per_month?: number;
 }
 
 
