@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react"
+import React, { memo, useState, useMemo } from "react"
 import { CalendarIcon, ClockIcon, UserIcon } from "@heroicons/react/24/outline"
 import { Building, Eye } from "lucide-react"
 import { format } from "date-fns"
@@ -11,28 +11,53 @@ type AssignmentTableProps = {
   assignments: NurseAssignmentData[]
 }
 
+function formatTime(timeString: string) {
+  try {
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const displayHours = hours % 12 || 12
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+  } catch {
+    return timeString
+  }
+}
+
+const usePreparedAssignmentData = (assignment: NurseAssignmentData) => {
+  return useMemo(() => {
+    const fullName = assignment.nurse_first_name
+      ? `${assignment.nurse_first_name} ${assignment.nurse_last_name}`
+      : "Unknown Nurse";
+    
+    const clientName = assignment.client_name || "Unknown Client";
+    const clientType = assignment.client_type;
+    const clientProfileUrl = assignment.client_profile_url || `/${assignment.client_id}`;
+
+    const formattedStartTime = formatTime(assignment.shift_start_time);
+    const formattedEndTime = formatTime(assignment.shift_end_time);
+
+    return {
+      fullName,
+      clientName,
+      clientType,
+      clientProfileUrl,
+      formattedStartTime,
+      formattedEndTime
+    }
+  }, [assignment])
+}
+
 const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
   assignment: NurseAssignmentData,
   onViewDetails: (assignment: NurseAssignmentData) => void
 }) => {
-  function formatTime(timeString: string) {
-    try {
-      const [hours, minutes] = timeString.split(':').map(Number)
-      const period = hours >= 12 ? 'PM' : 'AM'
-      const displayHours = hours % 12 || 12
-      return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
-    } catch {
-      return timeString
-    }
-  }
-  
-  const fullName = assignment.nurse_first_name
-    ? `${assignment.nurse_first_name} ${assignment.nurse_last_name}`
-    : "Unknown Nurse";
-  
-  const clientName = assignment.client_name || "Unknown Client";
-  const clientType = assignment.client_type;
-  const clientProfileUrl = assignment.client_profile_url || `/${assignment.client_id}`;
+  const {
+    fullName,
+    clientName,
+    clientType,
+    clientProfileUrl,
+    formattedStartTime,
+    formattedEndTime
+  } = usePreparedAssignmentData(assignment);
 
   return (
     <tr className="hover:bg-gray-50">
@@ -42,6 +67,8 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           <div>
             <span className="font-medium">{formatName(fullName)}</span>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
+            <p className="text-xs text-gray-500">Salary Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
+            <p className="text-xs text-gray-500">Salary Per Month: ₹{assignment.salary_per_month ?? "N/A"}</p>
           </div>
         </div>
       </td>
@@ -73,7 +100,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           <div className="flex items-center">
             <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
             <div className="text-gray-600">
-              {formatTime(assignment.shift_start_time)} - {formatTime(assignment.shift_end_time)}
+              {formattedStartTime} - {formattedEndTime}
             </div>
           </div>
         </div>
@@ -96,24 +123,14 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
   assignment: NurseAssignmentData,
   onViewDetails: (assignment: NurseAssignmentData) => void
 }) => {
-  function formatTime(timeString: string) {
-    try {
-      const [hours, minutes] = timeString.split(':').map(Number)
-      const period = hours >= 12 ? 'PM' : 'AM'
-      const displayHours = hours % 12 || 12
-      return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
-    } catch {
-      return timeString
-    }
-  }
-  
-  const fullName = assignment.nurses?.first_name && assignment.nurses?.last_name 
-    ? `${assignment.nurses.first_name} ${assignment.nurses.last_name}`
-    : "Unknown Nurse";
-  
-  const clientName = assignment.client_name || "Unknown Client";
-  const clientType = assignment.client_type;
-  const clientProfileUrl = assignment.client_profile_url || `/${assignment.client_id}`;
+  const {
+    fullName,
+    clientName,
+    clientType,
+    clientProfileUrl,
+    formattedStartTime,
+    formattedEndTime
+  } = usePreparedAssignmentData(assignment);
 
   return (
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
@@ -121,8 +138,10 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <h3 className="font-semibold text-gray-800">{formatName(fullName)}</h3>
-            <p className="text-xs text-gray-500">ID: {assignment.nurse_id}</p>
+            <span className="font-medium text-gray-800">{formatName(fullName)}</span>
+            <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
+            <p className="text-xs text-gray-500">Salary Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
+            <p className="text-xs text-gray-500">Salary Per Month: ₹{assignment.salary_per_month ?? "N/A"}</p>
           </div>
         </div>
         <button
@@ -169,7 +188,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
           <ClockIcon className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
           <div>
             <p className="text-gray-500">Shift Time:</p>
-            <p className="text-gray-800">{formatTime(assignment.shift_start_time)} - {formatTime(assignment.shift_end_time)}</p>
+            <p className="text-gray-800">{formattedStartTime} - {formattedEndTime}</p>
           </div>
         </div>
       </div>
@@ -180,21 +199,6 @@ AssignmentMobileCard.displayName = 'AssignmentMobileCard';
 
 export const AssignmentTable = memo(function AssignmentTable({ assignments }: AssignmentTableProps) {
   const [selectedAssignment, setSelectedAssignment] = useState<NurseAssignmentData | null>(null);
-
-  // // We'll keep statusColors and statusIcons in case you need them elsewhere
-  // const statusColors: Record<string, string> = {
-  //   active: "bg-green-50 text-green-700 border border-green-200",
-  //   completed: "bg-gray-50 text-gray-700 border border-gray-200",
-  //   cancelled: "bg-red-50 text-red-700 border border-red-200",
-  //   default: "bg-gray-50 text-gray-600 border border-gray-200"
-  // }
-
-  // const statusIcons: Record<string, React.FC<{ className?: string }>> = {
-  //   active: CheckCircle,
-  //   completed: CheckCircle,
-  //   cancelled: AlertCircle,
-  //   default: Clock
-  // }
   
   const handleViewDetails = (assignment: NurseAssignmentData) => {
     setSelectedAssignment(assignment);
@@ -203,12 +207,11 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
   return (
     <>
       <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-        {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-100 border-b border-gray-200">
               <tr className="text-left">
-                <th className="py-4 px-6 font-medium text-gray-700">Nurse ID</th>
+                <th className="py-4 px-6 font-medium text-gray-700">Nurse</th>
                 <th className="py-4 px-6 font-medium text-gray-700">Client</th>
                 <th className="py-4 px-6 font-medium text-gray-700">Schedule</th>
                 <th className="py-4 px-6 font-medium text-gray-700">Actions</th>
@@ -234,7 +237,6 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
           </table>
         </div>
 
-        {/* Mobile Cards */}
         <div className="sm:hidden bg-white">
           {assignments.length > 0 ? (
             assignments.map((assignment) => (
@@ -251,8 +253,7 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
           )}
         </div>
       </div>
-      
-      {/* Assignment Details Overlay */}
+
       {selectedAssignment && (
         <AssignmentDetailsOverlay
           assignment={selectedAssignment}

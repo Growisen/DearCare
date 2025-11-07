@@ -55,6 +55,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
               district: clientData.details?.patient_district || '',
               pincode: clientData.details?.patient_pincode || '',
               state: clientData.details?.patient_state || '',
+              patientLocationLink: clientData.details?.patient_location_link || ''
             },
             requestor: {
               name: clientData.details?.requestor_name || '',
@@ -71,6 +72,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
                   district: clientData.details?.requestor_district || '',
                   pincode: clientData.details?.requestor_pincode || '',
                   state: clientData.details?.requestor_state || '',
+                  requestorLocationLink: clientData.details?.requestor_location_link || ''
               }
             },
             emergencyContact: {
@@ -243,5 +245,6 @@ export const usePatientData = (id: string, activeTab?: string) => {
     handleCloseProfileEdit,
     handleDeleteClient,
     fetchAssessmentData,
+    refetchClientData: fetchBasicClientData,
   };
 };

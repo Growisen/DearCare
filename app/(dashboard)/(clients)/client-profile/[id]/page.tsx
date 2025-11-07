@@ -70,7 +70,8 @@ const PatientProfilePage = () => {
     handleCategoryChange,
     handleEditProfile,
     handleCloseProfileEdit,
-    handleDeleteClient
+    handleDeleteClient,
+    refetchClientData,
   } = usePatientData(id, activeTab);
 
   const {
@@ -135,6 +136,8 @@ const PatientProfilePage = () => {
       setShowDeleteConfirmation(false);
     }
   };
+
+  console.log("adas", nurseAssignments);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -234,7 +237,7 @@ const PatientProfilePage = () => {
             {activeTab === 'profile' && (
               <div className="space-y-6">
                 <ServiceDetailsSection serviceDetails={patient.serviceDetails} />
-                <PatientInfo patient={patient} />
+                <PatientInfo patient={patient} refetchClientData={refetchClientData}/>
               </div>
             )}
             
