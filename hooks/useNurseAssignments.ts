@@ -129,8 +129,6 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     try {
       const assignmentsResponse = await getNurseAssignments(clientId);
 
-      console.log("Assignments Response:", assignmentsResponse);
-
       if (assignmentsResponse.success && assignmentsResponse.data) {
         const transformedAssignments: NurseAssignment[] = assignmentsResponse.data.map(assignment => ({
           id: assignment.id,
@@ -143,7 +141,8 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
           shiftType: determineShiftType(assignment.shift_start_time, assignment.shift_end_time),
           nurse_first_name: assignment.nurses?.first_name,
           nurse_last_name: assignment.nurses?.last_name,
-          salaryPerDay: assignment.salary_per_day
+          salaryPerDay: assignment.salary_per_day,
+          nurseRegNo: assignment.nurses?.nurse_reg_no,
         }));
         
         setNurseAssignments(transformedAssignments);

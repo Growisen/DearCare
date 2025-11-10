@@ -17,70 +17,71 @@ export const usePatientData = (id: string, activeTab?: string) => {
 
   const fetchBasicClientData = async () => {
     if (!id) return;
-    
+
     setLoading(true);
     try {
-      const statusResult = await getClientStatus(id);
+      const [statusResult, clientResponse] = await Promise.all([
+        getClientStatus(id),
+        getClientDetails(id) as Promise<ClientResponse>
+      ]);
+
       if (statusResult.success) {
         setStatus(statusResult.status);
       }
-      
-      const clientResponse = await getClientDetails(id) as ClientResponse;
 
       if (clientResponse.success && clientResponse.client) {
         const clientData = clientResponse.client;
 
         const transformedPatient: Patient = {
-            _id: clientData.details?.client_id,
-            registrationNumber: clientData.registration_number || '',
-            firstName: clientData.details?.patient_name?.split(' ')[0] || '',
-            lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
-            age: clientData.details?.patient_age || 0,
-            gender: clientData.details?.patient_gender || '',
-            bloodGroup: '',
-            location: clientData.details?.complete_address || '',
-            email: '',
-            phoneNumber: clientData.details?.patient_phone || '',
-            clientCategory: clientData.client_category || 'DearCare LLP',
-            profileImage: clientData.details?.patient_profile_pic_url || '',
-            serviceDetails: {
-              serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || ''),
-              preferredCaregiverGender: clientData.details?.preferred_caregiver_gender || '',
-              startDate: clientData.details?.start_date,
-              status: statusResult.status,
-            },
+          _id: clientData.details?.client_id,
+          registrationNumber: clientData.registration_number || '',
+          firstName: clientData.details?.patient_name?.split(' ')[0] || '',
+          lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
+          age: clientData.details?.patient_age || 0,
+          gender: clientData.details?.patient_gender || '',
+          bloodGroup: '',
+          location: clientData.details?.complete_address || '',
+          email: '',
+          phoneNumber: clientData.details?.patient_phone || '',
+          clientCategory: clientData.client_category || 'DearCare LLP',
+          profileImage: clientData.details?.patient_profile_pic_url || '',
+          serviceDetails: {
+            serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || ''),
+            preferredCaregiverGender: clientData.details?.preferred_caregiver_gender || '',
+            startDate: clientData.details?.start_date,
+            status: statusResult.status,
+          },
+          address: {
+            fullAddress: clientData.details?.patient_address || '',
+            city: clientData.details?.patient_city || '',
+            district: clientData.details?.patient_district || '',
+            pincode: clientData.details?.patient_pincode || '',
+            state: clientData.details?.patient_state || '',
+            patientLocationLink: clientData.details?.patient_location_link || ''
+          },
+          requestor: {
+            name: clientData.details?.requestor_name || '',
+            relation: clientData.details?.relation_to_patient || '',
+            phone: clientData.details?.requestor_phone || '',
+            email: clientData.details?.requestor_email || '',
+            profileImage: clientData.details?.requestor_profile_pic_url || '',
+            emergencyPhone: clientData.details?.requestor_emergency_phone || '',
+            jobDetails: clientData.details?.requestor_job_details || '',
             address: {
-              fullAddress: clientData.details?.patient_address || '',
-              city: clientData.details?.patient_city || '',
-              district: clientData.details?.patient_district || '',
-              pincode: clientData.details?.patient_pincode || '',
-              state: clientData.details?.patient_state || '',
-              patientLocationLink: clientData.details?.patient_location_link || ''
-            },
-            requestor: {
-              name: clientData.details?.requestor_name || '',
-              relation: clientData.details?.relation_to_patient || '',
-              phone: clientData.details?.requestor_phone || '',
-              email: clientData.details?.requestor_email || '',
-              profileImage: clientData.details?.requestor_profile_pic_url || '',
-              emergencyPhone: clientData.details?.requestor_emergency_phone || '',
-              jobDetails: clientData.details?.requestor_job_details || '',
-              
-              address: {
-                  fullAddress: clientData.details?.requestor_address || '',
-                  city: clientData.details?.requestor_city || '',
-                  district: clientData.details?.requestor_district || '',
-                  pincode: clientData.details?.requestor_pincode || '',
-                  state: clientData.details?.requestor_state || '',
-                  requestorLocationLink: clientData.details?.requestor_location_link || ''
-              }
-            },
-            emergencyContact: {
-              name: clientData.details?.requestor_name || '',
-              relation: clientData.details?.relation_to_patient || '',
-              phone: clientData.details?.requestor_phone || ''
-            },
-            assessments: []
+              fullAddress: clientData.details?.requestor_address || '',
+              city: clientData.details?.requestor_city || '',
+              district: clientData.details?.requestor_district || '',
+              pincode: clientData.details?.requestor_pincode || '',
+              state: clientData.details?.requestor_state || '',
+              requestorLocationLink: clientData.details?.requestor_location_link || ''
+            }
+          },
+          emergencyContact: {
+            name: clientData.details?.requestor_name || '',
+            relation: clientData.details?.relation_to_patient || '',
+            phone: clientData.details?.requestor_phone || ''
+          },
+          assessments: []
         };
 
         setPatient(transformedPatient);

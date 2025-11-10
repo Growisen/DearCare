@@ -19,7 +19,6 @@ export function useClientData() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(10)
 
-  // Map organization from store to client category
   const getClientCategory = (): ClientCategory | "all" => {
     if (!organization) return "all";
     if (organization === "TataHomeNursing") return "Tata HomeNursing";
@@ -29,7 +28,6 @@ export function useClientData() {
 
   const selectedCategory = getClientCategory();
 
-  // Load status from localStorage after initial render
   useEffect(() => {
     const savedStatus = localStorage.getItem('clientsPageStatus');
     if (savedStatus && ["pending", "under_review", "approved", "rejected", "assigned", "all"].includes(savedStatus)) {
@@ -38,7 +36,6 @@ export function useClientData() {
     setIsStatusLoaded(true);
   }, []);
 
-  // Use React Query for data fetching with caching
   const { 
     data, 
     isLoading, 
@@ -48,16 +45,15 @@ export function useClientData() {
     queryKey: ['clients', selectedStatus, searchQuery, currentPage, pageSize, selectedCategory],
     queryFn: () => getClients(selectedStatus, searchQuery, currentPage, pageSize, selectedCategory),
     enabled: isStatusLoaded && !!selectedStatus,
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 10, // 10 minutes
+    refetchInterval: 1000 * 60 * 10,
   });
 
   const invalidateClientCache = () => {
     queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
 
-  // Process the data
   const clients = data?.success && data?.clients 
     ? data.clients.map(client => ({
         ...client,

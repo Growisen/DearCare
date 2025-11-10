@@ -50,6 +50,7 @@ export async function getClients(
         requestor_email,
         requestor_phone,
         requestor_name,
+        patient_name,
         service_required,
         start_date
       ),
@@ -141,7 +142,32 @@ export async function getClients(
     }
     
 
-    const clients = data.map(record => {
+    const clients = data
+    .filter(record => {
+      const isIndividual = record.client_type === 'individual';
+      const individualData = isIndividual && record.individual_clients
+        ? (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients)
+        : null;
+      const organizationData = !isIndividual && record.organization_clients
+        ? (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients)
+        : null;
+
+      if (isIndividual) {
+        return (
+          individualData?.requestor_name ||
+          individualData?.patient_name ||
+          individualData?.requestor_email ||
+          individualData?.requestor_phone
+        );
+      } else {
+        return (
+          organizationData?.organization_name ||
+          organizationData?.contact_email ||
+          organizationData?.contact_phone
+        );
+      }
+    })
+    .map(record => {
       const isIndividual = record.client_type === 'individual'
       const individualData = isIndividual && record.individual_clients ? 
         (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients) 
@@ -153,11 +179,12 @@ export async function getClients(
       return {
         id: record.id,
         name: isIndividual 
-          ? (individualData?.requestor_name || "Unknown") 
-          : (organizationData?.organization_name || "Unknown"),
+          ? (individualData?.requestor_name || individualData?.patient_name) 
+          : (organizationData?.organization_name),
         requestDate: isIndividual
           ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
           : new Date(record.created_at || new Date()).toISOString().split('T')[0],
+        createdAt: record.created_at,
         service: isIndividual ? individualData?.service_required : "Organization Care",
         status: record.status,
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,

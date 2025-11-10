@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Nurse } from '@/types/staff.types';
-import ConfirmationModal from '@/components/common/ConfirmationModal';
-import ModalPortal from '@/components/ui/ModalPortal';
-import { formatDate } from '@/utils/formatters';
+import Modal from '../ui/Modal';
+import Link from 'next/link';
+import {
+  formatDate,
+  calculateDaysBetween,
+  format12HourTime,
+  calculatePeriodSalary,
+} from '@/utils/nurseAssignmentUtils';
 
 interface NurseAssignment {
   id?: number;
-  nurseId: number | string; 
+  nurseId: number | string;
   startDate: string;
   endDate?: string;
   shiftStart?: string;
@@ -17,6 +21,13 @@ interface NurseAssignment {
   nurse_last_name?: string;
   salaryPerDay?: number;
   salaryPerMonth?: number;
+  nurseRegNo?: string;
+}
+
+interface Nurse {
+  _id: string;
+  firstName: string;
+  lastName: string;
 }
 
 interface NurseAssignmentsListProps {
@@ -34,116 +45,157 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   onEndAssignment,
   onDeleteAssignment,
 }) => {
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [assignmentToDelete, setAssignmentToDelete] = useState<number | string | null>(null);
+  const [deleteId, setDeleteId] = useState<number | string | null>(null);
 
   const getDisplayStatus = (assignment: NurseAssignment) => {
     if (assignment.status === 'cancelled') return 'cancelled';
-    
     if (assignment.endDate) {
       const endDate = new Date(assignment.endDate);
       const currentDate = new Date();
-      if (endDate < currentDate) {
-        return 'completed';
-      }
+      if (endDate < currentDate) return 'completed';
     }
-    
     return 'active';
   };
 
   const handleDeleteClick = (id: number | string) => {
-    setAssignmentToDelete(id);
-    setIsDeleteModalOpen(true);
+    setDeleteId(id);
   };
 
   const confirmDelete = () => {
-    if (assignmentToDelete !== null) {
-      onDeleteAssignment(assignmentToDelete);
-      setIsDeleteModalOpen(false);
-      setAssignmentToDelete(null);
+    if (deleteId !== null) {
+      onDeleteAssignment(deleteId);
+      setDeleteId(null);
     }
   };
 
-  const cancelDelete = () => {
-    setIsDeleteModalOpen(false);
-    setAssignmentToDelete(null);
-  };
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {assignments.map((assignment) => {
         let firstName = assignment.nurse_first_name;
         let lastName = assignment.nurse_last_name;
-        
+
         if (!firstName && !lastName && nurses.length > 0) {
-          const nurse = nurses.find((n) => 
-            n._id === assignment.nurseId || n._id === assignment.nurseId.toString()
+          const nurse = nurses.find(
+            (n) => n._id === assignment.nurseId || n._id === assignment.nurseId.toString()
           );
           if (nurse) {
             firstName = nurse.firstName;
             lastName = nurse.lastName;
           }
         }
-        
+
         if (!firstName && !lastName) return null;
 
         const displayStatus = getDisplayStatus(assignment);
+        const statusColors = {
+          active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+          completed: 'bg-gray-50 text-gray-600 border-gray-200',
+          cancelled: 'bg-red-50 text-red-700 border-red-200',
+        };
 
         return (
           <div
-            key={assignment.id ?? `${assignment.nurseId}-${assignment.startDate}-${Math.random()}`}
-            className="bg-white rounded-lg border border-gray-200 p-4"
+            key={assignment.id ?? `${assignment.nurseId}-${assignment.startDate}`}
+            className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  {firstName} {lastName}
-                </h3>
-                <div className="mt-1 text-sm text-gray-600">
-                  <p>Shift: {assignment.shiftType}</p>
-                  <p>Start Date: {formatDate(assignment.startDate)}</p>
-                  {assignment.endDate && (
-                    <p>End Date: {formatDate(assignment.endDate)}</p>
+            <div className="px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div>
+                  <h3 className="font-medium text-gray-900">
+                    <Link
+                      href={`/nurses/${assignment.nurseId}`}
+                      title="View profile"
+                      className="hover:text-blue-600"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {firstName} {lastName}
+                    </Link>
+                  </h3>
+                  {assignment.nurseRegNo && (
+                    <p className="text-xs text-gray-500">{assignment.nurseRegNo}</p>
                   )}
-                  {assignment.salaryPerDay !== undefined && (
-                    <p>Salary per Day: ₹{assignment.salaryPerDay ? assignment.salaryPerDay : 0}</p>
-                  )}
-                  {assignment.salaryPerMonth !== undefined && (
-                    <p>Salary per Month: ₹{assignment.salaryPerMonth ? assignment.salaryPerMonth : 0}</p>
-                  )}
-                  <span
-                    className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${
-                      displayStatus === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : displayStatus === 'completed'
-                        ? 'bg-gray-100 text-gray-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
-                  </span>
                 </div>
               </div>
-              <div className="space-x-2">
+              <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${statusColors[displayStatus]}`}>
+                {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+              </span>
+            </div>
+
+            <div className="px-4 pb-3 border-t border-gray-100">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 pt-3 text-sm">
+                <div>
+                  <span className="text-gray-500">Duration:</span>
+                  <span className="ml-2 text-gray-900">
+                    {formatDate(assignment.startDate)}
+                    {assignment.endDate && ` - ${formatDate(assignment.endDate)}`}
+                    <span className="ml-2 text-xs text-gray-500">
+                      (
+                        {calculateDaysBetween(assignment.startDate, assignment.endDate)} day
+                        {calculateDaysBetween(assignment.startDate, assignment.endDate) > 1 ? 's' : ''}
+                      )
+                    </span>
+                  </span>
+                </div>
+                
+                {(assignment.shiftStart || assignment.shiftEnd) && (
+                  <div>
+                    <span className="text-gray-500">Shift:</span>
+                    <span className="ml-2 text-gray-900">
+                      {format12HourTime(assignment.shiftStart || null)}
+                      {assignment.shiftEnd && ` - ${format12HourTime(assignment.shiftEnd)}`}
+                      {assignment.shiftType && ` (${assignment.shiftType})`}
+                    </span>
+                  </div>
+                )}
+
+                {assignment.salaryPerDay !== undefined && (
+                  <div>
+                    <span className="text-gray-500">Salary Per Day:</span>
+                    <span className="ml-2 text-gray-900">₹{assignment.salaryPerDay || 0}</span>
+                  </div>
+                )}
+
+                {assignment.salaryPerMonth !== undefined && (
+                  <div>
+                    <span className="text-gray-500">Salary Per Month:</span>
+                    <span className="ml-2 text-gray-900">₹{assignment.salaryPerMonth || 0}</span>
+                  </div>
+                )}
+
+                {assignment.salaryPerDay !== undefined && (
+                  <div>
+                    <span className="text-gray-500">Estimated Salary for Period:</span>
+                    <span className="ml-2 text-gray-900">
+                      ₹{calculatePeriodSalary(assignment.startDate, assignment.endDate, assignment.salaryPerDay) || 0}
+                    </span>
+                    <span className="block text-xs text-gray-400">
+                      (Only if Staff completes the shift on all assigned days)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
                 {displayStatus === 'active' && (
                   <>
                     <button
                       onClick={() => onEditAssignment(assignment)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => onEndAssignment(assignment)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      className="text-sm text-orange-600 hover:text-orange-700 font-medium"
                     >
-                      End Assignment
+                      End
                     </button>
                   </>
                 )}
                 <button
                   onClick={() => handleDeleteClick(assignment.id || assignment.nurseId)}
-                  className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                  className="text-sm text-gray-500 hover:text-red-600 font-medium ml-auto"
                 >
                   Delete
                 </button>
@@ -152,21 +204,23 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
           </div>
         );
       })}
+
       {assignments.length === 0 && (
-        <p className="text-gray-500 text-center py-4">No nurse assignments found</p>
+        <div className="text-center py-12 text-gray-500">
+          No nurse assignments found
+        </div>
       )}
 
-      <ModalPortal>
-        <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          title="Delete Assignment"
-          message="Are you sure you want to delete this nurse assignment? This action cannot be undone."
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-          confirmButtonText="Delete"
-          confirmButtonColor="red"
-        />
-      </ModalPortal>
+      <Modal
+        open={deleteId !== null}
+        onClose={() => setDeleteId(null)}
+        onConfirm={confirmDelete}
+        variant="delete"
+        title="Delete Assignment?"
+        description="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };
