@@ -33,6 +33,7 @@ export interface Client {
   nurseLocation?: { lat: number; lng: number };
   clientLocation?: { lat: number; lng: number };
   rejection_reason?: string
+  createdAt?: string;
 }
 
 export interface Review {

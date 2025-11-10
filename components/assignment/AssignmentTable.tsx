@@ -1,11 +1,16 @@
 import React, { memo, useState, useMemo } from "react"
 import { CalendarIcon, ClockIcon, UserIcon } from "@heroicons/react/24/outline"
-import { Building, Eye } from "lucide-react"
+import { Building, Eye, Info } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { NurseAssignmentData } from "@/app/actions/scheduling/shift-schedule-actions";
 import { AssignmentDetailsOverlay } from "./AssignmentDetailsOverlay"
 import { formatName } from "@/utils/formatters"
+import {
+  calculateDaysBetween,
+  calculatePeriodSalary,
+} from '@/utils/nurseAssignmentUtils';
+
 
 type AssignmentTableProps = {
   assignments: NurseAssignmentData[]
@@ -59,6 +64,8 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
     formattedEndTime
   } = usePreparedAssignmentData(assignment);
 
+  const periodSalary = calculatePeriodSalary(assignment.start_date, assignment.end_date, assignment.salary_per_day);
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="py-4 px-6 text-gray-800 font-medium">
@@ -67,9 +74,24 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           <div>
             <span className="font-medium">{formatName(fullName)}</span>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
-            <p className="text-xs text-gray-500">Salary Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
-            <p className="text-xs text-gray-500">Salary Per Month: ₹{assignment.salary_per_month ?? "N/A"}</p>
           </div>
+        </div>
+      </td>
+      <td className="py-4 px-6">
+        <div>
+          <p className="text-xs text-gray-800">Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
+          <p className="text-xs text-gray-800">Per Month: ₹{assignment.salary_per_month ?? "N/A"}</p>
+          <p className="text-xs text-gray-800 flex items-center gap-1">
+            Est. Period Salary:
+            <span className="relative group inline-flex">
+              <Info className="w-3.5 h-3.5 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 p-2 text-center text-xs text-white bg-gray-900 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                Estimated total salary for this assignment period, assuming full attendance.
+                <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></span>
+              </span>
+            </span>
+            ₹{periodSalary !== null ? periodSalary : "N/A"}
+          </p>
         </div>
       </td>
       <td className="py-4 px-6">
@@ -95,6 +117,12 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
             <div className="text-gray-600">
               {format(new Date(assignment.start_date), 'MMM dd, yyyy')} - 
               {format(new Date(assignment.end_date), 'MMM dd, yyyy')}
+              <span className="ml-2 text-xs text-gray-500">
+                (
+                  {calculateDaysBetween(assignment.start_date, assignment.end_date)} day
+                  {calculateDaysBetween(assignment.start_date, assignment.end_date) > 1 ? 's' : ''}
+                )
+              </span>
             </div>
           </div>
           <div className="flex items-center">
@@ -132,6 +160,8 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
     formattedEndTime
   } = usePreparedAssignmentData(assignment);
 
+  const periodSalary = calculatePeriodSalary(assignment.start_date, assignment.end_date, assignment.salary_per_day);
+
   return (
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-start">
@@ -140,8 +170,6 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
           <div>
             <span className="font-medium text-gray-800">{formatName(fullName)}</span>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
-            <p className="text-xs text-gray-500">Salary Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
-            <p className="text-xs text-gray-500">Salary Per Month: ₹{assignment.salary_per_month ?? "N/A"}</p>
           </div>
         </div>
         <button
@@ -154,6 +182,22 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
       </div>
       
       <div className="space-y-3 text-sm bg-white border border-gray-200 p-3 rounded-lg">
+        <div>
+          <p className="text-gray-500">Salary:</p>
+          <p className="text-gray-800">Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
+          <p className="text-gray-800">Per Month: ₹{assignment.salary_per_month ?? "N/A"}</p>
+          <p className="text-gray-800 flex items-center gap-1">
+            Est. Period Salary :
+            <span className="relative group inline-flex">
+              <Info className="w-3.5 h-3.5 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 p-2 text-center text-xs text-white bg-gray-900 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                Estimated total salary for this assignment period, assuming full attendance.
+                <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></span>
+              </span>
+            </span>
+            ₹{periodSalary !== null ? periodSalary : "N/A"}
+          </p>
+        </div>
         <div>
           <div className="flex items-start">
             <Building className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
@@ -181,6 +225,12 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
             <p className="text-gray-500">Date Range:</p>
             <p className="text-gray-800">
               {format(new Date(assignment.start_date), 'MMM dd, yyyy')} - {format(new Date(assignment.end_date), 'MMM dd, yyyy')}
+              <span className="ml-2 text-xs text-gray-500">
+                (
+                  {calculateDaysBetween(assignment.start_date, assignment.end_date)} day
+                  {calculateDaysBetween(assignment.start_date, assignment.end_date) > 1 ? 's' : ''}
+                )
+              </span>
             </p>
           </div>
         </div>
@@ -208,13 +258,14 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
     <>
       <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
             <thead className="bg-gray-100 border-b border-gray-200">
               <tr className="text-left">
-                <th className="py-4 px-6 font-medium text-gray-700">Nurse</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Client</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Schedule</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Actions</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Nurse</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Salary</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Client</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Schedule</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-1/6">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">

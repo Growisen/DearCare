@@ -22,7 +22,8 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
   return (
     <tr className="hover:bg-gray-50">
       <td className="py-4 px-6 text-gray-800 font-medium">{formatName(client.name)}</td>
-      <td className="py-4 px-6 text-gray-600">{formatDate(client.requestDate)}</td>
+      <td className="py-4 px-6 text-gray-600">{formatDate(client.createdAt ?? '')}</td>
+      {/* <td className="py-4 px-6 text-gray-600">{formatDate(client.requestDate)}</td> */}
       <td className="py-4 px-6 text-gray-600">{getServiceLabel(serviceOptions, client.service || '')}</td>
       <td className="py-4 px-6">
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
@@ -74,8 +75,10 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
       </div>
       
       <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
-        <p className="text-gray-500">Request Date:</p>
-        <p className="text-gray-800 font-medium">{formatDate(client.requestDate)}</p>
+        {/* <p className="text-gray-500">Request Date:</p>
+        <p className="text-gray-800 font-medium">{formatDate(client.requestDate)}</p> */}
+        <p className="text-gray-500">Created At:</p>
+        <p className="text-gray-800 font-medium">{formatDate(client.createdAt ?? '')}</p>
         <p className="text-gray-500">Email:</p>
         <p className="text-gray-800 break-all">{client.email}</p>
         <p className="text-gray-500">Phone:</p>
@@ -116,13 +119,13 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
 
   return (
     <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-      {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-100 border-b border-gray-200">
             <tr className="text-left">
               <th className="py-4 px-6 font-medium text-gray-700">Client Name</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Request Date</th>
+              <th className="py-4 px-6 font-medium text-gray-700">Created At</th> 
+              {/* <th className="py-4 px-6 font-medium text-gray-700">Request Date</th> */}
               <th className="py-4 px-6 font-medium text-gray-700">Service</th>
               <th className="py-4 px-6 font-medium text-gray-700">Status</th>
               <th className="py-4 px-6 font-medium text-gray-700">Contact</th>
@@ -142,7 +145,7 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-500">
+                <td colSpan={7} className="py-8 text-center text-gray-500">
                   No client requests found
                 </td>
               </tr>
@@ -151,7 +154,6 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
         </table>
       </div>
 
-      {/* Mobile Cards */}
       <div className="sm:hidden bg-white">
         {clients.length > 0 ? (
           clients.map((client) => (

@@ -54,7 +54,7 @@ const PatientProfilePage = () => {
     return () => {
       window.onNurseAssignmentComplete = null;
     };
-  });
+  }, []);
   
   const {
     patient,
@@ -136,8 +136,6 @@ const PatientProfilePage = () => {
       setShowDeleteConfirmation(false);
     }
   };
-
-  console.log("adas", nurseAssignments);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -286,7 +284,7 @@ const PatientProfilePage = () => {
                     <Loader />
                   </div>
                 ) : (
-                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-white rounded-lg overflow-hidden">
                     <NurseAssignmentsList
                       assignments={nurseAssignments}
                       nurses={nurses}

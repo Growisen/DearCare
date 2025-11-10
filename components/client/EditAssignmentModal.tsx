@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Nurse } from '@/types/staff.types';
-import toast from 'react-hot-toast';
+import { Input } from '@/components/ui/input';
+
+interface Nurse {
+  firstName: string;
+  lastName: string;
+}
 
 interface NurseAssignment {
   id?: number;
@@ -35,6 +39,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
   const [shiftEnd, setShiftEnd] = useState('17:00');
   const [salaryPerDay, setSalaryPerDay] = useState<number | ''>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   
   useEffect(() => {
     if (assignment) {
@@ -52,21 +57,22 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
       setShiftEnd(assignment.shiftEnd?.substring(0, 5) || '17:00');
       setSalaryPerDay(assignment.salaryPerDay ?? '');
     }
-    // Reset submitting state when modal opens/closes
     setIsSubmitting(false);
+    setError('');
   }, [assignment, isOpen]);
   
   if (!isOpen || !assignment) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
     if (endDate && startDate && new Date(endDate) < new Date(startDate)) {
-      toast.error('End date cannot be before start date');
+      setError('End date cannot be before start date');
       return;
     }
     if (salaryPerDay === '' || Number(salaryPerDay) <= 0) {
-      toast.error('Salary per day must be a positive number');
+      setError('Salary per day must be a positive number');
       return;
     }
 
@@ -85,96 +91,118 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
       onSave(updatedAssignment);
     } catch {
       setIsSubmitting(false);
-      toast.error('Failed to save changes');
+      setError('Failed to save changes');
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="border-b px-6 py-4">
-          <h3 className="text-lg font-medium text-gray-900">
-            Edit Assignment for {nurse?.firstName} {nurse?.lastName}
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Edit Assignment
           </h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {nurse?.firstName} {nurse?.lastName}
+          </p>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={endDate || ''}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                min={startDate}
-                disabled={isSubmitting}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Shift Start Time
-              </label>
-              <input
-                type="time"
-                value={shiftStart}
-                onChange={(e) => setShiftStart(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Shift End Time
-              </label>
-              <input
-                type="time"
-                value={shiftEnd}
-                onChange={(e) => setShiftEnd(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price Per Day
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={salaryPerDay}
-                onChange={(e) => setSalaryPerDay(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                required
-                disabled={isSubmitting}
-                placeholder="Enter salary per day"
-              />
+        <form onSubmit={handleSubmit}>
+          <div className="p-6">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Start Date <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    End Date
+                  </label>
+                  <Input
+                    type="date"
+                    value={endDate || ''}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    min={startDate}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Shift Start <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="time"
+                    value={shiftStart}
+                    onChange={(e) => setShiftStart(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Shift End <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="time"
+                    value={shiftEnd}
+                    onChange={(e) => setShiftEnd(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Salary Per Day <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={salaryPerDay}
+                    onChange={(e) => setSalaryPerDay(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    required
+                    disabled={isSubmitting}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div className="mt-6 flex justify-end space-x-3">
+
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 rounded-b-lg">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
               disabled={isSubmitting}
             >
               Cancel
@@ -182,9 +210,13 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 py-2 ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md flex items-center justify-center min-w-[120px]`}
+              className={`px-5 py-2 text-sm font-medium text-white rounded-md transition-colors min-w-[100px] ${
+                isSubmitting 
+                  ? 'bg-blue-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
