@@ -10,6 +10,7 @@ interface PaymentHistoryTableProps {
   onOpenConfirmModal: (payment: SalaryPayment) => void;
   onOpenBonusModal: (payment: SalaryPayment) => void;
   onOpenDeductionModal: (payment: SalaryPayment) => void;
+  handleApprove: (payment: SalaryPayment) => void;
 }
 
 const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
@@ -20,6 +21,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   onOpenConfirmModal,
   onOpenBonusModal,
   onOpenDeductionModal,
+  handleApprove,
 }) => {
   return (
     <div className="bg-white rounded border border-gray-300 p-3 overflow-x-auto">
@@ -140,8 +142,8 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => {}}
-                      className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
+                      onClick={() => handleApprove(payment)}
+                      className="hidden text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
                     >
                         Approve
                     </button>

@@ -225,9 +225,9 @@ export default function NursesSalaryPage() {
                           Edit
                         </a> */}
                         <button
-                            onClick={() => {}}
-                            disabled={record.payment_status === "paid"}
-                            className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
+                          onClick={() => {}}
+                          disabled={record.payment_status === "paid"}
+                          className="hidden text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
                         >
                             Approve
                         </button>
