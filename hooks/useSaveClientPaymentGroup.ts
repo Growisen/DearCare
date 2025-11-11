@@ -4,6 +4,8 @@ import { saveClientPaymentGroup, getClientPaymentGroups } from "@/app/actions/cl
 interface LineItemInput {
   fieldName: string;
   amount: number;
+  gst?: number;
+  totalAmount?: number;
 }
 
 interface SavePaymentGroupInput {
@@ -32,7 +34,6 @@ export function useSaveClientPaymentGroup() {
     return result;
   };
 
-  // Fetches all payment groups for a client
   const fetchGroups = async (clientId: string) => {
     setLoading(true);
     setError(null);
