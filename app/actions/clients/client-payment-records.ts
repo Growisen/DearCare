@@ -6,6 +6,8 @@ import { logger } from '@/utils/logger';
 interface LineItemInput {
   fieldName: string;
   amount: number;
+  gst?: number;
+  totalWithGst?: number;
 }
 
 interface SavePaymentGroupInput {
@@ -44,7 +46,19 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
       return { success: false, error: "At least one line item is required." };
     }
 
-    const totalAmount = lineItems.reduce((sum, item) => sum + item.amount, 0);
+    let totalAmount = 0;
+    const lineItemsToInsert = lineItems.map(item => {
+      const gstValue = item.gst ? (item.amount * item.gst) / 100 : 0;
+      const amountWithGst = item.amount + gstValue;
+      totalAmount += amountWithGst;
+      return {
+        payment_record_id: undefined,
+        field_name: item.fieldName,
+        amount: item.amount,
+        gst: item.gst || 0,
+        amount_with_gst: amountWithGst,
+      };
+    });
 
     const { data: record, error: recordError } = await supabase
       .from('client_payment_records')
@@ -64,22 +78,21 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
       return { success: false, error: recordError.message };
     }
 
-    const lineItemsToInsert = lineItems.map(item => ({
+    const lineItemsWithRecordId = lineItemsToInsert.map(item => ({
+      ...item,
       payment_record_id: record.id,
-      field_name: item.fieldName,
-      amount: item.amount,
     }));
 
     const { error: lineItemsError } = await supabase
       .from('client_payment_line_items')
-      .insert(lineItemsToInsert);
+      .insert(lineItemsWithRecordId);
 
     if (lineItemsError) {
       logger.error('Error saving payment line items:', lineItemsError);
       return { success: false, error: lineItemsError.message };
     }
 
-    return { success: true, record, lineItems: lineItemsToInsert };
+    return { success: true, record, lineItems: lineItemsWithRecordId };
   } catch (error: unknown) {
     logger.error('Error saving client payment group:', error);
     return {
