@@ -214,6 +214,130 @@ export async function getClients(
 }
 
 
+export async function getUnifiedClients(
+  status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all',
+  searchQuery?: string,
+  page: number = 1,
+  pageSize: number = 10) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+    const { clientsOrg } = getOrgMappings(organization);
+
+    let query = supabase
+      .from('clients_view_unified')
+      .select(`
+        id,
+        client_type,
+        status,
+        created_at,
+        client_category,
+        requestor_email,
+        requestor_phone,
+        requestor_name,
+        patient_name,
+        service_required,
+        start_date,
+        organization_name,
+        contact_email,
+        contact_phone,
+        search_text
+      `);
+
+    if (status && status !== "all") {
+      query = query.eq('status', status);
+    }
+
+    if (clientsOrg) {
+      query = query.eq('client_category', clientsOrg);
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+      query = query.ilike('search_text', searchTerm);
+    }
+
+    let countQuery = supabase
+      .from('clients_view_unified')
+      .select('id', { count: 'exact', head: true });
+
+    if (status && status !== "all") {
+      countQuery = countQuery.eq('status', status);
+    }
+
+    if (clientsOrg) {
+      countQuery = countQuery.eq('client_category', clientsOrg);
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+      countQuery = countQuery.ilike('search_text', searchTerm);
+    }
+
+    const { count, error: countError } = await countQuery;
+
+    if (countError) {
+      logger.error("Error counting unified clients:", countError);
+      return { success: false, error: countError.message };
+    }
+
+    if (count === 0) {
+      return {
+        success: true,
+        clients: [],
+        pagination: { totalCount: 0, currentPage: page, pageSize, totalPages: 0 }
+      };
+    }
+
+    const { data, error } = await query
+      .range((page - 1) * pageSize, (page * pageSize) - 1)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error("Error fetching unified clients:", error);
+      return { success: false, error: error.message };
+    }
+
+    const clients = (data || []).map(record => {
+      const isIndividual = record.client_type === 'individual';
+      return {
+        id: record.id,
+        name: isIndividual
+          ? (record.requestor_name || record.patient_name)
+          : (record.organization_name),
+        requestDate: isIndividual
+          ? new Date(record.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+          : new Date(record.created_at || new Date()).toISOString().split('T')[0],
+        createdAt: record.created_at,
+        service: isIndividual ? record.service_required : "Organization Care",
+        status: record.status,
+        email: isIndividual ? record.requestor_email : record.contact_email,
+        phone: isIndividual ? record.requestor_phone : record.contact_phone,
+      };
+    });
+
+    return {
+      success: true,
+      clients,
+      pagination: {
+        totalCount: count || 0,
+        currentPage: page,
+        pageSize: pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      }
+    };
+  } catch (error: unknown) {
+    logger.error('Error fetching unified clients:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      clients: []
+    };
+  }
+}
+
+
 /**
  * Fetches detailed information for a specific client by ID
  */

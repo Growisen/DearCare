@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { getClients } from "@/app/actions/clients/client-actions"
+import { getUnifiedClients } from "@/app/actions/clients/client-actions"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Client, ClientFilters, ClientStatus, ClientCategory } from '@/types/client.types'
 import useOrgStore from '@/app/stores/UseOrgStore'
@@ -43,7 +43,7 @@ export function useClientData() {
     refetch 
   } = useQuery({
     queryKey: ['clients', selectedStatus, searchQuery, currentPage, pageSize, selectedCategory],
-    queryFn: () => getClients(selectedStatus, searchQuery, currentPage, pageSize, selectedCategory),
+    queryFn: () => getUnifiedClients(selectedStatus, searchQuery, currentPage, pageSize),
     enabled: isStatusLoaded && !!selectedStatus,
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
