@@ -32,6 +32,9 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Notes
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Mode of Payment
+            </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Client Visible
             </th>
@@ -98,6 +101,11 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                       <span className="text-sm text-gray-400 italic">No notes</span>
                     )}
                   </div>
+                </td>
+                <td className="px-6 py-4 align-top">
+                  <span className="text-sm text-gray-600">
+                    {group.modeOfPayment || <span className="text-gray-400 italic">N/A</span>}
+                  </span>
                 </td>
                 <td className="px-6 py-4 align-top text-center">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
