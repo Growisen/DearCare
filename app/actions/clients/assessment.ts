@@ -254,3 +254,34 @@ export async function sendClientAssessmentFormLink(clientId: string): Promise<{ 
     };
   }
 }
+
+/**
+ * Fetches requestor_name and patient_name for a given client_id
+ */
+export async function getClientNames(clientId: string): Promise<{ success: boolean; requestorName?: string; patientName?: string; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('individual_clients')
+      .select('requestor_name, patient_name')
+      .eq('client_id', clientId)
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return {
+      success: true,
+      requestorName: data.requestor_name,
+      patientName: data.patient_name
+    };
+  } catch (error) {
+    logger.error('Error fetching client names:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import RecorderInfoForm from '@/components/client/RecorderInfoForm';
 import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
+import { getClientNames } from '@/app/actions/clients/assessment'; // <-- Add this import
 
 export default function PatientAssessmentPage() {
   const params = useParams();
@@ -15,7 +16,6 @@ export default function PatientAssessmentPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // State for recorder information with more inclusive defaults
   const [recorderInfo, setRecorderInfo] = useState({
     recorderId: '', 
     recorderName: '',
@@ -25,6 +25,9 @@ export default function PatientAssessmentPage() {
     otherRoleSpecify: '',
     recorderTimestamp: new Date().toISOString()
   });
+
+  const [clientNames, setClientNames] = useState<{ patientName?: string; requestorName?: string } | null>(null);
+  const [nameLoading, setNameLoading] = useState(true);
 
   const {
     formData,
@@ -39,7 +42,6 @@ export default function PatientAssessmentPage() {
     handleFamilyMemberChange
   } = usePatientAssessmentForm();
 
-  // Handle recorder info changes
   const handleRecorderInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setRecorderInfo(prev => ({
@@ -90,11 +92,27 @@ export default function PatientAssessmentPage() {
     }
   };
 
+  React.useEffect(() => {
+    async function fetchName() {
+      setNameLoading(true);
+      const result = await getClientNames(id as string);
+      if (result.success) {
+        setClientNames({
+          patientName: result.patientName,
+          requestorName: result.requestorName
+        });
+      } else {
+        setClientNames(null);
+      }
+      setNameLoading(false);
+    }
+    if (id) fetchName();
+  }, [id]);
+
   return (
     <div className='min-h-screen bg-gradient-to-b from-slate-100 to-slate-200'>
       <div className="max-w-5xl mx-auto py-12 px-6">
         <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-          {/* Header Section */}
           <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
             <div className="flex items-center">
               <div className="flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 border-dCblue">
@@ -127,12 +145,45 @@ export default function PatientAssessmentPage() {
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800">Patient Assessment Form</h2>
             <p className="text-gray-600">Please fill out all required information accurately</p>
+            <div className="mt-4">
+              {nameLoading ? (
+                <span className="text-gray-500">Loading patient name...</span>
+              ) : clientNames ? (
+                <div>
+                  {clientNames.patientName && clientNames.requestorName ? (
+                    <div>
+                      <span className="font-semibold text-lg text-dCblue">
+                        Patient Name: {clientNames.patientName}
+                      </span>
+                      <br />
+                      <span className="font-semibold text-lg text-dCblue">
+                        Requestor Name: {clientNames.requestorName}
+                      </span>
+                      <div className="mt-2 text-red-600 font-medium">
+                        If this is <span className="underline">{clientNames.patientName}</span> or <span className="underline">{clientNames.requestorName}</span>, please proceed.<br />
+                        <span className="font-bold">If this is NOT your name, do NOT fill the form.</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="font-semibold text-lg text-dCblue">
+                        {clientNames.patientName ? `Patient Name: ${clientNames.patientName}` : `Requestor Name: ${clientNames.requestorName}`}
+                      </span>
+                      <div className="mt-2 text-red-600 font-medium">
+                        If this is <span className="underline">{clientNames.patientName || clientNames.requestorName}</span>, please proceed.<br />
+                        <span className="font-bold">If this is NOT your name, do NOT fill the form.</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span className="text-red-600 font-bold">Patient name could not be verified. Please contact support.</span>
+              )}
+            </div>
           </div>
 
-          {/* Form Section */}
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Recorder Information Section - Now as component */}
               <RecorderInfoForm 
                 recorderInfo={recorderInfo}
                 handleRecorderInfoChange={handleRecorderInfoChange}
