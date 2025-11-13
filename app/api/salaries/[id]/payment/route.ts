@@ -1,14 +1,25 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js'
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+import { NextResponse, NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
-) {
-  const { id } = (await params) as { id: string };
-  const { status, receiptUrl } = await req.json();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+type Context = {
+  params: Promise<{ id: string }>;
+};
+
+export async function PATCH(req: NextRequest, props: Context) {
+  const params = await props.params;
+  const id = params.id;
+
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
+  }
+  
+  const { status, receiptUrl } = body;
 
   const authHeader = req.headers.get('authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -22,16 +33,16 @@ export async function PATCH(
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-		global: {
-			headers: {
-			Authorization: `Bearer ${token}`,
-			},
-		},
-	})
+    global: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  });
 
   const {
     data: { user },
-    error: authError
+    error: authError,
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
@@ -43,7 +54,7 @@ export async function PATCH(
     .update({
       payment_status: status,
       receipt_url: receiptUrl ?? null,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('id', id)
     .select();
@@ -59,6 +70,6 @@ export async function PATCH(
   return NextResponse.json({
     success: true,
     message: `Salary ${id} marked as ${status}`,
-    receiptUrl
+    receiptUrl,
   });
 }

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Users, Mail, Phone, MapPin, Stethoscope, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
-import { createServiceEnquiry } from '@/app/actions/enquiry/enquiry-actions'; // <-- Add this import
+import { createServiceEnquiry } from '@/app/actions/enquiry/enquiry-actions'; 
 
 interface FormData {
   name: string;
@@ -34,7 +34,7 @@ const ContactForm: React.FC = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
-  const [submitError, setSubmitError] = useState<string | null>(null); // <-- Add for error display
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const serviceOptions: string[] = [
     '24/7 Patient & Elderly Care',
@@ -58,8 +58,7 @@ const ContactForm: React.FC = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Clear error when user starts typing
+
     if (formErrors[name as keyof FormErrors]) {
       setFormErrors(prev => ({
         ...prev,
@@ -109,10 +108,9 @@ const ContactForm: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    setSubmitError(null); // Reset error
+    setSubmitError(null); 
 
     try {
-      // Call Supabase action instead of simulated API
       const result = await createServiceEnquiry(formData);
 
       if (result.success) {
@@ -143,7 +141,6 @@ const ContactForm: React.FC = () => {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f0f9fa] via-[#faf8fc] to-[#f5f3f7] py-8 px-4 flex items-center justify-center relative overflow-hidden">
-        {/* Elegant background pattern */}
         <div 
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -157,7 +154,6 @@ const ContactForm: React.FC = () => {
         />
         
         <div className="w-full max-w-4xl mx-auto relative z-10">
-          {/* Header */}
           <Card className="p-4 sm:p-6 mb-4 backdrop-blur-sm">
             <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
                 <div className="flex items-center">
@@ -187,7 +183,6 @@ const ContactForm: React.FC = () => {
             </div>
           </Card>
 
-          {/* Success Message */}
           <Card className="p-6 sm:p-8 backdrop-blur-sm">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-md bg-emerald-100 mb-6">
@@ -234,7 +229,6 @@ const ContactForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-200 py-8 px-4 flex items-center justify-center relative overflow-hidden">
-      {/* Elegant background pattern */}
       <div 
         className="absolute inset-0 opacity-[0.03]"
         style={{
@@ -248,7 +242,6 @@ const ContactForm: React.FC = () => {
       />
       
       <div className="w-full max-w-4xl mx-auto relative z-10">
-        {/* Header */}
         <Card className="p-4 sm:p-6 mb-4 backdrop-blur-sm">
                       <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
                 <div className="flex items-center">
@@ -278,7 +271,6 @@ const ContactForm: React.FC = () => {
             </div>
         </Card>
 
-        {/* Form */}
         <Card className="overflow-hidden backdrop-blur-sm">
           <div className="border-b border-[#004d6d]/10 bg-gradient-to-r from-slate-50/80 to-blue-50/80 px-4 sm:px-6 py-4 backdrop-blur-sm">
             <h1 className="text-lg sm:text-xl font-semibold text-slate-800">Professional Care Service Request</h1>
@@ -289,7 +281,6 @@ const ContactForm: React.FC = () => {
 
           <div className="p-4 sm:p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              {/* Name Field */}
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium text-slate-800 mb-2" htmlFor="name">
                   <div className="flex items-center gap-2">
@@ -318,7 +309,6 @@ const ContactForm: React.FC = () => {
                 )}
               </div>
 
-              {/* Email Field */}
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium text-slate-800 mb-2" htmlFor="email">
                   <div className="flex items-center gap-2">
@@ -347,7 +337,6 @@ const ContactForm: React.FC = () => {
                 )}
               </div>
 
-              {/* Phone Field */}
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium text-slate-800 mb-2" htmlFor="phone">
                   <div className="flex items-center gap-2">
@@ -376,7 +365,6 @@ const ContactForm: React.FC = () => {
                 )}
               </div>
 
-              {/* Location Field */}
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium text-slate-800 mb-2" htmlFor="location">
                   <div className="flex items-center gap-2">
@@ -406,7 +394,6 @@ const ContactForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Service Selection */}
             <div className="mt-6">
               <label className="block text-sm font-medium text-slate-800 mb-2" htmlFor="service">
                 <div className="flex items-center gap-2">
@@ -440,7 +427,6 @@ const ContactForm: React.FC = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <div className="mt-8 flex justify-end">
               <button
                 type="button"
@@ -461,7 +447,7 @@ const ContactForm: React.FC = () => {
                 )}
               </button>
             </div>
-            {/* Error Message */}
+
             {submitError && (
               <div className="mt-4 text-red-600 text-sm text-center">
                 {submitError}
