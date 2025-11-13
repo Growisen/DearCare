@@ -475,7 +475,8 @@ export async function getNurseAssignments(clientId: string): Promise<{
         *,
         nurses:nurse_id(first_name, last_name, salary_per_month, nurse_reg_no)
       `)
-      .eq('client_id', clientId);
+      .eq('client_id', clientId)
+      .order('start_date', { ascending: false });
     
     if (error) {
       logger.error('Error fetching nurse assignments:', error);
