@@ -723,3 +723,30 @@ export async function updateIndividualClientLocationLink(
     };
   }
 }
+
+
+/**
+ * Updates the created_at field for a client.
+ * @param clientId - The ID of the client.
+ * @param newCreatedAt - The new created_at value (ISO string or Date).
+ */
+export async function updateClientCreatedAt(clientId: string, newCreatedAt: string | Date) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase
+      .from('clients')
+      .update({ created_at: typeof newCreatedAt === 'string' ? newCreatedAt : newCreatedAt.toISOString() })
+      .eq('id', clientId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating created_at:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}

@@ -81,7 +81,8 @@ export const usePatientData = (id: string, activeTab?: string) => {
             relation: clientData.details?.relation_to_patient || '',
             phone: clientData.details?.requestor_phone || ''
           },
-          assessments: []
+          assessments: [],
+          createdAt: clientData.created_at || ''
         };
 
         setPatient(transformedPatient);
