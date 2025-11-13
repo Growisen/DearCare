@@ -467,109 +467,92 @@ export async function getClientStatus(clientId: string) {
 export async function deleteClient(clientId: string) {
     try {
         const supabase = await createSupabaseServerClient();
-
-        const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('client_type')
-        .eq('id', clientId)
-        .single();
-
-        if (clientError) {
-        return { success: false, error: clientError.message };
-        }
-
-        const { data: clientFiles } = await supabase
-        .from('client_files')
-        .select('id, storage_path')
-        .eq('client_id', clientId);
-
-        if (clientFiles && clientFiles.length > 0) {
-        const filePaths = clientFiles.map(file => file.storage_path).filter(Boolean);
-        if (filePaths.length > 0) {
-            await supabase.storage.from('DearCare').remove(filePaths);
-        }
         
-        await supabase
-            .from('client_files')
-            .delete()
+        const { data: nurseAssignments, error: nurseError } = await supabase
+            .from('nurse_client')
+            .select('nurse_id')
             .eq('client_id', clientId);
-        }
 
-        const { data: nurseAssignments } = await supabase
-        .from('nurse_client')
-        .select('nurse_id')
-        .eq('client_id', clientId);
-
-        await supabase
-        .from('nurse_client')
-        .delete()
-        .eq('client_id', clientId);
-        
-        await supabase
-        .from('patient_assessments')
-        .delete()
-        .eq('client_id', clientId);
-
-        if (client.client_type === 'individual') {
-        await supabase
-            .from('individual_clients')
-            .delete()
-            .eq('client_id', clientId);
-        } else {
-        await supabase
-            .from('staff_requirements')
-            .delete()
-            .eq('client_id', clientId);
-            
-        await supabase
-            .from('organization_clients')
-            .delete()
-            .eq('client_id', clientId);
-        
-        await supabase
-        .from('otp')
-        .delete()
-        .eq('client_id', clientId);
-        }
-
-        const { error: deleteError } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId);
-
-        if (deleteError) {
-        logger.error('Error deleting client record:', deleteError);
-        return { success: false, error: deleteError.message };
+        if (nurseError) {
+            return { success: false, error: nurseError.message };
         }
 
         if (nurseAssignments && nurseAssignments.length > 0) {
-        const uniqueNurseIds = [...new Set(nurseAssignments.map(na => na.nurse_id))];
-        
-        await Promise.all(
-            uniqueNurseIds.map(async (nurseId) => {
-            const { data: remainingAssignments } = await supabase
-                .from('nurse_client')
-                .select('id')
-                .eq('nurse_id', nurseId);
+            return { success: false, error: 'Client cannot be deleted' };
+        }
 
-            if (!remainingAssignments || remainingAssignments.length === 0) {
-                await supabase
-                .from('nurses')
-                .update({ status: 'unassigned' })
-                .eq('nurse_id', nurseId);
+        const { data: client, error: clientError } = await supabase
+            .from('clients')
+            .select('client_type')
+            .eq('id', clientId)
+            .single();
+
+        if (clientError) {
+            return { success: false, error: clientError.message };
+        }
+
+        const { data: clientFiles } = await supabase
+            .from('client_files')
+            .select('id, storage_path')
+            .eq('client_id', clientId);
+
+        if (clientFiles && clientFiles.length > 0) {
+            const filePaths = clientFiles.map(file => file.storage_path).filter(Boolean);
+            if (filePaths.length > 0) {
+                await supabase.storage.from('DearCare').remove(filePaths);
             }
-            })
-        );
+
+            await supabase
+                .from('client_files')
+                .delete()
+                .eq('client_id', clientId);
+        }
+
+        await supabase
+            .from('patient_assessments')
+            .delete()
+            .eq('client_id', clientId);
+
+        if (client.client_type === 'individual') {
+            await supabase
+                .from('individual_clients')
+                .delete()
+                .eq('client_id', clientId);
+        } else {
+            await supabase
+                .from('staff_requirements')
+                .delete()
+                .eq('client_id', clientId);
+
+            await supabase
+                .from('organization_clients')
+                .delete()
+                .eq('client_id', clientId);
+
+            await supabase
+                .from('otp')
+                .delete()
+                .eq('client_id', clientId);
+        }
+
+        const { error: deleteError } = await supabase
+            .from('clients')
+            .delete()
+            .eq('id', clientId);
+
+        if (deleteError) {
+            logger.error('Error deleting client record:', deleteError);
+            return { success: false, error: deleteError.message };
         }
 
         revalidatePath('/clients');
         return { success: true };
-        
+
     } catch (error: unknown) {
         logger.error('Error deleting client:', error);
         return {
-        success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred'
+            success: false,
+            error: error instanceof Error ? error.message : 'An unknown error occurred'
         };
     }
 }

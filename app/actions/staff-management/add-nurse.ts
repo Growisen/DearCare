@@ -948,6 +948,19 @@ export async function deleteNurse(nurseId: number): Promise<{ success: boolean; 
   try {
     const supabase = await createSupabaseServerClient();
 
+    const { data: assignments, error: assignmentError } = await supabase
+      .from('nurse_client')
+      .select('id')
+      .eq('nurse_id', nurseId);
+
+    if (assignmentError) {
+      return { success: false, error: assignmentError.message };
+    }
+
+    if (assignments && assignments.length > 0) {
+      return { success: false, error: 'Nurse cannot be deleted.' };
+    }
+
     const folders = [
       'image',
       'adhar',

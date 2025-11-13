@@ -768,12 +768,32 @@ export async function deleteNurseAssignment(
   try {
     const supabase = await createSupabaseServerClient();
 
+    const { data: attendanceRecords, error: attendanceFetchError } = await supabase
+      .from('attendence_individual')
+      .select('id')
+      .eq('assigned_id', assignmentId);
+
+    if (attendanceFetchError) {
+      logger.error('Error checking attendance records:', attendanceFetchError);
+      return {
+        success: false,
+        message: `Error checking attendance records: ${attendanceFetchError.message}`
+      };
+    }
+
+    if (attendanceRecords && attendanceRecords.length > 0) {
+      return {
+        success: false,
+        message: 'Cannot delete assignment.'
+      };
+    }
+
     const { data: assignment, error: fetchError } = await supabase
       .from('nurse_client')
       .select('nurse_id')
       .eq('id', assignmentId)
       .single();
-    
+
     if (fetchError) {
       logger.error('Error fetching assignment details:', fetchError);
       return {
@@ -781,27 +801,14 @@ export async function deleteNurseAssignment(
         message: `Error fetching assignment details: ${fetchError.message}`
       };
     }
-    
+
     const nurseId = assignment.nurse_id;
 
-    const { error: attendanceDeleteError } = await supabase
-      .from('attendence_individual')
-      .delete()
-      .eq('assigned_id', assignmentId);
-
-    if (attendanceDeleteError) {
-      logger.error('Error deleting related attendance records:', attendanceDeleteError);
-      return {
-        success: false,
-        message: `Failed to delete related attendance records: ${attendanceDeleteError.message}`
-      };
-    }
-    
     const { error: deleteError } = await supabase
       .from('nurse_client')
       .delete()
       .eq('id', assignmentId);
-    
+
     if (deleteError) {
       logger.error('Error deleting nurse assignment:', deleteError);
       return {
@@ -809,12 +816,12 @@ export async function deleteNurseAssignment(
         message: `Database error: ${deleteError.message}`
       };
     }
-    
+
     const { data: remainingAssignments, error: checkError } = await supabase
       .from('nurse_client')
       .select('id')
       .eq('nurse_id', nurseId);
-    
+
     if (checkError) {
       logger.error('Error checking remaining assignments:', checkError);
     } else {
@@ -825,7 +832,7 @@ export async function deleteNurseAssignment(
         }
       }
     }
-    
+
     return {
       success: true,
       message: 'Assignment deleted successfully'
