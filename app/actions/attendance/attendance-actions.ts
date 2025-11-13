@@ -426,6 +426,7 @@ export async function unmarkAttendance({
     const supabase = await createSupabaseServerClient();
 
     let recordId = id;
+    let createdAt: string | null = null;
 
     if (!recordId) {
       if (!assignmentId || !date) {
@@ -437,7 +438,7 @@ export async function unmarkAttendance({
 
       const { data: existing, error: fetchError } = await supabase
         .from('attendence_individual')
-        .select('id')
+        .select('id, created_at')
         .eq('assigned_id', assignmentId)
         .eq('date', date)
         .maybeSingle();
@@ -454,6 +455,33 @@ export async function unmarkAttendance({
       }
 
       recordId = existing.id;
+      createdAt = existing.created_at;
+    } else {
+      const { data: record, error: fetchError } = await supabase
+        .from('attendence_individual')
+        .select('created_at')
+        .eq('id', recordId)
+        .maybeSingle();
+
+      if (fetchError) {
+        return { success: false, message: fetchError.message };
+      }
+      createdAt = record?.created_at;
+    }
+
+    if (!createdAt) {
+      return { success: false, message: 'Could not determine creation time of attendance record' };
+    }
+
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const diffHours = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+
+    if (diffHours > 24) {
+      return { 
+        success: false, 
+        message: 'Attendance record can only be deleted within 24 hours of creation' 
+      };
     }
 
     const { error: deleteError } = await supabase

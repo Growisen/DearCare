@@ -412,6 +412,7 @@ export interface Patient {
     specialRequirements?: string;
     preferredCaregiverGender?: string;
   };
+  createdAt?: string;
 }
 
 export interface ClientResponse {

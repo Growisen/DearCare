@@ -214,6 +214,130 @@ export async function getClients(
 }
 
 
+export async function getUnifiedClients(
+  status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all',
+  searchQuery?: string,
+  page: number = 1,
+  pageSize: number = 10) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+    const { clientsOrg } = getOrgMappings(organization);
+
+    let query = supabase
+      .from('clients_view_unified')
+      .select(`
+        id,
+        client_type,
+        status,
+        created_at,
+        client_category,
+        requestor_email,
+        requestor_phone,
+        requestor_name,
+        patient_name,
+        service_required,
+        start_date,
+        organization_name,
+        contact_email,
+        contact_phone,
+        search_text
+      `);
+
+    if (status && status !== "all") {
+      query = query.eq('status', status);
+    }
+
+    if (clientsOrg) {
+      query = query.eq('client_category', clientsOrg);
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+      query = query.ilike('search_text', searchTerm);
+    }
+
+    let countQuery = supabase
+      .from('clients_view_unified')
+      .select('id', { count: 'exact', head: true });
+
+    if (status && status !== "all") {
+      countQuery = countQuery.eq('status', status);
+    }
+
+    if (clientsOrg) {
+      countQuery = countQuery.eq('client_category', clientsOrg);
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+      countQuery = countQuery.ilike('search_text', searchTerm);
+    }
+
+    const { count, error: countError } = await countQuery;
+
+    if (countError) {
+      logger.error("Error counting unified clients:", countError);
+      return { success: false, error: countError.message };
+    }
+
+    if (count === 0) {
+      return {
+        success: true,
+        clients: [],
+        pagination: { totalCount: 0, currentPage: page, pageSize, totalPages: 0 }
+      };
+    }
+
+    const { data, error } = await query
+      .range((page - 1) * pageSize, (page * pageSize) - 1)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error("Error fetching unified clients:", error);
+      return { success: false, error: error.message };
+    }
+
+    const clients = (data || []).map(record => {
+      const isIndividual = record.client_type === 'individual';
+      return {
+        id: record.id,
+        name: isIndividual
+          ? (record.requestor_name || record.patient_name)
+          : (record.organization_name),
+        requestDate: isIndividual
+          ? new Date(record.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+          : new Date(record.created_at || new Date()).toISOString().split('T')[0],
+        createdAt: record.created_at,
+        service: isIndividual ? record.service_required : "Organization Care",
+        status: record.status,
+        email: isIndividual ? record.requestor_email : record.contact_email,
+        phone: isIndividual ? record.requestor_phone : record.contact_phone,
+      };
+    });
+
+    return {
+      success: true,
+      clients,
+      pagination: {
+        totalCount: count || 0,
+        currentPage: page,
+        pageSize: pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      }
+    };
+  } catch (error: unknown) {
+    logger.error('Error fetching unified clients:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      clients: []
+    };
+  }
+}
+
+
 /**
  * Fetches detailed information for a specific client by ID
  */
@@ -343,109 +467,92 @@ export async function getClientStatus(clientId: string) {
 export async function deleteClient(clientId: string) {
     try {
         const supabase = await createSupabaseServerClient();
-
-        const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('client_type')
-        .eq('id', clientId)
-        .single();
-
-        if (clientError) {
-        return { success: false, error: clientError.message };
-        }
-
-        const { data: clientFiles } = await supabase
-        .from('client_files')
-        .select('id, storage_path')
-        .eq('client_id', clientId);
-
-        if (clientFiles && clientFiles.length > 0) {
-        const filePaths = clientFiles.map(file => file.storage_path).filter(Boolean);
-        if (filePaths.length > 0) {
-            await supabase.storage.from('DearCare').remove(filePaths);
-        }
         
-        await supabase
-            .from('client_files')
-            .delete()
+        const { data: nurseAssignments, error: nurseError } = await supabase
+            .from('nurse_client')
+            .select('nurse_id')
             .eq('client_id', clientId);
-        }
 
-        const { data: nurseAssignments } = await supabase
-        .from('nurse_client')
-        .select('nurse_id')
-        .eq('client_id', clientId);
-
-        await supabase
-        .from('nurse_client')
-        .delete()
-        .eq('client_id', clientId);
-        
-        await supabase
-        .from('patient_assessments')
-        .delete()
-        .eq('client_id', clientId);
-
-        if (client.client_type === 'individual') {
-        await supabase
-            .from('individual_clients')
-            .delete()
-            .eq('client_id', clientId);
-        } else {
-        await supabase
-            .from('staff_requirements')
-            .delete()
-            .eq('client_id', clientId);
-            
-        await supabase
-            .from('organization_clients')
-            .delete()
-            .eq('client_id', clientId);
-        
-        await supabase
-        .from('otp')
-        .delete()
-        .eq('client_id', clientId);
-        }
-
-        const { error: deleteError } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId);
-
-        if (deleteError) {
-        logger.error('Error deleting client record:', deleteError);
-        return { success: false, error: deleteError.message };
+        if (nurseError) {
+            return { success: false, error: nurseError.message };
         }
 
         if (nurseAssignments && nurseAssignments.length > 0) {
-        const uniqueNurseIds = [...new Set(nurseAssignments.map(na => na.nurse_id))];
-        
-        await Promise.all(
-            uniqueNurseIds.map(async (nurseId) => {
-            const { data: remainingAssignments } = await supabase
-                .from('nurse_client')
-                .select('id')
-                .eq('nurse_id', nurseId);
+            return { success: false, error: 'Client cannot be deleted' };
+        }
 
-            if (!remainingAssignments || remainingAssignments.length === 0) {
-                await supabase
-                .from('nurses')
-                .update({ status: 'unassigned' })
-                .eq('nurse_id', nurseId);
+        const { data: client, error: clientError } = await supabase
+            .from('clients')
+            .select('client_type')
+            .eq('id', clientId)
+            .single();
+
+        if (clientError) {
+            return { success: false, error: clientError.message };
+        }
+
+        const { data: clientFiles } = await supabase
+            .from('client_files')
+            .select('id, storage_path')
+            .eq('client_id', clientId);
+
+        if (clientFiles && clientFiles.length > 0) {
+            const filePaths = clientFiles.map(file => file.storage_path).filter(Boolean);
+            if (filePaths.length > 0) {
+                await supabase.storage.from('DearCare').remove(filePaths);
             }
-            })
-        );
+
+            await supabase
+                .from('client_files')
+                .delete()
+                .eq('client_id', clientId);
+        }
+
+        await supabase
+            .from('patient_assessments')
+            .delete()
+            .eq('client_id', clientId);
+
+        if (client.client_type === 'individual') {
+            await supabase
+                .from('individual_clients')
+                .delete()
+                .eq('client_id', clientId);
+        } else {
+            await supabase
+                .from('staff_requirements')
+                .delete()
+                .eq('client_id', clientId);
+
+            await supabase
+                .from('organization_clients')
+                .delete()
+                .eq('client_id', clientId);
+
+            await supabase
+                .from('otp')
+                .delete()
+                .eq('client_id', clientId);
+        }
+
+        const { error: deleteError } = await supabase
+            .from('clients')
+            .delete()
+            .eq('id', clientId);
+
+        if (deleteError) {
+            logger.error('Error deleting client record:', deleteError);
+            return { success: false, error: deleteError.message };
         }
 
         revalidatePath('/clients');
         return { success: true };
-        
+
     } catch (error: unknown) {
         logger.error('Error deleting client:', error);
         return {
-        success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred'
+            success: false,
+            error: error instanceof Error ? error.message : 'An unknown error occurred'
         };
     }
 }
@@ -717,6 +824,33 @@ export async function updateIndividualClientLocationLink(
     return { success: true };
   } catch (error: unknown) {
     logger.error('Error updating location link:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+
+/**
+ * Updates the created_at field for a client.
+ * @param clientId - The ID of the client.
+ * @param newCreatedAt - The new created_at value (ISO string or Date).
+ */
+export async function updateClientCreatedAt(clientId: string, newCreatedAt: string | Date) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase
+      .from('clients')
+      .update({ created_at: typeof newCreatedAt === 'string' ? newCreatedAt : newCreatedAt.toISOString() })
+      .eq('id', clientId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating created_at:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'

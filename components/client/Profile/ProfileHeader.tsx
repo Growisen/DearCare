@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { FiEdit2, FiSave, FiX, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiEdit2, FiSave, FiX, FiTrash2, FiEye, FiCalendar, FiClock } from 'react-icons/fi';
 import CategorySelector from '@/components/client/Profile/CategorySelector';
 import ImageViewer from '@/components/common/ImageViewer';
+import EditCreatedAtModal from '@/components/client/Profile/EditCreatedAtModal';
 import { ClientCategory } from '@/types/client.types';
 import { formatName } from '@/utils/formatters';
+import { getExperienceFromJoiningDate, formatDateToDDMMYYYY } from '@/utils/dateUtils';
+import { updateClientCreatedAt } from '@/app/actions/clients/client-core';
 
 interface ProfileHeaderProps {
   patient: {
@@ -18,6 +21,7 @@ interface ProfileHeaderProps {
     location: string;
     profileImage?: string | null;
     clientCategory: ClientCategory;
+    createdAt?: string;
   };
   status: string | null;
   isEditing: boolean;
@@ -42,6 +46,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 }) => {
 
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [isEditDateOpen, setIsEditDateOpen] = useState(false);
+  const [createdAt, setCreatedAt] = useState(patient.createdAt || '');
 
   const getCategoryBorderColor = () => {
     switch (patient.clientCategory) {
@@ -55,6 +61,34 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   const borderColor = getCategoryBorderColor();
+
+  const formattedCreatedAt = createdAt
+    ? new Date(createdAt).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null;
+
+  const isNewClient = createdAt
+    ? (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24) < 7
+    : false;
+
+  const daysSinceJoined = createdAt
+    ? getExperienceFromJoiningDate(formatDateToDDMMYYYY(createdAt))
+    : null;
+
+  const handleSaveCreatedAt = async (newDate: string) => {
+    if (patient._id) {
+      const result = await updateClientCreatedAt(patient._id, newDate);
+      if (result?.success) {
+        setCreatedAt(newDate);
+        return true;
+      }
+      return false;
+    }
+    return false;
+  };
 
   return (
     <div className={`bg-gray-100 border-b border-gray-200 px-4 sm:px-6 py-4 ${patient.clientCategory ? `border-l-4 ${borderColor}` : ''}`}>
@@ -83,16 +117,63 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             )}
           </div>
 
-          <div className="mt-2 sm:mt-0">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-              {formatName(`${patient.firstName} ${patient.lastName}`)}
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">
-              {patient.age} years • {patient.gender} • {patient.bloodGroup}
-            </p>
-            <div className="flex flex-wrap items-center justify-center sm:justify-start mt-3 gap-2">
-              <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
-                Reg.No: {patient.registrationNumber || "Not Available"}
+          <div className="mt-2 sm:mt-0 space-y-2">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                {formatName(`${patient.firstName} ${patient.lastName}`)}
+              </h1>
+              {isNewClient && (
+                <span className="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-700
+                 text-xs rounded-full font-semibold border border-green-300">
+                  ✨ New Client
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-500 font-medium">Age:</span>
+                <span className="text-gray-900">{patient.age} years</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-500 font-medium">Gender:</span>
+                <span className="text-gray-900">{patient.gender}</span>
+              </div>
+              {/* <div className="flex items-center gap-1.5">
+                <span className="text-gray-500 font-medium">Blood Group:</span>
+                <span className="text-gray-900 font-semibold">{patient.bloodGroup}</span>
+              </div> */}
+            </div>
+
+            {formattedCreatedAt && (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 rounded-md shadow-sm">
+                  <FiCalendar className="h-3.5 w-3.5 text-gray-500" />
+                  <span className="text-xs text-gray-600">
+                    <span className="font-medium">Joined:</span> {formattedCreatedAt}
+                  </span>
+                  <button
+                    onClick={() => setIsEditDateOpen(true)}
+                    className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-200 transition"
+                  >
+                    Edit
+                  </button>
+                </div>
+                {daysSinceJoined && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-md">
+                    <FiClock className="h-3.5 w-3.5 text-blue-600" />
+                    <span className="text-xs text-blue-700 font-medium">
+                      {daysSinceJoined} with us
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center px-3 py-1.5 bg-white text-sm rounded-md text-gray-700 border border-gray-300 shadow-sm">
+                <span className="font-medium text-gray-500 mr-1.5">Reg.No:</span>
+                <span className="font-semibold">{patient.registrationNumber || "Not Available"}</span>
               </span>
               <CategorySelector
                 currentCategory={patient.clientCategory}
@@ -108,7 +189,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               {onEditProfile && (
                 <button
                   onClick={onEditProfile}
-                  className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50/80 backdrop-blur-sm border border-indigo-200 rounded-md hover:bg-indigo-100/80 transition-all flex items-center justify-center shadow-sm"
+                  className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-indigo-700
+                   bg-indigo-50/80 backdrop-blur-sm border border-indigo-200 rounded-md hover:bg-indigo-100/80 
+                   transition-all flex items-center justify-center shadow-sm"
                 >
                   <FiEye className="h-4 w-4 mr-1 text-indigo-600" />
                   Edit Profile
@@ -117,7 +200,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               
               <button
                 onClick={handleEdit}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-md hover:bg-blue-100/80 transition-all flex items-center justify-center shadow-sm"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50/80
+                 backdrop-blur-sm border border-blue-200 rounded-md hover:bg-blue-100/80 transition-all flex
+                  items-center justify-center shadow-sm"
               >
                 <FiEdit2 className="h-4 w-4 mr-1 text-blue-600" />
                 Edit Assessment
@@ -125,7 +210,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
               <button
                 onClick={onDelete}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-red-700 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-md hover:bg-red-100/80 transition-all flex items-center justify-center shadow-sm"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-red-700 bg-red-50/80
+                 backdrop-blur-sm border border-red-200 rounded-md hover:bg-red-100/80 transition-all flex 
+                 items-center justify-center shadow-sm"
               >
                 <FiTrash2 className="h-4 w-4 mr-1 text-red-600" />
                 Delete Client
@@ -135,14 +222,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <>
               <button
                 onClick={handleSave}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-green-700 bg-green-50/80 backdrop-blur-sm border border-green-200 rounded-md hover:bg-green-100/80 transition-all flex items-center justify-center shadow-sm"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-green-700
+                 bg-green-50/80 backdrop-blur-sm border border-green-200 rounded-md hover:bg-green-100/80
+                  transition-all flex items-center justify-center shadow-sm"
               >
                 <FiSave className="h-4 w-4 mr-1 text-green-600" />
                 Save Changes
               </button>
               <button
                 onClick={handleCancel}
-                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-md hover:bg-gray-100/80 transition-all flex items-center justify-center shadow-sm"
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 
+                bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-md hover:bg-gray-100/80 
+                transition-all flex items-center justify-center shadow-sm"
               >
                 <FiX className="h-4 w-4 mr-1 text-gray-600" />
                 Cancel
@@ -159,6 +250,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           onClose={() => setIsImageViewerOpen(false)}
         />
       )}
+      <EditCreatedAtModal
+        isOpen={isEditDateOpen}
+        currentDate={createdAt}
+        onClose={() => setIsEditDateOpen(false)}
+        onSave={handleSaveCreatedAt}
+      />
     </div>
   );
 };

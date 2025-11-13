@@ -2,6 +2,7 @@ import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "
 import { NurseBasicDetails } from "@/types/staff.types"
 import Loader from '@/components/Loader'
 import { useRouter } from 'next/navigation'
+import { formatName } from "@/utils/formatters"
 
 const statusColors = {
   assigned: "bg-green-200 text-green-800 border border-green-300",
@@ -61,7 +62,7 @@ const NurseTable = ({
             return (
               <tr key={nurse.nurse_id} className="hover:bg-gray-50/50">
                 <td className="py-4 px-6 text-gray-900 font-medium">
-                  {`${nurse.name.first || ""} ${nurse.name.last || ""}`}
+                  {`${formatName(nurse.name.first || "")} ${formatName(nurse.name.last || "")}`}
                 </td>
                 <td className="py-4 px-6 text-gray-700">
                   {nurse.regno || 'N/A'}

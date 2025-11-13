@@ -20,6 +20,7 @@ export const FORM_CONFIG = {
       "Justdial",
       "Newspaper",
       "Client Reference",
+      "Staff Reference",
       "Sulekha",
       "Direct Entry",
       "Lead From Csv"

@@ -49,6 +49,8 @@ export async function signIn(formData: FormData) {
 
   const user = data.user
 
+  console.log(data.session?.access_token);
+
   if (!user) {
     return { error: "User not found", success: false }
   }

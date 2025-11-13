@@ -15,6 +15,8 @@ interface PaymentEntryFormProps {
   onCancel: () => void;
   isSaving: boolean;
   loading: boolean;
+  modeOfPayment: string;
+  setModeOfPayment: (value: string) => void;
 }
 
 const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
@@ -30,6 +32,8 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
   onCancel,
   isSaving,
   loading,
+  modeOfPayment,
+  setModeOfPayment,
 }) => {
   const addLineItem = () => {
     const newItem: FormLineItem = { 
@@ -61,19 +65,33 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
         Add New Payment
       </summary>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Group Name *
-        </label>
-        <input
-          type="text"
-          value={groupName}
-          onChange={(e) => setGroupName(e.target.value)}
-          placeholder="e.g., Monthly Expenses"
-          className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-        />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Group Name *
+          </label>
+          <input
+            type="text"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="e.g., Monthly Expenses"
+            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+          />
+        </div>
+        <div className="w-1/3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Mode of Payment
+          </label>
+          <input
+            type="text"
+            value={modeOfPayment}
+            onChange={(e) => setModeOfPayment(e.target.value)}
+            placeholder="e.g., Cash, Credit Card, Bank Transfer"
+            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+          />
+        </div>
       </div>
-
+      
       <div className="space-y-3 pt-4 border-t">
         <label className="block text-sm font-medium text-gray-700">
           Fields & Amounts *

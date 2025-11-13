@@ -10,6 +10,7 @@ import CreateSalaryModal from "./salary/CreateSalaryModal";
 import AddBonusModal from "./salary/AddBonusModal";
 import AddDeductionModal from "./salary/AddDeductionModal";
 import { SalaryPayment } from "./types";
+import useOrgStore from "@/app/stores/UseOrgStore";
 
 const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [hourlySalary, setHourlySalary] = useState<number>(0);
@@ -24,6 +25,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [creating, setCreating] = useState(false);
   const [processingBonus, setProcessingBonus] = useState(false);
   const [processingDeduction, setProcessingDeduction] = useState(false);
+  const { organization } = useOrgStore()
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -219,6 +221,44 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     }
   };
 
+
+  const getAdmittedTypeFilter = (): 'Dearcare' | 'TATANursing' | "" => {
+    if (!organization) return "";
+    if (organization === "TataHomeNursing") return "TATANursing";
+    if (organization === "DearCare") return "Dearcare";
+    return "";
+  };
+
+  const handleApprove = async (payment: SalaryPayment) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nurseId: nurseId,
+          amount: payment.netSalary,
+          payment_type: "outgoing",
+          pay_status: "un_paid",
+          description: payment.info,
+          tenant: getAdmittedTypeFilter(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        alert("Salary payment approved!");
+      } else {
+        alert("Failed to approve: " + (result.error || response.statusText));
+      }
+    } catch (error) {
+      console.error("Approve error:", error);
+      alert("Error approving salary payment.");
+    }
+  };
+
   if (loading && payments.length === 0) {
     return <Loader message="Loading salary details..." />;
   }
@@ -235,6 +275,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         onOpenConfirmModal={handleOpenConfirm}
         onOpenBonusModal={handleOpenBonusModal}
         onOpenDeductionModal={handleOpenDeductionModal}
+        handleApprove={handleApprove}
       />
 
       <ModalPortal>

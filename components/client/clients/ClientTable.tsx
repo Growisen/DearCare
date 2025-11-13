@@ -4,6 +4,7 @@ import { CheckCircle, Clock, AlertCircle } from "lucide-react"
 import { formatDate, formatName, getServiceLabel } from "@/utils/formatters"
 import { serviceOptions } from "@/utils/constants"
 import { Client, ClientFilters } from "@/types/client.types"
+import { getExperienceFromJoiningDate, formatDateToDDMMYYYY } from "@/utils/dateUtils";
 
 type ClientTableProps = {
   clients: Client[]
@@ -18,11 +19,34 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
 }) => {
   const status = client.status as ClientFilters;
   const StatusIcon = statusIcons[status];
-  
+
+  const createdAt = client.createdAt ?? '';
+  const isNewClient = createdAt
+    ? (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24) < 7
+    : false;
+
+  const daysSinceJoined = createdAt
+    ? getExperienceFromJoiningDate(formatDateToDDMMYYYY(createdAt))
+    : null;
+
   return (
     <tr className="hover:bg-gray-50">
-      <td className="py-4 px-6 text-gray-800 font-medium">{formatName(client.name)}</td>
-      <td className="py-4 px-6 text-gray-600">{formatDate(client.createdAt ?? '')}</td>
+      <td className="py-4 px-6 text-gray-800 font-medium">
+        {formatName(client.name)}
+        {isNewClient && (
+          <span className="inline-block mt-1 ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold border border-green-300">
+            ✨ New Client
+          </span>
+        )}
+      </td>
+      <td className="py-4 px-6 text-gray-600">
+        {formatDate(createdAt)}
+        {daysSinceJoined !== null && (
+          <span className="block text-xs text-gray-400 mt-1">
+            {daysSinceJoined} days ago
+          </span>
+        )}
+      </td>
       {/* <td className="py-4 px-6 text-gray-600">{formatDate(client.requestDate)}</td> */}
       <td className="py-4 px-6 text-gray-600">{getServiceLabel(serviceOptions, client.service || '')}</td>
       <td className="py-4 px-6">

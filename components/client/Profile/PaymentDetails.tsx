@@ -27,6 +27,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
   ]);
   const [groupNotes, setGroupNotes] = useState("");
   const [groupShowToClient, setGroupShowToClient] = useState(false);
+  const [modeOfPayment, setModeOfPayment] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
@@ -35,7 +36,6 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
 
   const fetchData = async () => {
     const apiEntries = await fetchGroups(clientId);
-    console.log("Fetched Entries:", apiEntries);
 
     const updatedEntries: EntryGroup[] = (apiEntries ?? []).map((group: ApiEntryGroup) => ({
       id: typeof group.id === "string" ? parseInt(group.id, 10) : group.id,
@@ -50,6 +50,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
       dateAdded: group.date_added,
       notes: group.notes ?? undefined,
       showToClient: group.show_to_client,
+      modeOfPayment: group.mode_of_payment ?? "",
     }));
     setEntries(updatedEntries);
   };
@@ -109,6 +110,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
       dateAdded: new Date().toISOString(),
       notes: groupNotes.trim() || undefined,
       showToClient: groupShowToClient,
+      modeOfPayment: modeOfPayment.trim() || undefined,
     });
 
     if (result.success) {
@@ -174,6 +176,8 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
         onCancel={resetForm}
         isSaving={isSaving}
         loading={loading}
+        modeOfPayment={modeOfPayment}
+        setModeOfPayment={setModeOfPayment}
       />
 
       {loading ? (

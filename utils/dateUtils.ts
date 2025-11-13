@@ -8,8 +8,11 @@ export const getTodayDDMMYYYY = () => {
 
 export const formatDateToDDMMYYYY = (isoDate: string) => {
   if (!isoDate) return '';
-  const [year, month, day] = isoDate.split('-');
-  return `${day}/${month}/${year}`;
+  const date = new Date(isoDate);
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 export const formatDateToISO = (ddmmyyyy: string) => {
