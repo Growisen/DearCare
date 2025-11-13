@@ -36,8 +36,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { setOrganization } = useOrgStore()
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const publicRoutes = [
+    '/signin',
+    '/register',
+    '/',
+    '/about',
+    '/client-registration',
+    '/forgot-password',
+    '/client-enquiry'
+  ];
+  const isPublicRoute =
+    publicRoutes.includes(pathname) ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/patient-assessment/') ||
+    pathname.startsWith('/client-enquiry') ||
+    pathname.includes('.');
 
   useEffect(() => {
+    if (isPublicRoute) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
 
     let organization = 'DearCare';
@@ -57,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setOrganization(organization);
     setIsLoading(false);
-  }, [setOrganization])
+  }, [setOrganization, pathname, isPublicRoute])
 
   const signIn = async (email: string, password: string) => {
     const formData = new FormData()
