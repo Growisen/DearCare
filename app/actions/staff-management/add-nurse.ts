@@ -511,6 +511,8 @@ export async function fetchBasicDetails(
       return { data: null, count: null, error: 'Not authenticated' }
     }
 
+    console.log('Fetching basic nurse details with params:', { page, limit, searchQuery, nursesOrg })
+
     let nursesQuery = supabase
       .from('nurses')
       .select(`
@@ -528,9 +530,19 @@ export async function fetchBasicDetails(
 
     if (searchQuery && searchQuery.trim() !== '') {
       const q = `%${searchQuery.trim()}%`
+      console.log('Applying search filter with query:', q)
       nursesQuery = nursesQuery.or(
-        `full_name.ilike.${q},email.ilike.${q},phone_number.ilike.${q},nurse_reg_no.ilike.${q}`
-      )
+        [
+          `full_name.ilike.${q}`,
+          `city.ilike.${q}`,
+          `email.ilike.${q}`,
+          `phone_number.ilike.${q}`,
+          `state.ilike.${q}`,
+          `address.ilike.${q}`,
+          `taluk.ilike.${q}`,
+          `category.ilike.${q}`
+        ].join(',')
+      );
     }
 
     nursesQuery = nursesQuery
@@ -538,6 +550,8 @@ export async function fetchBasicDetails(
       .range(start, end)
 
     const { data, error, count } = await nursesQuery
+
+    console.log('Fetched basic nurse details:', data)
 
     if (error) throw error
 
@@ -1168,6 +1182,7 @@ export async function listNursesWithAssignments(
 
     if (filterParams?.searchTerm && filterParams.searchTerm.trim() !== '') {
       const q = `%${filterParams.searchTerm.trim()}%`;
+      console.log('Applying search filter with query:', q);
       nursesQuery = nursesQuery.or(
         [
           `full_name.ilike.${q}`,
