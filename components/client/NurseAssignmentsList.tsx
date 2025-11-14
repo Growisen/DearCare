@@ -6,6 +6,7 @@ import {
   calculateDaysBetween,
   format12HourTime,
   calculatePeriodSalary,
+  getAssignmentPeriodStatus
 } from '@/utils/nurseAssignmentUtils';
 
 interface NurseAssignment {
@@ -129,12 +130,30 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   <span className="ml-2 text-gray-900">
                     {formatDate(assignment.startDate)}
                     {assignment.endDate && ` - ${formatDate(assignment.endDate)}`}
-                    <span className="ml-2 text-xs text-gray-500">
-                      (
-                        {calculateDaysBetween(assignment.startDate, assignment.endDate)} day
-                        {calculateDaysBetween(assignment.startDate, assignment.endDate) > 1 ? 's' : ''}
-                      )
-                    </span>
+                    {assignment.endDate && (() => {
+                      const { daysCompleted, daysRemaining, totalDays } = 
+                        getAssignmentPeriodStatus(
+                          assignment.startDate,
+                          assignment.endDate
+                        );
+                      return (
+                        <span className="ml-2 text-xs text-gray-500">
+                          (
+                            {daysCompleted} completed
+                            {daysRemaining > 0 && `, ${daysRemaining} remaining`}
+                            , {totalDays} total
+                          )
+                        </span>
+                      );
+                    })()}
+                    {!assignment.endDate && (
+                      <span className="ml-2 text-xs text-gray-500">
+                        (
+                          {calculateDaysBetween(assignment.startDate, assignment.endDate)} day
+                          {calculateDaysBetween(assignment.startDate, assignment.endDate) > 1 ? 's' : ''}
+                        )
+                      </span>
+                    )}
                   </span>
                 </div>
                 

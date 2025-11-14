@@ -7,8 +7,8 @@ import { NurseAssignmentData } from "@/app/actions/scheduling/shift-schedule-act
 import { AssignmentDetailsOverlay } from "./AssignmentDetailsOverlay"
 import { formatName } from "@/utils/formatters"
 import {
-  calculateDaysBetween,
   calculatePeriodSalary,
+  getAssignmentPeriodStatus,
 } from '@/utils/nurseAssignmentUtils';
 
 
@@ -66,6 +66,8 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
 
   const periodSalary = calculatePeriodSalary(assignment.start_date, assignment.end_date, assignment.salary_per_day);
 
+  const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(assignment.start_date, assignment.end_date);
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="py-4 px-6 text-gray-800 font-medium">
@@ -94,19 +96,15 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           </p>
         </div>
       </td>
-      <td className="py-4 px-6">
+      <td className="py-4 px-0">
         <div className="space-y-2">
           <div className="flex items-center">
             <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
             <div className="text-gray-600">
-              {format(new Date(assignment.start_date), 'MMM dd, yyyy')} - 
-              {format(new Date(assignment.end_date), 'MMM dd, yyyy')}
-              <span className="ml-2 text-xs text-gray-500">
-                (
-                  {calculateDaysBetween(assignment.start_date, assignment.end_date)} day
-                  {calculateDaysBetween(assignment.start_date, assignment.end_date) > 1 ? 's' : ''}
-                )
-              </span>
+              <div>
+                {format(new Date(assignment.start_date), 'MMM dd, yyyy')} - 
+                {format(new Date(assignment.end_date), 'MMM dd, yyyy')}
+              </div>
             </div>
           </div>
           <div className="flex items-center">
@@ -114,6 +112,13 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
             <div className="text-gray-600">
               {formattedStartTime} - {formattedEndTime}
             </div>
+          </div>
+          <div className="ml-7 text-xs text-gray-500">
+            (
+              {daysCompleted} completed
+              {daysRemaining > 0 && `, ${daysRemaining} remaining`}
+              , {totalDays} total
+            )
           </div>
         </div>
       </td>
@@ -163,6 +168,8 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
   } = usePreparedAssignmentData(assignment);
 
   const periodSalary = calculatePeriodSalary(assignment.start_date, assignment.end_date, assignment.salary_per_day);
+  
+  const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(assignment.start_date, assignment.end_date);
 
   return (
     <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
@@ -227,12 +234,13 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
             <p className="text-gray-500">Date Range:</p>
             <p className="text-gray-800">
               {format(new Date(assignment.start_date), 'MMM dd, yyyy')} - {format(new Date(assignment.end_date), 'MMM dd, yyyy')}
-              <span className="ml-2 text-xs text-gray-500">
-                (
-                  {calculateDaysBetween(assignment.start_date, assignment.end_date)} day
-                  {calculateDaysBetween(assignment.start_date, assignment.end_date) > 1 ? 's' : ''}
-                )
-              </span>
+            </p>
+            <p className="ml-0 text-xs text-gray-500">
+              (
+                {daysCompleted} completed
+                {daysRemaining > 0 && `, ${daysRemaining} remaining`}
+                , {totalDays} total
+              )
             </p>
           </div>
         </div>
@@ -267,7 +275,7 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Salary</th>
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Schedule</th>
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Client</th> 
-                <th className="py-4 px-6 font-medium text-gray-700 w-1/6">Actions</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-24 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">

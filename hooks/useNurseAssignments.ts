@@ -32,6 +32,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     city?: string;
     serviceType?: string;
     admittedType?: string;
+    searchTerm?: string;
   }>({admittedType: organization});
 
   const determineShiftType = (startTime?: string, endTime?: string): 'day' | 'night' | '24h' => {

@@ -1126,7 +1126,7 @@ interface AssignmentInfo {
 
 export async function listNursesWithAssignments(
   paginationParams?: { page: number; pageSize: number },
-  filterParams?: { status?: string; city?: string; admittedType?: string }
+  filterParams?: { status?: string; city?: string; admittedType?: string, searchTerm?: string }
 ): Promise<{ 
   data: Nurse[] | null, 
   error: string | null,
@@ -1158,8 +1158,29 @@ export async function listNursesWithAssignments(
         city,
         admitted_type,
         salary_per_month,
-        joining_date
+        joining_date,
+        full_name,
+        state,
+        address,
+        taluk,
+        category
       `, { count: 'exact' });
+
+    if (filterParams?.searchTerm && filterParams.searchTerm.trim() !== '') {
+      const q = `%${filterParams.searchTerm.trim()}%`;
+      nursesQuery = nursesQuery.or(
+        [
+          `full_name.ilike.${q}`,
+          `city.ilike.${q}`,
+          `email.ilike.${q}`,
+          `phone_number.ilike.${q}`,
+          `state.ilike.${q}`,
+          `address.ilike.${q}`,
+          `taluk.ilike.${q}`,
+          `category.ilike.${q}`
+        ].join(',')
+      );
+    }
 
     if (filterParams?.city) {
       nursesQuery = nursesQuery.like('city', filterParams.city);
