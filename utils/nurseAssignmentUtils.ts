@@ -25,11 +25,11 @@ export const format12HourTime = (time: string | null) => {
 
 
 export const calculatePeriodSalary = (startDate: string, endDate?: string, salaryPerDay?: number) => {
-	if (!salaryPerDay) return null;
-	const start = new Date(startDate);
-	const end = endDate ? new Date(endDate) : new Date();
-	const diffTime = end.getTime() - start.getTime();
-	const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
-	const salary = salaryPerDay * diffDays;
-	return Number(salary.toFixed(2));
+  if (!salaryPerDay) return null;
+  const start = new Date(startDate);
+  const end = endDate ? new Date(endDate) : new Date();
+  const diffTime = end.getTime() - start.getTime();
+  const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+  const salary = salaryPerDay * diffDays;
+  return Math.ceil(salary);
 };

@@ -95,22 +95,6 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
         </div>
       </td>
       <td className="py-4 px-6">
-        <div className="space-y-1">
-          <div className="font-medium text-gray-800">{formatName(clientName)}</div>
-          {clientType && (
-            <div className="text-xs text-gray-500">{clientType}</div>
-          )}
-          <Link 
-            href={clientProfileUrl} 
-            className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Profile
-          </Link>
-        </div>
-      </td>
-      <td className="py-4 px-6">
         <div className="space-y-2">
           <div className="flex items-center">
             <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
@@ -133,13 +117,31 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           </div>
         </div>
       </td>
+
+      <td className="py-4 px-6">
+        <div className="space-y-1">
+          <div className="font-medium text-gray-800">{formatName(clientName)}</div>
+          {clientType && (
+            <div className="text-xs text-gray-500">{clientType}</div>
+          )}
+          <Link 
+            href={clientProfileUrl} 
+            className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Profile
+          </Link>
+        </div>
+      </td>
+      
       <td className="py-4 px-6">
         <button
           onClick={() => onViewDetails(assignment)}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
-          View Details
+          View
         </button>
       </td>
     </tr>
@@ -263,8 +265,8 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
               <tr className="text-left">
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Nurse</th>
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Salary</th>
-                <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Client</th>
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Schedule</th>
+                <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Client</th> 
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/6">Actions</th>
               </tr>
             </thead>

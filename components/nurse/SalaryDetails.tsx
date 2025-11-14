@@ -237,6 +237,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          salary_id: payment.id,
           nurseId: nurseId,
           amount: payment.netSalary,
           payment_type: "outgoing",

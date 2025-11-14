@@ -75,7 +75,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
             placeholder="e.g., Monthly Expenses"
-            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
         </div>
         <div className="w-1/3">
@@ -87,7 +87,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
             value={modeOfPayment}
             onChange={(e) => setModeOfPayment(e.target.value)}
             placeholder="e.g., Cash, Credit Card, Bank Transfer"
-            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="w-full text-gray-700 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
         </div>
       </div>
@@ -123,7 +123,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
             onChange={(e) => setGroupNotes(e.target.value)}
             placeholder="Add shared notes for all fields above..."
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
         </div>
         <div>
@@ -133,7 +133,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
           <select
             value={groupShowToClient ? 'yes' : 'no'}
             onChange={(e) => setGroupShowToClient(e.target.value === 'yes')}
-            className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded bg-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded bg-white focus:outline-none focus:ring-1 focus:ring-gray-300"
           >
             <option value="yes">Yes</option>
             <option value="no">No</option>

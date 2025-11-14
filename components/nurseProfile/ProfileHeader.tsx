@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SimplifiedNurseDetails } from '@/app/actions/staff-management/add-nurse';
 import { getExperienceFromJoiningDate } from '@/utils/dateUtils';
 import { formatOrganizationName } from '@/utils/formatters';
+import { format } from 'date-fns'
 
 interface ProfileHeaderProps {
   nurse: SimplifiedNurseDetails;
@@ -95,7 +96,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
                   Joined
                 </div>
                 <div className="text-sm font-semibold text-gray-900">
-                  {basicInfo.joining_date || 'N/A'}
+                  {format(new Date(basicInfo.joining_date || ""), 'MMM dd, yyyy') || 'N/A'}
                 </div>
               </div>
 
