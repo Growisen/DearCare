@@ -5,6 +5,7 @@ import { FormattedAssignmentDetails } from '@/hooks/useAssignment';
 import { formatName } from '@/utils/formatters';
 import useOrgStore from '@/app/stores/UseOrgStore';
 import { generateAssignmentPDF } from '@/utils/generateAssignmentPDF';
+import { getAssignmentPeriodStatus } from '@/utils/nurseAssignmentUtils';
 
 export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: FormattedAssignmentDetails }) {
   const { organization } = useOrgStore();
@@ -12,6 +13,11 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
   const handleDownloadPDF = async () => {
     await generateAssignmentPDF(assignmentDetails, organization);
   };
+
+  const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(
+    assignmentDetails.assignmentPeriod.startDate,
+    assignmentDetails.assignmentPeriod.endDate
+  );
 
   return (
     <>
@@ -91,6 +97,15 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
               <p className="text-sm font-medium text-slate-500">End Date</p>
               <p className="text-slate-800">
                 {format(new Date(assignmentDetails.assignmentPeriod.endDate), 'MMMM d, yyyy')}
+              </p>
+            </div>
+            <div>
+              <p className="ml-0 text-sm text-gray-700">
+                (
+                  {daysCompleted} completed
+                  {daysRemaining > 0 && `, ${daysRemaining} remaining`}
+                  , {totalDays} total
+                )
               </p>
             </div>
           </div>

@@ -22,9 +22,21 @@ export const formatDateToISO = (ddmmyyyy: string) => {
 
 export function getExperienceFromJoiningDate(joiningDate: string) {
   if (!joiningDate) return 'N/A';
-  // Parse dd/mm/yyyy format
-  const [day, month, year] = joiningDate.split('/').map(Number);
-  const start = new Date(year, month - 1, day);
+
+  let start: Date;
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(joiningDate)) {
+    // dd/mm/yyyy
+    const [day, month, year] = joiningDate.split('/').map(Number);
+    start = new Date(year, month - 1, day);
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(joiningDate)) {
+    // yyyy-mm-dd
+    const [year, month, day] = joiningDate.split('-').map(Number);
+    start = new Date(year, month - 1, day);
+  } else {
+    return 'Invalid date format';
+  }
+
   const now = new Date();
 
   let years = now.getFullYear() - start.getFullYear();
@@ -33,7 +45,6 @@ export function getExperienceFromJoiningDate(joiningDate: string) {
 
   if (days < 0) {
     months -= 1;
-    // Get days in previous month
     const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
     days += prevMonth.getDate();
   }

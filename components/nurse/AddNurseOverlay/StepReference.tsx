@@ -8,8 +8,7 @@ interface StepReferenceProps {
 }
 
 export const StepReference: React.FC<StepReferenceProps> = ({ data, setData }) => (
-  <div className="space-y-8">
-    {/* Primary Reference */}
+  <div className="space-y-8 text-gray-700">
     <div className="space-y-4">
       <div className="border-b pb-2">
         <h4 className="text-base font-medium">Primary Reference</h4>
@@ -31,7 +30,6 @@ export const StepReference: React.FC<StepReferenceProps> = ({ data, setData }) =
       />
     </div>
 
-    {/* Family References */}
     <div className="space-y-4">
       <div className="border-b pb-2">
         <h4 className="text-base font-medium">Family References</h4>

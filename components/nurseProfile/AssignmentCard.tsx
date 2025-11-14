@@ -2,6 +2,7 @@ import React from 'react';
 import { NurseAssignmentWithClient } from '@/app/actions/staff-management/add-nurse';
 import { format12HourTime, formatDate, getServiceLabel, formatName } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
+import { getAssignmentPeriodStatus } from '@/utils/nurseAssignmentUtils';
 
 interface AssignmentCardProps {
   assignment: NurseAssignmentWithClient;
@@ -26,6 +27,12 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
   };
 
   const status = getStatusConfig();
+
+  // Get assignment period status
+  const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(
+    assignment.assignment.start_date,
+    assignment.assignment.end_date || new Date().toISOString()
+  );
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
@@ -93,6 +100,17 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
               <div className="flex items-start">
                 <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Salary Per Day</span>
                 <span className="text-sm text-gray-900 font-semibold">{assignment.assignment.salary_per_day ? `₹${assignment.assignment.salary_per_day}` : 'N/A'}</span>
+              </div>
+
+              <div className="flex items-start">
+                <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Assignment Period: </span>
+                <span className="text-sm text-gray-900 font-medium">
+                  <p className="ml-0 text-sm text-gray-700">
+                    {daysCompleted} completed
+                      {daysRemaining > 0 && `, ${daysRemaining} remaining`}
+                      , {totalDays} total
+                  </p>
+                </span>
               </div>
             </div>
           </div>

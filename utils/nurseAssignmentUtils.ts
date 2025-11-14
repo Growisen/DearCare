@@ -23,13 +23,34 @@ export const format12HourTime = (time: string | null) => {
   return `${displayHour}:${minutes} ${ampm}`;
 };
 
-
 export const calculatePeriodSalary = (startDate: string, endDate?: string, salaryPerDay?: number) => {
-	if (!salaryPerDay) return null;
-	const start = new Date(startDate);
-	const end = endDate ? new Date(endDate) : new Date();
-	const diffTime = end.getTime() - start.getTime();
-	const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
-	const salary = salaryPerDay * diffDays;
-	return Number(salary.toFixed(2));
+  if (!salaryPerDay) return null;
+  const start = new Date(startDate);
+  const end = endDate ? new Date(endDate) : new Date();
+  const diffTime = end.getTime() - start.getTime();
+  const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+  const salary = salaryPerDay * diffDays;
+  return Math.ceil(salary);
 };
+
+export function getAssignmentPeriodStatus(startDate: string, endDate: string) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const today = new Date();
+
+  const effectiveToday = today < start ? start : (today > end ? end : today);
+
+  const daysCompleted = Math.max(
+    0,
+    Math.floor((effectiveToday.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  );
+
+  const totalDays = Math.max(
+    0,
+    Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  );
+
+  const daysRemaining = Math.max(0, totalDays - daysCompleted);
+
+  return { daysCompleted, daysRemaining, totalDays };
+}

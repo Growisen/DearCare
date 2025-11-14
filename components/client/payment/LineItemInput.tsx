@@ -26,14 +26,14 @@ const LineItemInput: React.FC<LineItemInputProps> = ({
         value={item.fieldName}
         onChange={(e) => onUpdate(item.id, 'fieldName', e.target.value)}
         placeholder="Field name"
-        className="flex-1 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className="flex-1 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
       />
       <input
         type="number"
         value={item.amount}
         onChange={(e) => onUpdate(item.id, 'amount', e.target.value)}
         placeholder="Amount (₹)"
-        className="w-35 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className="w-35 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
       />
       <input
         type="number"
@@ -42,7 +42,7 @@ const LineItemInput: React.FC<LineItemInputProps> = ({
         placeholder="GST (%)"
         min="0"
         max="100"
-        className="w-30 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className="w-30 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
       />
       <input
         type="text"

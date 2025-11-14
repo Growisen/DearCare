@@ -179,58 +179,84 @@ const [referenceData, setReferenceData] = useState<NurseReferenceData>({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-md w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
+return (
+  <div className="fixed inset-0 bg-gray-900/40 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden shadow-xl">
 
-        <div className="shrink-0 border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Add New Nurse</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-full">
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
+      <div className="shrink-0 border-b border-gray-200 px-6 py-5 flex items-center justify-between bg-gray-50">
+        <h2 className="text-lg font-semibold text-gray-900">Add New Nurse</h2>
+        <button 
+          onClick={onClose} 
+          className="p-1.5 hover:bg-gray-200 rounded transition-colors"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5 text-gray-600" />
+        </button>
+      </div>
 
-
-        <div className="shrink-0 px-6 pt-4">
-          <div className="flex justify-between mb-4">
-            {FORM_CONFIG.steps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-gray-700 ${index <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200'
-                  }`}>
-                  {index + 1}
-                </div>
-                <span className="hidden sm:block text-xs mt-1 text-gray-700">{step}</span>
-
-                {currentStep === index && (
-                  <span className="sm:hidden text-xs mt-1 font-medium text-blue-600">{step}</span>
-                )}
-              </div>
-            ))}
+      <div className="shrink-0 px-4 sm:px-6 py-4 sm:py-5 bg-white border-b border-gray-100">
+        <div className="flex items-center justify-between relative">
+          <div className="absolute top-3 sm:top-4 left-0 right-0 h-0.5 bg-gray-200 hidden sm:block">
+            <div 
+              className="h-full bg-gray-400 transition-all duration-300"
+              style={{ width: `${(currentStep / (FORM_CONFIG.steps.length - 1)) * 100}%` }}
+            />
           </div>
-        </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 text-gray-700">
-          {renderStep()}
-        </div>
-
-        <div className="shrink-0 border-t px-6 py-4 bg-white mt-auto flex justify-between items-center rounded-b-2xl">
-          <button
-            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-            disabled={currentStep === 0}
-            className="px-4 py-2 text-sm bg-gray-100 rounded-lg text-gray-700 hover:text-gray-900 disabled:text-gray-400 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-blue-600 font-medium">Step {currentStep + 1} of {FORM_CONFIG.steps.length}</span>
-          <button
-            onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
-            disabled={!canProceed()}
-            className="px-4 py-2 text-sm bg-blue-600 text-white hover:text-white rounded-lg disabled:opacity-50 disabled:text-gray-100"
-          >
-            {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
-          </button>
+          {FORM_CONFIG.steps.map((step, index) => (
+            <div key={index} className="flex flex-col items-center relative z-10">
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-medium text-xs sm:text-sm transition-colors ${
+                index < currentStep 
+                  ? 'bg-gray-600 text-white' 
+                  : index === currentStep
+                  ? 'bg-gray-700 text-white ring-2 sm:ring-4 ring-gray-200'
+                  : 'bg-white text-gray-400 border-2 border-gray-300'
+              }`}>
+                {index < currentStep ? '✓' : index + 1}
+              </div>
+              
+              <span className={`hidden sm:block text-xs mt-2 font-medium whitespace-nowrap ${
+                index === currentStep ? 'text-gray-900' : 'text-gray-500'
+              }`}>
+                {step}
+              </span>
+              
+              {index === currentStep && (
+                <span className="sm:hidden text-xs mt-1.5 font-medium text-gray-900 whitespace-nowrap">
+                  {step}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        {renderStep()}
+      </div>
+      
+      <div className="shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between items-center gap-4">
+        <button
+          onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+          disabled={currentStep === 0}
+          className="px-5 py-2.5 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Previous
+        </button>
+        
+        <span className="text-sm text-gray-600">
+          Step {currentStep + 1} of {FORM_CONFIG.steps.length}
+        </span>
+        
+        <button
+          onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
+          disabled={!canProceed()}
+          className="px-5 py-2.5 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
+        </button>
+      </div>
     </div>
-  );
+  </div>
+);
 }

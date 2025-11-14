@@ -8,6 +8,7 @@ import useOrgStore from '@/app/stores/UseOrgStore';
 import { useEffect } from 'react';
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 export default function RootLayout({
   children,
@@ -37,6 +38,7 @@ export default function RootLayout({
                 />
                 {children}
                 <SpeedInsights />
+                <Analytics />
               </Providers>
             </NetworkProvider>
           </AuthProvider>

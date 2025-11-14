@@ -31,8 +31,8 @@ interface NurseListModalProps {
   totalPages: number;
   totalNurses: number;
   onPageChange: (page: number) => void;
-  onFilterChange: (filters: { status?: string; city?: string; admittedType?: string }) => void;
-  filters: { status?: string; city?: string; admittedType?: string };
+  onFilterChange: (filters: { status?: string; city?: string; admittedType?: string; searchTerm?: string }) => void;
+  filters: { status?: string; city?: string; admittedType?: string; searchTerm?: string };
   isLoading: boolean;
 }
 
@@ -53,13 +53,25 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
 }) => {
   const [selectedNurses, setSelectedNurses] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
-  const [cityFilter, setCityFilter] = useState(filters.city || '');
+  const [searchTerm, setSearchTerm] = useState(filters.searchTerm || '');
   // const [admittedTypeFilter, setAdmittedTypeFilter] = useState(filters.admittedType || '');
   const admittedTypeFilter = filters.admittedType;
-  
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onFilterChange({
+        status: statusFilter || undefined,
+        searchTerm: searchTerm || undefined,
+        //admittedType: admittedTypeFilter || undefined
+      });
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [statusFilter, searchTerm/*, admittedTypeFilter*/]);
+
   useEffect(() => {
     setStatusFilter(filters.status || '');
-    setCityFilter(filters.city || '');
+    setSearchTerm(filters.searchTerm || '');
     // setAdmittedTypeFilter(filters.admittedType || '');
   }, [filters]);
   
@@ -83,21 +95,13 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
     }
   };
 
-  const applyFilters = () => {
-    onFilterChange({
-      status: statusFilter || undefined,
-      city: cityFilter || undefined,
-      //admittedType: admittedTypeFilter || undefined
-    });
-  };
-
   const clearFilters = () => {
     setStatusFilter('');
-    setCityFilter('');
+    setSearchTerm('');
     // setAdmittedTypeFilter('');
     onFilterChange({
       status: undefined,
-      city: undefined,
+      searchTerm: undefined,
       //admittedType: undefined
     });
   };
@@ -152,7 +156,6 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2">
       <div className="bg-white w-full max-w-6xl max-h-[95vh] overflow-y-auto relative shadow-xl">
-        {/* Header with title and action buttons */}
         <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
           <div className="flex items-center justify-between p-4">
             <div>
@@ -182,10 +185,8 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
             </div>
           </div>
 
-          {/* Redesigned Filters section for better responsiveness */}
           <div className="bg-gray-50 p-3">
             <div className="flex flex-col md:flex-row gap-4">
-              {/* Filter controls - stack vertically on mobile, horizontally on larger screens */}
               <div className="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label htmlFor="statusFilter" className="block text-xs font-medium text-gray-700 mb-1">Status</label>
@@ -231,30 +232,22 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                 </div>
                 
                 <div>
-                  <label htmlFor="cityFilter" className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                  <label htmlFor="searchTerm" className="block text-xs font-medium text-gray-700 mb-1">Search</label>
                   <input 
-                    id="cityFilter"
+                    id="searchTerm"
                     type="text" 
-                    value={cityFilter} 
-                    onChange={(e) => setCityFilter(e.target.value)}
-                    placeholder="Enter city name" 
+                    value={searchTerm} 
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Enter city, nurse name, etc." 
                     className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
               
-              {/* Action buttons - aligned to end on desktop, full width on mobile */}
               <div className="flex flex-col sm:flex-row gap-2 md:items-end md:self-end mt-3 md:mt-0">
                 <button 
-                  onClick={applyFilters}
-                  // disabled={!statusFilter && !cityFilter /* && !admittedTypeFilter */}
-                  className="px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  Apply Filters
-                </button>
-                <button 
                   onClick={clearFilters}
-                  disabled={!statusFilter && !cityFilter /* && !admittedTypeFilter */}
+                  disabled={!statusFilter && !searchTerm /* && !admittedTypeFilter */}
                   className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 
                   transition-colors disabled:opacity-40 disabled:text-gray-400 disabled:border-gray-200
                   disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-gray-400 w-full sm:w-auto"
@@ -266,7 +259,6 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
           </div>
         </div>
         
-        {/* Body content */}
         <div className="p-3 sm:p-4">
           {isLoading ? (
             <div className="flex justify-center py-8">
@@ -279,8 +271,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                   {`showing ${((currentPage - 1) * nurses.length) + 1}-${((currentPage - 1) * nurses.length) + nurses.length > totalNurses ? totalNurses : ((currentPage - 1) * nurses.length) + nurses.length} of ${totalNurses} nurses available`}
                 </p>
               </div>
-              
-              {/* Updated layout to use grid instead of dividers */}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {nurses.map((nurse) => (
                   <div key={nurse._id} className="w-full">
@@ -298,7 +289,6 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                         }
                       }}
                     >
-                      {/* Display all assignments or no assignments message */}
                       {nurse.assignments && nurse.assignments.length > 0 ? (
                         <div className="mt-2">
                           <div className="flex items-center mb-2">
@@ -379,7 +369,6 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                         )
                       )}
 
-                      {/* Display leave info */}
                       {nurse.leaveInfo && (
                         <div className="mt-2">
                           <div className="bg-gray-100 border-l-4 border-black rounded p-3">
@@ -414,7 +403,6 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
             </div>
           )}
           
-          {/* Pagination controls */}
           {!isLoading && totalPages > 0 && renderPagination()}
         </div>
       </div>
