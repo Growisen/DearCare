@@ -278,6 +278,111 @@ export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date
   }
 }
 
+export interface PaymentOverview {
+  totalPayments: number;
+  totalAmount: number;
+  recentPayments: Array<{
+    id: string;
+    clientName: string;
+    groupName: string;
+    amount: number;
+    date: string;
+    modeOfPayment?: string;
+  }>;
+}
+
+type PaymentRecord = {
+  id: string;
+  client_id: string;
+  payment_group_name: string;
+  total_amount: number;
+  date_added: string;
+  mode_of_payment?: string;
+};
+
+type PaymentClient = {
+  id: string;
+  requestor_name?: string;
+  organization_name?: string;
+};
+
+// ==============================
+// Function: fetchPaymentOverview
+// Description: Fetches summary and recent client payments for dashboard overview.
+// Returns: Promise<{ success: boolean; data?: PaymentOverview; error?: string }>
+// ==============================
+export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Date | null }): Promise<{
+  success: boolean;
+  data?: PaymentOverview;
+  error?: string;
+}> {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const dateToUse = selectedDate ?? new Date();
+
+    let paymentsQuery = supabase
+      .from('client_payment_records')
+      .select('id, client_id, payment_group_name, total_amount, date_added, mode_of_payment')
+      .order('date_added', { ascending: false })
+      .limit(10);
+
+    if (dateToUse) {
+      const startOfDay = new Date(dateToUse);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(dateToUse);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      paymentsQuery = paymentsQuery
+        .gte('date_added', startOfDay.toISOString())
+        .lte('date_added', endOfDay.toISOString());
+    }
+
+    const { data: payments, error: paymentsError } = await paymentsQuery;
+
+    if (paymentsError) throw new Error(paymentsError.message);
+
+    const clientIds = (payments as PaymentRecord[]).map(p => p.client_id);
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients_view_unified')
+      .select('id, requestor_name, organization_name')
+      .in('id', clientIds);
+
+    if (clientsError) throw new Error(clientsError.message);
+
+    const recentPayments = (payments as PaymentRecord[]).map(p => {
+      const client = (clients as PaymentClient[]).find(c => c.id === p.client_id);
+      return {
+        id: p.id,
+        clientName: client?.requestor_name || client?.organization_name || 'Unknown',
+        groupName: p.payment_group_name,
+        amount: p.total_amount,
+        date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
+        modeOfPayment: p.mode_of_payment,
+      };
+    });
+
+    const totalPayments = payments.length;
+    const totalAmount = (payments as PaymentRecord[]).reduce((sum, p) => sum + (p.total_amount || 0), 0);
+
+    console.log('Fetched payment overview:', { totalPayments, totalAmount, recentPayments });
+
+    return {
+      success: true,
+      data: {
+        totalPayments,
+        totalAmount,
+        recentPayments,
+      },
+    };
+  } catch (error) {
+    logger.error('Error fetching payment overview:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
 // ==============================
 // Function: addTodo
 // Description: Adds a new todo item for the authenticated user.

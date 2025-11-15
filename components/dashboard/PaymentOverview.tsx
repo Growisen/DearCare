@@ -1,0 +1,129 @@
+import { Card } from "@/components/ui/card"
+import { CreditCard, Download, Search } from "lucide-react"
+import { useState, useEffect } from "react"
+import Loader from "@/components/Loader"
+
+interface PaymentOverviewProps {
+  paymentData?: {
+    totalPayments: number;
+    totalAmount: number;
+    recentPayments: Array<{
+      id: string;
+      clientName: string;
+      groupName: string;
+      amount: number;
+      date: string;
+      modeOfPayment?: string;
+    }>;
+  };
+  loading?: boolean;
+}
+
+export default function PaymentOverview({ paymentData, loading = false }: PaymentOverviewProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [payments, setPayments] = useState(paymentData?.recentPayments || [])
+
+  useEffect(() => {
+    if (paymentData?.recentPayments) {
+      setPayments(paymentData.recentPayments)
+    }
+  }, [paymentData])
+
+  const filteredPayments = payments.filter(p =>
+    p.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const handleExport = () => {
+    const csvContent = "data:text/csv;charset=utf-8," +
+      ["Client Name,Group,Amount,Date,Mode of Payment"]
+        .concat(filteredPayments.map(p =>
+          `${p.clientName},${p.groupName},${p.amount},${p.date},${p.modeOfPayment || ""}`
+        )).join("\n")
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", "recent_payments.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-6 bg-white border border-slate-200 shadow-sm rounded-lg mt-6 flex items-center justify-center min-h-[300px]">
+        <Loader message="Loading payments..." size="large" color="primary" centered />
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg mt-6">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
+        <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
+          <CreditCard className="w-5 h-5 text-slate-700 mr-2" />
+          <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Payments Overview</h3>
+        </div>
+        <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
+            <Search className="w-3 h-3 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search payments..."
+              className="pl-10 pr-4 py-2 rounded-md border text-slate-800 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button
+            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+            onClick={handleExport}
+          >
+            <Download className="w-4 h-4" />
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+      <div className="mb-4 flex gap-6">
+        <div className="text-sm text-slate-700">
+          <span className="font-semibold">Total Payments:</span> {paymentData?.totalPayments ?? 0}
+        </div>
+        <div className="text-sm text-slate-700">
+          <span className="font-semibold">Total Amount:</span> ₹{paymentData?.totalAmount?.toLocaleString() ?? "0"}
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        {filteredPayments.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
+              <p className="text-lg font-medium mb-1">No payments found</p>
+              <p className="text-sm">No recent payments available</p>
+            </div>
+          </div>
+        ) : (
+          <table className="hidden sm:table w-full">
+            <thead>
+              <tr className="text-left border-b border-slate-200">
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Client Name</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Group</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Amount</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPayments.map((p) => (
+                <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="py-3 px-4 text-sm font-medium text-slate-800">{p.clientName}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">{p.groupName}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">₹{p.amount.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">{p.date}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">{p.modeOfPayment || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </Card>
+  )
+}
