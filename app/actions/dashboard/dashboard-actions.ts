@@ -291,26 +291,19 @@ export interface PaymentOverview {
   }>;
 }
 
-type PaymentRecord = {
+type UnifiedPaymentViewRecord = {
   id: string;
   client_id: string;
   payment_group_name: string;
   total_amount: number;
   date_added: string;
-  mode_of_payment?: string;
+  mode_of_payment: string | null;
+  client_display_name: string;
+  client_category: string;
+  client_type?: string;
+  client_status?: string;
 };
 
-type PaymentClient = {
-  id: string;
-  requestor_name?: string;
-  organization_name?: string;
-};
-
-// ==============================
-// Function: fetchPaymentOverview
-// Description: Fetches summary and recent client payments for dashboard overview.
-// Returns: Promise<{ success: boolean; data?: PaymentOverview; error?: string }>
-// ==============================
 export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Date | null }): Promise<{
   success: boolean;
   data?: PaymentOverview;
@@ -327,23 +320,10 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
     const dateToUse = selectedDate ?? new Date();
 
     let paymentsQuery = supabase
-      .from('client_payment_records')
-      .select(`
-        id,
-        client_id,
-        payment_group_name,
-        total_amount,
-        date_added,
-        mode_of_payment,
-        client:clients (
-          id,
-          requestor_name,
-          organization_name,
-          client_category
-        )
-      `)
+      .from('unified_payment_records_view')
+      .select('*')
       .order('date_added', { ascending: false })
-      .eq('client.client_category', clientsOrg);
+      .eq('client_category', clientsOrg);
 
     if (dateToUse) {
       const startOfDay = new Date(dateToUse);
@@ -356,34 +336,25 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
         .lte('date_added', endOfDay.toISOString());
     }
 
-    const { data: payments, error: paymentsError } = await paymentsQuery;
+    const { data: rawPayments, error: paymentsError } = await paymentsQuery.returns<UnifiedPaymentViewRecord[]>();
 
     if (paymentsError) throw new Error(paymentsError.message);
 
-    const clientIds = (payments as PaymentRecord[]).map(p => p.client_id);
-    const { data: clients, error: clientsError } = await supabase
-      .from('clients_view_unified')
-      .select('id, requestor_name, organization_name')
-      .in('id', clientIds);
+    const payments = rawPayments || [];
 
-    if (clientsError) throw new Error(clientsError.message);
-
-    const recentPayments = (payments as PaymentRecord[]).map(p => {
-      const client = (clients as PaymentClient[]).find(c => c.id === p.client_id);
+    const recentPayments = payments.map(p => {
       return {
         id: p.id,
-        clientName: client?.requestor_name || client?.organization_name || 'Unknown',
+        clientName: p.client_display_name,
         groupName: p.payment_group_name,
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
-        modeOfPayment: p.mode_of_payment,
+        modeOfPayment: p.mode_of_payment || '',
       };
     });
 
     const totalPayments = payments.length;
-    const totalAmount = (payments as PaymentRecord[]).reduce((sum, p) => sum + (p.total_amount || 0), 0);
-
-    console.log('Fetched payment overview:', { totalPayments, totalAmount, recentPayments });
+    const totalAmount = payments.reduce((sum, p) => sum + (p.total_amount || 0), 0);
 
     return {
       success: true,
