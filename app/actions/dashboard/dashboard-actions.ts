@@ -319,12 +319,31 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
   try {
     const { supabase } = await getAuthenticatedClient();
 
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { clientsOrg } = getOrgMappings(organization);
+
     const dateToUse = selectedDate ?? new Date();
 
     let paymentsQuery = supabase
       .from('client_payment_records')
-      .select('id, client_id, payment_group_name, total_amount, date_added, mode_of_payment')
+      .select(`
+        id,
+        client_id,
+        payment_group_name,
+        total_amount,
+        date_added,
+        mode_of_payment,
+        client:clients (
+          id,
+          requestor_name,
+          organization_name,
+          client_category
+        )
+      `)
       .order('date_added', { ascending: false })
+      .eq('client.client_category', clientsOrg);
 
     if (dateToUse) {
       const startOfDay = new Date(dateToUse);
