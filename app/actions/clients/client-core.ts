@@ -218,12 +218,47 @@ export async function getUnifiedClients(
   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all',
   searchQuery?: string,
   page: number = 1,
-  pageSize: number = 10) {
+  pageSize: number = 10,
+  createdAt?: Date | null,
+) {
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     const organization = user?.user_metadata?.organization;
     const { clientsOrg } = getOrgMappings(organization);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const applyFilters = (baseQuery: any) => {
+      let q = baseQuery;
+
+      if (status && status !== "all") {
+        q = q.eq('status', status);
+      }
+
+      if (clientsOrg) {
+        q = q.eq('client_category', clientsOrg);
+      }
+
+      if (searchQuery && searchQuery.trim() !== '') {
+        const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+        q = q.ilike('search_text', searchTerm);
+      }
+
+      if (createdAt) {
+        const date = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        q = q.gte('created_at', startOfDay.toISOString())
+            .lte('created_at', endOfDay.toISOString());
+      }
+
+      return q;
+    };
+
+    console.log('Filters - Status:', status, 'Search Query:', searchQuery, 'Created At:', createdAt);
 
     let query = supabase
       .from('clients_view_unified')
@@ -245,35 +280,13 @@ export async function getUnifiedClients(
         search_text
       `);
 
-    if (status && status !== "all") {
-      query = query.eq('status', status);
-    }
-
-    if (clientsOrg) {
-      query = query.eq('client_category', clientsOrg);
-    }
-
-    if (searchQuery && searchQuery.trim() !== '') {
-      const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
-      query = query.ilike('search_text', searchTerm);
-    }
+    query = applyFilters(query);
 
     let countQuery = supabase
       .from('clients_view_unified')
       .select('id', { count: 'exact', head: true });
 
-    if (status && status !== "all") {
-      countQuery = countQuery.eq('status', status);
-    }
-
-    if (clientsOrg) {
-      countQuery = countQuery.eq('client_category', clientsOrg);
-    }
-
-    if (searchQuery && searchQuery.trim() !== '') {
-      const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
-      countQuery = countQuery.ilike('search_text', searchTerm);
-    }
+    countQuery = applyFilters(countQuery);
 
     const { count, error: countError } = await countQuery;
 

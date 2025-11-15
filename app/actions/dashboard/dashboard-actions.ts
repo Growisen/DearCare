@@ -46,7 +46,7 @@ export interface DashboardData {
 // Returns: Promise<{ success: boolean; data?: DashboardData; error?: string }>
 // ==============================
 
-export async function fetchDashboardData(): Promise<{
+export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date | null }): Promise<{
   success: boolean;
   data?: DashboardData;
   error?: string;
@@ -54,11 +54,100 @@ export async function fetchDashboardData(): Promise<{
   try {
     const { supabase, userId } = await getAuthenticatedClient();
     const today = new Date().toISOString().split('T')[0];
+    
+    let startOfDay: Date | undefined;
+    let endOfDay: Date | undefined;
+
+    if (selectedDate) {
+      const date = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate;
+      startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      startOfDay = new Date(startOfDay.toISOString());
+      endOfDay = new Date(endOfDay.toISOString());
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     const organization = user?.user_metadata?.organization;
 
     const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+    let nursesQuery = supabase
+      .from('nurses')
+      .select('count')
+      .neq('status', 'leave')
+      .eq('admitted_type', nursesOrg);
+
+    let assignmentsQuery = supabase
+      .from('nurse_client')
+      .select('*, nurse_id!inner(*)')
+      .eq('nurse_id.admitted_type', nursesOrg);
+
+    let pendingClientsQuery = supabase
+      .from('clients')
+      .select('count')
+      .eq('status', 'pending')
+      .eq('client_category', clientsOrg);
+
+    let approvedClientsQuery = supabase
+      .from('clients')
+      .select('count')
+      .eq('status', 'approved')
+      .eq('client_category', clientsOrg);
+
+    let todosQuery = supabase
+      .from('admin_dashboard_todos')
+      .select('id, text, time, date, location, urgent, completed')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    let recentClientsQuery = supabase
+      .from('clients_view_unified')
+      .select(`
+        id,
+        client_type,
+        status,
+        created_at,
+        client_category,
+        requestor_email,
+        requestor_phone,
+        requestor_name,
+        patient_name,
+        service_required,
+        start_date,
+        organization_name,
+        contact_email,
+        contact_phone
+      `)
+      .eq('client_category', clientsOrg)
+      .limit(5)
+      .order('created_at', { ascending: false });
+
+    let totalComplaintsQuery = supabase.from('dearcare_complaints').select('count');
+    let openComplaintsQuery = supabase.from('dearcare_complaints').select('count').eq('status', 'open');
+    let underReviewComplaintsQuery = supabase.from('dearcare_complaints').select('count').eq('status', 'under_review');
+    let resolvedComplaintsQuery = supabase.from('dearcare_complaints').select('count').eq('status', 'resolved');
+
+    if (selectedDate && startOfDay && endOfDay) {
+      const startIso = startOfDay.toISOString();
+      const endIso = endOfDay.toISOString();
+
+      nursesQuery = nursesQuery.gte('created_at', startIso).lte('created_at', endIso);
+      assignmentsQuery = assignmentsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      pendingClientsQuery = pendingClientsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      approvedClientsQuery = approvedClientsQuery.gte('created_at', startIso).lte('created_at', endIso);
+
+      todosQuery = todosQuery.eq('date', selectedDate);
+
+      recentClientsQuery = recentClientsQuery.gte('created_at', startIso).lte('created_at', endIso);
+
+      totalComplaintsQuery = totalComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      openComplaintsQuery = openComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      underReviewComplaintsQuery = underReviewComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      resolvedComplaintsQuery = resolvedComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+    }
 
     const [
       statsResults,
@@ -69,72 +158,28 @@ export async function fetchDashboardData(): Promise<{
     ] = await Promise.all([
 
       Promise.all([
-        supabase
-          .from('nurses')
-          .select('count')
-          .neq('status', 'leave')
-          .eq('admitted_type', nursesOrg) 
-          .single(),
-        supabase
-          .from('nurse_client')
-          .select('*, nurse_id!inner(*)')
-          .eq('nurse_id.admitted_type', nursesOrg),
-        supabase
-          .from('clients')
-          .select('count')
-          .eq('status', 'pending')
-          .eq('client_category', clientsOrg)
-          .single(),
-        supabase
-          .from('clients')
-          .select('count')
-          .eq('status', 'approved')
-          .eq('client_category', clientsOrg)
-          .single()
+        nursesQuery.single(),
+        assignmentsQuery,
+        pendingClientsQuery.single(),
+        approvedClientsQuery.single()
       ]),
 
-      supabase
-        .from('admin_dashboard_todos')
-        .select('id, text, time, date, location, urgent, completed')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false }),
+      todosQuery,
 
-      supabase
-        .from('clients')
-        .select(`
-          id,
-          client_type,
-          status,
-          created_at,
-          individual_clients:individual_clients(
-            requestor_email,
-            requestor_phone,
-            patient_name,
-            requestor_name,
-            service_required,
-            start_date
-          ),
-          organization_clients:organization_clients(
-            organization_name,
-            contact_email,
-            contact_phone
-          )
-        `)
-        .eq('status', 'pending')
-        .eq('client_category', clientsOrg)
-        .limit(5)
-        .order('created_at', { ascending: false }),
+      recentClientsQuery,
 
-      supabase.rpc('get_attendance_data_by_org', { curr_date: today, organization:nursesOrg }),
+      supabase.rpc('get_attendance_data_by_org', { 
+        curr_date: selectedDate || today,
+        organization: nursesOrg 
+      }),
 
       Promise.all([
-        supabase.from('dearcare_complaints').select('count').single(),
-        supabase.from('dearcare_complaints').select('count').eq('status', 'open').single(),
-        supabase.from('dearcare_complaints').select('count').eq('status', 'under_review').single(),
-        supabase.from('dearcare_complaints').select('count').eq('status', 'resolved').single()
+        totalComplaintsQuery.single(),
+        openComplaintsQuery.single(),
+        underReviewComplaintsQuery.single(),
+        resolvedComplaintsQuery.single()
       ])
     ]);
-
 
     const [nursesResult, assignmentsResult, requestsResult, clientsResult] = statsResults;
     const [totalComplaintsResult, openComplaintsResult, underReviewComplaintsResult, resolvedComplaintsResult] = complaintsResults;
@@ -152,33 +197,25 @@ export async function fetchDashboardData(): Promise<{
     if (underReviewComplaintsResult.error) throw new Error(`Error fetching under review complaints: ${underReviewComplaintsResult.error.message}`);
     if (resolvedComplaintsResult.error) throw new Error(`Error fetching resolved complaints: ${resolvedComplaintsResult.error.message}`);
 
-    const recentClients = recentClientsResult.data.map(record => {
+    const recentClients = (recentClientsResult.data || []).map(record => {
       const isIndividual = record.client_type === 'individual';
-      const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
-        ? record.individual_clients[0] 
-        : record.individual_clients) : null;
-      const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
-        ? record.organization_clients[0] 
-        : record.organization_clients) : null;
-      
       return {
         id: record.id,
-        name: isIndividual 
-          ? individualData?.requestor_name || "Unknown" 
-          : organizationData?.organization_name || "Unknown",
+        name: isIndividual
+          ? (record.requestor_name || record.patient_name || "Unknown")
+          : (record.organization_name || "Unknown"),
         requestDate: isIndividual
-          ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+          ? new Date(record.start_date || record.created_at || new Date()).toISOString().split('T')[0]
           : new Date(record.created_at || new Date()).toISOString().split('T')[0],
-        service: isIndividual ? individualData?.service_required : "Organization Care",
+        service: isIndividual ? record.service_required : "Organization Care",
         status: record.status,
-        email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
-        phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
+        email: isIndividual ? record.requestor_email : record.contact_email,
+        phone: isIndividual ? record.requestor_phone : record.contact_phone,
       };
     });
 
     const attendanceData = attendanceResult.data || { total: 0, present: 0, onLeave: 0 };
     const totalStaff = attendanceData.total || 0;
-    console.log('Attendance Data:', attendanceData);
     const presentStaff = attendanceData.present || 0;
     const onLeaveStaff = attendanceData.onLeave || 0;
     const absentStaff = totalStaff - presentStaff - onLeaveStaff;
@@ -233,7 +270,7 @@ export async function fetchDashboardData(): Promise<{
     };
     
   } catch (error) {
-    logger.error('Error fetching dashboard data:', error);
+    console.error('Error fetching dashboard data:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -241,7 +278,110 @@ export async function fetchDashboardData(): Promise<{
   }
 }
 
+export interface PaymentOverview {
+  totalPayments: number;
+  totalAmount: number;
+  recentPayments: Array<{
+    id: string;
+    clientName: string;
+    groupName: string;
+    amount: number;
+    date: string;
+    modeOfPayment?: string;
+  }>;
+}
 
+type PaymentRecord = {
+  id: string;
+  client_id: string;
+  payment_group_name: string;
+  total_amount: number;
+  date_added: string;
+  mode_of_payment?: string;
+};
+
+type PaymentClient = {
+  id: string;
+  requestor_name?: string;
+  organization_name?: string;
+};
+
+// ==============================
+// Function: fetchPaymentOverview
+// Description: Fetches summary and recent client payments for dashboard overview.
+// Returns: Promise<{ success: boolean; data?: PaymentOverview; error?: string }>
+// ==============================
+export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Date | null }): Promise<{
+  success: boolean;
+  data?: PaymentOverview;
+  error?: string;
+}> {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const dateToUse = selectedDate ?? new Date();
+
+    let paymentsQuery = supabase
+      .from('client_payment_records')
+      .select('id, client_id, payment_group_name, total_amount, date_added, mode_of_payment')
+      .order('date_added', { ascending: false })
+
+    if (dateToUse) {
+      const startOfDay = new Date(dateToUse);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(dateToUse);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      paymentsQuery = paymentsQuery
+        .gte('date_added', startOfDay.toISOString())
+        .lte('date_added', endOfDay.toISOString());
+    }
+
+    const { data: payments, error: paymentsError } = await paymentsQuery;
+
+    if (paymentsError) throw new Error(paymentsError.message);
+
+    const clientIds = (payments as PaymentRecord[]).map(p => p.client_id);
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients_view_unified')
+      .select('id, requestor_name, organization_name')
+      .in('id', clientIds);
+
+    if (clientsError) throw new Error(clientsError.message);
+
+    const recentPayments = (payments as PaymentRecord[]).map(p => {
+      const client = (clients as PaymentClient[]).find(c => c.id === p.client_id);
+      return {
+        id: p.id,
+        clientName: client?.requestor_name || client?.organization_name || 'Unknown',
+        groupName: p.payment_group_name,
+        amount: p.total_amount,
+        date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
+        modeOfPayment: p.mode_of_payment,
+      };
+    });
+
+    const totalPayments = payments.length;
+    const totalAmount = (payments as PaymentRecord[]).reduce((sum, p) => sum + (p.total_amount || 0), 0);
+
+    console.log('Fetched payment overview:', { totalPayments, totalAmount, recentPayments });
+
+    return {
+      success: true,
+      data: {
+        totalPayments,
+        totalAmount,
+        recentPayments,
+      },
+    };
+  } catch (error) {
+    logger.error('Error fetching payment overview:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
 // ==============================
 // Function: addTodo
 // Description: Adds a new todo item for the authenticated user.

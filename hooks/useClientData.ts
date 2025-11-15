@@ -14,9 +14,10 @@ export function useClientData() {
   const [selectedStatus, setSelectedStatus] = useState<ClientFilters>("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [isStatusLoaded, setIsStatusLoaded] = useState(false)
+  const [createdAt, setCreatedAt] = useState<Date | null>(null)
 
   const [currentPage, setCurrentPage] = useState(1)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [pageSize, setPageSize] = useState(10)
 
   const getClientCategory = (): ClientCategory | "all" => {
@@ -42,8 +43,8 @@ export function useClientData() {
     error, 
     refetch 
   } = useQuery({
-    queryKey: ['clients', selectedStatus, searchQuery, currentPage, pageSize, selectedCategory],
-    queryFn: () => getUnifiedClients(selectedStatus, searchQuery, currentPage, pageSize),
+    queryKey: ['clients', selectedStatus, searchQuery, currentPage, pageSize, selectedCategory, createdAt],
+    queryFn: () => getUnifiedClients(selectedStatus, searchQuery, currentPage, pageSize, createdAt),
     enabled: isStatusLoaded && !!selectedStatus,
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
@@ -123,6 +124,8 @@ export function useClientData() {
     handlePreviousPage,
     handleNextPage,
     refreshData,
-    invalidateClientCache
+    invalidateClientCache,
+    createdAt,
+    setCreatedAt,
   }
 }

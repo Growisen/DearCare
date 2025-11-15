@@ -14,6 +14,8 @@ type ClientHeader = {
   selectedCategory: ClientCategory | "all" 
   handleSearch: () => void
   handleResetFilters: () => void
+  createdAt: string
+  setCreatedAt: (date: string) => void
 }
 
 export function ClientHeader({ 
@@ -26,7 +28,9 @@ export function ClientHeader({
   handleStatusChange,
   selectedCategory,
   handleSearch,
-  handleResetFilters
+  handleResetFilters,
+  createdAt,
+  setCreatedAt
 }: ClientHeader) {
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
@@ -123,11 +127,21 @@ export function ClientHeader({
             </div>
           </div>
           
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Created At:</span>
+            <input
+              type="date"
+              value={createdAt}
+              onChange={(e) => setCreatedAt(e.target.value)}
+              className="px-2.5 py-1 rounded-md text-xs font-medium bg-white border border-gray-200 text-gray-800"
+            />
+          </div>
+          
           <button
             onClick={handleResetFilters}
-            disabled={selectedStatus === "all" && !searchInput}
+            disabled={selectedStatus === "all" && !searchInput && !createdAt}
             className={`ml-auto px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
-              selectedStatus === "all" && !searchInput
+              selectedStatus === "all" && !searchInput && !createdAt
                 ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
             }`}
