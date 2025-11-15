@@ -18,6 +18,7 @@ export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [showAddClient, setShowAddClient] = useState(false)
   
+
   const { 
     clients,
     isLoading,
@@ -39,7 +40,9 @@ export default function ClientsPage() {
     handlePageChange,
     handlePreviousPage,
     handleNextPage,
-    refreshData
+    refreshData,
+    createdAt,
+    setCreatedAt,
   } = useClientData()
 
   const { isExporting, handleExport } = useExportClients(selectedStatus, searchQuery)
@@ -57,6 +60,7 @@ export default function ClientsPage() {
     try {
       setSearchInput("");
       setSelectedStatus("all")
+      setCreatedAt(null);
       
       setSearchQuery(""); 
       
@@ -80,6 +84,8 @@ export default function ClientsPage() {
           handleSearch={handleSearch}
           selectedCategory={selectedCategory}
           handleResetFilters={handleResetFilters}
+          createdAt={createdAt ? createdAt.toISOString().split('T')[0] : ""}
+          setCreatedAt={(date: string) => setCreatedAt(date ? new Date(date) : null)}
         />
 
         {/* <ClientFilters
