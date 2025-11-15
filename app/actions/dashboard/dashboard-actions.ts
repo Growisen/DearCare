@@ -104,27 +104,23 @@ export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date
       .order('created_at', { ascending: false });
 
     let recentClientsQuery = supabase
-      .from('clients')
+      .from('clients_view_unified')
       .select(`
         id,
         client_type,
         status,
         created_at,
-        individual_clients:individual_clients(
-          requestor_email,
-          requestor_phone,
-          patient_name,
-          requestor_name,
-          service_required,
-          start_date
-        ),
-        organization_clients:organization_clients(
-          organization_name,
-          contact_email,
-          contact_phone
-        )
+        client_category,
+        requestor_email,
+        requestor_phone,
+        requestor_name,
+        patient_name,
+        service_required,
+        start_date,
+        organization_name,
+        contact_email,
+        contact_phone
       `)
-      // .eq('status', 'pending')
       .eq('client_category', clientsOrg)
       .limit(5)
       .order('created_at', { ascending: false });
@@ -201,27 +197,20 @@ export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date
     if (underReviewComplaintsResult.error) throw new Error(`Error fetching under review complaints: ${underReviewComplaintsResult.error.message}`);
     if (resolvedComplaintsResult.error) throw new Error(`Error fetching resolved complaints: ${resolvedComplaintsResult.error.message}`);
 
-    const recentClients = recentClientsResult.data.map(record => {
+    const recentClients = (recentClientsResult.data || []).map(record => {
       const isIndividual = record.client_type === 'individual';
-      const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
-        ? record.individual_clients[0] 
-        : record.individual_clients) : null;
-      const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
-        ? record.organization_clients[0] 
-        : record.organization_clients) : null;
-      
       return {
         id: record.id,
-        name: isIndividual 
-          ? individualData?.requestor_name || "Unknown" 
-          : organizationData?.organization_name || "Unknown",
+        name: isIndividual
+          ? (record.requestor_name || record.patient_name || "Unknown")
+          : (record.organization_name || "Unknown"),
         requestDate: isIndividual
-          ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
+          ? new Date(record.start_date || record.created_at || new Date()).toISOString().split('T')[0]
           : new Date(record.created_at || new Date()).toISOString().split('T')[0],
-        service: isIndividual ? individualData?.service_required : "Organization Care",
+        service: isIndividual ? record.service_required : "Organization Care",
         status: record.status,
-        email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
-        phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
+        email: isIndividual ? record.requestor_email : record.contact_email,
+        phone: isIndividual ? record.requestor_phone : record.contact_phone,
       };
     });
 
