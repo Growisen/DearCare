@@ -46,7 +46,7 @@ export interface DashboardData {
 // Returns: Promise<{ success: boolean; data?: DashboardData; error?: string }>
 // ==============================
 
-export async function fetchDashboardData(): Promise<{
+export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date | null }): Promise<{
   success: boolean;
   data?: DashboardData;
   error?: string;
@@ -54,11 +54,104 @@ export async function fetchDashboardData(): Promise<{
   try {
     const { supabase, userId } = await getAuthenticatedClient();
     const today = new Date().toISOString().split('T')[0];
+    
+    let startOfDay: Date | undefined;
+    let endOfDay: Date | undefined;
+
+    if (selectedDate) {
+      const date = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate;
+      startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      startOfDay = new Date(startOfDay.toISOString());
+      endOfDay = new Date(endOfDay.toISOString());
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     const organization = user?.user_metadata?.organization;
 
     const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+    let nursesQuery = supabase
+      .from('nurses')
+      .select('count')
+      .neq('status', 'leave')
+      .eq('admitted_type', nursesOrg);
+
+    let assignmentsQuery = supabase
+      .from('nurse_client')
+      .select('*, nurse_id!inner(*)')
+      .eq('nurse_id.admitted_type', nursesOrg);
+
+    let pendingClientsQuery = supabase
+      .from('clients')
+      .select('count')
+      .eq('status', 'pending')
+      .eq('client_category', clientsOrg);
+
+    let approvedClientsQuery = supabase
+      .from('clients')
+      .select('count')
+      .eq('status', 'approved')
+      .eq('client_category', clientsOrg);
+
+    let todosQuery = supabase
+      .from('admin_dashboard_todos')
+      .select('id, text, time, date, location, urgent, completed')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    let recentClientsQuery = supabase
+      .from('clients')
+      .select(`
+        id,
+        client_type,
+        status,
+        created_at,
+        individual_clients:individual_clients(
+          requestor_email,
+          requestor_phone,
+          patient_name,
+          requestor_name,
+          service_required,
+          start_date
+        ),
+        organization_clients:organization_clients(
+          organization_name,
+          contact_email,
+          contact_phone
+        )
+      `)
+      // .eq('status', 'pending')
+      .eq('client_category', clientsOrg)
+      .limit(5)
+      .order('created_at', { ascending: false });
+
+    let totalComplaintsQuery = supabase.from('dearcare_complaints').select('count');
+    let openComplaintsQuery = supabase.from('dearcare_complaints').select('count').eq('status', 'open');
+    let underReviewComplaintsQuery = supabase.from('dearcare_complaints').select('count').eq('status', 'under_review');
+    let resolvedComplaintsQuery = supabase.from('dearcare_complaints').select('count').eq('status', 'resolved');
+
+    if (selectedDate && startOfDay && endOfDay) {
+      const startIso = startOfDay.toISOString();
+      const endIso = endOfDay.toISOString();
+
+      nursesQuery = nursesQuery.gte('created_at', startIso).lte('created_at', endIso);
+      assignmentsQuery = assignmentsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      pendingClientsQuery = pendingClientsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      approvedClientsQuery = approvedClientsQuery.gte('created_at', startIso).lte('created_at', endIso);
+
+      todosQuery = todosQuery.eq('date', selectedDate);
+
+      recentClientsQuery = recentClientsQuery.gte('created_at', startIso).lte('created_at', endIso);
+
+      totalComplaintsQuery = totalComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      openComplaintsQuery = openComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      underReviewComplaintsQuery = underReviewComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+      resolvedComplaintsQuery = resolvedComplaintsQuery.gte('created_at', startIso).lte('created_at', endIso);
+    }
 
     const [
       statsResults,
@@ -69,72 +162,28 @@ export async function fetchDashboardData(): Promise<{
     ] = await Promise.all([
 
       Promise.all([
-        supabase
-          .from('nurses')
-          .select('count')
-          .neq('status', 'leave')
-          .eq('admitted_type', nursesOrg) 
-          .single(),
-        supabase
-          .from('nurse_client')
-          .select('*, nurse_id!inner(*)')
-          .eq('nurse_id.admitted_type', nursesOrg),
-        supabase
-          .from('clients')
-          .select('count')
-          .eq('status', 'pending')
-          .eq('client_category', clientsOrg)
-          .single(),
-        supabase
-          .from('clients')
-          .select('count')
-          .eq('status', 'approved')
-          .eq('client_category', clientsOrg)
-          .single()
+        nursesQuery.single(),
+        assignmentsQuery,
+        pendingClientsQuery.single(),
+        approvedClientsQuery.single()
       ]),
 
-      supabase
-        .from('admin_dashboard_todos')
-        .select('id, text, time, date, location, urgent, completed')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false }),
+      todosQuery,
 
-      supabase
-        .from('clients')
-        .select(`
-          id,
-          client_type,
-          status,
-          created_at,
-          individual_clients:individual_clients(
-            requestor_email,
-            requestor_phone,
-            patient_name,
-            requestor_name,
-            service_required,
-            start_date
-          ),
-          organization_clients:organization_clients(
-            organization_name,
-            contact_email,
-            contact_phone
-          )
-        `)
-        .eq('status', 'pending')
-        .eq('client_category', clientsOrg)
-        .limit(5)
-        .order('created_at', { ascending: false }),
+      recentClientsQuery,
 
-      supabase.rpc('get_attendance_data_by_org', { curr_date: today, organization:nursesOrg }),
+      supabase.rpc('get_attendance_data_by_org', { 
+        curr_date: selectedDate || today,
+        organization: nursesOrg 
+      }),
 
       Promise.all([
-        supabase.from('dearcare_complaints').select('count').single(),
-        supabase.from('dearcare_complaints').select('count').eq('status', 'open').single(),
-        supabase.from('dearcare_complaints').select('count').eq('status', 'under_review').single(),
-        supabase.from('dearcare_complaints').select('count').eq('status', 'resolved').single()
+        totalComplaintsQuery.single(),
+        openComplaintsQuery.single(),
+        underReviewComplaintsQuery.single(),
+        resolvedComplaintsQuery.single()
       ])
     ]);
-
 
     const [nursesResult, assignmentsResult, requestsResult, clientsResult] = statsResults;
     const [totalComplaintsResult, openComplaintsResult, underReviewComplaintsResult, resolvedComplaintsResult] = complaintsResults;
@@ -178,7 +227,6 @@ export async function fetchDashboardData(): Promise<{
 
     const attendanceData = attendanceResult.data || { total: 0, present: 0, onLeave: 0 };
     const totalStaff = attendanceData.total || 0;
-    console.log('Attendance Data:', attendanceData);
     const presentStaff = attendanceData.present || 0;
     const onLeaveStaff = attendanceData.onLeave || 0;
     const absentStaff = totalStaff - presentStaff - onLeaveStaff;
@@ -233,14 +281,13 @@ export async function fetchDashboardData(): Promise<{
     };
     
   } catch (error) {
-    logger.error('Error fetching dashboard data:', error);
+    console.error('Error fetching dashboard data:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
     };
   }
 }
-
 
 // ==============================
 // Function: addTodo

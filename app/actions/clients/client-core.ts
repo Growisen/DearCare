@@ -245,7 +245,7 @@ export async function getUnifiedClients(
       }
 
       if (createdAt) {
-          const date = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
+        const date = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
         const startOfDay = new Date(date);
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(date);
@@ -257,6 +257,8 @@ export async function getUnifiedClients(
 
       return q;
     };
+
+    console.log('Filters - Status:', status, 'Search Query:', searchQuery, 'Created At:', createdAt);
 
     let query = supabase
       .from('clients_view_unified')
