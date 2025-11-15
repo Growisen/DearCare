@@ -67,7 +67,7 @@ export default function ClientsPage() {
   }
 
   return (
-    <div>
+    <div className="w-full">
       <div className="space-y-5 sm:space-y-7">
         <ClientHeader 
           onAddClient={() => setShowAddClient(true)}
