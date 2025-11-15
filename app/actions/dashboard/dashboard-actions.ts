@@ -325,7 +325,6 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
       .from('client_payment_records')
       .select('id, client_id, payment_group_name, total_amount, date_added, mode_of_payment')
       .order('date_added', { ascending: false })
-      .limit(10);
 
     if (dateToUse) {
       const startOfDay = new Date(dateToUse);
