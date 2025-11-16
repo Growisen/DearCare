@@ -29,12 +29,15 @@ function renderServicePeriod(start?: string, end?: string) {
   if (!start) return <span className="text-gray-400">N/A</span>;
   
   return (
-    <div className="flex flex-col text-sm">
+    <div className="flex flex-col text-sm items-center">
       <span className="text-gray-700 whitespace-nowrap">
         {formatDate(start)}
       </span>
-      <span className="text-gray-400 text-xs">
-        to {end ? formatDate(end) : "Present"}
+      <span className="flex justify-center w-full text-gray-700 font-medium">
+        to
+      </span>
+      <span className="text-gray-700">
+        {end ? formatDate(end) : "Present"}
       </span>
     </div>
   );
@@ -45,14 +48,14 @@ function renderNurses(nurses?: AssignedNurse[]) {
   return (
     <ul className="space-y-2">
       {nurses.map((nurse) => (
-        <li key={nurse.nurseId} className="text-xs text-gray-700 leading-tight">
+        <li key={nurse.nurseId} className="text-sm text-gray-700 leading-tight">
           <span className="font-medium block">{formatName(nurse.name)}</span>
           {nurse.regNo && (
-            <span className="block text-gray-500 text-[10px] mb-0.5">
+            <span className="block text-gray-500 text-xs mb-0.5">
               Reg No: {nurse.regNo}
             </span>
           )}
-          <span className="text-gray-400 text-[10px]">
+          <span className="text-gray-400 text-xs">
             {formatDate(nurse.startDate)} - {nurse.endDate ? formatDate(nurse.endDate) : "Present"}
           </span>
         </li>

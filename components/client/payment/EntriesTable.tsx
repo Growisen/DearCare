@@ -6,12 +6,14 @@ interface EntriesTableProps {
   entries: EntryGroup[];
   onDelete: (id: number) => void;
   deletingId: string | null;
+  onEdit: (id: number) => void;
 }
 
 const EntriesTable: React.FC<EntriesTableProps> = ({
   entries,
   onDelete,
   deletingId,
+  onEdit,
 }) => {
 
   console.log("Rendering EntriesTable with entries:", entries);
@@ -130,6 +132,12 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                   </span>
                 </td>
                 <td className="px-6 py-4 align-top text-center">
+                  <button 
+                    onClick={() => onEdit(group.id)}
+                    className="text-blue-600 hover:text-blue-900 text-sm font-medium hover:bg-blue-50 px-3 py-1 rounded transition-colors mr-2"
+                  >
+                    Edit
+                  </button>
                   <button 
                     onClick={() => onDelete(group.id)} 
                     className="text-red-600 hover:text-red-900 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"

@@ -397,6 +397,8 @@ export async function fetchPaymentOverview({
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
         assignedNurses: relevantNurses,
+        startDate: p.start_date,
+        endDate: p.end_date,
       };
     });
 
@@ -416,6 +418,48 @@ export async function fetchPaymentOverview({
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
+export interface UpdatePaymentGroupInput {
+  paymentRecordId: number | string;
+  groupName?: string;
+  notes?: string;
+  showToClient?: boolean;
+  modeOfPayment?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const updateFields: Record<string, unknown> = {};
+    if (input.groupName !== undefined) updateFields.payment_group_name = input.groupName;
+    if (input.notes !== undefined) updateFields.notes = input.notes;
+    if (input.showToClient !== undefined) updateFields.show_to_client = input.showToClient;
+    if (input.modeOfPayment !== undefined) updateFields.mode_of_payment = input.modeOfPayment;
+    if (input.startDate !== undefined) updateFields.start_date = input.startDate ? new Date(input.startDate).toISOString() : null;
+    if (input.endDate !== undefined) updateFields.end_date = input.endDate ? new Date(input.endDate).toISOString() : null;
+
+    const { error } = await supabase
+      .from('client_payment_records')
+      .update(updateFields)
+      .eq('id', input.paymentRecordId);
+
+    if (error) {
+      logger.error('Error updating payment group:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating client payment group:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
     };
   }
 }

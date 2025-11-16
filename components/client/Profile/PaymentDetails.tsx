@@ -17,6 +17,8 @@ import {
 } from "@/types/paymentDetails.types";
 import { toast } from "sonner";
 
+import EditEntryGroupModal from "@/components/client/payment/EditEntryGroupModal";
+
 const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) => {
   const { saveGroup, fetchGroups, loading, isSaving } = useSaveClientPaymentGroup();
   
@@ -35,6 +37,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
   }>({ open: false, groupId: null });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [editModal, setEditModal] = useState<{ open: boolean; group: EntryGroup | null }>({ open: false, group: null });
 
   const fetchData = async () => {
     const apiEntries = await fetchGroups(clientId);
@@ -167,6 +170,13 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     }
   };
 
+  const handleEditClick = (id: number) => {
+    const group = entries.find(g => g.id === id);
+    if (group) setEditModal({ open: true, group });
+  };
+
+  const closeEditModal = () => setEditModal({ open: false, group: null });
+
   return (
     <div className="mx-auto space-y-6">
       <PaymentEntryForm
@@ -210,6 +220,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
             entries={entries}
             onDelete={handleDeleteClick}
             deletingId={deletingId}
+            onEdit={handleEditClick}
           />
           
           <EntriesMobileView
@@ -234,6 +245,16 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
           confirmButtonColor="red"
           isLoading={!!deletingId}
         />
+        {editModal.open && editModal.group && (
+          <EditEntryGroupModal
+            group={editModal.group}
+            onClose={closeEditModal}
+            onSave={() => {
+              closeEditModal();
+              fetchData();
+            }}
+          />
+        )}
       </ModalPortal>
     </div>
   );
