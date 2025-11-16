@@ -64,7 +64,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 min-h-screen md:px-6 pb-6  bg-gray-50/50 custom-scrollbar">
+    <div className="flex flex-col gap-6 min-h-screen md:px-6 pb-6 custom-scrollbar">
       <DashboardHeader
         greeting={greeting}
         selectedDate={selectedDate}
