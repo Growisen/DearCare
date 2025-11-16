@@ -82,7 +82,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
       <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <Users className="w-5 h-5 text-slate-700 mr-2" />
-          <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Client Requests</h3>
+          <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Clients</h3>
         </div>
         <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
           <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
