@@ -14,6 +14,8 @@ export interface EntryGroup {
   notes?: string;
   showToClient: boolean;
   modeOfPayment?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface FormLineItem {
@@ -43,4 +45,6 @@ export interface ApiEntryGroup {
   notes?: string | null;
   show_to_client: boolean;
   mode_of_payment?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
 }

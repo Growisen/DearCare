@@ -20,6 +20,8 @@ interface SavePaymentGroupInput {
   notes?: string;
   showToClient?: boolean;
   modeOfPayment?: string;
+  startDate?: string;
+  endDate?: string;  
 }
 
 interface ClientPaymentRecord {
@@ -30,6 +32,8 @@ interface ClientPaymentRecord {
   date_added: string;
   notes?: string | null;
   show_to_client: boolean;
+  // start_date?: string;
+  // end_date?: string;  
 }
 
 interface ClientPaymentLineItem {
@@ -43,7 +47,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment } = input;
+    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate } = input;
 
     if (!lineItems || lineItems.length === 0) {
       return { success: false, error: "At least one line item is required." };
@@ -73,6 +77,8 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
         notes: notes || null,
         show_to_client: showToClient !== undefined ? showToClient : true,
         mode_of_payment: modeOfPayment || null,
+        start_date: startDate ? new Date(startDate).toISOString() : null,
+        end_date: endDate ? new Date(endDate).toISOString() : null, 
       }])
       .select()
       .single();

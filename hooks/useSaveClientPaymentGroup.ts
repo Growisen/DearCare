@@ -16,6 +16,8 @@ interface SavePaymentGroupInput {
   notes?: string;
   showToClient: boolean;
   modeOfPayment?: string;
+  startDate?: string;
+  endDate?: string;  
 }
 
 

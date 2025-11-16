@@ -27,6 +27,9 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
               Total Amount
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Start & End Date
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date Added
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -89,6 +92,16 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                       maximumFractionDigits: 2,
                     })}
                   </span>
+                </td>
+                <td className="px-6 py-4 align-top">
+                  <div className="flex flex-col text-sm text-gray-600">
+                    <span>
+                      {group.startDate ? formatDate(group.startDate) : <span className="text-gray-400 italic">N/A</span>} <br /> to
+                    </span>
+                    <span>
+                      {group.endDate ? formatDate(group.endDate) : <span className="text-gray-400 italic">N/A</span>}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-6 py-4 align-top text-sm text-gray-600">
                   {formatDate(group.dateAdded)}
