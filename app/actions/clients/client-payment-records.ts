@@ -202,17 +202,46 @@ export async function deleteClientPaymentGroup(paymentRecordId: string) {
   }
 }
 
+export interface AssignedNurse {
+  nurseId: number;
+  name: string;
+  regNo: string | null;
+  startDate: string;
+  endDate: string | null;
+}
+
+export interface RecentPayment {
+  id: string;
+  clientName: string;
+  groupName: string;
+  amount: number;
+  date: string;
+  modeOfPayment: string;
+  assignedNurses: AssignedNurse[];
+}
+
+export interface AssignedNurse {
+  nurseId: number;
+  name: string;
+  regNo: string | null;
+  startDate: string;
+  endDate: string | null;
+}
+
+export interface RecentPayment {
+  id: string;
+  clientName: string;
+  groupName: string;
+  amount: number;
+  date: string;
+  modeOfPayment: string;
+  assignedNurses: AssignedNurse[];
+}
+
 export interface PaymentOverview {
   totalPayments: number;
   totalAmount: number;
-  recentPayments: Array<{
-    id: string;
-    clientName: string;
-    groupName: string;
-    amount: number;
-    date: string;
-    modeOfPayment?: string;
-  }>;
+  recentPayments: RecentPayment[];
 }
 
 type UnifiedPaymentViewRecord = {
@@ -226,6 +255,19 @@ type UnifiedPaymentViewRecord = {
   client_category: string;
   client_type?: string;
   client_status?: string;
+  start_date: string | null;
+  end_date: string | null;
+};
+
+type NurseClientJoin = {
+  client_id: string;
+  start_date: string;
+  end_date: string | null;
+  nurse_id: number;
+  nurses: {
+    full_name: string | null;
+    nurse_reg_no: string | null;
+  } | null;
 };
 
 export async function fetchPaymentOverview({
@@ -292,8 +334,56 @@ export async function fetchPaymentOverview({
     if (paymentsError) throw new Error(paymentsError.message);
 
     const payments = rawPayments || [];
+    const clientIds = [...new Set(payments.map(p => p.client_id))];
+
+    let assignmentsMap: Record<string, NurseClientJoin[]> = {};
+
+    if (clientIds.length > 0) {
+      const { data: assignments, error: assignmentError } = await supabase
+        .from('nurse_client')
+        .select(`
+          client_id,
+          start_date,
+          end_date,
+          nurse_id,
+          nurses (
+            full_name,
+            nurse_reg_no
+          )
+        `)
+        .in('client_id', clientIds)
+        .returns<NurseClientJoin[]>();
+
+      if (!assignmentError && assignments) {
+        assignmentsMap = assignments.reduce((acc, curr) => {
+          if (!acc[curr.client_id]) acc[curr.client_id] = [];
+          acc[curr.client_id].push(curr);
+          return acc;
+        }, {} as Record<string, NurseClientJoin[]>);
+      }
+    }
 
     const recentPayments = payments.map(p => {
+      const paymentStart = p.start_date ? new Date(p.start_date) : new Date(p.date_added);
+      const paymentEnd = p.end_date ? new Date(p.end_date) : new Date(p.date_added);
+      
+      const clientAssignments = assignmentsMap[p.client_id] || [];
+
+      const relevantNurses = clientAssignments
+        .filter(a => {
+          const assignStart = new Date(a.start_date);
+          const assignEnd = a.end_date ? new Date(a.end_date) : new Date('9999-12-31');
+          
+          return assignStart <= paymentEnd && assignEnd >= paymentStart;
+        })
+        .map(a => ({
+          nurseId: a.nurse_id,
+          name: a.nurses?.full_name || 'Unknown',
+          regNo: a.nurses?.nurse_reg_no || null,
+          startDate: a.start_date,
+          endDate: a.end_date
+        }));
+
       return {
         id: p.id,
         clientName: p.client_display_name,
@@ -301,6 +391,7 @@ export async function fetchPaymentOverview({
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
+        assignedNurses: relevantNurses,
       };
     });
 

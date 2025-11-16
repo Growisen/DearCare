@@ -2,6 +2,14 @@ import React from "react"
 import { formatDate } from "@/utils/formatters";
 import { formatName } from "@/utils/formatters";
 
+type AssignedNurse = {
+  nurseId: number;
+  name: string;
+  regNo: string | null;
+  startDate: string;
+  endDate: string | null;
+};
+
 type Payment = {
   id: string;
   clientName: string;
@@ -9,10 +17,28 @@ type Payment = {
   amount: number;
   date: string;
   modeOfPayment?: string;
+  assignedNurses?: AssignedNurse[];
 };
 
 type PaymentTableProps = {
   payments: Payment[]
+}
+
+function renderNurses(nurses?: AssignedNurse[]) {
+  if (!nurses || nurses.length === 0) return <span className="text-gray-400">None</span>;
+  return (
+    <ul className="space-y-1">
+      {nurses.map(nurse => (
+        <li key={nurse.nurseId} className="text-xs text-gray-700">
+          <span className="font-medium">{formatName(nurse.name)}</span>
+          {nurse.regNo && <span className="ml-1 text-gray-500">({nurse.regNo})</span>}
+          <span className="ml-2 text-gray-400">
+            {formatDate(nurse.startDate)} - {nurse.endDate ? formatDate(nurse.endDate) : "Present"}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export default function PaymentTable({ payments }: PaymentTableProps) {
@@ -28,6 +54,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                 <th className="py-4 px-6 font-medium text-gray-700">Amount</th>
                 <th className="py-4 px-6 font-medium text-gray-700">Date</th>
                 <th className="py-4 px-6 font-medium text-gray-700">Mode</th>
+                <th className="py-4 px-6 font-medium text-gray-700">Assigned Nurses</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
@@ -39,11 +66,12 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                     <td className="py-4 px-6 text-gray-800 font-semibold">₹{payment.amount.toLocaleString() || "N/A"}</td>
                     <td className="py-4 px-6 text-gray-600">{formatDate(payment.date) || "N/A"}</td>
                     <td className="py-4 px-6 text-gray-600">{payment.modeOfPayment || "N/A"}</td>
+                    <td className="py-4 px-6">{renderNurses(payment.assignedNurses)}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                  <td colSpan={6} className="py-8 text-center text-gray-500">
                     No payments found
                   </td>
                 </tr>
@@ -63,7 +91,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <h3 className="text-gray-900 font-semibold text-lg">
-                    {formatName(payment.clientName) || "N/A"}
+                    {payment.clientName || "N/A"}
                   </h3>
                   <p className="text-gray-500 text-sm mt-1">
                     {payment.groupName || "N/A"}
@@ -79,7 +107,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
               <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-500 text-sm">
-                    {formatDate(payment.date) || "N/A"}
+                    {payment.date || "N/A"}
                   </span>
                 </div>
                 <div className="bg-gray-100 px-3 py-1 rounded-full">
@@ -87,6 +115,10 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                     {payment.modeOfPayment || "N/A"}
                   </span>
                 </div>
+              </div>
+              <div className="mt-2">
+                <span className="block text-xs font-semibold text-gray-700 mb-1">Assigned Nurses:</span>
+                {renderNurses(payment.assignedNurses)}
               </div>
             </div>
           ))

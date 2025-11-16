@@ -271,7 +271,7 @@ const PatientProfilePage = () => {
             {activeTab === 'assignments' && status === 'approved' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800">Nurse Assignments</h2>
+                  <h2 className="text-lg font-semibold text-gray-800">Assignments</h2>
                   <button
                     onClick={handleOpenNurseList}
                     className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"

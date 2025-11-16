@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { AddNurseProps, NurseFormData, NurseReferenceData, NurseHealthData, NurseDocuments } from '@/types/staff.types';
 import { createNurse } from '@/app/actions/staff-management/add-nurse';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import useOrgStore from '@/app/stores/UseOrgStore';
 import { getTodayDDMMYYYY } from '@/utils/dateUtils';
 import { FORM_CONFIG } from './AddNurseOverlay/Config';

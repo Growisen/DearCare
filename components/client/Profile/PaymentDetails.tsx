@@ -167,11 +167,8 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     }
   };
 
-
-  console.log("Rendering PaymentDetails with entries:", entries);
-
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="mx-auto space-y-6">
       <PaymentEntryForm
         groupName={groupName}
         setGroupName={setGroupName}
