@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { CreditCard, Download, Search } from "lucide-react"
 import { useState, useEffect } from "react"
 import Loader from "@/components/Loader"
+import Link from "next/link"
 
 interface PaymentOverviewProps {
   paymentData?: {
@@ -125,6 +126,14 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
             </tbody>
           </table>
         )}
+      </div>
+       <div className="text-center mt-4">
+        <Link 
+          href="/client-payments" 
+          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+        >
+          View All Payments from clients →
+        </Link>
       </div>
     </Card>
   )
