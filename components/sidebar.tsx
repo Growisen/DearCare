@@ -14,6 +14,7 @@ import {
   Building,
   // Settings,
   UserPlus,
+  CreditCard,
 } from "lucide-react"
 import { useEffect } from "react"
 import useOrgStore from "@/app/stores/UseOrgStore"
@@ -83,13 +84,14 @@ const orgLabel = organization === 'TataHomeNursing' ? 'Tata Home Nursing' : (org
           {[
             { icon: Home, label: "Dashboard", href: "/dashboard" },
             { icon: Users, label: "Clients", href: "/clients" },
+            { icon: CreditCard, label: "Client Payments", href: "/client-payments" },
             { icon: HeartPulse, label: "Nurses", href: "/nurses" },
+            { icon: ClipboardCheck, label: "Nurse Salary", href: "/dearcare-nurses-salary" },
             { icon: Building, label: "Staff", href: "/staff" },
             { icon: Clipboard, label: "Assignments", href: "/assignments" },
             { icon: ClipboardCheck, label: "Staff Attendance", href: "/staff-attendance" },
             { icon: Calendar, label: "Leave Management", href: "/leave-requests" },
             { icon: MessageSquare, label: "Complaints", href: "/complaints" },
-            { icon: ClipboardCheck, label: "Nurse Salary", href: "/dearcare-nurses-salary" },
             { icon: UserPlus, label: "Enquiry", href: "/enquiry-data" },
             // { icon: Settings, label: "Settings", href: "/settings" },
           ].map((item) => {

@@ -2,6 +2,8 @@
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { logger } from '@/utils/logger';
+import { getOrgMappings } from '@/app/utils/org-utils';
+import { getAuthenticatedClient } from '@/app/utils/auth-utils';
 
 interface LineItemInput {
   fieldName: string;
@@ -190,6 +192,128 @@ export async function deleteClientPaymentGroup(paymentRecordId: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+export interface PaymentOverview {
+  totalPayments: number;
+  totalAmount: number;
+  recentPayments: Array<{
+    id: string;
+    clientName: string;
+    groupName: string;
+    amount: number;
+    date: string;
+    modeOfPayment?: string;
+  }>;
+}
+
+type UnifiedPaymentViewRecord = {
+  id: string;
+  client_id: string;
+  payment_group_name: string;
+  total_amount: number;
+  date_added: string;
+  mode_of_payment: string | null;
+  client_display_name: string;
+  client_category: string;
+  client_type?: string;
+  client_status?: string;
+};
+
+export async function fetchPaymentOverview({
+  page = 1,
+  pageSize = 10,
+  search = "",
+  filters = {},
+  isExporting = false,
+}: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  filters?: Record<string, unknown>;
+  isExporting?: boolean;
+}): Promise<{
+  success: boolean;
+  data?: PaymentOverview;
+  error?: string;
+}> {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { clientsOrg } = getOrgMappings(organization);
+
+    let paymentsQuery = supabase
+      .from('unified_payment_records_view')
+      .select('*', { count: 'exact' })
+      .order('date_added', { ascending: false })
+      .eq('client_category', clientsOrg);
+
+    if (!isExporting) {
+      if (filters.date) {
+        const date = new Date(filters.date as string);
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        paymentsQuery = paymentsQuery
+          .gte('date_added', startOfDay.toISOString())
+          .lte('date_added', endOfDay.toISOString());
+      }
+
+      if (search) {
+        paymentsQuery = paymentsQuery.ilike('client_display_name', `%${search}%`);
+      }
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (key !== "date" && value !== undefined && value !== "") {
+          paymentsQuery = paymentsQuery.eq(key, value);
+        }
+      });
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      paymentsQuery = paymentsQuery.range(from, to);
+    }
+
+    const { data: rawPayments, error: paymentsError, count } = await paymentsQuery.returns<UnifiedPaymentViewRecord[]>();
+
+    if (paymentsError) throw new Error(paymentsError.message);
+
+    const payments = rawPayments || [];
+
+    const recentPayments = payments.map(p => {
+      return {
+        id: p.id,
+        clientName: p.client_display_name,
+        groupName: p.payment_group_name,
+        amount: p.total_amount,
+        date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
+        modeOfPayment: p.mode_of_payment || '',
+      };
+    });
+
+    const totalPayments = isExporting ? payments.length : (count ?? payments.length);
+    const totalAmount = payments.reduce((sum, p) => sum + (p.total_amount || 0), 0);
+
+    return {
+      success: true,
+      data: {
+        totalPayments,
+        totalAmount,
+        recentPayments,
+      },
+    };
+  } catch (error) {
+    logger.error('Error fetching payment overview:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
     };
   }
 }

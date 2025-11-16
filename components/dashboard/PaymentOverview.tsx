@@ -1,3 +1,5 @@
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { CreditCard, Download, Search } from "lucide-react"
 import { useState, useEffect } from "react"
