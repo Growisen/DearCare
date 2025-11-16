@@ -1,6 +1,5 @@
-import React from "react"
-import { formatDate } from "@/utils/formatters";
-import { formatName } from "@/utils/formatters";
+import React from "react";
+import { formatDate, formatName } from "@/utils/formatters";
 
 type AssignedNurse = {
   nurseId: number;
@@ -16,23 +15,44 @@ type Payment = {
   groupName: string;
   amount: number;
   date: string;
+  startDate?: string;
+  endDate?: string;
   modeOfPayment?: string;
   assignedNurses?: AssignedNurse[];
 };
 
 type PaymentTableProps = {
-  payments: Payment[]
+  payments: Payment[];
+};
+
+function renderServicePeriod(start?: string, end?: string) {
+  if (!start) return <span className="text-gray-400">N/A</span>;
+  
+  return (
+    <div className="flex flex-col text-sm">
+      <span className="text-gray-700 whitespace-nowrap">
+        {formatDate(start)}
+      </span>
+      <span className="text-gray-400 text-xs">
+        to {end ? formatDate(end) : "Present"}
+      </span>
+    </div>
+  );
 }
 
 function renderNurses(nurses?: AssignedNurse[]) {
-  if (!nurses || nurses.length === 0) return <span className="text-gray-400">None</span>;
+  if (!nurses || nurses.length === 0) return <span className="text-gray-400">N/A</span>;
   return (
-    <ul className="space-y-1">
-      {nurses.map(nurse => (
-        <li key={nurse.nurseId} className="text-xs text-gray-700">
-          <span className="font-medium">{formatName(nurse.name)}</span>
-          {nurse.regNo && <span className="ml-1 text-gray-500">({nurse.regNo})</span>}
-          <span className="ml-2 text-gray-400">
+    <ul className="space-y-2">
+      {nurses.map((nurse) => (
+        <li key={nurse.nurseId} className="text-xs text-gray-700 leading-tight">
+          <span className="font-medium block">{formatName(nurse.name)}</span>
+          {nurse.regNo && (
+            <span className="block text-gray-500 text-[10px] mb-0.5">
+              Reg No: {nurse.regNo}
+            </span>
+          )}
+          <span className="text-gray-400 text-[10px]">
             {formatDate(nurse.startDate)} - {nurse.endDate ? formatDate(nurse.endDate) : "Present"}
           </span>
         </li>
@@ -44,34 +64,52 @@ function renderNurses(nurses?: AssignedNurse[]) {
 export default function PaymentTable({ payments }: PaymentTableProps) {
   return (
     <div className="w-full mx-auto">
-      <div className="hidden md:block bg-gray-50 rounded-sm border border-gray-200 overflow-hidden">
+      <div className="hidden md:block bg-gray-50 rounded-lg border border-gray-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-100 border-b border-gray-200">
-              <tr className="text-left">
-                <th className="py-4 px-6 font-medium text-gray-700">Client Name</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Group</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Amount</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Date</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Mode</th>
-                <th className="py-4 px-6 font-medium text-gray-700">Assigned Nurses</th>
+              <tr className="text-left text-sm uppercase tracking-wider">
+                <th className="py-4 px-6 font-semibold text-gray-600">Client</th>
+                <th className="py-4 px-6 font-semibold text-gray-600">Group</th>
+                <th className="py-4 px-6 font-semibold text-gray-600">Amount</th>
+                <th className="py-4 px-6 font-semibold text-gray-600">Service Period</th>
+                <th className="py-4 px-6 font-semibold text-gray-600">Method</th>
+                <th className="py-4 px-6 font-semibold text-gray-600">Assignments</th>
+                <th className="py-4 px-6 font-semibold text-gray-600">Paid On</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {payments.length > 0 ? (
                 payments.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="py-4 px-6 text-gray-800 font-medium">{formatName(payment.clientName) || "N/A"}</td>
-                    <td className="py-4 px-6 text-gray-600">{payment.groupName || "N/A"}</td>
-                    <td className="py-4 px-6 text-gray-800 font-semibold">₹{payment.amount.toLocaleString() || "N/A"}</td>
-                    <td className="py-4 px-6 text-gray-600">{formatDate(payment.date) || "N/A"}</td>
-                    <td className="py-4 px-6 text-gray-600">{payment.modeOfPayment || "N/A"}</td>
-                    <td className="py-4 px-6">{renderNurses(payment.assignedNurses)}</td>
+                  <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-6 text-gray-800 font-medium">
+                      {formatName(payment.clientName) || "N/A"}
+                    </td>
+                    <td className="py-4 px-6 text-gray-600">
+                      {payment.groupName || "N/A"}
+                    </td>
+                    <td className="py-4 px-6 text-gray-800 font-semibold">
+                      ₹{payment.amount.toLocaleString()}
+                    </td>
+                    <td className="py-4 px-6">
+                      {renderServicePeriod(payment.startDate, payment.endDate)}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {payment.modeOfPayment || "N/A"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      {renderNurses(payment.assignedNurses)}
+                    </td>
+                    <td className="py-4 px-6 text-gray-600">
+                      {formatDate(payment.date) || "N/A"}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
+                  <td colSpan={7} className="py-12 text-center text-gray-500">
                     No payments found
                   </td>
                 </tr>
@@ -80,45 +118,55 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
           </table>
         </div>
       </div>
-
-      <div className="md:hidden space-y-1">
+      <div className="md:hidden space-y-3">
         {payments.length > 0 ? (
           payments.map((payment) => (
-            <div 
-              key={payment.id} 
-              className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow"
+            <div
+              key={payment.id}
+              className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
             >
               <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
+                <div>
                   <h3 className="text-gray-900 font-semibold text-lg">
                     {payment.clientName || "N/A"}
                   </h3>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="text-gray-500 text-sm">
                     {payment.groupName || "N/A"}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-gray-900 font-bold text-xl">
+                  <p className="text-emerald-600 font-bold text-lg">
                     ₹{payment.amount.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Paid: {formatDate(payment.date)}
                   </p>
                 </div>
               </div>
-              
-              <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500 text-sm">
-                    {payment.date || "N/A"}
+              <div className="border-t border-gray-100 my-3"></div>
+              <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
+                <div className="col-span-2">
+                  <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    Service Period
                   </span>
+                  <div className="bg-gray-50 p-2 rounded text-gray-700 text-sm flex items-center gap-2">
+                    <span>{payment.startDate ? formatDate(payment.startDate) : "N/A"}</span>
+                    <span className="text-gray-400">→</span>
+                    <span>{payment.endDate ? formatDate(payment.endDate) : "Present"}</span>
+                  </div>
                 </div>
-                <div className="bg-gray-100 px-3 py-1 rounded-full">
-                  <span className="text-gray-700 text-xs font-medium">
-                    {payment.modeOfPayment || "N/A"}
+                <div>
+                  <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    Method
                   </span>
+                  <span className="text-gray-800">{payment.modeOfPayment || "N/A"}</span>
                 </div>
-              </div>
-              <div className="mt-2">
-                <span className="block text-xs font-semibold text-gray-700 mb-1">Assigned Nurses:</span>
-                {renderNurses(payment.assignedNurses)}
+                <div className="col-span-2 mt-2">
+                  <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    Nurses
+                  </span>
+                  {renderNurses(payment.assignedNurses)}
+                </div>
               </div>
             </div>
           ))
@@ -129,5 +177,5 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

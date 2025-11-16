@@ -269,7 +269,6 @@ type NurseClientJoin = {
     nurse_reg_no: string | null;
   } | null;
 };
-
 export async function fetchPaymentOverview({
   page = 1,
   pageSize = 10,
@@ -334,7 +333,9 @@ export async function fetchPaymentOverview({
     if (paymentsError) throw new Error(paymentsError.message);
 
     const payments = rawPayments || [];
-    const clientIds = [...new Set(payments.map(p => p.client_id))];
+
+    const paymentsWithDates = payments.filter(p => p.start_date && p.end_date);
+    const clientIds = [...new Set(paymentsWithDates.map(p => p.client_id))];
 
     let assignmentsMap: Record<string, NurseClientJoin[]> = {};
 
@@ -364,25 +365,29 @@ export async function fetchPaymentOverview({
     }
 
     const recentPayments = payments.map(p => {
-      const paymentStart = p.start_date ? new Date(p.start_date) : new Date(p.date_added);
-      const paymentEnd = p.end_date ? new Date(p.end_date) : new Date(p.date_added);
-      
-      const clientAssignments = assignmentsMap[p.client_id] || [];
+      let relevantNurses: AssignedNurse[] = [];
 
-      const relevantNurses = clientAssignments
-        .filter(a => {
-          const assignStart = new Date(a.start_date);
-          const assignEnd = a.end_date ? new Date(a.end_date) : new Date('9999-12-31');
-          
-          return assignStart <= paymentEnd && assignEnd >= paymentStart;
-        })
-        .map(a => ({
-          nurseId: a.nurse_id,
-          name: a.nurses?.full_name || 'Unknown',
-          regNo: a.nurses?.nurse_reg_no || null,
-          startDate: a.start_date,
-          endDate: a.end_date
-        }));
+      if (p.start_date && p.end_date) {
+        const paymentStart = new Date(p.start_date);
+        const paymentEnd = new Date(p.end_date);
+
+        const clientAssignments = assignmentsMap[p.client_id] || [];
+
+        relevantNurses = clientAssignments
+          .filter(a => {
+            const assignStart = new Date(a.start_date);
+            const assignEnd = a.end_date ? new Date(a.end_date) : new Date('9999-12-31');
+
+            return assignStart <= paymentEnd && assignEnd >= paymentStart;
+          })
+          .map(a => ({
+            nurseId: a.nurse_id,
+            name: a.nurses?.full_name || 'Unknown',
+            regNo: a.nurses?.nurse_reg_no || null,
+            startDate: a.start_date,
+            endDate: a.end_date
+          }));
+      }
 
       return {
         id: p.id,
