@@ -4,7 +4,7 @@ import { Users, Search, Download, Mail, Phone, Eye, Clock } from "lucide-react"
 import { Client } from "../../types/client.types"
 import Link from "next/link"
 import { serviceOptions } from "@/utils/constants"
-import { getServiceLabel } from "@/utils/formatters"
+import { getServiceLabel, formatDate, formatName } from "@/utils/formatters"
 
 
 interface RecentClientsProps {
@@ -39,7 +39,6 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch recent pending clients
   useEffect(() => {
     if (clientsData) {
       const typedClients = clientsData.map(client => ({
@@ -78,11 +77,10 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
 
   return (
     <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg">
-      {/* Header Section */}
       <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <Users className="w-5 h-5 text-slate-700 mr-2" />
-          <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Client Requests</h3>
+          <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Clients</h3>
         </div>
         <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
           <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
@@ -105,7 +103,6 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
         </div>
       </div>
 
-      {/* Desktop Table */}
       <div className="overflow-x-auto">
         {isLoading ? (
           <div className="py-8 text-center">
@@ -144,10 +141,10 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
                     <tr key={client.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-slate-800">{client.name}</span>
+                          <span className="text-sm font-medium text-slate-800">{formatName(client.name)}</span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-600">{client.requestDate}</td>
+                      <td className="py-3 px-4 text-sm text-slate-600">{formatDate(client.requestDate)}</td>
                       <td className="py-3 px-4 text-sm text-slate-600">{getServiceLabel(serviceOptions, client.service || "")}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyles(client.status)}`}>
@@ -167,7 +164,6 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
               </tbody>
             </table>
 
-            {/* Mobile Cards */}
             <div className="sm:hidden space-y-4">
               {filteredClients.map((client) => {
                 const StatusIcon = statusIcons[client.status]

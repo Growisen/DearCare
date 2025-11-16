@@ -13,7 +13,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   setSelectedDate,
   todayFormatted
 }) => (
-  <header className="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-5">
+  <header className="bg-white border border-gray-200 rounded-md shadow-sm px-6 py-5">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div className="flex-1">
         <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">

@@ -1,7 +1,11 @@
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { CreditCard, Download, Search } from "lucide-react"
 import { useState, useEffect } from "react"
 import Loader from "@/components/Loader"
+import Link from "next/link"
+import { formatDate, formatName } from "@/utils/formatters"
 
 interface PaymentOverviewProps {
   paymentData?: {
@@ -61,7 +65,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
       <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <CreditCard className="w-5 h-5 text-slate-700 mr-2" />
-          <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Payments Overview</h3>
+          <h3 className="text-sm sm:text-md font-medium text-slate-800">Clients Payments Overview</h3>
         </div>
         <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
           <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
@@ -96,7 +100,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
           <div className="p-8 text-center">
             <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
               <p className="text-lg font-medium mb-1">No payments found</p>
-              <p className="text-sm">No recent payments available</p>
+              <p className="text-sm">No payments available for the selected date</p>
             </div>
           </div>
         ) : (
@@ -113,16 +117,24 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
             <tbody>
               {filteredPayments.map((p) => (
                 <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 text-sm font-medium text-slate-800">{p.clientName}</td>
+                  <td className="py-3 px-4 text-sm font-medium text-slate-800">{formatName(p.clientName)}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{p.groupName}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">₹{p.amount.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-sm text-slate-600">{p.date}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">{formatDate(p.date)}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{p.modeOfPayment || "-"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+      </div>
+       <div className="text-center mt-4">
+        <Link 
+          href="/client-payments" 
+          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+        >
+          View All Payments from clients →
+        </Link>
       </div>
     </Card>
   )
