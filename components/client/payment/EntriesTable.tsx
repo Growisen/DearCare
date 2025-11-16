@@ -6,12 +6,14 @@ interface EntriesTableProps {
   entries: EntryGroup[];
   onDelete: (id: number) => void;
   deletingId: string | null;
+  onEdit: (id: number) => void;
 }
 
 const EntriesTable: React.FC<EntriesTableProps> = ({
   entries,
   onDelete,
   deletingId,
+  onEdit,
 }) => {
 
   console.log("Rendering EntriesTable with entries:", entries);
@@ -25,6 +27,9 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Total Amount
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Start & End Date
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date Added
@@ -90,6 +95,16 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                     })}
                   </span>
                 </td>
+                <td className="px-6 py-4 align-top">
+                  <div className="flex flex-col text-sm text-gray-600">
+                    <span>
+                      {group.startDate ? formatDate(group.startDate) : <span className="text-gray-400 italic">N/A</span>} <br /> to
+                    </span>
+                    <span>
+                      {group.endDate ? formatDate(group.endDate) : <span className="text-gray-400 italic">N/A</span>}
+                    </span>
+                  </div>
+                </td>
                 <td className="px-6 py-4 align-top text-sm text-gray-600">
                   {formatDate(group.dateAdded)}
                 </td>
@@ -117,6 +132,12 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                   </span>
                 </td>
                 <td className="px-6 py-4 align-top text-center">
+                  <button 
+                    onClick={() => onEdit(group.id)}
+                    className="text-blue-600 hover:text-blue-900 text-sm font-medium hover:bg-blue-50 px-3 py-1 rounded transition-colors mr-2"
+                  >
+                    Edit
+                  </button>
                   <button 
                     onClick={() => onDelete(group.id)} 
                     className="text-red-600 hover:text-red-900 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"

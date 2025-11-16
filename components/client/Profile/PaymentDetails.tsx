@@ -17,6 +17,8 @@ import {
 } from "@/types/paymentDetails.types";
 import { toast } from "sonner";
 
+import EditEntryGroupModal from "@/components/client/payment/EditEntryGroupModal";
+
 const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) => {
   const { saveGroup, fetchGroups, loading, isSaving } = useSaveClientPaymentGroup();
   
@@ -33,6 +35,9 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     open: boolean;
     groupId: number | null;
   }>({ open: false, groupId: null });
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [editModal, setEditModal] = useState<{ open: boolean; group: EntryGroup | null }>({ open: false, group: null });
 
   const fetchData = async () => {
     const apiEntries = await fetchGroups(clientId);
@@ -51,6 +56,8 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
       notes: group.notes ?? undefined,
       showToClient: group.show_to_client,
       modeOfPayment: group.mode_of_payment ?? "",
+      startDate: group.start_date ?? "",
+      endDate: group.end_date ?? "",
     }));
     setEntries(updatedEntries);
   };
@@ -63,7 +70,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     setGroupName("");
     setLineItems([{ id: `field-${Date.now()}`, fieldName: "", amount: "", gst: "" }]);
     setGroupNotes("");
-    setGroupShowToClient(true);
+    setGroupShowToClient(false);
   };
 
   const saveEntryGroup = async () => {
@@ -111,6 +118,8 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
       notes: groupNotes.trim() || undefined,
       showToClient: groupShowToClient,
       modeOfPayment: modeOfPayment.trim() || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
     });
 
     if (result.success) {
@@ -161,8 +170,15 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     }
   };
 
+  const handleEditClick = (id: number) => {
+    const group = entries.find(g => g.id === id);
+    if (group) setEditModal({ open: true, group });
+  };
+
+  const closeEditModal = () => setEditModal({ open: false, group: null });
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="mx-auto space-y-6">
       <PaymentEntryForm
         groupName={groupName}
         setGroupName={setGroupName}
@@ -178,6 +194,10 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
         loading={loading}
         modeOfPayment={modeOfPayment}
         setModeOfPayment={setModeOfPayment}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
       />
 
       {loading ? (
@@ -200,6 +220,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
             entries={entries}
             onDelete={handleDeleteClick}
             deletingId={deletingId}
+            onEdit={handleEditClick}
           />
           
           <EntriesMobileView
@@ -224,6 +245,16 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
           confirmButtonColor="red"
           isLoading={!!deletingId}
         />
+        {editModal.open && editModal.group && (
+          <EditEntryGroupModal
+            group={editModal.group}
+            onClose={closeEditModal}
+            onSave={() => {
+              closeEditModal();
+              fetchData();
+            }}
+          />
+        )}
       </ModalPortal>
     </div>
   );

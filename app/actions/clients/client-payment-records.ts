@@ -20,6 +20,8 @@ interface SavePaymentGroupInput {
   notes?: string;
   showToClient?: boolean;
   modeOfPayment?: string;
+  startDate?: string;
+  endDate?: string;  
 }
 
 interface ClientPaymentRecord {
@@ -30,6 +32,8 @@ interface ClientPaymentRecord {
   date_added: string;
   notes?: string | null;
   show_to_client: boolean;
+  // start_date?: string;
+  // end_date?: string;  
 }
 
 interface ClientPaymentLineItem {
@@ -43,7 +47,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment } = input;
+    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate } = input;
 
     if (!lineItems || lineItems.length === 0) {
       return { success: false, error: "At least one line item is required." };
@@ -73,6 +77,8 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
         notes: notes || null,
         show_to_client: showToClient !== undefined ? showToClient : true,
         mode_of_payment: modeOfPayment || null,
+        start_date: startDate ? new Date(startDate).toISOString() : null,
+        end_date: endDate ? new Date(endDate).toISOString() : null, 
       }])
       .select()
       .single();
@@ -196,17 +202,46 @@ export async function deleteClientPaymentGroup(paymentRecordId: string) {
   }
 }
 
+export interface AssignedNurse {
+  nurseId: number;
+  name: string;
+  regNo: string | null;
+  startDate: string;
+  endDate: string | null;
+}
+
+export interface RecentPayment {
+  id: string;
+  clientName: string;
+  groupName: string;
+  amount: number;
+  date: string;
+  modeOfPayment: string;
+  assignedNurses: AssignedNurse[];
+}
+
+export interface AssignedNurse {
+  nurseId: number;
+  name: string;
+  regNo: string | null;
+  startDate: string;
+  endDate: string | null;
+}
+
+export interface RecentPayment {
+  id: string;
+  clientName: string;
+  groupName: string;
+  amount: number;
+  date: string;
+  modeOfPayment: string;
+  assignedNurses: AssignedNurse[];
+}
+
 export interface PaymentOverview {
   totalPayments: number;
   totalAmount: number;
-  recentPayments: Array<{
-    id: string;
-    clientName: string;
-    groupName: string;
-    amount: number;
-    date: string;
-    modeOfPayment?: string;
-  }>;
+  recentPayments: RecentPayment[];
 }
 
 type UnifiedPaymentViewRecord = {
@@ -220,8 +255,20 @@ type UnifiedPaymentViewRecord = {
   client_category: string;
   client_type?: string;
   client_status?: string;
+  start_date: string | null;
+  end_date: string | null;
 };
 
+type NurseClientJoin = {
+  client_id: string;
+  start_date: string;
+  end_date: string | null;
+  nurse_id: number;
+  nurses: {
+    full_name: string | null;
+    nurse_reg_no: string | null;
+  } | null;
+};
 export async function fetchPaymentOverview({
   page = 1,
   pageSize = 10,
@@ -287,7 +334,61 @@ export async function fetchPaymentOverview({
 
     const payments = rawPayments || [];
 
+    const paymentsWithDates = payments.filter(p => p.start_date && p.end_date);
+    const clientIds = [...new Set(paymentsWithDates.map(p => p.client_id))];
+
+    let assignmentsMap: Record<string, NurseClientJoin[]> = {};
+
+    if (clientIds.length > 0) {
+      const { data: assignments, error: assignmentError } = await supabase
+        .from('nurse_client')
+        .select(`
+          client_id,
+          start_date,
+          end_date,
+          nurse_id,
+          nurses (
+            full_name,
+            nurse_reg_no
+          )
+        `)
+        .in('client_id', clientIds)
+        .returns<NurseClientJoin[]>();
+
+      if (!assignmentError && assignments) {
+        assignmentsMap = assignments.reduce((acc, curr) => {
+          if (!acc[curr.client_id]) acc[curr.client_id] = [];
+          acc[curr.client_id].push(curr);
+          return acc;
+        }, {} as Record<string, NurseClientJoin[]>);
+      }
+    }
+
     const recentPayments = payments.map(p => {
+      let relevantNurses: AssignedNurse[] = [];
+
+      if (p.start_date && p.end_date) {
+        const paymentStart = new Date(p.start_date);
+        const paymentEnd = new Date(p.end_date);
+
+        const clientAssignments = assignmentsMap[p.client_id] || [];
+
+        relevantNurses = clientAssignments
+          .filter(a => {
+            const assignStart = new Date(a.start_date);
+            const assignEnd = a.end_date ? new Date(a.end_date) : new Date('9999-12-31');
+
+            return assignStart <= paymentEnd && assignEnd >= paymentStart;
+          })
+          .map(a => ({
+            nurseId: a.nurse_id,
+            name: a.nurses?.full_name || 'Unknown',
+            regNo: a.nurses?.nurse_reg_no || null,
+            startDate: a.start_date,
+            endDate: a.end_date
+          }));
+      }
+
       return {
         id: p.id,
         clientName: p.client_display_name,
@@ -295,6 +396,9 @@ export async function fetchPaymentOverview({
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
+        assignedNurses: relevantNurses,
+        startDate: p.start_date,
+        endDate: p.end_date,
       };
     });
 
@@ -314,6 +418,48 @@ export async function fetchPaymentOverview({
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
+export interface UpdatePaymentGroupInput {
+  paymentRecordId: number | string;
+  groupName?: string;
+  notes?: string;
+  showToClient?: boolean;
+  modeOfPayment?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const updateFields: Record<string, unknown> = {};
+    if (input.groupName !== undefined) updateFields.payment_group_name = input.groupName;
+    if (input.notes !== undefined) updateFields.notes = input.notes;
+    if (input.showToClient !== undefined) updateFields.show_to_client = input.showToClient;
+    if (input.modeOfPayment !== undefined) updateFields.mode_of_payment = input.modeOfPayment;
+    if (input.startDate !== undefined) updateFields.start_date = input.startDate ? new Date(input.startDate).toISOString() : null;
+    if (input.endDate !== undefined) updateFields.end_date = input.endDate ? new Date(input.endDate).toISOString() : null;
+
+    const { error } = await supabase
+      .from('client_payment_records')
+      .update(updateFields)
+      .eq('id', input.paymentRecordId);
+
+    if (error) {
+      logger.error('Error updating payment group:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating client payment group:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
     };
   }
 }

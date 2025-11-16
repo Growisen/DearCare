@@ -116,6 +116,9 @@ export default function ClientPaymentsListPage() {
 		}
 	};
 
+
+  console.log("Rendering ClientPaymentsListPage with payments:", payments);
+
   return (
     <div className="mx-auto pt-2 pb-4">
       <PaymentHeader
