@@ -5,6 +5,7 @@ import { CreditCard, Download, Search } from "lucide-react"
 import { useState, useEffect } from "react"
 import Loader from "@/components/Loader"
 import Link from "next/link"
+import { formatDate, formatName } from "@/utils/formatters"
 
 interface PaymentOverviewProps {
   paymentData?: {
@@ -116,10 +117,10 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
             <tbody>
               {filteredPayments.map((p) => (
                 <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 text-sm font-medium text-slate-800">{p.clientName}</td>
+                  <td className="py-3 px-4 text-sm font-medium text-slate-800">{formatName(p.clientName)}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{p.groupName}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">₹{p.amount.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-sm text-slate-600">{p.date}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">{formatDate(p.date)}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{p.modeOfPayment || "-"}</td>
                 </tr>
               ))}
