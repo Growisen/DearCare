@@ -302,6 +302,7 @@ type UnifiedPaymentViewRecord = {
   client_category: string;
   client_type?: string;
   client_status?: string;
+  total_commission?: number;
 };
 
 export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Date | null }): Promise<{
@@ -320,7 +321,7 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
     const dateToUse = selectedDate ?? new Date();
 
     let paymentsQuery = supabase
-      .from('unified_payment_records_view')
+      .from('unified_payment_records_view_with_comm')
       .select('*')
       .order('date_added', { ascending: false })
       .eq('client_category', clientsOrg);
@@ -338,6 +339,8 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
 
     const { data: rawPayments, error: paymentsError } = await paymentsQuery.returns<UnifiedPaymentViewRecord[]>();
 
+    console.log('Fetched raw payments:', rawPayments);
+
     if (paymentsError) throw new Error(paymentsError.message);
 
     const payments = rawPayments || [];
@@ -350,6 +353,7 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
+        totalCommission: p.total_commission || 0,
       };
     });
 

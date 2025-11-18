@@ -18,6 +18,7 @@ interface PaymentOverviewProps {
       amount: number;
       date: string;
       modeOfPayment?: string;
+      totalCommission?: number;
     }>;
   };
   loading?: boolean;
@@ -94,6 +95,9 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
         <div className="text-sm text-slate-700">
           <span className="font-semibold">Total Amount:</span> ₹{paymentData?.totalAmount?.toLocaleString() ?? "0"}
         </div>
+        <div className="text-sm text-slate-700">
+          <span className="font-semibold">Total Commission:</span> ₹{paymentData?.recentPayments?.reduce((acc, p) => acc + (p.totalCommission ?? 0), 0).toLocaleString() ?? "0"}
+        </div>
       </div>
       <div className="overflow-x-auto">
         {filteredPayments.length === 0 ? (
@@ -112,6 +116,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
                 <th className="py-3 px-4 text-sm font-semibold text-slate-600">Amount</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-600">Mode</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Total Commission</th>
               </tr>
             </thead>
             <tbody>
@@ -122,6 +127,9 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
                   <td className="py-3 px-4 text-sm text-slate-600">₹{p.amount.toLocaleString()}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{formatDate(p.date)}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{p.modeOfPayment || "-"}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">
+                    {p.totalCommission ? `₹${p.totalCommission.toLocaleString()}` : "N/A"}
+                  </td>
                 </tr>
               ))}
             </tbody>
