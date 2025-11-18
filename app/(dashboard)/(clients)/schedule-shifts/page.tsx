@@ -113,12 +113,24 @@ function ScheduleShiftsContent() {
       );
 
       if (!isValid) {
-        toast.error('Please complete all shift information for all nurses');
+        toast.error('Please complete all shift information for all nurses', {
+          action: {
+            label: 'OK',
+            onClick: () => toast.dismiss(),
+          },
+          duration: Infinity,
+        });
         return;
       }
 
       if (!clientId) {
-        toast.error('Missing client information');
+        toast.error('Missing client information', {
+          action: {
+            label: 'OK',
+            onClick: () => toast.dismiss(),
+          },
+          duration: Infinity,
+        });
         return;
       }
 
@@ -149,7 +161,14 @@ function ScheduleShiftsContent() {
       toast.error(
         `Failed to assign nurses: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`
+        }`,
+        {
+          action: {
+            label: 'OK',
+            onClick: () => toast.dismiss(),
+          },
+          duration: Infinity,
+        }
       );
     } finally {
       setLoading(false);

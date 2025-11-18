@@ -45,6 +45,15 @@ const LineItemInput: React.FC<LineItemInputProps> = ({
         className="w-30 px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
       />
       <input
+        type="number"
+        value={item.commission ?? ""}
+        onChange={(e) => onUpdate(item.id, 'commission', e.target.value)}
+        placeholder="Commission (₹)"
+        min="0"
+        max="100"
+        className="w-[180px] px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+      />
+      <input
         type="text"
         value={`₹${totalWithGst.toLocaleString('en-IN', { 
           minimumFractionDigits: 2, 

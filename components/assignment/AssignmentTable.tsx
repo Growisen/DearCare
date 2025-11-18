@@ -68,8 +68,12 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
 
   const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(assignment.start_date, assignment.end_date);
 
+  const rowBgClass = daysRemaining > 0 
+    ? "bg-gray-50 hover:bg-gray-100" 
+    : "bg-red-50 hover:bg-red-100";
+
   return (
-    <tr className="hover:bg-gray-50">
+    <tr className={`transition-colors border-b border-gray-100 last:border-0 ${rowBgClass}`}>
       <td className="py-4 px-6 text-gray-800 font-medium">
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
@@ -143,7 +147,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
       <td className="py-4 px-6">
         <button
           onClick={() => onViewDetails(assignment)}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-sm transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
           View
@@ -171,8 +175,12 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
   
   const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(assignment.start_date, assignment.end_date);
 
+  const cardBgClass = daysRemaining > 0 
+    ? "bg-gray-50 border-gray-100" 
+    : "bg-red-50 border-red-100";
+
   return (
-    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+    <div className={`p-5 space-y-4 transition-colors border-b last:border-0 ${cardBgClass}`}>
       <div className="flex justify-between items-start">
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
@@ -183,14 +191,14 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
         </div>
         <button
           onClick={() => onViewDetails(assignment)}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-white text-blue-700 hover:bg-gray-50 border border-blue-200 shadow-sm transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
           Details
         </button>
       </div>
       
-      <div className="space-y-3 text-sm bg-white border border-gray-200 p-3 rounded-lg">
+      <div className="space-y-3 text-sm bg-white/50 border border-gray-200/50 p-3 rounded-lg backdrop-blur-sm">
         <div>
           <p className="text-gray-500">Salary:</p>
           <p className="text-gray-800">Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
@@ -266,9 +274,9 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
 
   return (
     <>
-      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-gray-200 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full table-fixed">
+          <table className="w-full table-fixed border-collapse">
             <thead className="bg-gray-100 border-b border-gray-200">
               <tr className="text-left">
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Nurse</th>
@@ -278,7 +286,7 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
                 <th className="py-4 px-6 font-medium text-gray-700 w-24 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-100">
               {assignments.length > 0 ? (
                 assignments.map((assignment) => (
                   <AssignmentTableRow

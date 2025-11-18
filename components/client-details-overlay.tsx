@@ -260,33 +260,45 @@ export function ClientDetailsOverlay({
         </div>
       </div>
 
-      {/* Patient Information */}
-      <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-          <div className="space-y-4">
-            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
-              <DetailItem label="Age" value={client.details?.patient_age} />
-              <DetailItem label="Gender" value={client.details?.patient_gender} />
-              <DetailItem label="Phone" value={client.details?.patient_phone} />
-              <DetailItem label="Preferred Caregiver Gender" value={client.details?.preferred_caregiver_gender} />
+      {(
+        client.details?.patient_name ||
+        client.details?.patient_age ||
+        client.details?.patient_gender ||
+        client.details?.patient_phone ||
+        client.details?.patient_address ||
+        client.details?.complete_address ||
+        client.details?.patient_city ||
+        client.details?.patient_district ||
+        client.details?.patient_state ||
+        client.details?.patient_pincode
+      ) && (
+        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+            <div className="space-y-4">
+              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
+                <DetailItem label="Age" value={client.details?.patient_age} />
+                <DetailItem label="Gender" value={client.details?.patient_gender} />
+                <DetailItem label="Phone" value={client.details?.patient_phone} />
+              </div>
             </div>
-          </div>
-          
-          <div className="space-y-4">
-            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
-              <DetailItem label="City" value={client.details?.patient_city} />
-              <DetailItem label="District" value={client.details?.patient_district} />
-              <DetailItem label="State" value={client.details?.patient_state} />
-              <DetailItem label="Pincode" value={client.details?.patient_pincode} />
+            
+            <div className="space-y-4">
+              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
+                <DetailItem label="City" value={client.details?.patient_city} />
+                <DetailItem label="District" value={client.details?.patient_district} />
+                <DetailItem label="State" value={client.details?.patient_state} />
+                <DetailItem label="Pincode" value={client.details?.patient_pincode} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
 
       {/* Care Details */}
       <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
@@ -295,6 +307,7 @@ export function ClientDetailsOverlay({
           <DetailItem label="Service Required" value={getServiceLabel(serviceOptions, client.details?.service_required || '')} />
           <DetailItem label="Care Duration" value={client.details?.care_duration || 'Not specified'} />
           <DetailItem label="Duty Period" value={getServiceLabel(dutyPeriodOptions, client.duty_period || '')} />
+          <DetailItem label="Preferred Caregiver Gender" value={client.details?.preferred_caregiver_gender} />
           <DetailItem label="Start Date" value={formatDate(client.details?.start_date || '') || 'Not specified'} />
           <DetailItem label="Period Reason" value={client.duty_period_reason} columns={3} />
         </div>

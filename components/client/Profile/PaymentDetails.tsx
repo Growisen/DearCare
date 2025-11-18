@@ -25,7 +25,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
   const [entries, setEntries] = useState<EntryGroup[]>([]);
   const [groupName, setGroupName] = useState("");
   const [lineItems, setLineItems] = useState<FormLineItem[]>([
-    { id: `field-${Date.now()}`, fieldName: "", amount: "", gst: "" },
+    { id: `field-${Date.now()}`, fieldName: "", amount: "", gst: "", commission: "" },
   ]);
   const [groupNotes, setGroupNotes] = useState("");
   const [groupShowToClient, setGroupShowToClient] = useState(false);
@@ -51,6 +51,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
         amount: item.amount,
         gst: item.gst,
         amountWithGst: item.amount_with_gst,
+        commission: item.commission,
       })),
       dateAdded: group.date_added,
       notes: group.notes ?? undefined,
@@ -86,7 +87,8 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
       fieldName: string; 
       amount: number; 
       gst?: number; 
-      totalWithGst: number 
+      totalWithGst: number
+      commission?: number; 
     }[] = [];
     
     for (const item of lineItems) {
@@ -107,6 +109,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
         amount,
         gst,
         totalWithGst,
+        commission: item.commission ? parseFloat(item.commission) : 0,
       });
     }
 

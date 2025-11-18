@@ -48,7 +48,8 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
       id: `field-${Date.now()}`, 
       fieldName: "", 
       amount: "", 
-      gst: "" 
+      gst: "",
+      commission: ""
     };
     setLineItems(prev => [...prev, newItem]);
   };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { FiEdit2, FiSave, FiX, FiTrash2, FiEye, FiCalendar, FiClock } from 'react-icons/fi';
+import { FiEdit2, FiSave, FiX, FiTrash2, FiEye, FiCalendar, FiClock, FiCopy } from 'react-icons/fi'; // <-- Add FiCopy
 import CategorySelector from '@/components/client/Profile/CategorySelector';
 import ImageViewer from '@/components/common/ImageViewer';
 import EditCreatedAtModal from '@/components/client/Profile/EditCreatedAtModal';
@@ -48,6 +48,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [isEditDateOpen, setIsEditDateOpen] = useState(false);
   const [createdAt, setCreatedAt] = useState(patient.createdAt || '');
+  const [copied, setCopied] = useState(false); // For feedback
 
   const getCategoryBorderColor = () => {
     switch (patient.clientCategory) {
@@ -88,6 +89,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       return false;
     }
     return false;
+  };
+
+  const handleCopyLink = () => {
+    if (patient._id && typeof window !== 'undefined') {
+      const baseUrl = window.location.origin;
+      const link = `${baseUrl}/patient-assessment/${patient._id}`;
+      navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
   };
 
   return (
@@ -207,7 +218,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <FiEdit2 className="h-4 w-4 mr-1 text-blue-600" />
                 Edit Assessment
               </button>
-
+              <button
+                onClick={handleCopyLink}
+                className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50/80
+                  border border-gray-200 rounded-md hover:bg-gray-100/80 transition-all flex items-center justify-center shadow-sm"
+                title="Copy sharable assessment link"
+              >
+                <FiCopy className="h-4 w-4 mr-1 text-gray-600" />
+                {copied ? "Copied!" : "Copy Link"}
+              </button>
               <button
                 onClick={onDelete}
                 className="flex-1 sm:flex-none sm:w-auto px-4 py-2 text-sm font-medium text-red-700 bg-red-50/80
