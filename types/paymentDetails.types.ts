@@ -4,6 +4,7 @@ export interface LineItem {
   amount: number;
   gst?: number;
   amountWithGst?: number;
+  commission?: number;
 }
 
 export interface EntryGroup {
@@ -23,6 +24,7 @@ export interface FormLineItem {
   fieldName: string;
   amount: string;
   gst?: string;
+  commission?: string;
 }
 
 export interface DynamicFieldTrackerProps {
@@ -35,6 +37,7 @@ export interface ApiLineItem {
   amount: number;
   gst?: number;
   amount_with_gst?: number;
+  commission?: number;
 }
 
 export interface ApiEntryGroup {

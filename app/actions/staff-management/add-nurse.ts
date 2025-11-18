@@ -1094,17 +1094,6 @@ export async function updateNurse(
     }
 
     if (tempFiles) {
-      const uploadFile = async (file: File, folder: string) => {
-        const extension = file.name.split('.').pop();
-        const fileName = `${nurseId}.${extension}`;
-        return supabase.storage
-          .from('DearCare')
-          .upload(`Nurses/${folder}/${fileName}`, file, {
-            cacheControl: '3600',
-            upsert: true,
-          });
-      };
-
       for (const [docType, files] of Object.entries(tempFiles)) {
         if (files && files.length > 0) {
           let folder = docType;
@@ -1113,7 +1102,34 @@ export async function updateNurse(
           if (docType === 'experience') folder = 'Experience_Certificates';
           if (docType === 'noc') folder = 'Noc_Certificate';
           if (docType === 'ration') folder = 'ration_card';
-          await uploadFile(files[0].file, folder);
+
+          const folderPath = `Nurses/${folder}`;
+
+          const { data: existingFiles } = await supabase.storage
+            .from('DearCare')
+            .list(folderPath, {
+              search: `${nurseId}.`,
+            });
+
+          if (existingFiles && existingFiles.length > 0) {
+            const filesToRemove = existingFiles.map(
+              (f) => `${folderPath}/${f.name}`
+            );
+            await supabase.storage.from('DearCare').remove(filesToRemove);
+          }
+
+          const file = files[0].file;
+          const extension = file.name.split('.').pop();
+          const fileName = `${nurseId}.${extension}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('DearCare')
+            .upload(`${folderPath}/${fileName}`, file, {
+              cacheControl: '3600',
+              upsert: true,
+            });
+
+          if (uploadError) throw uploadError;
         }
       }
     }

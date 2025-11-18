@@ -47,8 +47,8 @@ function renderNurses(nurses?: AssignedNurse[]) {
   if (!nurses || nurses.length === 0) return <span className="text-gray-400">N/A</span>;
   return (
     <ul className="space-y-2">
-      {nurses.map((nurse) => (
-        <li key={nurse.nurseId} className="text-sm text-gray-700 leading-tight">
+      {nurses.map((nurse, idx) => (
+        <li key={`${nurse.nurseId}-${nurse.startDate}-${idx}`} className="text-sm text-gray-700 leading-tight">
           <span className="font-medium block">{formatName(nurse.name)}</span>
           {nurse.regNo && (
             <span className="block text-gray-500 text-xs mb-0.5">

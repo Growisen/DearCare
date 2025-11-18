@@ -58,30 +58,47 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
             return (
               <tr key={group.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 align-top">
-                  <div className="max-w-xs">
-                    <div className="font-medium text-gray-900 mb-2">
+                  <div className="min-w-[200px]"> 
+                    <div className="font-medium text-gray-900 mb-3">
                       {group.groupName}
                     </div>
-                    <div className="space-y-1">
+                    
+                    <div className="space-y-2">
                       {group.lineItems.map((item) => (
                         <div
                           key={item.id}
-                          className="flex justify-between items-center text-sm bg-gray-50 px-3 py-1 rounded"
+                          className="bg-gray-50 px-3 py-2 rounded border border-gray-100"
                         >
-                          <span className="text-gray-600 truncate mr-2" title={item.fieldName}>
-                            {item.fieldName}
-                          </span>
-                          <span className="text-gray-900 font-normal whitespace-nowrap">
-                            ₹{item.amountWithGst?.toLocaleString('en-IN', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                            {(item.gst ?? 0) > 0 && (
-                              <span className="ml-2 text-xs text-gray-500">
-                                (₹{item.amount.toLocaleString()} + {(item.gst ?? 0)}% GST)
-                              </span>
-                            )}
-                          </span>
+                          <div className="flex justify-between items-start gap-4">
+                            <span className="text-sm text-gray-700 font-medium break-words">
+                              {item.fieldName}
+                            </span>
+                            <span className="text-sm text-gray-900 font-bold whitespace-nowrap">
+                              ₹{item.amountWithGst?.toLocaleString('en-IN', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </span>
+                          </div>
+
+                          {((item.gst ?? 0) > 0 || (item.commission ?? 0) > 0) && (
+                            <div className="mt-1 flex flex-col items-end text-xs text-gray-500">
+                              
+                              {(item.gst ?? 0) > 0 && (
+                                <span>
+                                  (₹{item.amount.toLocaleString()} + {item.gst}% GST)
+                                </span>
+                              )}
+
+                              {(item.commission ?? 0) > 0 && (
+                                <span className="text-purple-600 font-medium mt-0.5">
+                                  Commission: ₹{(item.commission ?? 0).toLocaleString('en-IN', {
+                                    minimumFractionDigits: 2,
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

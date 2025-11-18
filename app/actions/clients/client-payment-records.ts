@@ -10,6 +10,7 @@ interface LineItemInput {
   amount: number;
   gst?: number;
   totalWithGst?: number;
+  commission?: number;
 }
 
 interface SavePaymentGroupInput {
@@ -64,6 +65,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
         amount: item.amount,
         gst: item.gst || 0,
         amount_with_gst: amountWithGst,
+        commission: item.commission || 0,
       };
     });
 

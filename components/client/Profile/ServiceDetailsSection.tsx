@@ -67,7 +67,7 @@ const ServiceDetailsSection: React.FC<ServiceDetailsSectionProps> = ({
 
         {startDate && (
           <div>
-            <p className="text-xs text-gray-500 font-medium">Service Start Date</p>
+            <p className="text-xs text-gray-500 font-medium">Expected Service Start Date</p>
             <p className="text-sm text-gray-700">{formatDate(startDate)}</p>
           </div>
         )}
