@@ -23,6 +23,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   onOpenDeductionModal,
   handleApprove,
 }) => {
+  console.log("sds", payments)
   return (
     <div className="bg-white rounded border border-gray-300 p-3 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
@@ -140,13 +141,15 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     >
                       Add Bonus
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApprove(payment)}
-                      className="hidden text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
-                    >
+                    {(payment.paymentStatus === "pending" || payment.paymentStatus === "Pending") && (
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(payment)}
+                        className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
+                      >
                         Approve
-                    </button>
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="text-red-600 hover:underline text-xs hover:bg-green-50 rounded px-2 py-1"
