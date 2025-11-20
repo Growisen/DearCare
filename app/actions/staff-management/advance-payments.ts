@@ -2,18 +2,83 @@
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 
+type Deduction = {
+  date: string;
+  amount_paid?: number;
+  lend?: number;
+  remaining: number;
+  type?: string;
+  payment_method?: string;
+  receipt_file?: string | null;
+  info?: string | null;
+};
 
 export async function fetchAdvancePayments(nurseId: number) {
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase
     .from('advance_payments')
-    .select('*')
+    .select(`
+      id,
+      date,
+      advance_amount,
+      return_type,
+      return_amount,
+      remaining_amount,
+      installment_amount,
+      info,
+      payment_method,
+      receipt_file,
+      deductions
+    `)
     .eq('nurse_id', nurseId)
     .order('date', { ascending: false })
 
   if (error) throw error
-  return data
+  if (!data) return []
+
+  const paymentsWithUrls = await Promise.all(
+    data.map(async (payment) => {
+      let receipt_url = null
+
+      if (payment.receipt_file) {
+        const { data: urlData, error: urlError } = await supabase.storage
+          .from('DearCare')
+          .createSignedUrl(payment.receipt_file, 60 * 60)
+        
+        if (urlError) throw urlError
+        receipt_url = urlData?.signedUrl
+      }
+
+      let processedDeductions = payment.deductions
+
+      if (Array.isArray(payment.deductions)) {
+        processedDeductions = await Promise.all(
+          payment.deductions.map(async (deduction: Deduction) => {
+            if (deduction.receipt_file) {
+              const { data: dedUrlData } = await supabase.storage
+                .from('DearCare')
+                .createSignedUrl(deduction.receipt_file, 60 * 60)
+
+              if (dedUrlData?.signedUrl) {
+                return { ...deduction, receipt_file: dedUrlData.signedUrl }
+              }
+            }
+            return deduction
+          })
+        )
+      }
+
+      return { 
+        ...payment, 
+        receipt_url,
+        deductions: processedDeductions
+      }
+    })
+  )
+
+  return paymentsWithUrls
 }
+
 
 export async function insertAdvancePayment(payment: {
   nurse_id: number
@@ -23,9 +88,24 @@ export async function insertAdvancePayment(payment: {
   return_amount?: number
   remaining_amount?: number
   installment_amount?: number
-  deductions?: object[]
+  deductions?: Deduction[]
+  payment_method?: string
+  receipt_file?: File | null
+  info?: string
 }) {
   const supabase = await createSupabaseServerClient()
+
+  const uploadReceipt = async (id: number, file: File) => {
+    const timestamp = new Date().getTime()
+    const filePath = `Nurses/advance/${id}/${timestamp}_${file.name}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('DearCare')
+      .upload(filePath, file, { upsert: true })
+
+    if (uploadError) throw uploadError
+    return filePath
+  }
 
   const { data: sameDateData, error: sameDateError } = await supabase
     .from('advance_payments')
@@ -37,11 +117,21 @@ export async function insertAdvancePayment(payment: {
   if (sameDateError && sameDateError.code !== 'PGRST116') throw sameDateError
 
   if (sameDateData) {
+    let newReceiptPath = null
+    if (payment.receipt_file) {
+      newReceiptPath = await uploadReceipt(sameDateData.id, payment.receipt_file)
+    }
+
     const newDeduction = {
       date: payment.date,
       lend: payment.advance_amount,
-      remaining: (sameDateData.remaining_amount ?? 0) + payment.advance_amount
+      remaining: (sameDateData.remaining_amount ?? 0) + payment.advance_amount,
+      type: 'addition',
+      payment_method: payment.payment_method,
+      receipt_file: newReceiptPath,
+      info: payment.info
     }
+
     const updatedDeductions = Array.isArray(sameDateData.deductions)
       ? [...sameDateData.deductions, newDeduction]
       : [newDeduction]
@@ -72,11 +162,21 @@ export async function insertAdvancePayment(payment: {
   if (remainingError && remainingError.code !== 'PGRST116') throw remainingError
 
   if (remainingData) {
+    let newReceiptPath = null
+    if (payment.receipt_file) {
+      newReceiptPath = await uploadReceipt(remainingData.id, payment.receipt_file)
+    }
+
     const newDeduction = {
       date: payment.date,
       lend: payment.advance_amount,
-      remaining: (remainingData.remaining_amount ?? 0) + payment.advance_amount
+      remaining: (remainingData.remaining_amount ?? 0) + payment.advance_amount,
+      type: 'addition',
+      payment_method: payment.payment_method,
+      receipt_file: newReceiptPath,
+      info: payment.info
     }
+
     const updatedDeductions = Array.isArray(remainingData.deductions)
       ? [...remainingData.deductions, newDeduction]
       : [newDeduction]
@@ -111,15 +211,57 @@ export async function insertAdvancePayment(payment: {
       remaining_amount: payment.remaining_amount ?? payment.advance_amount,
       installment_amount: installmentAmount,
       deductions: payment.deductions ?? [],
+      payment_method: payment.payment_method ?? null,
+      receipt_file: null,
+      info: payment.info ?? null
     }])
     .select()
 
   if (error) throw error
-  return data?.[0]
+  const inserted = data?.[0]
+  if (!inserted) throw new Error('Failed to insert advance payment')
+
+  if (payment.receipt_file) {
+    const filePath = await uploadReceipt(inserted.id, payment.receipt_file)
+
+    const { data: updateData, error: updateError } = await supabase
+      .from('advance_payments')
+      .update({ receipt_file: filePath })
+      .eq('id', inserted.id)
+      .select()
+
+    if (updateError) throw updateError
+    return updateData?.[0]
+  }
+
+  return inserted
 }
 
 export async function deleteAdvancePayment(paymentId: string) {
   const supabase = await createSupabaseServerClient()
+
+  const { data: payment, error: fetchError } = await supabase
+    .from('advance_payments')
+    .select('created_at, receipt_file')
+    .eq('id', paymentId)
+    .single()
+
+  if (fetchError) throw fetchError
+  if (!payment) throw new Error('Payment not found')
+
+  const createdAt = new Date(payment.created_at)
+  const now = new Date()
+  const diffHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60)
+
+  if (diffHours > 24) throw new Error('Cannot delete payments created more than 24 hours ago')
+
+  if (payment.receipt_file) {
+    const { error: fileDeleteError } = await supabase.storage
+      .from('DearCare')
+      .remove([payment.receipt_file])
+    if (fileDeleteError) throw fileDeleteError
+  }
+
   const { data, error } = await supabase
     .from('advance_payments')
     .delete()
