@@ -26,6 +26,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [creating, setCreating] = useState(false);
   const [processingBonus, setProcessingBonus] = useState(false);
   const [processingDeduction, setProcessingDeduction] = useState(false);
+  const [approvingId, setApprovingId] = useState<number | null>(null);
   const { organization } = useOrgStore()
 
   const fetchPayments = async () => {
@@ -238,6 +239,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   };
 
   const handleApprove = async (payment: SalaryPayment) => {
+    setApprovingId(payment.id);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
         method: "POST",
@@ -283,6 +285,8 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     } catch (error) {
       console.error("Approve error:", error);
       toast.error("Error approving salary payment.");
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -303,6 +307,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         onOpenBonusModal={handleOpenBonusModal}
         onOpenDeductionModal={handleOpenDeductionModal}
         handleApprove={handleApprove}
+        approvingId={approvingId}
       />
 
       <ModalPortal>
