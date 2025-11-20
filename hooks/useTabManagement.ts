@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-type TabType = 'profile' | 'medical' | 'assignments' | 'files' | 'requirements' | 'paymentDetails';
+type TabType = 'profile' | 'medical' | 'assignments' | 'files' | 'requirements' | 'paymentDetails' | 'servicePeriods';
 
 export const useTabManagement = (id: string) => {
   const [activeTab, setActiveTab] = useState<TabType>(() => {

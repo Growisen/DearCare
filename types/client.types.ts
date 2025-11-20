@@ -197,6 +197,8 @@ export interface DetailedClientIndividual {
   };
   general_notes?: string;
   created_at?: string;
+  service_start_date?: string;
+  service_end_date?: string;
 }
 
 export interface DetailedClientOrganization {
@@ -413,6 +415,8 @@ export interface Patient {
     preferredCaregiverGender?: string;
   };
   createdAt?: string;
+  serviceStartDate?: string;
+  serviceEndDate?: string;
 }
 
 export interface ClientResponse {

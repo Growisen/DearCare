@@ -433,7 +433,8 @@ export async function fetchNurseAssignments(
           client_type
         )
       `)
-      .eq('nurse_id', nurseId);
+      .eq('nurse_id', nurseId)
+      .order('start_date', { ascending: false });
 
     if (assignmentError) throw assignmentError;
     if (!assignments) return { data: null, error: 'No assignments found' };

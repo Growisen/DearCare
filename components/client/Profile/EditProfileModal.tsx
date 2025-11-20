@@ -58,7 +58,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Validation hooks for requestor fields
   const requestorNameValidation = useNameValidation(formData.requestorName);
   const requestorPhoneValidation = usePhoneValidation(formData.requestorPhone);
   const requestorEmailValidation = useEmailValidation(formData.requestorEmail);
@@ -67,15 +66,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const requestorDistrictValidation = useTextFieldValidation(formData.requestorDistrict, 'District', true);
   const requestorStateValidation = useTextFieldValidation(formData.requestorState, 'State', true);
 
-  // Validation hooks for patient fields
-  const patientNameValidation = useNameValidation(formData.patientName);
-  const patientPhoneValidation = usePhoneValidation(formData.patientPhone);
-  const patientPincodeValidation = usePincodeValidation(formData.patientPincode);
-  const patientCityValidation = useTextFieldValidation(formData.patientCity, 'City', true);
-  const patientDistrictValidation = useTextFieldValidation(formData.patientDistrict, 'District', true);
-  const patientStateValidation = useTextFieldValidation(formData.patientState, 'State', true);
 
-  // Initialize form with patient data when modal opens
+  const patientNameValidation = useNameValidation(formData.patientName, false); 
+  const patientPhoneValidation = usePhoneValidation(formData.patientPhone, false); 
+  const patientPincodeValidation = usePincodeValidation(formData.patientPincode, false);
+
+  const patientCityValidation = useTextFieldValidation(formData.patientCity, 'City', false);
+  const patientDistrictValidation = useTextFieldValidation(formData.patientDistrict, 'District', false);
+  const patientStateValidation = useTextFieldValidation(formData.patientState, 'State', false);
+
   useEffect(() => {
     if (patient && isOpen) {
       setFormData({
@@ -188,7 +187,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    console.log('Submitting form with data:', formData);
     if (!validateForm() || !patient?._id) return;
+    console.log('Form is valid and patient ID is present, proceeding with submission');
     
     setIsSubmitting(true);
     try {

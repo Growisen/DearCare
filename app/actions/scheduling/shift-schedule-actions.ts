@@ -530,6 +530,8 @@ export interface NurseAssignmentData {
   client_type?: string;
   client_name?: string;
   client_profile_url?: string;
+  current_service_start?: string;
+  current_service_end?: string;
 }
 
 export async function getAllNurseAssignments(
@@ -556,7 +558,7 @@ export async function getAllNurseAssignments(
     const { nursesOrg } = getOrgMappings(organization);
 
     let query = supabase
-      .from('nurse_assignments_view_with_salary')
+      .from('nurse_assignments_view_with_service_history')
       .select('*', { count: 'exact' });
 
     if (filterStatus !== 'all') {
