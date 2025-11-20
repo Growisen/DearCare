@@ -11,7 +11,7 @@ export interface SalaryPayment {
   hourlyRate: number;
   hourlyPay: number;
   netSalary: number;
-  paymentStatus: "Paid" | "Pending";
+  paymentStatus: "Paid" | "Pending" | "Failed" | "Approved" | "Rejected" | "paid" | "pending" | "failed" | "approved" | "rejected";
   paymentMethod: string;
   transactionReference: string;
   notes: string;

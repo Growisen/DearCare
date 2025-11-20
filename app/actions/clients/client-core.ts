@@ -870,3 +870,172 @@ export async function updateClientCreatedAt(clientId: string, newCreatedAt: stri
     };
   }
 }
+
+/**
+ * Updates the service_start_date and service_end_date fields for a client.
+ * @param clientId - The ID of the client.
+ * @param startDate - The new service start date (string in 'YYYY-MM-DD' format or Date).
+ * @param endDate - The new service end date (string in 'YYYY-MM-DD' format or Date).
+ */
+export async function updateClientServicePeriod(
+  clientId: string,
+  startDate: string | Date,
+  endDate: string | Date
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const formatDate = (d: string | Date) =>
+      typeof d === 'string'
+        ? d
+        : d.toISOString().split('T')[0];
+
+    const { error } = await supabase
+      .from('clients')
+      .update({
+        service_start_date: formatDate(startDate),
+        service_end_date: formatDate(endDate),
+      })
+      .eq('id', clientId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating service period:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+export type ServiceHistoryItem = {
+  id: string;
+  client_id: string;
+  start_date: string;
+  end_date: string;
+  note?: string;
+  created_at?: string;
+};
+
+/**
+ * Adds a new service item to the client_service_history table.
+ * @param clientId - The ID of the client.
+ * @param serviceItem - The service item details.
+ */
+export async function addServiceHistoryItem(
+  clientId: string,
+  serviceItem: { start_date: string; end_date: string; note?: string }
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('client_service_history')
+      .insert({
+        client_id: clientId,
+        start_date: serviceItem.start_date,
+        end_date: serviceItem.end_date,
+        note: serviceItem.note,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
+/**
+ * Updates a specific service history row.
+ * @param clientId - The ID of the client (used for safety check).
+ * @param itemId - The specific UUID of the service history row.
+ * @param updates - Object containing fields to change.
+ */
+export async function updateServiceHistoryItem(
+  clientId: string,
+  itemId: string,
+  updates: Partial<{ start_date: string; end_date: string; note: string }>
+) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('client_service_history')
+      .update(updates)
+      .eq('id', itemId)
+      .eq('client_id', clientId); 
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
+/**
+ * Fetches service history from the table, sorted by newest start_date.
+ * @param clientId - The ID of the client.
+ */
+export async function getServiceHistory(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('client_service_history')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('start_date', { ascending: false }); // Database handles the sorting now
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: data as ServiceHistoryItem[] };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
+/**
+ * Deletes a service history item.
+ * @param itemId - The UUID of the item to delete.
+ */
+export async function deleteServiceHistoryItem(itemId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('client_service_history')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}

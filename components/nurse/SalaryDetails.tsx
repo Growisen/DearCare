@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../Loader";
 import { fetchNurseSalaryPayments } from "@/app/actions/payroll/salary-actions";
-import { calculateNurseSalary, addNurseBonus, addNurseSalaryDeduction } from "@/app/actions/payroll/calculate-nurse-salary";
+import { calculateNurseSalary, addNurseBonus, addNurseSalaryDeduction, updateSalaryPaymentStatus } from "@/app/actions/payroll/calculate-nurse-salary";
 import ConfirmationModal from "../common/ConfirmationModal";
 import ModalPortal from "../ui/ModalPortal";
 import HourlySalaryCard from "./salary/HourlySalaryCard";
@@ -11,6 +11,7 @@ import AddBonusModal from "./salary/AddBonusModal";
 import AddDeductionModal from "./salary/AddDeductionModal";
 import { SalaryPayment } from "./types";
 import useOrgStore from "@/app/stores/UseOrgStore";
+import { toast } from "sonner";
 
 const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [hourlySalary, setHourlySalary] = useState<number>(0);
@@ -25,12 +26,14 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [creating, setCreating] = useState(false);
   const [processingBonus, setProcessingBonus] = useState(false);
   const [processingDeduction, setProcessingDeduction] = useState(false);
+  const [approvingId, setApprovingId] = useState<number | null>(null);
   const { organization } = useOrgStore()
 
   const fetchPayments = async () => {
     setLoading(true);
     try {
       const data = await fetchNurseSalaryPayments(nurseId);
+      console.log("data fetched", data)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mappedPayments: SalaryPayment[] = (data ?? []).map((p: any) => ({
         id: p.id,
@@ -45,7 +48,12 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         hourlyRate: p.hourly_rate ?? p.salary_config?.hourly_rate ?? 0,
         hourlyPay: p.hourly_pay ?? 0,
         netSalary: p.net_salary ?? 0,
-        paymentStatus: p.payment_status === "paid" ? "Paid" : "Pending",
+        paymentStatus:
+          p.payment_status === "paid" ? "Paid"
+          : p.payment_status === "approved" ? "Approved"
+          : p.payment_status === "failed" ? "Failed"
+          : p.payment_status === "pending" ? "Pending"
+          : p.payment_status ?? "Pending",
         paymentMethod: p.payment_method ?? "",
         transactionReference: p.transaction_reference ?? "",
         notes: p.notes ?? "",
@@ -54,6 +62,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         bonus: p.bonus ?? 0,
       }));
 
+      setPayments([]);
       setPayments(mappedPayments);
 
       if (mappedPayments.length > 0) {
@@ -211,11 +220,11 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         await fetchPayments();
         setShowCreateModal(false);
       } else {
-        alert("Salary creation failed: " + result.error);
+        toast.error("Salary creation failed: " + result.error);
       }
     } catch (error) {
       console.error("Error creating salary:", error);
-      alert("Error creating salary.");
+      toast.error("Error creating salary.");
     } finally {
       setCreating(false);
     }
@@ -230,6 +239,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   };
 
   const handleApprove = async (payment: SalaryPayment) => {
+    setApprovingId(payment.id);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
         method: "POST",
@@ -249,14 +259,34 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        alert("Salary payment approved!");
+      if (!result.error) {
+        const statusResult = await updateSalaryPaymentStatus({
+          paymentId: payment.id,
+          status: "approved",
+        });
+        await fetchPayments();
+        if (statusResult.success) {
+          toast.success("Salary payment approved!", {
+            action: {
+              label: "OK",
+              onClick: async () => {
+                toast.dismiss();
+                await fetchPayments();
+                console.log("Data refetched after approval.");
+              },
+            },
+          });
+        } else {
+          toast.error("Failed to update status: " + statusResult.error);
+        }
       } else {
-        alert("Failed to approve: " + (result.error || response.statusText));
+        toast.error("Failed to approve: " + (result.error || response.statusText));
       }
     } catch (error) {
       console.error("Approve error:", error);
-      alert("Error approving salary payment.");
+      toast.error("Error approving salary payment.");
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -277,6 +307,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         onOpenBonusModal={handleOpenBonusModal}
         onOpenDeductionModal={handleOpenDeductionModal}
         handleApprove={handleApprove}
+        approvingId={approvingId}
       />
 
       <ModalPortal>

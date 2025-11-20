@@ -11,6 +11,7 @@ interface PaymentHistoryTableProps {
   onOpenBonusModal: (payment: SalaryPayment) => void;
   onOpenDeductionModal: (payment: SalaryPayment) => void;
   handleApprove: (payment: SalaryPayment) => void;
+  approvingId?: number | null;
 }
 
 const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
@@ -22,7 +23,9 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   onOpenBonusModal,
   onOpenDeductionModal,
   handleApprove,
+  approvingId,
 }) => {
+  console.log("sds", payments)
   return (
     <div className="bg-white rounded border border-gray-300 p-3 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
@@ -140,13 +143,16 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     >
                       Add Bonus
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApprove(payment)}
-                      className="hidden text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
-                    >
-                        Approve
-                    </button>
+                    {(payment.paymentStatus === "pending" || payment.paymentStatus === "Pending") && (
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(payment)}
+                        className="text-green-600 hover:text-green-900 text-xs hover:underline mt-1 disabled:opacity-60"
+                        disabled={approvingId === payment.id}
+                      >
+                        {approvingId === payment.id ? "Approving..." : "Approve"}
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="text-red-600 hover:underline text-xs hover:bg-green-50 rounded px-2 py-1"

@@ -885,3 +885,39 @@ export async function createAdvanceSalaryPayment({
     info: 'Advance Salary',
   };
 }
+
+
+export async function updateSalaryPaymentStatus({
+  paymentId,
+  status,
+}: {
+  paymentId: number;
+  status: string;
+}) {
+  if (!paymentId || !status) {
+    return {
+      success: false,
+      error: "Invalid payment ID or status",
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { error } = await supabase
+    .from("salary_payments")
+    .update({ payment_status: status })
+    .eq("id", paymentId);
+
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+
+  return {
+    success: true,
+    paymentId,
+    status,
+  };
+}

@@ -98,15 +98,23 @@ export const usePasswordValidation = () => {
   };
 };
 
-// New hook for name validation
-export const useNameValidation = (initialName: string = '') => {
+export const useNameValidation = (initialName: string = '', isRequired: boolean = true) => {
   const [name, setName] = useState(initialName);
   const [nameError, setNameError] = useState("");
 
-  const validateName = (name: string) => {
-    if (!name.trim()) return "Name is required";
+  const validateName = (value: string) => {
+    const trimmedName = value.trim();
+
+    if (!trimmedName) {
+      if (isRequired) return "Name is required";
+      return ""; 
+    }
+
     const nameRegex = /^[a-zA-Z\s.]+$/;
-    if (!nameRegex.test(name)) return "Name should contain only letters, spaces, and periods";
+    if (!nameRegex.test(trimmedName)) {
+      return "Name should contain only letters, spaces, and periods";
+    }
+
     return "";
   };
 
@@ -126,15 +134,23 @@ export const useNameValidation = (initialName: string = '') => {
   };
 };
 
-// New hook for phone validation
-export const usePhoneValidation = (initialPhone: string = '', digitLength: number = 10) => {
+export const usePhoneValidation = (initialPhone: string = '', isRequired: boolean = true, digitLength: number = 10) => {
   const [phone, setPhone] = useState(initialPhone);
   const [phoneError, setPhoneError] = useState("");
 
-  const validatePhone = (phone: string) => {
-    if (!phone.trim()) return "Phone number is required";
+  const validatePhone = (value: string) => {
+    const trimmedPhone = value.trim();
+
+    if (!trimmedPhone) {
+      if (isRequired) return "Phone number is required";
+      return "";
+    }
+
     const phoneRegex = new RegExp(`^\\d{${digitLength}}$`);
-    if (!phoneRegex.test(phone)) return `Phone must be exactly ${digitLength} digits`;
+    if (!phoneRegex.test(trimmedPhone)) {
+      return `Phone must be exactly ${digitLength} digits`;
+    }
+    
     return "";
   };
 
@@ -154,15 +170,23 @@ export const usePhoneValidation = (initialPhone: string = '', digitLength: numbe
   };
 };
 
-// New hook for PIN/postal code validation
-export const usePincodeValidation = (initialPincode: string = '', digitLength: number = 6) => {
+export const usePincodeValidation = (initialPincode: string = '', isRequired: boolean = true, digitLength: number = 6) => {
   const [pincode, setPincode] = useState(initialPincode);
   const [pincodeError, setPincodeError] = useState("");
 
-  const validatePincode = (pincode: string) => {
-    if (!pincode.trim()) return "PIN code is required";
+  const validatePincode = (value: string) => {
+    const trimmedPincode = value.trim();
+
+    if (!trimmedPincode) {
+      if (isRequired) return "PIN code is required";
+      return "";
+    }
+
     const pincodeRegex = new RegExp(`^\\d{${digitLength}}$`);
-    if (!pincodeRegex.test(pincode)) return `PIN code must be exactly ${digitLength} digits`;
+    if (!pincodeRegex.test(trimmedPincode)) {
+      return `PIN code must be exactly ${digitLength} digits`;
+    }
+
     return "";
   };
 
@@ -182,7 +206,7 @@ export const usePincodeValidation = (initialPincode: string = '', digitLength: n
   };
 };
 
-// A generic hook for text field validation (city, district, state)
+
 export const useTextFieldValidation = (
   initialValue: string = '',
   fieldName: string = 'Field',
@@ -216,7 +240,6 @@ export const useTextFieldValidation = (
   };
 };
 
-// A hook for address validation that composes other validation hooks
 export const useAddressValidation = (initialAddress?: {
   line1: string;
   line2?: string;

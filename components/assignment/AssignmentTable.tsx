@@ -72,6 +72,10 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
     ? "bg-gray-50 hover:bg-gray-100" 
     : "bg-red-50 hover:bg-red-100";
 
+  const serviceStats = assignment.current_service_start && assignment.current_service_end
+    ? getAssignmentPeriodStatus(assignment.current_service_start, assignment.current_service_end)
+    : null;
+
   return (
     <tr className={`transition-colors border-b border-gray-100 last:border-0 ${rowBgClass}`}>
       <td className="py-4 px-6 text-gray-800 font-medium">
@@ -133,6 +137,26 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           {clientType && (
             <div className="text-xs text-gray-500">{clientType}</div>
           )}
+
+          {(assignment.current_service_start || assignment.current_service_end) && (
+            <div className="text-xs text-gray-500">
+              Active: 
+              {assignment.current_service_start && (
+                <> {format(new Date(assignment.current_service_start), 'MMM dd, yyyy')}</>
+              )}
+              {" - "}
+              {assignment.current_service_end && (
+                <>{format(new Date(assignment.current_service_end), 'MMM dd, yyyy')}</>
+              )}
+            </div>
+          )}
+          {serviceStats && (
+            <div className="text-xs text-gray-500">
+                {serviceStats.daysCompleted} completed
+                {serviceStats.daysRemaining > 0 && `, ${serviceStats.daysRemaining} remaining`}
+                , {serviceStats.totalDays} total
+            </div>
+          )}
           <Link 
             href={clientProfileUrl} 
             className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
@@ -179,6 +203,10 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
     ? "bg-gray-50 border-gray-100" 
     : "bg-red-50 border-red-100";
 
+  const serviceStats = assignment.current_service_start && assignment.current_service_end
+    ? getAssignmentPeriodStatus(assignment.current_service_start, assignment.current_service_end)
+    : null;
+
   return (
     <div className={`p-5 space-y-4 transition-colors border-b last:border-0 ${cardBgClass}`}>
       <div className="flex justify-between items-start">
@@ -223,6 +251,28 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
               <div className="font-medium text-gray-800">{formatName(clientName)}</div>
               {clientType && (
                 <div className="text-xs text-gray-500">{clientType}</div>
+              )}
+
+              {(assignment.current_service_start || assignment.current_service_end) && (
+                <div className="text-xs text-gray-500">
+                  Service: 
+                  {assignment.current_service_start && (
+                    <> {format(new Date(assignment.current_service_start), 'MMM dd, yyyy')}</>
+                  )}
+                  {" - "}
+                  {assignment.current_service_end && (
+                    <>{format(new Date(assignment.current_service_end), 'MMM dd, yyyy')}</>
+                  )}
+                </div>
+              )}
+              {serviceStats && (
+                <div className="text-xs text-gray-500">
+                  (
+                    {serviceStats.daysCompleted} completed
+                    {serviceStats.daysRemaining > 0 && `, ${serviceStats.daysRemaining} remaining`}
+                    , {serviceStats.totalDays} total
+                  )
+                </div>
               )}
               <Link 
                 href={clientProfileUrl} 
@@ -271,6 +321,8 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
   const handleViewDetails = (assignment: NurseAssignmentData) => {
     setSelectedAssignment(assignment);
   };
+
+  console.log('Rendering AssignmentTable with assignments:', assignments);
 
   return (
     <>

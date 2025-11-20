@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getClientDetails, getPatientAssessment, getClientStatus, updateClientCategory, deleteClient } from '@/app/actions/clients/client-actions';
 import { Patient, ClientResponse, ClientCategory } from '@/types/client.types';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { getServiceLabel } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
 
@@ -45,6 +45,8 @@ export const usePatientData = (id: string, activeTab?: string) => {
           phoneNumber: clientData.details?.patient_phone || '',
           clientCategory: clientData.client_category || 'DearCare LLP',
           profileImage: clientData.details?.patient_profile_pic_url || '',
+          serviceStartDate: clientData?.service_start_date || '',
+          serviceEndDate: clientData?.service_end_date || '',
           serviceDetails: {
             serviceRequired: getServiceLabel(serviceOptions, clientData.details?.service_required || ''),
             preferredCaregiverGender: clientData.details?.preferred_caregiver_gender || '',

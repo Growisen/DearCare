@@ -9,6 +9,7 @@ interface AssignmentCardProps {
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
+  console.log('Rendering AssignmentCard for assignment:', assignment);
   const getStatusConfig = () => {
     const startDate = new Date(assignment.assignment.start_date);
     const endDate = assignment.assignment.end_date ? new Date(assignment.assignment.end_date) : null;
@@ -28,7 +29,6 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
 
   const status = getStatusConfig();
 
-  // Get assignment period status
   const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(
     assignment.assignment.start_date,
     assignment.assignment.end_date || new Date().toISOString()
@@ -103,12 +103,12 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
               </div>
 
               <div className="flex items-start">
-                <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Assignment Period: </span>
+                <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Assignment Period</span>
                 <span className="text-sm text-gray-900 font-medium">
                   <p className="ml-0 text-sm text-gray-700">
-                    {daysCompleted} completed
-                      {daysRemaining > 0 && `, ${daysRemaining} remaining`}
-                      , {totalDays} total
+                    : {daysCompleted} {daysCompleted === 1 ? 'day' : 'days'} completed
+                      {daysRemaining > 0 && `, ${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} remaining`}
+                      , {totalDays} {totalDays === 1 ? 'day' : 'days'} total
                   </p>
                 </span>
               </div>
@@ -123,9 +123,13 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
             {assignment.client.type === 'individual' ? (
               <div className="space-y-2">
                 <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Patient</span>
+                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Requestor</span>
                   <span className="text-sm text-gray-900">
-                    {assignment.client.details.individual?.patient_name || 'N/A'}
+                    {
+                      assignment.client.details.individual?.patient_name
+                      || assignment.client.details.individual?.requestor_name
+                      || 'N/A'
+                    }
                     {assignment.client.details.individual?.patient_age != null &&
                       `, ${assignment.client.details.individual.patient_age} yrs`}
                   </span>
