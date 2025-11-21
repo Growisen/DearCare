@@ -97,13 +97,24 @@ export const usePatientData = (id: string, activeTab?: string) => {
     }
   };
 
-  const fetchAssessmentData = async () => {
-    if (!id || assessmentLoaded) return;
-    
-    setIsLoadingAssessment(true); 
+  const fetchAssessmentData = async (assessmentId?: string) => {
+    if (!id) return;
+
+    if (assessmentId) {
+      setAssessmentLoaded(false);
+    }
+
+    if (assessmentLoaded && !assessmentId) return;
+
+    setIsLoadingAssessment(true);
     try {
-      const assessmentResponse = await getPatientAssessment(id);
+      const assessmentResponse = await getPatientAssessment(id, assessmentId);
+
+      console.log('Assessment Response:', assessmentResponse);
       const assessmentData = assessmentResponse.success ? assessmentResponse.assessment : null;
+      const totalAssessments = assessmentResponse.success && assessmentResponse.assessments
+        ? assessmentResponse.assessments
+        : [];
 
       if (assessmentData) {
         setPatient(prev => prev ? {
@@ -149,7 +160,8 @@ export const usePatientData = (id: string, activeTab?: string) => {
                 familyRelationship: '',
                 recorderTimestamp: ''
             }
-          }]
+          }],
+          totalAssessments
         } : prev);
         setAssessmentLoaded(true);
       }
@@ -157,7 +169,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
       console.error('Error fetching assessment data:', error);
       toast.error('Failed to load assessment data');
     } finally {
-      setIsLoadingAssessment(false); 
+      setIsLoadingAssessment(false);
     }
   };
 

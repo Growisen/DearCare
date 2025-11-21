@@ -6,13 +6,15 @@ interface EditPatientModalProps {
   clientId: string;
   handleSave: () => void;
   handleCancel: () => void;
+  selectedAssessment?: string;
 }
 
 const EditPatientModal: React.FC<EditPatientModalProps> = ({
   isEditing,
   clientId,
   handleSave,
-  handleCancel
+  handleCancel,
+  selectedAssessment
 }) => {
   // Create a ref for the form with type assertion
   const formRef = useRef<HTMLFormElement>(null) as React.RefObject<HTMLFormElement>;
@@ -114,6 +116,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
             onSave={handleSaveWithState}
             showSaveButton={false}
             formRef={formRef}
+            selectedAssessment={selectedAssessment}
           />
         </div>
         

@@ -40,6 +40,7 @@ const PatientProfilePage = () => {
   const params = useParams();
   const id = params.id as string;
   const { activeTab, handleTabChange } = useTabManagement(id);
+  const [selectedAssessmentId, setSelectedAssessmentId] = React.useState<string | undefined>(undefined);
 
 
   React.useEffect(() => {
@@ -72,6 +73,7 @@ const PatientProfilePage = () => {
     handleEditProfile,
     handleCloseProfileEdit,
     handleDeleteClient,
+    fetchAssessmentData,
     refetchClientData,
   } = usePatientData(id, activeTab);
 
@@ -128,6 +130,15 @@ const PatientProfilePage = () => {
   }
 
   const latestAssessment = patient.assessments[0];
+  const totalAssessments = patient.totalAssessments || [];
+
+  const selectedAssessment =
+    patient.assessments.find(a => a.id === selectedAssessmentId) || latestAssessment;
+
+  const handleSelectAssessment = (assessmentId: string) => {
+    setSelectedAssessmentId(assessmentId);
+    fetchAssessmentData(assessmentId);
+  };
 
   const handleDeleteConfirmation = async () => {
     const success = await handleDeleteClient();
@@ -242,6 +253,7 @@ const PatientProfilePage = () => {
               clientId={id}
               handleSave={handleSave}
               handleCancel={handleCancel}
+              selectedAssessment={selectedAssessmentId}
             />
             
             {activeTab === 'profile' && (
@@ -258,7 +270,12 @@ const PatientProfilePage = () => {
                     <Loader />
                   </div>
                 ) : (
-                  <MedicalInfo assessment={latestAssessment} />
+                  <MedicalInfo 
+                    assessment={selectedAssessment}
+                    totalAssessments={totalAssessments}
+                    selectedAssessmentId={selectedAssessmentId}
+                    onSelectAssessment={handleSelectAssessment}
+                  />
                 )}
               </div>
             )}

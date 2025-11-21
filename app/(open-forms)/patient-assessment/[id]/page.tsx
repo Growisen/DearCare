@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { savePatientAssessment } from '@/app/actions/clients/client-actions';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import Image from 'next/image';
 import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import RecorderInfoForm from '@/components/client/RecorderInfoForm';
 import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
-import { getClientNames } from '@/app/actions/clients/assessment'; // <-- Add this import
+import { getClientNames } from '@/app/actions/clients/assessment';
 
 export default function PatientAssessmentPage() {
   const params = useParams();
@@ -26,7 +26,7 @@ export default function PatientAssessmentPage() {
     recorderTimestamp: new Date().toISOString()
   });
 
-  const [clientNames, setClientNames] = useState<{ patientName?: string; requestorName?: string } | null>(null);
+  const [clientNames, setClientNames] = useState<{ patientName?: string; requestorName?: string, clientCategory?: string } | null>(null);
   const [nameLoading, setNameLoading] = useState(true);
 
   const {
@@ -99,7 +99,8 @@ export default function PatientAssessmentPage() {
       if (result.success) {
         setClientNames({
           patientName: result.patientName,
-          requestorName: result.requestorName
+          requestorName: result.requestorName,
+          clientCategory: result.clientCategory
         });
       } else {
         setClientNames(null);
@@ -115,11 +116,11 @@ export default function PatientAssessmentPage() {
         <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
           <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
             <div className="flex items-center">
-              <div className="flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 border-dCblue">
+              <div className={`flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 ${clientNames?.clientCategory === 'DearCare LLP' ? 'border-dCblue' : 'border-amber-600'}`}>
                 <div className="relative w-12 h-12">
                   <Image
-                    src="/DearCare.png"
-                    alt="DearCare Logo"
+                    src={clientNames?.clientCategory === 'DearCare LLP' ? "/DearCare.png" : "/TATA.png"}
+                    alt={clientNames?.clientCategory === 'DearCare LLP' ? "DearCare Logo" : "Tata Home Nursing Logo"}
                     fill
                     className="object-contain"
                   />
@@ -128,12 +129,20 @@ export default function PatientAssessmentPage() {
               <div>
                 <h1 className="text-2xl font-bold">
                   <div className="flex items-center whitespace-nowrap">
-                    <span className='text-dCblue'>Dear</span>
-                    <span className='text-amber-500'>C</span>
-                    <span className='text-dCblue'>are</span>
+                    {clientNames?.clientCategory === 'DearCare LLP' ? (
+                      <>
+                        <span className='text-dCblue'>Dear</span>
+                        <span className='text-amber-500'>C</span>
+                        <span className='text-dCblue'>are</span>
+                      </>
+                    ) : (
+                      <span className='text-amber-600'>Tata Home Nursing</span>
+                    )}
                   </div>
                 </h1>
-                <p className="text-sm text-gray-500">Healthcare & Caregiving Services</p>
+                <p className="text-sm text-gray-500">
+                  Healthcare & Caregiving Services
+                </p>
               </div>
             </div>
             <div className="hidden sm:block">

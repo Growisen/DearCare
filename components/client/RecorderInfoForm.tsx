@@ -12,7 +12,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
   handleRecorderInfoChange
 }) => {
   return (
-    <div className="bg-blue-50 p-5 rounded-lg border border-blue-200 mb-6">
+    <div className="bg-blue-50 p-5 rounded-lg border border-blue-200 mb-6 text-gray-700">
       <h3 className="text-lg font-semibold text-blue-800 mb-3">Person Completing this Form</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
