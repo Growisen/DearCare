@@ -12,9 +12,10 @@ interface PatientAssessmentProps {
   onSave: () => void;
   showSaveButton?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
+  selectedAssessment?: string;
 }
 
-export default function PatientAssessment({ clientId, isEditing, onSave, formRef }: PatientAssessmentProps) {
+export default function PatientAssessment({ clientId, isEditing, onSave, formRef, selectedAssessment }: PatientAssessmentProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { userData } = useUserData();
@@ -38,7 +39,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     const fetchAssessmentData = async () => {
       try {
         setLoading(true);
-        const result = await getPatientAssessment(clientId);
+        const result = await getPatientAssessment(clientId, selectedAssessment);
         
         if (result.success && result.assessment) {
           // Transform database data to match component state structure

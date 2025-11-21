@@ -12,15 +12,7 @@ import { logger } from '@/utils/logger';
 export async function savePatientAssessment(data: SavePatientAssessmentParams): Promise<SavePatientAssessmentResult> {
   try {
     const supabase = await createSupabaseServerClient();
-    
-    // Check if an assessment already exists for this client
-    const { data: existingAssessment } = await supabase
-      .from('patient_assessments')
-      .select('id')
-      .eq('client_id', data.clientId)
-      .single();
-    
-    // Prepare environment JSONB data
+
     const environmentData = {
       is_clean: data.assessmentData.isClean,
       is_ventilated: data.assessmentData.isVentilated,
@@ -30,7 +22,6 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       has_supportive_env: data.assessmentData.hasSupportiveEnv
     };
     
-    // Prepare lab investigations JSONB data
     const labInvestigationsData = {
       hb: data.assessmentData.hb,
       rbc: data.assessmentData.rbc,
@@ -48,7 +39,6 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       recordedAt: data.assessmentData.recorderInfo.recorderTimestamp || new Date().toISOString()
     };
     
-    // Common assessment data for both insert and update
     const assessmentData = {
       guardian_occupation: data.assessmentData.guardianOccupation,
       marital_status: data.assessmentData.maritalStatus,
@@ -85,35 +75,23 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       recorder_info: recorderData,
       updated_at: new Date().toISOString()
     };
-    
-    let result;
-    
-    if (existingAssessment) {
-      // Update existing assessment
-      result = await supabase
-        .from('patient_assessments')
-        .update(assessmentData)
-        .eq('id', existingAssessment.id)
-        .select();
-    } else {
-      // Insert new assessment
-      result = await supabase
-        .from('patient_assessments')
-        .insert({
-          client_id: data.clientId,
-          ...assessmentData,
-          created_at: new Date().toISOString()
-        })
-        .select();
-    }
-    
+
+    const result = await supabase
+      .from('patient_assessments')
+      .insert({
+        client_id: data.clientId,
+        ...assessmentData,
+        created_at: new Date().toISOString()
+      })
+      .select();
+
     if (result.error) {
       throw new Error(`Failed to save assessment: ${result.error.message}`);
     }
-    
+
     revalidatePath(`/clients/${data.clientId}`);
     return { success: true, id: result.data?.[0]?.id };
-    
+
   } catch (error: unknown) {
     logger.error('Error saving patient assessment:', error);
     return { 
@@ -125,33 +103,79 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
 
 
 /**
- * Fetches patient assessment data for a specific client
+ * Fetches patient assessment data for a specific client.
+ * If assessmentId is provided, fetches that assessment.
+ * Otherwise, fetches the latest assessment by created_at.
+ * Also returns all assessments' id and created_at for the client.
+ *
+ * @param clientId - Unique client identifier
+ * @param assessmentId - Optional assessment identifier
+ * @returns Promise<{ success: boolean; assessment: any; assessments: Array<{ id: string; created_at: string }>; error?: string }>
  */
-export async function getPatientAssessment(clientId: string) {
+export async function getPatientAssessment(
+  clientId: string,
+  assessmentId?: string
+): Promise<{
+  success: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  assessment: any;
+  assessments: Array<{ id: string; created_at: string }>;
+  error?: string;
+}> {
   try {
     const supabase = await createSupabaseServerClient();
-    
-    const { data, error } = await supabase
+
+    const { data: allAssessments, error: allError } = await supabase
       .from('patient_assessments')
-      .select('*')
+      .select('id, created_at')
       .eq('client_id', clientId)
-      .single();
-    
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // Record not found, return success with null data
-        return { success: true, assessment: null };
-      }
-      return { success: false, error: error.message };
+      .order('created_at', { ascending: false });
+
+    if (allError) {
+      return { success: false, error: allError.message, assessment: null, assessments: [] };
     }
-    
-    return { success: true, assessment: data };
+
+    let assessmentData = null;
+    if (assessmentId) {
+      const { data, error } = await supabase
+        .from('patient_assessments')
+        .select('*')
+        .eq('id', assessmentId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return { success: true, assessment: null, assessments: allAssessments || [] };
+        }
+        return { success: false, error: error.message, assessment: null, assessments: allAssessments || [] };
+      }
+      assessmentData = data;
+    } else if (allAssessments && allAssessments.length > 0) {
+      const latestId = allAssessments[0].id;
+      const { data, error } = await supabase
+        .from('patient_assessments')
+        .select('*')
+        .eq('id', latestId)
+        .single();
+
+      if (error) {
+        return { success: false, error: error.message, assessment: null, assessments: allAssessments };
+      }
+      assessmentData = data;
+    }
+
+    return {
+      success: true,
+      assessment: assessmentData,
+      assessments: allAssessments || []
+    };
   } catch (error: unknown) {
     logger.error('Error fetching patient assessment:', error);
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred',
-      assessment: null
+      assessment: null,
+      assessments: []
     };
   }
 }
@@ -196,7 +220,6 @@ export async function sendClientAssessmentFormLink(clientId: string): Promise<{ 
   try {
     const supabase = await createSupabaseServerClient();
 
-    // First get the client type to determine where to look for contact info
     const { error: clientError } = await supabase
       .from('clients')
       .select('client_type')
@@ -255,16 +278,35 @@ export async function sendClientAssessmentFormLink(clientId: string): Promise<{ 
   }
 }
 
-/**
- * Fetches requestor_name and patient_name for a given client_id
- */
-export async function getClientNames(clientId: string): Promise<{ success: boolean; requestorName?: string; patientName?: string; error?: string }> {
+type IndividualClientData = {
+  requestor_name: string;
+  patient_name: string;
+  clients?: {
+    client_category?: string;
+  };
+};
+
+export async function getClientNames(
+  clientId: string
+): Promise<{
+  success: boolean;
+  requestorName?: string;
+  patientName?: string;
+  clientCategory?: string;
+  error?: string;
+}> {
   try {
     const supabase = await createSupabaseServerClient();
 
     const { data, error } = await supabase
       .from('individual_clients')
-      .select('requestor_name, patient_name')
+      .select(`
+        requestor_name, 
+        patient_name, 
+        clients (
+          client_category
+        )
+      `)
       .eq('client_id', clientId)
       .single();
 
@@ -272,11 +314,15 @@ export async function getClientNames(clientId: string): Promise<{ success: boole
       return { success: false, error: error.message };
     }
 
+    const clientData = data as IndividualClientData;
+
     return {
       success: true,
-      requestorName: data.requestor_name,
-      patientName: data.patient_name
+      requestorName: clientData.requestor_name,
+      patientName: clientData.patient_name,
+      clientCategory: clientData.clients?.client_category
     };
+
   } catch (error) {
     logger.error('Error fetching client names:', error);
     return {

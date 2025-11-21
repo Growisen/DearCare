@@ -3,6 +3,13 @@ import InfoField from './InfoField';
 import { Json, FamilyMember, LabInvestigations, RecorderInfo } from '@/types/client.types';
 import { equipmentCategories } from '@/utils/constants';
 import { formatDate } from '@/utils/formatters';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/Select';
 
 interface MedicalInfoProps {
   assessment: {
@@ -35,9 +42,12 @@ interface MedicalInfoProps {
     recorderInfo: RecorderInfo;
     [key: string]: string | boolean | Json | Record<string, string | boolean> | undefined | LabInvestigations | RecorderInfo;
   };
+  totalAssessments: Array<{ id: string; created_at: string }>;
+  onSelectAssessment?: (id: string) => void;
+  selectedAssessmentId?: string;
 }
 
-const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
+const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments, onSelectAssessment, selectedAssessmentId }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const toggleSection = (sectionName: string) => {
@@ -351,9 +361,32 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment }) => {
       )
     }
   ];
+  
 
-  return (
+ return (
     <div className="space-y-4">
+      {totalAssessments && totalAssessments.length > 0 && (
+        <div className="mb-4">
+          <label htmlFor="assessment-selector" className="block text-sm font-medium text-gray-700 mb-1">
+            Select Assessment:
+          </label>
+          <Select
+            value={selectedAssessmentId ?? totalAssessments[0]?.id}
+            onValueChange={onSelectAssessment}
+          >
+            <SelectTrigger className="max-w-xs w-full text-gray-800 bg-white border border-gray-300 rounded-md">
+              <SelectValue placeholder="Choose assessment..." />
+            </SelectTrigger>
+            <SelectContent className="text-gray-800 bg-white border border-gray-300">
+              {totalAssessments.map(a => (
+                <SelectItem key={a.id} value={a.id}>
+                  {formatDate(a.created_at, true)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       {medicalSections.map((section) => (
         <div key={section.id} className="bg-white p-4 rounded border border-gray-200">
           <button 

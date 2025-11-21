@@ -417,6 +417,7 @@ export interface Patient {
   createdAt?: string;
   serviceStartDate?: string;
   serviceEndDate?: string;
+  totalAssessments?: Array<{ id: string; created_at: string; }>;
 }
 
 export interface ClientResponse {
