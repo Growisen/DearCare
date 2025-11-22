@@ -48,14 +48,28 @@ interface MedicalInfoProps {
 }
 
 const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments, onSelectAssessment, selectedAssessmentId }) => {
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const ALL_SECTIONS = [
+    'medical-status', 
+    'current-status', 
+    'family-members',
+    'lab-investigations', 
+    'care-plan', 
+    'behavioral-assessment',
+    'social-history', 
+    'environment-equipment', 
+    'recorder-info'
+  ];
 
-  const toggleSection = (sectionName: string) => {
-    if (expandedSection === sectionName) {
-      setExpandedSection(null);
-    } else {
-      setExpandedSection(sectionName);
-    }
+  const [expandedSections, setExpandedSections] = useState<string[]>(ALL_SECTIONS);
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) => {
+      if (prev.includes(sectionId)) {
+        return prev.filter((id) => id !== sectionId);
+      } else {
+        return [...prev, sectionId];
+      }
+    });
   };
 
   const medicalSections = [
@@ -70,7 +84,6 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
           <InfoField label="Medication History" value={assessment?.medicationHistory} />
         </div>
       ),
-      alwaysExpanded: true
     },
     {
       id: 'current-status',
@@ -83,7 +96,6 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
           <InfoField label="Current Status" value={assessment?.currentStatus} />
         </div>
       ),
-      alwaysExpanded: true
     },
     {
       id: 'family-members',
@@ -134,18 +146,15 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
           )}
         </div>
       ),
-      alwaysExpanded: false
     },
     {
       id: 'lab-investigations',
       title: 'Lab Investigations',
       content: (
         <div className="space-y-4">
-          {/* Standard lab tests */}
           {assessment?.lab_investigations && Object.keys(assessment.lab_investigations).length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries(assessment.lab_investigations).map(([key, value]) => {
-                // Skip rendering the custom_tests here as we'll handle it separately
                 if (key === 'custom_tests') return null;
                 
                 return (
@@ -160,7 +169,6 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
             <p className="text-sm text-gray-500">No standard lab investigations recorded</p>
           )}
     
-          {/* Custom tests section */}
           {assessment?.lab_investigations?.custom_tests && 
           Array.isArray(assessment.lab_investigations.custom_tests) && 
           assessment.lab_investigations.custom_tests.length > 0 ? (
@@ -248,12 +256,10 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
               <p className="text-sm text-gray-500">No environment details recorded</p>
             )}
           </div>
-          {/* Equipment Section */}
           <div>
             <h3 className="text-sm font-medium mb-2 text-gray-800">Equipment Needed</h3>
             {Object.keys(assessment?.equipment || {}).length > 0 ? (
               <div className="space-y-5">
-                {/* Bedridden Equipment */}
                 <div className="space-y-2">
                   <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Bed-related Equipment</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
@@ -277,7 +283,6 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                   </div>
                 </div>
 
-                {/* Mobility Equipment */}
                 <div className="space-y-2">
                   <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Mobility Equipment</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
@@ -301,7 +306,6 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                   </div>
                 </div>
 
-                {/* Medical Equipment */}
                 <div className="space-y-2">
                   <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Medical Equipment</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
@@ -387,36 +391,37 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
           </Select>
         </div>
       )}
-      {medicalSections.map((section) => (
-        <div key={section.id} className="bg-white p-4 rounded border border-gray-200">
-          <button 
-            className="w-full flex justify-between items-center focus:outline-none"
-            onClick={() => !section.alwaysExpanded && toggleSection(section.id)}
-            disabled={section.alwaysExpanded}
-          >
-            <h2 className="text-base font-semibold text-gray-800">
-              {section.title}
-            </h2>
-            {!section.alwaysExpanded && (
+      {medicalSections.map((section) => {
+        const isExpanded = expandedSections.includes(section.id);
+
+        return (
+          <div key={section.id} className="bg-white p-4 rounded border border-gray-200">
+            <button 
+              className="w-full flex justify-between items-center focus:outline-none"
+              onClick={() => toggleSection(section.id)}
+            >
+              <h2 className="text-base font-semibold text-gray-800">
+                {section.title}
+              </h2>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className={`h-5 w-5 transition-transform ${expandedSection === section.id ? 'transform rotate-180' : ''}`}
+                className={`h-5 w-5 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
+            </button>
+            
+            {isExpanded && (
+              <div className="pt-4 mt-2 border-t border-gray-200">
+                {section.content}
+              </div>
             )}
-          </button>
-          
-          {(section.alwaysExpanded || expandedSection === section.id) && (
-            <div className="pt-4 mt-2 border-t border-gray-200">
-              {section.content}
-            </div>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 };

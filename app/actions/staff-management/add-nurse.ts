@@ -490,7 +490,9 @@ export async function fetchNurseAssignments(
 
 export async function fetchBasicDetails(
   pagination?: PaginationParams,
-  searchQuery?: string
+  status?: string,
+  experience?: string,
+  searchQuery?: string,
 ): Promise<{ 
   data: NurseBasicDetails[] | null;
   count: number | null;
@@ -512,8 +514,6 @@ export async function fetchBasicDetails(
       return { data: null, count: null, error: 'Not authenticated' }
     }
 
-    console.log('Fetching basic nurse details with params:', { page, limit, searchQuery, nursesOrg })
-
     let nursesQuery = supabase
       .from('nurses')
       .select(`
@@ -531,7 +531,6 @@ export async function fetchBasicDetails(
 
     if (searchQuery && searchQuery.trim() !== '') {
       const q = `%${searchQuery.trim()}%`
-      console.log('Applying search filter with query:', q)
       nursesQuery = nursesQuery.or(
         [
           `full_name.ilike.${q}`,
@@ -541,9 +540,50 @@ export async function fetchBasicDetails(
           `state.ilike.${q}`,
           `address.ilike.${q}`,
           `taluk.ilike.${q}`,
-          `category.ilike.${q}`
+          `category.ilike.${q}`,
+          `nurse_reg_no.ilike.${q}`
         ].join(',')
       );
+    }
+
+    if (status && status.trim() !== '' && status !== 'all') {
+      if (status === 'leave') {
+        const currentDate = new Date().toISOString().split('T')[0];
+        const { data: leaveNurses, error: leaveError } = await supabase
+          .from('nurse_leave_requests')
+          .select('nurse_id')
+          .eq('status', 'approved')
+          .lte('start_date', currentDate)
+          .gte('end_date', currentDate);
+
+        if (leaveError) throw leaveError;
+        const nurseIdsOnLeave = leaveNurses?.map(l => l.nurse_id) ?? [];
+        if (nurseIdsOnLeave.length === 0) {
+          return { data: [], count: 0, error: null };
+        }
+        nursesQuery = nursesQuery.in('nurse_id', nurseIdsOnLeave);
+      } else {
+        nursesQuery = nursesQuery.eq('status', status.trim());
+      }
+    }
+
+    if (experience && experience.trim() !== '' && experience !== 'all') {
+      switch (experience.trim()) {
+        case 'less_than_1':
+          nursesQuery = nursesQuery.lt('experience', 1);
+          break;
+        case 'less_than_5':
+          nursesQuery = nursesQuery.lt('experience', 5);
+          break;
+        case 'less_than_10':
+          nursesQuery = nursesQuery.lt('experience', 10);
+          break;
+        case 'greater_than_15':
+          nursesQuery = nursesQuery.gte('experience', 10);
+          break;
+        default:
+          nursesQuery = nursesQuery.eq('experience', Number(experience.trim()));
+      }
     }
 
     nursesQuery = nursesQuery
@@ -551,8 +591,6 @@ export async function fetchBasicDetails(
       .range(start, end)
 
     const { data, error, count } = await nursesQuery
-
-    console.log('Fetched basic nurse details:', data)
 
     if (error) throw error
 
@@ -587,10 +625,6 @@ export async function fetchBasicDetails(
     }
   }
 }
-
-
-
-
 
 
 export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | null, error: string | null }> {
