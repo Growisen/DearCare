@@ -29,8 +29,22 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChang
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
           }`}
         >
-          Medical Info
+          Assessment Info
         </button>
+        {status === 'approved' && (
+          <>
+            <button
+              onClick={() => onTabChange('reassessment')}
+              className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                activeTab === 'reassessment'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Reassessment
+            </button>
+          </>
+        )}
         <button
           onClick={() => onTabChange('files')}
           className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
@@ -54,16 +68,6 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChang
               Assignments
             </button>
             <button
-              onClick={() => onTabChange('paymentDetails')}
-              className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                activeTab === 'paymentDetails'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Payment Details
-            </button>
-            <button
               onClick={() => onTabChange('servicePeriods')}
               className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                 activeTab === 'servicePeriods'
@@ -72,6 +76,16 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChang
               }`}
             >
               Service Periods
+            </button>
+            <button
+              onClick={() => onTabChange('paymentDetails')}
+              className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                activeTab === 'paymentDetails'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Payment Details
             </button>
           </>
         )}

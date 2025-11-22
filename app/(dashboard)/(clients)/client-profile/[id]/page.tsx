@@ -26,6 +26,7 @@ import ClientPaymentHistory from '@/components/client/Profile/PaymentDetails'
 import ProfileSkeletonLoader from '@/components/ProfileSkeletonLoader';
 import ServicePeriodsTab from '@/components/client/Profile/ServicePeriodsTab';
 import ProfileTabs from '@/components/client/Profile/ProfileTabs';
+import Reassessment from '@/components/client/Profile/Reassessment'; 
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -34,6 +35,7 @@ import { useModalManagement } from '@/hooks/useModalManagement';
 import { useClientFiles } from '@/hooks/useClientFiles';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
+import { useReassessmentForm } from '@/hooks/useReassessment';
 
 const PatientProfilePage = () => {
   const { invalidateDashboardCache } = useDashboardData()
@@ -123,6 +125,14 @@ const PatientProfilePage = () => {
 
   
   const { showDeleteConfirmation, setShowDeleteConfirmation } = useModalManagement();
+  const { 
+    reassessments, 
+    fetchLoading, 
+    fetchError, 
+    selectedReassessmentId, 
+    setSelectedReassessmentId,
+    totalReassessments,
+  } = useReassessmentForm(id, activeTab);
 
   if (loading) {
     return <ProfileSkeletonLoader />;
@@ -215,6 +225,23 @@ const PatientProfilePage = () => {
               </div>
             )}
 
+            {activeTab === 'reassessment' && status === 'approved' && (
+              <div className="space-y-6">
+                {fetchLoading ? (
+                  <ProfileSkeletonLoader />
+                ) : fetchError ? (
+                  <ProfileError error={fetchError} />
+                ) : (
+                  <Reassessment 
+                    reassessments={reassessments} 
+                    selectedReassessmentId={selectedReassessmentId} 
+                    setSelectedReassessmentId={setSelectedReassessmentId}
+                    totalReassessments={totalReassessments}
+                  />
+                )}
+              </div>
+            )}
+
             {activeTab === 'files' && (
               <>
                 {isLoadingFiles ? (
@@ -261,14 +288,14 @@ const PatientProfilePage = () => {
               </div>
             )}
 
+            {activeTab === 'servicePeriods' && (
+              <ServicePeriodsTab clientId={id}/>
+            )}
+
             {activeTab === 'paymentDetails' && status === 'approved' && (
               <div className="space-y-6">
                 <ClientPaymentHistory clientId={id} />
               </div>
-            )}
-
-            {activeTab === 'servicePeriods' && (
-              <ServicePeriodsTab clientId={id}/>
             )}
           </div>
         </div>

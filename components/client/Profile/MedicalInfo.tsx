@@ -370,25 +370,28 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
  return (
     <div className="space-y-4">
       {totalAssessments && totalAssessments.length > 0 && (
-        <div className="mb-4">
-          <label htmlFor="assessment-selector" className="block text-sm font-medium text-gray-700 mb-1">
-            Select Assessment:
-          </label>
-          <Select
-            value={selectedAssessmentId ?? totalAssessments[0]?.id}
-            onValueChange={onSelectAssessment}
-          >
-            <SelectTrigger className="max-w-xs w-full text-gray-800 bg-white border border-gray-300 rounded-md">
-              <SelectValue placeholder="Choose assessment..." />
-            </SelectTrigger>
-            <SelectContent className="text-gray-800 bg-white border border-gray-300">
-              {totalAssessments.map(a => (
-                <SelectItem key={a.id} value={a.id}>
-                  {formatDate(a.created_at, true)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">Assessment History</h3>
+            <p className="text-xs text-gray-500 mt-1">Select a date to view past reports</p>
+          </div>
+          <div className="w-full sm:w-64">
+            <Select
+              value={selectedAssessmentId ?? totalAssessments[0]?.id}
+              onValueChange={onSelectAssessment}
+            >
+              <SelectTrigger className="w-full bg-white border-gray-300 text-gray-800">
+                <SelectValue placeholder="Select date..." />
+              </SelectTrigger>
+              <SelectContent className="text-gray-800 bg-white">
+                {totalAssessments.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {formatDate(a.created_at, true)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
       {medicalSections.map((section) => {
