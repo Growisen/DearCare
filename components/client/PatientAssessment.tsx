@@ -31,10 +31,11 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     handleRemoveCustomLab,
     handleAddFamilyMember,
     handleRemoveFamilyMember,
-    handleFamilyMemberChange
+    handleFamilyMemberChange,
+    handleBedSoreChange,
+    handleBedSoreStageChange
   } = usePatientAssessmentForm(getDefaultFormData(), isEditing);
 
-  // Fetch patient assessment data when component mounts or clientId changes
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
@@ -42,13 +43,11 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
         const result = await getPatientAssessment(clientId, selectedAssessment);
         
         if (result.success && result.assessment) {
-          // Transform database data to match component state structure
           const assessmentData = result.assessment as AssessmentData;
           const environment = assessmentData.environment || {};
           const labInvestigations = assessmentData.lab_investigations || {};
 
           setFormData({
-            // Personal Details
             guardianOccupation: assessmentData.guardian_occupation || '',
             maritalStatus: assessmentData.marital_status || '',
             height: assessmentData.height || '',
@@ -57,14 +56,12 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             district: assessmentData.district || '',
             cityTown: assessmentData.city_town || '',
             
-            // Existing fields
             currentStatus: assessmentData.current_status || '',
             chronicIllness: assessmentData.chronic_illness || '',
             medicalHistory: assessmentData.medical_history || '',
             surgicalHistory: assessmentData.surgical_history || '',
             medicationHistory: assessmentData.medication_history || '',
             
-            // Current Details
             presentCondition: assessmentData.present_condition || '',
             bloodPressure: assessmentData.blood_pressure || '',
             sugarLevel: assessmentData.sugar_level || '',
@@ -76,19 +73,16 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             otherLabInvestigations: labInvestigations.other || '',
             customLabTests: labInvestigations.custom_tests || [],
             
-            // Psychological Assessment
             alertnessLevel: assessmentData.alertness_level || '',
             physicalBehavior: assessmentData.physical_behavior || '',
             speechPatterns: assessmentData.speech_patterns || '',
             emotionalState: assessmentData.emotional_state || '',
             
-            // Social History
             drugsUse: assessmentData.drugs_use || '',
             alcoholUse: assessmentData.alcohol_use || '',
             tobaccoUse: assessmentData.tobacco_use || '',
             otherSocialHistory: assessmentData.other_social_history || '',
             
-            // Environment Assessment
             isClean: environment.is_clean || false,
             isVentilated: environment.is_ventilated || false,
             isDry: environment.is_dry || false,
@@ -96,7 +90,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             hasSocialInteraction: environment.has_social_interaction || false,
             hasSupportiveEnv: environment.has_supportive_env || false,
             
-            // Equipment
             equipment: {
               hospitalBed: false,
               wheelChair: false,
@@ -130,7 +123,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
               ...(assessmentData.equipment || {})
             },
             
-            // Diagnosis and Care Plan
             finalDiagnosis: assessmentData.final_diagnosis || '',
             foodsToInclude: assessmentData.foods_to_include || '',
             foodsToAvoid: assessmentData.foods_to_avoid || '',
@@ -153,7 +145,14 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
               familyRelationship: '',
               recorderTimestamp: '',
               nurseRegistrationNumber: ''
+            },
+            bedSore: assessmentData.bed_sore || {
+              shape: '',
+              size: '',
+              site: '', 
+              stage: '',
             }
+
           });
 
           setLoading(false);
@@ -170,7 +169,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     fetchAssessmentData();
   }, [clientId, setFormData]);
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -193,7 +191,6 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
       });
           
       if (response.success) {
-        // Call the onSave callback provided by the parent component
         onSave();
       } else {
         setError(response.error || 'Failed to save assessment data');
@@ -236,11 +233,12 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
             handleAddFamilyMember={handleAddFamilyMember}
             handleRemoveFamilyMember={handleRemoveFamilyMember}
             handleFamilyMemberChange={handleFamilyMemberChange}
+            handleBedSoreChange={handleBedSoreChange}
+            handleBedSoreStageChange={handleBedSoreStageChange}
           />
         </div>
       </form>
-      
-      {/* Show error if any */}
+
       {error && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
           {error}

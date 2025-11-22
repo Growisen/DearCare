@@ -51,9 +51,23 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
     );
   };
 
-  const formatDynamicValue = (value: DynamicField): React.ReactNode => {
+  function formatTo12Hour(timeStr: string): string {
+    if (!timeStr) return "-";
+    const [hourStr, minStr, secStr] = timeStr.split(":");
+    let hour = parseInt(hourStr, 10);
+    if (isNaN(hour)) return timeStr;
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${minStr}${secStr ? `:${secStr}` : ""} ${ampm}`;
+  }
+
+  const formatDynamicValue = (value: DynamicField, key?: string): React.ReactNode => {
     if (value === null || value === undefined) return "-";
     
+    if (key === "time" && typeof value === "string") {
+      return formatTo12Hour(value);
+    }
+
     if (typeof value !== 'object') return String(value);
 
     if (Array.isArray(value)) {
@@ -73,7 +87,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
         {Object.entries(value).map(([subKey, subValue]) => (
           <li key={subKey}>
             <span className="font-medium text-gray-600">{subKey}: </span>
-            {typeof subValue === 'object' ? JSON.stringify(subValue) : String(subValue)}
+            {typeof subValue === 'object' ? JSON.stringify(subValue) : formatDynamicValue(subValue, subKey)}
           </li>
         ))}
       </ul>
@@ -82,7 +96,8 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
 
   const renderJsonFields = (
     data: VitalsData | BedSoreData | DynamicField[] | Record<string, unknown> | string | null | undefined,
-    fallbackText: string = "No data recorded"
+    fallbackText: string = "No data recorded",
+    sectionKey?: string
   ) => {
     if (!data) return <p className="text-sm text-gray-500 italic">{fallbackText}</p>;
 
@@ -94,8 +109,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
       return value !== null && value !== undefined && value !== '';
     });
 
-    const hasNonEmptyArray = entries.some(([value]) => Array.isArray(value) && value.length > 0);
-    if (!hasNonEmptyArray) return <p className="text-sm text-gray-500 italic">{fallbackText}</p>;
+    if (entries.length === 0) return <p className="text-sm text-gray-500 italic">{fallbackText}</p>;
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -105,7 +119,10 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
               {key.replace(/_/g, ' ')}
             </p>
             <div className="text-sm text-gray-800 font-medium">
-              {formatDynamicValue(value)}
+              {sectionKey === "vitals" && key === "time"
+                ? formatTo12Hour(value as string)
+                : formatDynamicValue(value, key)
+              }
             </div>
           </div>
         ))}
@@ -142,7 +159,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
         <div className="space-y-6">
           <div>
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Vital Signs</h4>
-            {renderJsonFields(activeAssessment.vitals, "No vitals recorded")}
+            {renderJsonFields(activeAssessment.vitals, "No vitals recorded", "vitals")}
           </div>
           <div className="h-px bg-gray-100 w-full" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

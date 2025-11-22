@@ -34,7 +34,16 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
       if (error) {
         toast.error(error || "Failed to save reassessment");
       } else {
-        toast.success("Reassessment saved successfully!");
+        toast.success('Reassessment saved successfully. This window will close in 5 seconds.', {
+          action: {
+            label: 'OK',
+            onClick: () => window.close()
+          }
+        });
+
+        setTimeout(() => {
+          window.close();
+        }, 5000);
       }
       setSubmitted(false);
     }
@@ -57,7 +66,7 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
     clientCategory?: string;
     loading: boolean;
     error?: string;
-  }>({ loading: false });
+  }>({ loading: true });
 
   useEffect(() => {
     let isMounted = true;
@@ -77,6 +86,20 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
     }
     return () => { isMounted = false; };
   }, [clientId]);
+
+  if (clientInfo.loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center">
+          <svg className="animate-spin h-8 w-8 text-gray-700 mb-4" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          <span className="text-gray-700 font-medium text-lg">Loading information...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
@@ -158,7 +181,9 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
 											</div>
 											<div>
 												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Organisation</p>
-												<span className="inline-flex items-center px-4 py-1 rounded text-base font-medium bg-gray-100 text-gray-800">
+												<span className={`inline-flex items-center px-4 py-1 rounded text-base font-medium bg-gray-100 
+                          ${clientInfo.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientInfo.clientCategory === 'Tata Home Nursing' ? 
+                          "text-amber-600" : 'text-gray-800'}`}>
 														{clientInfo.clientCategory === 'DearCare LLP' ? "DearCare" : clientInfo.clientCategory === 'Tata Home Nursing' ? "Tata Home Nursing" : '-'}
 												</span>
 											</div>

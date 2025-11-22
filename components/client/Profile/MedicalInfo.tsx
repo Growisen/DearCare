@@ -57,7 +57,8 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
     'behavioral-assessment',
     'social-history', 
     'environment-equipment', 
-    'recorder-info'
+    'recorder-info',
+    'bed-sore-details'
   ];
 
   const [expandedSections, setExpandedSections] = useState<string[]>(ALL_SECTIONS);
@@ -71,6 +72,29 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
       }
     });
   };
+
+  function renderBedSoreFields(
+    bedSore: Record<string, unknown> | undefined,
+    fallbackText: string = "No bed sore details recorded"
+  ) {
+    if (!bedSore || Object.keys(bedSore).length === 0) {
+      return <p className="text-sm text-gray-500 italic">{fallbackText}</p>;
+    }
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {Object.entries(bedSore).map(([key, value]) => (
+          <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100 overflow-hidden break-words">
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
+              {key.replace(/_/g, ' ')}
+            </p>
+            <div className="text-sm text-gray-800 font-medium">
+              {value === null || value === undefined || value === "" ? "-" : String(value)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const medicalSections = [
     {
@@ -94,6 +118,18 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
           <InfoField label="Blood Pressure" value={assessment?.bloodPressure} />
           <InfoField label="Sugar Level" value={assessment?.sugarLevel} />
           <InfoField label="Current Status" value={assessment?.currentStatus} />
+        </div>
+      ),
+    },
+    {
+      id: 'bed-sore-details',
+      title: 'Bed Sore Details',
+      content: (
+        <div>
+          {assessment?.bedSore && typeof assessment.bedSore === 'object' && assessment.bedSore !== null
+            ? renderBedSoreFields(assessment.bedSore as Record<string, unknown>)
+            : renderBedSoreFields(undefined)
+          }
         </div>
       ),
     },

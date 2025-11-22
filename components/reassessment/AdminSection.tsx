@@ -42,7 +42,7 @@ export default function AdminSection({ formData, onChange, dynamicProps }: Props
         </div>
       </div>
       <div className="mt-6 border-t border-gray-200 pt-2">
-        <DynamicFieldSection fields={formData.dynamicFields.admin} sectionKey="admin" {...dynamicProps} />
+        <DynamicFieldSection fields={formData.dynamicFields.info} sectionKey="info" {...dynamicProps} />
       </div>
     </section>
   );

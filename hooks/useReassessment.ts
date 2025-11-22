@@ -15,7 +15,7 @@ const initialForm: FormData = {
   mentalStatus: '', hygiene: '', generalStatus: '', careStatus: '', outdoorHours: '',
   nursingDiagnosis: '', followUpEvaluation: '', assignmentDoneBy: '', allottedStaffName: '',
   assigningPeriod: '', previousVisitedDate: '',
-  dynamicFields: { diagnosis: [], vitals: [], bedSore: [], assessment: [], admin: [] }
+  dynamicFields: { diagnosis: [], vitals: [], bedSore: [], assessment: [], info: [] }
 };
 
 export const useReassessmentForm = (clientId: string, activeTab?: string) => {

@@ -44,7 +44,7 @@ export interface FormData {
     vitals: DynamicField[];
     bedSore: DynamicField[];
     assessment: DynamicField[];
-    admin: DynamicField[];
+    info: DynamicField[];
   };
 }
 

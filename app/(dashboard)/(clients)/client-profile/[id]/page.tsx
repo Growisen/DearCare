@@ -162,6 +162,8 @@ const PatientProfilePage = () => {
     }
   };
 
+  console.log("sda", patient.assessments)
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="w-full pb-2">
