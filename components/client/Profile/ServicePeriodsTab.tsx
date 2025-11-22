@@ -8,6 +8,9 @@ import {
 import ServicePeriodModal, { ServicePeriodFormValues, ServicePeriod } from "./ServicePeriodModal";
 import Modal from "@/components/ui/Modal";
 import { toast } from "sonner";
+import {
+  getAssignmentPeriodStatus
+} from "@/utils/nurseAssignmentUtils";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
@@ -20,27 +23,6 @@ const calculateDaysBetween = (start: string, end: string) => {
   const endDate = new Date(end);
   const oneDay = 1000 * 60 * 60 * 24;
   return Math.round((endDate.getTime() - startDate.getTime()) / oneDay);
-};
-
-const getPeriodStatus = (start: string, end: string) => {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const today = new Date();
-  
-  startDate.setHours(0,0,0,0);
-  endDate.setHours(0,0,0,0);
-  today.setHours(0,0,0,0);
-
-  const oneDay = 1000 * 60 * 60 * 24;
-  const totalDays = Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / oneDay));
-  let daysElapsed = Math.round((today.getTime() - startDate.getTime()) / oneDay);
-  
-  if (daysElapsed < 0) daysElapsed = 0;
-  if (daysElapsed > totalDays) daysElapsed = totalDays;
-
-  const daysRemaining = totalDays - daysElapsed;
-
-  return { totalDays, daysElapsed, daysRemaining };
 };
 
 interface BackendServicePeriod {
@@ -123,10 +105,9 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
   };
 
   const handleEndPeriod = (period: ServicePeriod) => {
-    // Open modal for editing, pre-fill endDate with today
     setEditingPeriod({
       ...period,
-      endDate: new Date().toISOString().slice(0, 10), // YYYY-MM-DD format
+      endDate: new Date().toISOString().slice(0, 10),
     });
     setIsModalOpen(true);
   };
@@ -160,15 +141,19 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
           </div>
         ) : (
           servicePeriods.map((assignment) => {
-            const displayStatus = assignment.status; 
-            
+            const displayStatus = assignment.status;
+
             const statusColors = {
               active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
               completed: 'bg-gray-50 text-gray-600 border-gray-200',
               cancelled: 'bg-red-50 text-red-700 border-red-200',
             };
 
-            const { daysElapsed, daysRemaining, totalDays } = getPeriodStatus(assignment.startDate, assignment.endDate);
+            // Use getAssignmentPeriodStatus for progress
+            const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(
+              assignment.startDate,
+              assignment.endDate
+            );
 
             return (
               <div
@@ -193,22 +178,23 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
                     <div className="col-span-2 sm:col-span-1">
                       <span className="text-gray-500">Progress:</span>
                       <span className="ml-2 text-gray-900">
-                        {daysElapsed} / {totalDays} days
-                        {displayStatus === 'active' && (
-                          <span className="ml-2 text-xs text-gray-500">
-                            ({daysRemaining} remaining)
-                          </span>
-                        )}
+                        <span className="ml-2 text-xs text-gray-500">
+                          (
+                            {daysCompleted} completed
+                            {daysRemaining > 0 && `, ${daysRemaining} remaining`}
+                            , {totalDays} total
+                          )
+                        </span>
                       </span>
                     </div>
 
-                     <div className="col-span-2 sm:col-span-1">
+                    <div className="col-span-2 sm:col-span-1">
                       <span className="text-gray-500">Notes:</span>
                       <span className="ml-2 text-gray-900">
-                         {assignment.notes || <span className="text-gray-400 italic">No notes</span>}
+                        {assignment.notes || <span className="text-gray-400 italic">No notes</span>}
                       </span>
                     </div>
-                    
+
                     <div className="col-span-2 mt-1">
                       <span className="text-gray-500">Duration:</span>
                       <span className="ml-2 text-gray-900">
