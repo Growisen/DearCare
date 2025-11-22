@@ -82,7 +82,9 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     handleRemoveCustomLab,
     handleAddFamilyMember,
     handleRemoveFamilyMember,
-    handleFamilyMemberChange
+    handleFamilyMemberChange,
+    handleBedSoreChange,
+    handleBedSoreStageChange,
   } = usePatientAssessmentForm();
 
   const [sharableLink, setSharableLink] = useState('');
@@ -387,6 +389,8 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                 handleRemoveFamilyMember={handleRemoveFamilyMember}
                 handleFamilyMemberChange={handleFamilyMemberChange}
                 showReviewChecklist={true}
+                handleBedSoreChange={handleBedSoreChange}
+                handleBedSoreStageChange={handleBedSoreStageChange}
               />
               
               <div className="flex w-full gap-4">
