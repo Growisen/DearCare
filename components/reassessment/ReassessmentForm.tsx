@@ -8,7 +8,7 @@ import BedSoreSection from './BedSoreSection';
 import PatientStatusSection from './PatientStatusSection';
 import AdminSection from './AdminSection';
 import { getClientNames } from '@/app/actions/clients/assessment';
-import { ClipboardList, AlertTriangle, User, Building2, FileText, Save } from 'lucide-react';
+import { AlertTriangle, User, Building2, FileText, Save } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
@@ -121,10 +121,6 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
 						<div className="flex items-start justify-between mb-6">
 							<div>
 								<h1 className="text-2xl font-bold tracking-tight text-gray-900">Reassessment Form</h1>
-								<p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
-									<ClipboardList className="w-4 h-4" />
-									Clinical Nursing Record
-								</p>
 							</div>
 							
 							{clientId && !clientInfo.loading && !clientInfo.error && (
