@@ -22,6 +22,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
   const [showEndModal, setShowEndModal] = useState(false);
   const [assignmentToEnd, setAssignmentToEnd] = useState<NurseAssignment | null>(null);
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [endAssignmentNotes, setEndAssignmentNotes] = useState<string>('');
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -144,6 +145,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
           nurse_last_name: assignment.nurses?.last_name,
           salaryPerDay: assignment.salary_per_day,
           nurseRegNo: assignment.nurses?.nurse_reg_no,
+          endNotes: assignment.end_notes,
         }));
         
         setNurseAssignments(transformedAssignments);
@@ -260,6 +262,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
   const handleEndAssignment = (assignment: NurseAssignment) => {
     setAssignmentToEnd(assignment);
     setEndDate(new Date().toISOString().slice(0, 10));
+    setEndAssignmentNotes('');
     setShowEndModal(true);
   };
 
@@ -268,6 +271,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     try {
       const updates = {
         end_date: endDate,
+        end_notes: endAssignmentNotes,
       };
       const result = await updateNurseAssignment(assignmentToEnd.id, updates);
       if (result.success) {
@@ -282,6 +286,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     } finally {
       setShowEndModal(false);
       setAssignmentToEnd(null);
+      setEndAssignmentNotes('');
     }
   };
 
@@ -332,6 +337,8 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     updateFilters,
     setPageSize,
     refetch,
-    handleOpenNurseList
+    handleOpenNurseList,
+    endAssignmentNotes,
+    setEndAssignmentNotes,
   };
 };

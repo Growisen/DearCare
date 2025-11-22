@@ -10,6 +10,8 @@ import ReviewChecklist from './UnderReview/ReviewChecklist';
 import FamilyMembers from './UnderReview/FamilyMembers';
 import { FamilyMember } from '@/types/client.types';
 import { PatientAssessmentFormData } from '@/hooks/usePatientAssessment';
+import BedSoreSection from './BedSoreSection';
+import { BedSoreStage } from '@/types/reassessment.types';
 
 
 export interface PatientAssessmentFormProps {
@@ -25,6 +27,8 @@ export interface PatientAssessmentFormProps {
   handleRemoveFamilyMember: (id: string) => void;
   handleFamilyMemberChange: (id: string, field: keyof FamilyMember, value: string) => void;
   showReviewChecklist?: boolean;
+  handleBedSoreChange: (field: keyof PatientAssessmentFormData['bedSore'], value: string) => void;
+  handleBedSoreStageChange: (stage: BedSoreStage) => void;
 }
 
 const PatientAssessmentForm: React.FC<PatientAssessmentFormProps> = ({
@@ -39,7 +43,10 @@ const PatientAssessmentForm: React.FC<PatientAssessmentFormProps> = ({
   handleAddFamilyMember,
   handleRemoveFamilyMember,
   handleFamilyMemberChange,
+  handleBedSoreChange,
+  handleBedSoreStageChange,
   showReviewChecklist = false
+
 }) => {
   return (
     <div className={`space-y-6 ${!isEditable ? 'opacity-90 pointer-events-none' : ''}`}>
@@ -68,6 +75,14 @@ const PatientAssessmentForm: React.FC<PatientAssessmentFormProps> = ({
         handleCustomLabChange={handleCustomLabChange}
         handleAddCustomLab={handleAddCustomLab}
         handleRemoveCustomLab={handleRemoveCustomLab}
+      />
+
+      
+      <BedSoreSection
+        bedSore={formData.bedSore}
+        isEditable={isEditable}
+        handleBedSoreChange={handleBedSoreChange}
+        handleBedSoreStageChange={handleBedSoreStageChange}
       />
       
       <DiagnosisAndCarePlan formData={formData} handleInputChange={handleInputChange} />

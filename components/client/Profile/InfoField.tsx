@@ -2,7 +2,7 @@ import React from 'react';
 
 interface InfoFieldProps {
   label: string;
-  value?: string | null;
+  value?: string | null | number;
   fallback?: string;
   icon?: React.ReactNode;
 }

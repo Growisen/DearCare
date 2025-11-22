@@ -23,7 +23,7 @@ export default function FamilyMembers({
   onFamilyMemberChange 
 }: FamilyMembersProps) {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <span className="p-1.5 bg-amber-100 rounded-md">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">

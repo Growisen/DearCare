@@ -73,6 +73,7 @@ export async function savePatientAssessment(data: SavePatientAssessmentParams): 
       equipment: data.assessmentData.equipment, 
       family_members: data.assessmentData.familyMembers,
       recorder_info: recorderData,
+      bed_sore: data.assessmentData.bedSore,
       updated_at: new Date().toISOString()
     };
 

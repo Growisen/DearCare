@@ -1,3 +1,5 @@
+import { BedSoreData } from "./reassessment.types";
+
 export type Json =
   | string
   | number
@@ -289,6 +291,7 @@ export interface PatientAssessmentData {
   familyMembers: FamilyMember[],
   customLabTests: Array<{ id: string; name: string; value: string }>;
   recorderInfo: RecorderInfo;
+  bedSore: BedSoreData;
 }
 
 export interface SavePatientAssessmentParams {
@@ -355,6 +358,9 @@ export interface NurseAssignment {
   salaryPerDay?: number;
   salaryPerMonth?: number;
   salary_per_month?: number;
+  nurseRegNo?: string;
+  end_notes?: string;
+  endNotes?: string;
 }
 
 
@@ -511,6 +517,7 @@ export interface AssessmentData {
   equipment?: Equipment;
   family_members: FamilyMember[];
   recorder_info: RecorderInfo;
+  bed_sore?: BedSoreData;
 }
 
 

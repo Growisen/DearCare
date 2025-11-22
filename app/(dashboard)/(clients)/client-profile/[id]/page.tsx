@@ -25,6 +25,8 @@ import FileSection from '@/components/client/Profile/FilesSection';
 import ClientPaymentHistory from '@/components/client/Profile/PaymentDetails'
 import ProfileSkeletonLoader from '@/components/ProfileSkeletonLoader';
 import ServicePeriodsTab from '@/components/client/Profile/ServicePeriodsTab';
+import ProfileTabs from '@/components/client/Profile/ProfileTabs';
+import Reassessment from '@/components/client/Profile/Reassessment'; 
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -33,6 +35,7 @@ import { useModalManagement } from '@/hooks/useModalManagement';
 import { useClientFiles } from '@/hooks/useClientFiles';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
+import { useReassessmentForm } from '@/hooks/useReassessment';
 
 const PatientProfilePage = () => {
   const { invalidateDashboardCache } = useDashboardData()
@@ -109,6 +112,8 @@ const PatientProfilePage = () => {
     confirmEndAssignment,
     endDate,
     setEndDate,
+    endAssignmentNotes,
+    setEndAssignmentNotes,
   } = useNurseAssignments(id, activeTab);
 
   const {
@@ -120,6 +125,14 @@ const PatientProfilePage = () => {
 
   
   const { showDeleteConfirmation, setShowDeleteConfirmation } = useModalManagement();
+  const { 
+    reassessments, 
+    fetchLoading, 
+    fetchError, 
+    selectedReassessmentId, 
+    setSelectedReassessmentId,
+    totalReassessments,
+  } = useReassessmentForm(id, activeTab);
 
   if (loading) {
     return <ProfileSkeletonLoader />;
@@ -149,6 +162,8 @@ const PatientProfilePage = () => {
     }
   };
 
+  console.log("sda", patient.assessments)
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="w-full pb-2">
@@ -166,79 +181,11 @@ const PatientProfilePage = () => {
             onEditProfile={handleEditProfile}
           />
 
-          <div className="border-b border-gray-200 px-3 sm:px-6">
-            <div className="overflow-x-auto pb-1">
-              <nav className="-mb-px flex space-x-2 sm:space-x-8">
-                <button
-                  onClick={() => handleTabChange('profile')}
-                  className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                    activeTab === 'profile'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Profile Details
-                </button>
-                <button
-                  onClick={() => handleTabChange('medical')}
-                  className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                    activeTab === 'medical'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Medical Info
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('files')}
-                  className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                    activeTab === 'files'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Files
-                </button>
-                {status === 'approved' && (
-                  <>
-                    <button
-                      onClick={() => handleTabChange('assignments')}
-                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                        activeTab === 'assignments'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Assignments
-                    </button>
-
-                    <button
-                      onClick={() => handleTabChange('paymentDetails')}
-                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                        activeTab === 'paymentDetails'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Payment Details
-                    </button>
-
-                    <button
-                      onClick={() => handleTabChange('servicePeriods')}
-                      className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                        activeTab === 'servicePeriods'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Service Periods
-                    </button>
-                  </>
-                )}
-              </nav>
-            </div>
-          </div>
+          <ProfileTabs
+            activeTab={activeTab}
+            status={status}
+            onTabChange={handleTabChange}
+          />
           
           <div className="p-3 sm:p-4 md:p-6">
             <EditProfileModal 
@@ -275,6 +222,23 @@ const PatientProfilePage = () => {
                     totalAssessments={totalAssessments}
                     selectedAssessmentId={selectedAssessmentId}
                     onSelectAssessment={handleSelectAssessment}
+                  />
+                )}
+              </div>
+            )}
+
+            {activeTab === 'reassessment' && status === 'approved' && (
+              <div className="space-y-6">
+                {fetchLoading ? (
+                  <ProfileSkeletonLoader />
+                ) : fetchError ? (
+                  <ProfileError error={fetchError} />
+                ) : (
+                  <Reassessment 
+                    reassessments={reassessments} 
+                    selectedReassessmentId={selectedReassessmentId} 
+                    setSelectedReassessmentId={setSelectedReassessmentId}
+                    totalReassessments={totalReassessments}
                   />
                 )}
               </div>
@@ -326,14 +290,14 @@ const PatientProfilePage = () => {
               </div>
             )}
 
+            {activeTab === 'servicePeriods' && (
+              <ServicePeriodsTab clientId={id}/>
+            )}
+
             {activeTab === 'paymentDetails' && status === 'approved' && (
               <div className="space-y-6">
                 <ClientPaymentHistory clientId={id} />
               </div>
-            )}
-
-            {activeTab === 'servicePeriods' && (
-              <ServicePeriodsTab clientId={id}/>
             )}
           </div>
         </div>
@@ -422,6 +386,18 @@ const PatientProfilePage = () => {
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 max={new Date().toISOString().slice(0, 10)}
+              />
+            </div>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Assignment Notes
+              </label>
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={3}
+                value={endAssignmentNotes}
+                onChange={e => setEndAssignmentNotes(e.target.value)}
+                placeholder="Add notes about ending this assignment..."
               />
             </div>
           </div>

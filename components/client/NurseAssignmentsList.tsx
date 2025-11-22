@@ -23,6 +23,7 @@ interface NurseAssignment {
   salaryPerDay?: number;
   salaryPerMonth?: number;
   nurseRegNo?: string;
+  endNotes?: string;
 }
 
 interface Nurse {
@@ -191,6 +192,13 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                     <span className="block text-xs text-gray-400">
                       (Only if Staff completes the shift on all assigned days)
                     </span>
+                  </div>
+                )}
+
+                {assignment.endNotes && (
+                  <div className="col-span-2">
+                    <span className="text-gray-500">Notes:</span>
+                    <span className="ml-2 text-gray-900">{assignment.endNotes}</span>
                   </div>
                 )}
               </div>

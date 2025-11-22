@@ -10,7 +10,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
   const [loading, setLoading] = useState(true);
   const [isLoadingAssessment, setIsLoadingAssessment] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [assessmentLoaded, setAssessmentLoaded] = useState(false);
@@ -116,6 +116,8 @@ export const usePatientData = (id: string, activeTab?: string) => {
         ? assessmentResponse.assessments
         : [];
 
+        console.log("totalAssessments", assessmentData);
+
       if (assessmentData) {
         setPatient(prev => prev ? {
           ...prev,
@@ -159,7 +161,8 @@ export const usePatientData = (id: string, activeTab?: string) => {
                 recorderRole: '',
                 familyRelationship: '',
                 recorderTimestamp: ''
-            }
+            },
+            bedSore: assessmentData.bed_sore || { stages: '', site: '', size: '', stage: ''}
           }],
           totalAssessments
         } : prev);

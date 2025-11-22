@@ -39,7 +39,9 @@ export default function PatientAssessmentPage() {
     handleRemoveCustomLab,
     handleAddFamilyMember,
     handleRemoveFamilyMember,
-    handleFamilyMemberChange
+    handleFamilyMemberChange,
+    handleBedSoreChange,
+    handleBedSoreStageChange
   } = usePatientAssessmentForm();
 
   const handleRecorderInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -56,7 +58,6 @@ export default function PatientAssessmentPage() {
       setIsSubmitting(true);
 
       let finalRecorderRole = recorderInfo.recorderRole;
-      
       if (recorderInfo.recorderRole === "Family Member" && recorderInfo.familyRelationship) {
         finalRecorderRole = `Family Member: ${recorderInfo.familyRelationship}`;
       } else if (recorderInfo.recorderRole === "Nurse" && recorderInfo.nurseRegistrationNumber) {
@@ -81,8 +82,16 @@ export default function PatientAssessmentPage() {
         throw new Error(assessmentResult.error || 'Failed to save assessment data');
       }
 
-      toast.success('Assessment saved successfully!');
-      router.push('/dashboard');
+      toast.success('Assessment saved successfully. This window will close in 5 seconds.', {
+        action: {
+          label: 'OK',
+          onClick: () => window.close()
+        }
+      });
+
+      setTimeout(() => {
+        window.close();
+      }, 5000);
 
     } catch (error) {
       console.error('Error saving assessment:', error);
@@ -111,136 +120,134 @@ export default function PatientAssessmentPage() {
   }, [id]);
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-slate-100 to-slate-200'>
-      <div className="max-w-5xl mx-auto py-12 px-6">
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-          <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
-            <div className="flex items-center">
-              <div className={`flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 ${clientNames?.clientCategory === 'DearCare LLP' ? 'border-dCblue' : 'border-amber-600'}`}>
-                <div className="relative w-12 h-12">
+    <div className='min-h-screen bg-gray-50 text-slate-800 py-12'>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        
+        {nameLoading ? (
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <div className="w-8 h-8 border-2 border-gray-200 border-t-slate-800 rounded-full animate-spin"></div>
+            <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Loading Data...</span>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+            <div className="bg-white px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className="relative w-32 h-12 md:w-60 md:h-14 shrink-0">
                   <Image
-                    src={clientNames?.clientCategory === 'DearCare LLP' ? "/DearCare.png" : "/TATA.png"}
-                    alt={clientNames?.clientCategory === 'DearCare LLP' ? "DearCare Logo" : "Tata Home Nursing Logo"}
+                    src={clientNames?.clientCategory === 'DearCare LLP' ? "/dearcare.png" : "/TATA.png"}
+                    alt="Organization Logo"
                     fill
-                    className="object-contain"
+                    className="object-contain object-left"
+                    priority
                   />
                 </div>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">
-                  <div className="flex items-center whitespace-nowrap">
-                    {clientNames?.clientCategory === 'DearCare LLP' ? (
-                      <>
-                        <span className='text-dCblue'>Dear</span>
-                        <span className='text-amber-500'>C</span>
-                        <span className='text-dCblue'>are</span>
-                      </>
-                    ) : (
-                      <span className='text-amber-600'>Tata Home Nursing</span>
-                    )}
-                  </div>
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Healthcare & Caregiving Services
-                </p>
-              </div>
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm text-gray-600 font-medium">Client Support: <span className="text-blue-600">+1 (800) 123-4567</span></p>
-              <p className="text-sm text-gray-600 mt-1">care@dearcare.com</p>
-            </div>
-          </div>
 
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-800">Patient Assessment Form</h2>
-            <p className="text-gray-600">Please fill out all required information accurately</p>
-            <div className="mt-4">
-              {nameLoading ? (
-                <span className="text-gray-500">Loading patient name...</span>
-              ) : clientNames ? (
-                <div>
-                  {clientNames.patientName && clientNames.requestorName ? (
-                    <div>
-                      <span className="font-semibold text-lg text-dCblue">
-                        Patient Name: {clientNames.patientName}
-                      </span>
-                      <br />
-                      <span className="font-semibold text-lg text-dCblue">
-                        Requestor Name: {clientNames.requestorName}
-                      </span>
-                      <div className="mt-2 text-red-600 font-medium">
-                        If this is <span className="underline">{clientNames.patientName}</span> or <span className="underline">{clientNames.requestorName}</span>, please proceed.<br />
-                        <span className="font-bold">If this is NOT your name, do NOT fill the form.</span>
+                <div className="hidden md:block h-8 w-px bg-gray-200"></div>
+
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-gray-100
+                        ${clientNames?.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientNames?.clientCategory === 'Tata Home Nursing' ? 
+                        "text-amber-600" : 'text-gray-800'}`}>
+                  {clientNames?.clientCategory === 'DearCare LLP' ? 'DearCare' : 'Tata Home Nursing'}
+                </div>
+              </div>
+
+              <div className="flex flex-col md:items-end">
+                <h2 className="text-lg font-semibold text-slate-800">Patient Assessment</h2>
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 border-b border-gray-100 p-6 md:p-8">
+              {clientNames ? (
+                <div className="flex flex-col md:flex-row md:items-start gap-4">
+                  <div className="mt-1 hidden md:block">
+                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Verification Required</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
+                      {clientNames.patientName && 
+                        (
+                          <div className="bg-white border border-gray-200 p-3 rounded-md shadow-sm">
+                            <span className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Patient Name</span>
+                            <span className="font-medium text-slate-700 text-base">{clientNames.patientName || 'N/A'}</span>
+                          </div>
+                        )
+                      }
+                      <div className="bg-white border border-gray-200 p-3 rounded-md shadow-sm">
+                        <span className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Requestor Name</span>
+                        <span className="font-medium text-slate-700 text-base">{clientNames.requestorName || 'N/A'}</span>
                       </div>
                     </div>
-                  ) : (
-                    <div>
-                      <span className="font-semibold text-lg text-dCblue">
-                        {clientNames.patientName ? `Patient Name: ${clientNames.patientName}` : `Requestor Name: ${clientNames.requestorName}`}
-                      </span>
-                      <div className="mt-2 text-red-600 font-medium">
-                        If this is <span className="underline">{clientNames.patientName || clientNames.requestorName}</span>, please proceed.<br />
-                        <span className="font-bold">If this is NOT your name, do NOT fill the form.</span>
-                      </div>
-                    </div>
-                  )}
+
+                    <p className="text-sm text-slate-500 leading-relaxed">
+                      Please confirm the identities above match your records. If these details are incorrect, 
+                      <span className="font-semibold text-slate-700"> do not proceed</span> with the assessment and contact support immediately.
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <span className="text-red-600 font-bold">Patient name could not be verified. Please contact support.</span>
+                 <div className="text-center py-4">
+                    <span className="text-red-600 font-medium text-sm">Unable to verify patient identity. Please contact support.</span>
+                 </div>
               )}
             </div>
+
+            <div className="p-6 md:p-10">
+              <form onSubmit={handleSubmit} className="space-y-10">
+                <RecorderInfoForm 
+                  recorderInfo={recorderInfo}
+                  handleRecorderInfoChange={handleRecorderInfoChange}
+                />
+
+                <div className="w-full h-px bg-gray-100 my-8"></div>
+
+                <PatientAssessmentForm
+                  formData={formData}
+                  isEditable={true}
+                  handleInputChange={handleInputChange}
+                  handleCheckboxChange={handleCheckboxChange}
+                  handleEquipmentChange={handleEquipmentChange}
+                  handleCustomLabChange={handleCustomLabChange}
+                  handleAddCustomLab={handleAddCustomLab}
+                  handleRemoveCustomLab={handleRemoveCustomLab}
+                  handleAddFamilyMember={handleAddFamilyMember}
+                  handleRemoveFamilyMember={handleRemoveFamilyMember}
+                  handleFamilyMemberChange={handleFamilyMemberChange}
+                  showReviewChecklist={true}
+                  handleBedSoreChange={handleBedSoreChange}
+                  handleBedSoreStageChange={handleBedSoreStageChange}
+                />
+
+                <div className="flex items-center justify-end gap-4 pt-8 border-t border-gray-100 mt-12">
+                  <button
+                    type="button"
+                    className="px-6 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50 rounded-md transition-colors"
+                    onClick={() => router.back()}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-8 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                    disabled={isSubmitting || !recorderInfo.recorderName || !recorderInfo.recorderRole}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                        Processing...
+                      </span>
+                    ) : 'Submit Assessment'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <RecorderInfoForm 
-                recorderInfo={recorderInfo}
-                handleRecorderInfoChange={handleRecorderInfoChange}
-              />
-
-              <PatientAssessmentForm
-                formData={formData}
-                isEditable={true}
-                handleInputChange={handleInputChange}
-                handleCheckboxChange={handleCheckboxChange}
-                handleEquipmentChange={handleEquipmentChange}
-                handleCustomLabChange={handleCustomLabChange}
-                handleAddCustomLab={handleAddCustomLab}
-                handleRemoveCustomLab={handleRemoveCustomLab}
-                handleAddFamilyMember={handleAddFamilyMember}
-                handleRemoveFamilyMember={handleRemoveFamilyMember}
-                handleFamilyMemberChange={handleFamilyMemberChange}
-                showReviewChecklist={true}
-              />
-
-              <div className="flex justify-end space-x-4 pt-6 mt-8 border-t border-gray-200">
-                <button
-                  type="button"
-                  className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
-                  onClick={() => router.back()}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-dCblue text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200 font-medium shadow-md"
-                  disabled={isSubmitting || !recorderInfo.recorderName || !recorderInfo.recorderRole}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                      </svg>
-                      Saving...
-                    </span>
-                  ) : 'Save Assessment'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

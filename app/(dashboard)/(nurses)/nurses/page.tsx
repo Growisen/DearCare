@@ -117,14 +117,19 @@ export default function NursesPage() {
 
   useEffect(() => {
     loadNurses()
-  }, [currentPage, debouncedSearch])
+  }, [currentPage, debouncedSearch, selectedStatus, selectedExperience])
 
   const loadNurses = async () => {
     setIsLoading(true)
-    const { data, count, error } = await fetchBasicDetails({
-      page: currentPage,
-      limit
-    }, debouncedSearch)
+    const { data, count, error } = await fetchBasicDetails(
+      {
+        page: currentPage,
+        limit,
+      },
+      selectedStatus,
+      selectedExperience,
+      debouncedSearch
+    )
 
     if (error) {
       setError(error)
@@ -137,16 +142,6 @@ export default function NursesPage() {
     setIsLoading(false)
   }
 
-  const filteredNurses = nurses.filter(nurse => {
-    const matchesStatus = selectedStatus === "all" || nurse.status === selectedStatus
-    const matchesExperience = selectedExperience === "all" || 
-      (selectedExperience === "less_than_1" && (nurse.experience ?? 0) < 1) ||
-      (selectedExperience === "less_than_5" && (nurse.experience ?? 0) < 5) ||
-      (selectedExperience === "less_than_10" && (nurse.experience ?? 0) < 10) ||
-      (selectedExperience === "greater_than_15" && (nurse.experience ?? 0) >= 10)
-    return matchesStatus && matchesExperience
-  })
-  
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber)
   }
@@ -238,11 +233,11 @@ export default function NursesPage() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
         <div className="hidden sm:block overflow-x-auto">
           <NurseTable 
-            nurses={filteredNurses} 
+            nurses={nurses} 
             isLoading={isLoading}
           />
           
-          {!isLoading && filteredNurses.length > 0 && (
+          {!isLoading && nurses.length > 0 && (
             <PaginationControls 
               currentPage={currentPage}
               totalPages={totalPages}
@@ -252,7 +247,7 @@ export default function NursesPage() {
             />
           )}
 
-          {!isLoading && filteredNurses.length === 0 && (
+          {!isLoading && nurses.length === 0 && (
             <EmptyState
               title="No nurses found"
               message="Try adjusting your filters or search to find nurses."
@@ -266,7 +261,7 @@ export default function NursesPage() {
             <Loader />
           ) : (
             <>
-              {filteredNurses.map((nurse) => (
+              {nurses.map((nurse) => (
                 <NurseCard 
                   key={nurse.nurse_id} 
                   nurse={nurse} 
@@ -274,7 +269,7 @@ export default function NursesPage() {
                 />
               ))}
               
-              {filteredNurses.length > 0 && (
+              {nurses.length > 0 && (
                 <PaginationControls 
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -285,7 +280,7 @@ export default function NursesPage() {
                 />
               )}
 
-              {filteredNurses.length === 0 && (
+              {nurses.length === 0 && (
                 <EmptyState
                   title="No nurses found"
                   message="Try adjusting your filters or search to find nurses."

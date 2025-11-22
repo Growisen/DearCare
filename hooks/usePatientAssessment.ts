@@ -1,9 +1,9 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FamilyMember } from '@/types/client.types';
+import { BedSoreData, BedSoreStage } from '@/types/reassessment.types';
 
 export interface PatientAssessmentFormData {
-  // Personal Details
   guardianOccupation: string;
   maritalStatus: string;
   height: string;
@@ -11,27 +11,23 @@ export interface PatientAssessmentFormData {
   pincode: string;
   district: string;
   cityTown: string;
-  
-  // Medical Status
+
   currentStatus: string;
   chronicIllness: string;
   medicalHistory: string;
   surgicalHistory: string;
   medicationHistory: string;
   
-  // Psychological Assessment
   alertnessLevel: string;
   physicalBehavior: string;
   speechPatterns: string;
   emotionalState: string;
   
-  // Social History
   drugsUse: string;
   alcoholUse: string;
   tobaccoUse: string;
   otherSocialHistory: string;
   
-  // Current Details
   presentCondition: string;
   bloodPressure: string;
   sugarLevel: string;
@@ -43,14 +39,12 @@ export interface PatientAssessmentFormData {
   otherLabInvestigations: string;
   customLabTests: Array<{ id: string; name: string; value: string }>;
   
-  // Diagnosis and Care Plan
   finalDiagnosis: string;
   foodsToInclude: string;
   foodsToAvoid: string;
   patientPosition: string;
   feedingMethod: string;
-  
-  // Environment Assessment
+
   isClean: boolean;
   isVentilated: boolean;
   isDry: boolean;
@@ -58,7 +52,6 @@ export interface PatientAssessmentFormData {
   hasSocialInteraction: boolean;
   hasSupportiveEnv: boolean;
   
-  // Equipment
   equipment: {
     hospitalBed: boolean;
     wheelChair: boolean;
@@ -91,7 +84,6 @@ export interface PatientAssessmentFormData {
     crutches: boolean;
   };
   
-  // Family Members
   familyMembers: FamilyMember[];
 
   recorderInfo: {
@@ -102,11 +94,11 @@ export interface PatientAssessmentFormData {
     recorderTimestamp: string;
     nurseRegistrationNumber: string;
   };
+  bedSore: BedSoreData;
 }
 
-// Create empty default form data
+
 export const getDefaultFormData = (): PatientAssessmentFormData => ({
-  // Personal Details
   guardianOccupation: '',
   maritalStatus: '',
   height: '',
@@ -115,26 +107,22 @@ export const getDefaultFormData = (): PatientAssessmentFormData => ({
   district: '',
   cityTown: '',
   
-  // Medical Status
   currentStatus: '',
   chronicIllness: '',
   medicalHistory: '',
   surgicalHistory: '',
   medicationHistory: '',
   
-  // Psychological Assessment
   alertnessLevel: '',
   physicalBehavior: '',
   speechPatterns: '',
   emotionalState: '',
   
-  // Social History
   drugsUse: '',
   alcoholUse: '',
   tobaccoUse: '',
   otherSocialHistory: '',
   
-  // Current Details
   presentCondition: '',
   bloodPressure: '',
   sugarLevel: '',
@@ -146,22 +134,19 @@ export const getDefaultFormData = (): PatientAssessmentFormData => ({
   otherLabInvestigations: '',
   customLabTests: [],
   
-  // Diagnosis and Care Plan
   finalDiagnosis: '',
   foodsToInclude: '',
   foodsToAvoid: '',
   patientPosition: '',
   feedingMethod: '',
   
-  // Environment Assessment
   isClean: false,
   isVentilated: false,
   isDry: false,
   hasNatureView: false,
   hasSocialInteraction: false,
   hasSupportiveEnv: false,
-  
-  // Equipment
+
   equipment: {
     hospitalBed: false,
     wheelChair: false,
@@ -203,10 +188,16 @@ export const getDefaultFormData = (): PatientAssessmentFormData => ({
     familyRelationship: '',
     recorderTimestamp: '',
     nurseRegistrationNumber: ''
+  },
+
+  bedSore: {
+    stage: '',
+    shape: '',
+    size: '',
+    site: ''
   }
 });
 
-// The actual hook
 const usePatientAssessmentForm = (initialData = getDefaultFormData(), isEditable = true) => {
   const [formData, setFormData] = React.useState<PatientAssessmentFormData>(initialData);
 
@@ -312,6 +303,30 @@ const usePatientAssessmentForm = (initialData = getDefaultFormData(), isEditable
     }));
   }, [isEditable]);
 
+  const handleBedSoreChange = React.useCallback((field: keyof BedSoreData, value: string) => {
+    if (!isEditable) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      bedSore: {
+        ...prev.bedSore,
+        [field]: value
+      } as BedSoreData
+    }));
+  }, [isEditable]);
+
+  const handleBedSoreStageChange = (stage: BedSoreStage) => {
+    setFormData(prev => ({
+      ...prev,
+      bedSore: {
+        stage,
+        shape: prev.bedSore?.shape ?? '',
+        size: prev.bedSore?.size ?? '',
+        site: prev.bedSore?.site ?? ''
+      }
+    }));
+  };
+
   return {
     formData,
     setFormData,
@@ -323,7 +338,9 @@ const usePatientAssessmentForm = (initialData = getDefaultFormData(), isEditable
     handleRemoveCustomLab,
     handleAddFamilyMember,
     handleRemoveFamilyMember,
-    handleFamilyMemberChange
+    handleFamilyMemberChange,
+    handleBedSoreChange,
+    handleBedSoreStageChange
   };
 };
 
