@@ -111,40 +111,50 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
     setModalType(null);
   };
 
+  const isPersonalInfoAvailable =
+    !!patient.email ||
+    !!patient.phoneNumber ||
+    !!patient.emergencyContact?.name ||
+    !!patient.emergencyContact?.relation ||
+    !!patient.emergencyContact?.phone ||
+    !!latestAssessment?.guardianOccupation;
+
   console.log('PatientInfo component rendered with patient:', patient);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-      <InfoSection title="Personal Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
-        <div className="space-y-3">
-          <InfoField 
-            label="Email" 
-            value={patient.email} 
-            icon={<Mail className="w-4 h-4 text-blue-500" />} 
-          />
-          <InfoField 
-            label="Phone" 
-            value={patient.phoneNumber} 
-            icon={<Phone className="w-4 h-4 text-blue-500" />} 
-          />
-          <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-            <p className="text-xs font-medium text-gray-500 mb-1 flex items-center">
-              <Users className="w-3 h-3 mr-1 text-blue-500" />
-              Emergency Contact
-            </p>
-            <p className="text-sm font-medium text-gray-800">{formatName(patient.emergencyContact.name)}</p>
-            <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
-              <span className="text-blue-600">{patient.emergencyContact.relation}</span> • 
-              <span className="text-gray-700">{patient.emergencyContact.phone}</span>
-            </p>
+      {isPersonalInfoAvailable && (
+        <InfoSection title="Personal Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+          <div className="space-y-3">
+            <InfoField 
+              label="Email" 
+              value={patient.email} 
+              icon={<Mail className="w-4 h-4 text-blue-500" />} 
+            />
+            <InfoField 
+              label="Phone" 
+              value={patient.phoneNumber} 
+              icon={<Phone className="w-4 h-4 text-blue-500" />} 
+            />
+            <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-1 flex items-center">
+                <Users className="w-3 h-3 mr-1 text-blue-500" />
+                Emergency Contact
+              </p>
+              <p className="text-sm font-medium text-gray-800">{formatName(patient.emergencyContact.name)}</p>
+              <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
+                <span className="text-blue-600">{patient.emergencyContact.relation}</span> • 
+                <span className="text-gray-700">{patient.emergencyContact.phone}</span>
+              </p>
+            </div>
+            <InfoField 
+              label="Guardian Occupation" 
+              value={latestAssessment?.guardianOccupation} 
+              icon={<Briefcase className="w-4 h-4 text-blue-500" />} 
+            />
           </div>
-          <InfoField 
-            label="Guardian Occupation" 
-            value={latestAssessment?.guardianOccupation} 
-            icon={<Briefcase className="w-4 h-4 text-blue-500" />} 
-          />
-        </div>
-      </InfoSection>
+        </InfoSection>
+      )}
 
       <InfoSection title="Patient Address" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
         <div className="space-y-3">

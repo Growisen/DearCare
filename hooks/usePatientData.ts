@@ -10,7 +10,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
   const [loading, setLoading] = useState(true);
   const [isLoadingAssessment, setIsLoadingAssessment] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [assessmentLoaded, setAssessmentLoaded] = useState(false);

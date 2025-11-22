@@ -459,6 +459,7 @@ export interface NurseAssignmentData {
   assigned_type: string;
   salary_per_day?: number;
   nurse_reg_no?: string;
+  end_notes?: string;
 }
 
 export async function getNurseAssignments(clientId: string): Promise<{
@@ -672,7 +673,6 @@ export async function updateNurseAssignment(
   try {
     const supabase = await createSupabaseServerClient();
     
-    // Validate data
     if (updates.end_date && updates.start_date) {
       const startDate = new Date(updates.start_date);
       const endDate = new Date(updates.end_date);
@@ -694,8 +694,7 @@ export async function updateNurseAssignment(
         };
       }
     }
-    
-    // Update the assignment in the database
+
     const { error } = await supabase
       .from('nurse_client')
       .update(updates)
