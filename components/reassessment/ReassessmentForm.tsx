@@ -109,6 +109,17 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
     );
   }
 
+  if (
+    !clientInfo.loading &&
+    (
+      !clientInfo.patientName &&
+      !clientInfo.requestorName &&
+      !clientInfo.clientCategory
+    )
+  ) {
+    notFound();
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-5xl mx-auto bg-white shadow-sm border border-gray-200 rounded-sm">
