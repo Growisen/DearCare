@@ -11,6 +11,7 @@ import { getClientNames } from '@/app/actions/clients/assessment';
 import { Save } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { notFound } from 'next/navigation';
 
 export default function ReassessmentForm({ clientId }: { clientId: string }) {
   const {
@@ -81,6 +82,16 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
             loading: false,
             error: res.error
           });
+
+          if (
+            !res.patientName &&
+            !res.requestorName &&
+            (!res.clientCategory || res.error)
+          ) {
+            if (typeof window !== "undefined") {
+              notFound();
+            }
+          }
         }
       });
     }
@@ -91,9 +102,9 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="w-8 h-8 border-2 border-gray-200 border-t-slate-800 rounded-full animate-spin"></div>
-            <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Verifying user</span>
-          </div>
+          <div className="w-8 h-8 border-2 border-gray-200 border-t-slate-800 rounded-full animate-spin"></div>
+          <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Verifying user</span>
+        </div>
       </div>
     );
   }
@@ -113,9 +124,8 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
               />
             </div>
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-gray-100
-              ${clientInfo.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientInfo.clientCategory === 'Tata Home Nursing' ? 
-              "text-amber-600" : 'text-gray-800'}`}>
-              {clientInfo.clientCategory === 'DearCare LLP' ? 'DearCare' : clientInfo.clientCategory === 'Tata Home Nursing' ? 'Tata Home Nursing' : '-'}
+              ${clientInfo.clientCategory === 'DearCare LLP' ? "text-dCblue" :"text-amber-600"}`}>
+              {clientInfo.clientCategory === 'DearCare LLP' ? 'DearCare' : 'Tata Home Nursing'}
             </div>
           </div>
           <div className="flex flex-col md:items-end">

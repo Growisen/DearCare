@@ -44,13 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     '/about',
     '/client-registration',
     '/forgot-password',
-    '/client-enquiry'
+    '/client-enquiry',
+    '/reassessment/:id',
   ];
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/patient-assessment/') ||
     pathname.startsWith('/client-enquiry') ||
+    pathname.startsWith('/reassessment/') ||
     pathname.includes('.');
 
   useEffect(() => {

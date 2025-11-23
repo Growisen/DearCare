@@ -9,6 +9,7 @@ import PatientAssessmentForm from '@/components/client/PatientAssessmentForm';
 import RecorderInfoForm from '@/components/client/RecorderInfoForm';
 import { usePatientAssessmentForm } from '@/hooks/usePatientAssessment';
 import { getClientNames } from '@/app/actions/clients/assessment';
+import { notFound } from 'next/navigation';
 
 export default function PatientAssessmentPage() {
   const params = useParams();
@@ -115,6 +116,16 @@ export default function PatientAssessmentPage() {
         setClientNames(null);
       }
       setNameLoading(false);
+
+      if (
+        !result.patientName &&
+        !result.requestorName &&
+        (!result.clientCategory || result.error)
+      ) {
+        if (typeof window !== "undefined") {
+          notFound();
+        }
+      }
     }
     if (id) fetchName();
   }, [id]);
@@ -143,9 +154,8 @@ export default function PatientAssessmentPage() {
                   />
                 </div>
                 <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-gray-100
-                  ${clientNames?.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientNames?.clientCategory === 'Tata Home Nursing' ? 
-                  "text-amber-600" : 'text-gray-800'}`}>
-                  {clientNames?.clientCategory === 'DearCare LLP' ? 'DearCare' : clientNames?.clientCategory === 'Tata Home Nursing' ? 'Tata Home Nursing' : '-'}
+                  ${clientNames?.clientCategory === 'DearCare LLP' ? "text-dCblue" : "text-amber-600"}`}>
+                  {clientNames?.clientCategory === 'DearCare LLP' ? 'DearCare' : 'Tata Home Nursing'}
                 </div>
               </div>
               <div className="flex flex-col md:items-end">
