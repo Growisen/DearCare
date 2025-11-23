@@ -130,6 +130,20 @@ export default function PatientAssessmentPage() {
     if (id) fetchName();
   }, [id]);
 
+  if (
+    !nameLoading &&
+    (
+      !clientNames ||
+      (
+        !clientNames.patientName &&
+        !clientNames.requestorName &&
+        !clientNames.clientCategory
+      )
+    )
+  ) {
+    notFound();
+  }
+
   return (
     <div className='min-h-screen bg-gray-50 text-slate-800 py-6'>
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
