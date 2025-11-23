@@ -8,7 +8,7 @@ import BedSoreSection from './BedSoreSection';
 import PatientStatusSection from './PatientStatusSection';
 import AdminSection from './AdminSection';
 import { getClientNames } from '@/app/actions/clients/assessment';
-import { AlertTriangle, User, Building2, FileText, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
@@ -90,13 +90,10 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
   if (clientInfo.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <svg className="animate-spin h-8 w-8 text-gray-700 mb-4" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-          </svg>
-          <span className="text-gray-700 font-medium text-lg">Loading information...</span>
-        </div>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <div className="w-8 h-8 border-2 border-gray-200 border-t-slate-800 rounded-full animate-spin"></div>
+            <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Verifying user</span>
+          </div>
       </div>
     );
   }
@@ -104,92 +101,56 @@ export default function ReassessmentForm({ clientId }: { clientId: string }) {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-5xl mx-auto bg-white shadow-sm border border-gray-200 rounded-sm">
-        <div className="bg-white border-b border-gray-200 shadow-sm">
-					<div className="bg-amber-50 border-l-4 border-amber-500 p-4">
-						<div className="flex items-center">
-							<AlertTriangle className="h-5 w-5 text-amber-600 mr-3" />
-							<div>
-								<p className="text-sm font-bold text-amber-800">Important Notice</p>
-								<p className="text-sm text-amber-700">
-									Please verify the details below. If this is not your data/form, <span className="font-bold underline">do not fill it out.</span>
-								</p>
-							</div>
-						</div>
-					</div>
+        <div className="bg-white px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="relative w-32 h-12 md:w-80 md:h-20 shrink-0">
+              <Image
+                src={clientInfo.clientCategory === 'DearCare LLP' ? "/dcTransparent.png" : "/TATA.png"}
+                alt={clientInfo.clientCategory === 'DearCare LLP' ? "DearCare Logo" : "Tata Home Nursing Logo"}
+                fill
+                className="object-contain object-left"
+                priority
+              />
+            </div>
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-gray-100
+              ${clientInfo.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientInfo.clientCategory === 'Tata Home Nursing' ? 
+              "text-amber-600" : 'text-gray-800'}`}>
+              {clientInfo.clientCategory === 'DearCare LLP' ? 'DearCare' : clientInfo.clientCategory === 'Tata Home Nursing' ? 'Tata Home Nursing' : '-'}
+            </div>
+          </div>
+          <div className="flex flex-col md:items-end">
+            <h2 className="text-lg font-semibold text-slate-800">Reassessment Form</h2>
+          </div>
+        </div>
 
-					<div className="px-8 py-6">
-						<div className="flex items-start justify-between mb-6">
-							<div>
-								<h1 className="text-2xl font-bold tracking-tight text-gray-900">Reassessment Form</h1>
-							</div>
-							
-							{clientId && !clientInfo.loading && !clientInfo.error && (
-								<div className="relative w-48 h-20 opacity-90 hover:opacity-100 transition-opacity">
-									<Image
-										src={clientInfo.clientCategory === 'DearCare LLP' ? "/dcTransparent.png" : "/TATA.png"}
-										alt={clientInfo.clientCategory === 'DearCare LLP' ? "DearCare Logo" : "Tata Home Nursing Logo"}
-										fill
-										className="object-contain object-right"
-									/>
-								</div>
-							)}
-						</div>
-
-						{clientId && (
-							<div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
-								{clientInfo.loading ? (
-									<div className="animate-pulse flex space-x-4">
-										<div className="h-4 bg-gray-200 rounded w-1/4"></div>
-										<div className="h-4 bg-gray-200 rounded w-1/4"></div>
-									</div>
-								) : clientInfo.error ? (
-									<div className="text-red-500 text-sm flex items-center gap-2">
-										<AlertTriangle className="w-4 h-4" />
-										Error loading client data: {clientInfo.error}
-									</div>
-								) : (
-									<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-										<div className="flex items-center gap-3">
-											<div className="p-2 bg-white rounded-full shadow-sm border border-gray-100">
-												<User className="w-4 h-4 text-blue-600" />
-											</div>
-											<div>
-												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Requestor</p>
-												<p className="text-sm font-semibold text-gray-900">{clientInfo.requestorName || '-'}</p>
-											</div>
-										</div>
-
-										{clientInfo.patientName && (
-											<div className="flex items-center gap-3">
-												<div className="p-2 bg-white rounded-full shadow-sm border border-gray-100">
-													<FileText className="w-4 h-4 text-emerald-600" />
-												</div>
-												<div>
-													<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Patient Name</p>
-													<p className="text-sm font-semibold text-gray-900">{clientInfo.patientName || '-'}</p>
-												</div>
-											</div>
-										)}
-
-										<div className="flex items-center gap-3">
-											<div className="p-2 bg-white rounded-full shadow-sm border border-gray-100">
-												<Building2 className="w-4 h-4 text-purple-600" />
-											</div>
-											<div>
-												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Organisation</p>
-												<span className={`inline-flex items-center px-4 py-1 rounded text-base font-medium bg-gray-100 
-                          ${clientInfo.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientInfo.clientCategory === 'Tata Home Nursing' ? 
-                          "text-amber-600" : 'text-gray-800'}`}>
-														{clientInfo.clientCategory === 'DearCare LLP' ? "DearCare" : clientInfo.clientCategory === 'Tata Home Nursing' ? "Tata Home Nursing" : '-'}
-												</span>
-											</div>
-										</div>
-									</div>
-								)}
-							</div>
-						)}
-					</div>
-				</div>
+        <div className="bg-slate-50/50 border-b border-gray-100 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-start gap-4">
+            <div className="mt-1 hidden md:block">
+              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Verification Required</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
+                {clientInfo.patientName && (
+                  <div className="bg-white border border-gray-200 p-3 rounded-md shadow-sm">
+                    <span className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Patient Name</span>
+                    <span className="font-medium text-slate-700 text-base">{clientInfo.patientName || 'N/A'}</span>
+                  </div>
+                )}
+                <div className="bg-white border border-gray-200 p-3 rounded-md shadow-sm">
+                  <span className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Requestor Name</span>
+                  <span className="font-medium text-slate-700 text-base">{clientInfo.requestorName || 'N/A'}</span>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 leading-relaxed">
+                Please confirm the identities above match your records. If these details are incorrect, 
+                <span className="font-semibold text-slate-700"> do not proceed</span> with the reassessment and contact support immediately.
+              </p>
+            </div>
+          </div>
+        </div>
         
         <form onSubmit={onSubmit} className="p-8 space-y-10">
           <DiagnosisSection 

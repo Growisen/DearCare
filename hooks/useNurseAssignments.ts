@@ -146,6 +146,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
           salaryPerDay: assignment.salary_per_day,
           nurseRegNo: assignment.nurses?.nurse_reg_no,
           endNotes: assignment.end_notes,
+          notes: assignment.notes,
         }));
         
         setNurseAssignments(transformedAssignments);

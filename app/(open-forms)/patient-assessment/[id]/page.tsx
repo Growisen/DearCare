@@ -120,40 +120,36 @@ export default function PatientAssessmentPage() {
   }, [id]);
 
   return (
-    <div className='min-h-screen bg-gray-50 text-slate-800 py-12'>
+    <div className='min-h-screen bg-gray-50 text-slate-800 py-6'>
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
         {nameLoading ? (
           <div className="flex flex-col items-center justify-center h-64 space-y-4">
             <div className="w-8 h-8 border-2 border-gray-200 border-t-slate-800 rounded-full animate-spin"></div>
-            <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Loading Data...</span>
+            <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Verifying user</span>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
 
             <div className="bg-white px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-5">
-                <div className="relative w-32 h-12 md:w-60 md:h-14 shrink-0">
+                <div className="relative w-32 h-12 md:w-80 md:h-20 shrink-0">
                   <Image
-                    src={clientNames?.clientCategory === 'DearCare LLP' ? "/dearcare.png" : "/TATA.png"}
-                    alt="Organization Logo"
+                    src={clientNames?.clientCategory === 'DearCare LLP' ? "/dcTransparent.png" : "/TATA.png"}
+                    alt={clientNames?.clientCategory === 'DearCare LLP' ? "DearCare Logo" : "Tata Home Nursing Logo"}
                     fill
                     className="object-contain object-left"
                     priority
                   />
                 </div>
-
-                <div className="hidden md:block h-8 w-px bg-gray-200"></div>
-
                 <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-gray-100
-                        ${clientNames?.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientNames?.clientCategory === 'Tata Home Nursing' ? 
-                        "text-amber-600" : 'text-gray-800'}`}>
-                  {clientNames?.clientCategory === 'DearCare LLP' ? 'DearCare' : 'Tata Home Nursing'}
+                  ${clientNames?.clientCategory === 'DearCare LLP' ? "text-dCblue" : clientNames?.clientCategory === 'Tata Home Nursing' ? 
+                  "text-amber-600" : 'text-gray-800'}`}>
+                  {clientNames?.clientCategory === 'DearCare LLP' ? 'DearCare' : clientNames?.clientCategory === 'Tata Home Nursing' ? 'Tata Home Nursing' : '-'}
                 </div>
               </div>
-
               <div className="flex flex-col md:items-end">
-                <h2 className="text-lg font-semibold text-slate-800">Patient Assessment</h2>
+                <h2 className="text-lg font-semibold text-slate-800">Reassessment Form</h2>
               </div>
             </div>
 
