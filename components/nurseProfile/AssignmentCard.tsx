@@ -1,203 +1,298 @@
-import React from 'react';
+import React, { useState } from 'react';
+import NotesModal from '@/components/ui/NotesModal';
+import { Plus, Calendar, User, Building2, FileText, Clock } from 'lucide-react';
 import { NurseAssignmentWithClient } from '@/app/actions/staff-management/add-nurse';
 import { format12HourTime, formatDate, getServiceLabel, formatName } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
-import { getAssignmentPeriodStatus } from '@/utils/nurseAssignmentUtils';
+import { getAssignmentPeriodStatus, calculatePeriodSalary } from '@/utils/nurseAssignmentUtils';
+import { updateNurseClientNotes } from '@/app/actions/clients/assessment';
 
 interface AssignmentCardProps {
   assignment: NurseAssignmentWithClient;
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
-  console.log('Rendering AssignmentCard for assignment:', assignment);
   const getStatusConfig = () => {
     const startDate = new Date(assignment.assignment.start_date);
     const endDate = assignment.assignment.end_date ? new Date(assignment.assignment.end_date) : null;
     const now = new Date();
 
     if (startDate > now) {
-      return { label: 'Upcoming', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+      return { label: 'Upcoming', color: 'bg-blue-100 text-blue-800 border-blue-200' };
     }
     if (!endDate) {
-      return { label: 'Active', color: 'bg-green-50 text-green-700 border-green-200' };
+      return { label: 'Ongoing', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
     }
-    if (endDate > now) {
-      return { label: 'Ending Soon', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+    if (endDate < now) {
+      return { label: 'Completed', color: 'bg-green-100 text-green-800 border-green-200' };
     }
-    return { label: 'Completed', color: 'bg-gray-50 text-gray-700 border-gray-200' };
+    return { label: 'Ongoing', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
   };
 
   const status = getStatusConfig();
-
   const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(
     assignment.assignment.start_date,
     assignment.assignment.end_date || new Date().toISOString()
   );
 
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-4 py-2.5 border-b border-gray-200">
-        <div className="flex flex-wrap justify-between items-center gap-2">
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
-              {assignment.client.type === 'individual' 
-                ? formatName(assignment.client.details.individual?.patient_name || '')
-                : formatName(assignment.client.details.organization?.organization_name || '')}
-            </h3>
-            <span className={`px-2 py-0.5 text-xs font-medium rounded border ${
-              assignment.client.type === 'individual' 
-                ? 'bg-indigo-50 text-indigo-700 border-indigo-200' 
-                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            }`}>
-              {assignment.client.type === 'individual' ? 'Individual' : 'Organization'}
-            </span>
-          </div>
-          <span className={`px-2.5 py-1 text-xs font-semibold rounded border ${status.color}`}>
-            {status.label}
-          </span>
+  const [notesModalOpen, setNotesModalOpen] = useState(false);
+  const [notes, setNotes] = useState(assignment.assignment.notes || '');
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [notesError, setNotesError] = useState<string | null>(null);
+
+  const handleSaveNotes = async (newNotes: string) => {
+    setNotesLoading(true);
+    setNotesError(null);
+    try {
+      const result = await updateNurseClientNotes(assignment.assignment.id.toString(), newNotes);
+      if (result.success) {
+        setNotes(newNotes);
+      } else {
+        setNotesError(result.error || 'Could not save');
+      }
+    } catch (err) {
+      setNotesError(err instanceof Error ? err.message : 'Could not save');
+    } finally {
+      setNotesLoading(false);
+    }
+  };
+
+  const isIndividual = assignment.client.type === 'individual';
+  const clientDetails = assignment.client.details;
+
+  const DetailRow = ({
+    label,
+    value,
+    subValue,
+    valueClassName = "text-gray-900"
+  }: {
+    label: string;
+    value: React.ReactNode;
+    subValue?: React.ReactNode;
+    valueClassName?: string;
+  }) => (
+    value ? (
+      <div className="grid grid-cols-[120px_1fr] items-start py-2 border-b border-gray-50 last:border-0">
+        <span className="text-[13px] font-bold text-gray-500 pt-1">{label}</span>
+        <div className="text-sm leading-tight">
+          <div className={`font-medium ${valueClassName}`}>{value}</div>
+          {subValue && <div className="text-xs text-gray-500 mt-1">{subValue}</div>}
         </div>
       </div>
+    ) : null
+  );
 
-      <div className="p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div>
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pb-1.5 border-b-2 border-gray-300">
-              Assignment Details
-            </h4>
-            <div className="space-y-2">
-              <div className="flex items-start">
-                <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Start Date</span>
-                <span className="text-sm text-gray-900 font-medium">
-                  {formatDate(assignment.assignment.start_date)}
-                </span>
-              </div>
-              
-              {assignment.assignment.end_date && (
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">End Date</span>
-                  <span className="text-sm text-gray-900 font-medium">
-                    {formatDate(assignment.assignment.end_date)}
-                  </span>
-                </div>
-              )}
-              
-              {assignment.assignment.shift_start_time && (
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Shift Time</span>
-                  <span className="text-sm text-gray-900">
-                    {format12HourTime(assignment.assignment.shift_start_time)} - {format12HourTime(assignment.assignment.shift_end_time)}
-                  </span>
-                </div>
-              )}
-              
-              {assignment.assignment.salary_hour && (
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Hourly Rate</span>
-                  <span className="text-sm text-gray-900 font-semibold">₹{assignment.assignment.salary_hour}</span>
-                </div>
-              )}
+  const getSalaryPerHour = () => {
+    const { salary_per_day, shift_start_time, shift_end_time } = assignment.assignment;
+    if (!salary_per_day || !shift_start_time || !shift_end_time) return null;
+    const [startHour, startMin] = shift_start_time.split(':').map(Number);
+    const [endHour, endMin] = shift_end_time.split(':').map(Number);
+    const start = new Date();
+    start.setHours(startHour, startMin, 0, 0);
+    const end = new Date();
+    end.setHours(endHour, endMin, 0, 0);
+    let diffMs = end.getTime() - start.getTime();
+    if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
+    const hours = diffMs / (1000 * 60 * 60);
+    if (hours <= 0) return null;
+    return Math.round((salary_per_day / hours) * 100) / 100;
+  };
 
-              <div className="flex items-start">
-                <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Salary Per Day</span>
-                <span className="text-sm text-gray-900 font-semibold">{assignment.assignment.salary_per_day ? `₹${assignment.assignment.salary_per_day}` : 'N/A'}</span>
-              </div>
+  const salaryPerHour = getSalaryPerHour();
 
-              <div className="flex items-start">
-                <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Assignment Period</span>
-                <span className="text-sm text-gray-900 font-medium">
-                  <p className="ml-0 text-sm text-gray-700">
-                    : {daysCompleted} {daysCompleted === 1 ? 'day' : 'days'} completed
-                      {daysRemaining > 0 && `, ${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} remaining`}
-                      , {totalDays} {totalDays === 1 ? 'day' : 'days'} total
-                  </p>
-                </span>
-              </div>
-            </div>
+  const periodSalaryEstimate = assignment.assignment.salary_per_day
+    ? calculatePeriodSalary(
+        assignment.assignment.start_date,
+        assignment.assignment.end_date ?? undefined,
+        assignment.assignment.salary_per_day
+      )
+    : null;
+
+  return (
+    <div className="group bg-white border border-gray-200 rounded-md transition-all hover:border-gray-300 hover:shadow-sm">
+      <div className="px-5 py-3 flex flex-wrap justify-between items-center gap-4 border-b border-gray-100 bg-white">
+        <div>
+          <div className="flex items-center gap-3">
+            <h3 className="text-base font-bold text-gray-900">
+              {isIndividual
+                ? formatName(clientDetails.individual?.patient_name || '')
+                : formatName(clientDetails.organization?.organization_name || '')}
+            </h3>
+            <span className={`px-2.5 py-0.5 text-[13px] font-bold rounded border ${status.color}`}>
+              {status.label}
+            </span>
           </div>
-          
-          <div>
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pb-1.5 border-b-2 border-gray-300">
-              {assignment.client.type === 'individual' ? 'Patient Details' : 'Organization Details'}
-            </h4>
-            
-            {assignment.client.type === 'individual' ? (
-              <div className="space-y-2">
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Requestor</span>
-                  <span className="text-sm text-gray-900">
-                    {
-                      assignment.client.details.individual?.patient_name
-                      || assignment.client.details.individual?.requestor_name
-                      || 'N/A'
-                    }
-                    {assignment.client.details.individual?.patient_age != null &&
-                      `, ${assignment.client.details.individual.patient_age} yrs`}
+          <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
+            {isIndividual ? <User className="w-3 h-3" /> : <Building2 className="w-3 h-3" />}
+            {isIndividual ? 'Personal Care' : 'Staffing'}
+          </p>
+        </div>
+        <button
+          onClick={() => setNotesModalOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded hover:bg-white hover:text-blue-600 hover:border-blue-200 transition-all"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          {notes ? 'Edit Note' : 'Add Note'}
+        </button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+            <Calendar className="w-3.5 h-3.5 text-blue-600" />
+            <h4 className="text-[15px] font-bold text-gray-900">Details</h4>
+          </div>
+          <div className="space-y-0.5">
+            <DetailRow
+              label="Dates"
+              value={
+                <span className="flex items-center gap-1">
+                  {assignment.assignment.start_date && formatDate(assignment.assignment.start_date)}
+                  {assignment.assignment.start_date && <span className="text-gray-400">-</span>}
+                  {assignment.assignment.end_date ? formatDate(assignment.assignment.end_date) : assignment.assignment.start_date ? 'Ongoing' : null}
+                </span>
+              }
+              subValue={
+                <span className="block mt-0.5">
+                  <span className="text-emerald-700 font-medium">{daysCompleted} days completed</span>
+                  <span className="mx-1 text-gray-300">|</span>
+                  <span className={daysRemaining > 0 ? "text-blue-600" : "text-red-600 font-semibold"}>
+                    {daysRemaining > 0 ? `${daysRemaining} left` : 'Ended'}
                   </span>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Gender</span>
-                  <span className="text-sm text-gray-900 capitalize">
-                    {assignment.client.details.individual?.patient_gender || 'N/A'}
-                  </span>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Service</span>
-                  <span className="text-sm text-gray-900">
-                    {getServiceLabel(serviceOptions, assignment.client.details.individual?.service_required || 'N/A')}
-                  </span>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Contact</span>
-                  <span className="text-sm text-gray-900">
-                    {assignment.client.details.individual?.requestor_name}
-                    {assignment.client.details.individual?.relation_to_patient && 
-                      <span className="text-gray-600"> ({assignment.client.details.individual.relation_to_patient})</span>}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Organization</span>
-                  <span className="text-sm text-gray-900">
-                    {assignment.client.details.organization?.organization_name}
-                    {assignment.client.details.organization?.organization_type && 
-                      <span className="text-gray-600"> ({assignment.client.details.organization.organization_type})</span>}
-                  </span>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Address</span>
-                  <span className="text-sm text-gray-900">
-                    {assignment.client.details.organization?.organization_address}
-                  </span>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Contact Person</span>
-                  <span className="text-sm text-gray-900">
-                    {assignment.client.details.organization?.contact_person_name}
-                    {assignment.client.details.organization?.contact_person_role && 
-                      <span className="text-gray-600"> ({assignment.client.details.organization.contact_person_role})</span>}
-                  </span>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="text-xs font-medium text-gray-500 w-28 flex-shrink-0 pt-0.5">Phone</span>
-                  <span className="text-sm text-gray-900">
-                    {assignment.client.details.organization?.contact_phone}
-                  </span>
+                  <span className="mx-1 text-gray-300">|</span>
+                  <span className="text-gray-900 font-semibold">{totalDays} days total</span>
+                </span>
+              }
+            />
+            {assignment.assignment.shift_start_time && assignment.assignment.shift_end_time && (
+              <DetailRow
+                label="Shift"
+                value={
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3 h-3 text-gray-400" />
+                    {format12HourTime(assignment.assignment.shift_start_time)} - {format12HourTime(assignment.assignment.shift_end_time)}
+                  </div>
+                }
+              />
+            )}
+            {assignment.assignment.salary_per_day && (
+              <DetailRow
+                label="Salary"
+                value={
+                  salaryPerHour
+                    ? `₹${salaryPerHour} per hour`
+                    : 'N/A'
+                }
+                subValue={
+                  <>
+                    {assignment.assignment.salary_per_day && (
+                      <span className="text-sm">Per day: ₹{assignment.assignment.salary_per_day}</span>
+                    )}
+                    {periodSalaryEstimate && (
+                      <span className="block mt-1 text-blue-700 font-semibold text-sm">
+                        Estimate For period: ₹{periodSalaryEstimate}
+                      </span>
+                    )}
+                  </>
+                }
+              />
+            )}
+            {(notes || assignment.assignment.end_notes) && (
+              <div className="mt-3 pt-2 border-t border-gray-50 bg-gray-50/50 p-2 rounded">
+                <div className="flex items-start gap-2">
+                  <FileText className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                  <div className="text-xs text-gray-600 italic leading-relaxed">
+                    <span className="font-semibold text-gray-500 text-[13px] block mb-0.5">Note:</span>
+                    &quot;{notes || assignment.assignment.end_notes}&quot;
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </div>
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+            {isIndividual ? <User className="w-3.5 h-3.5 text-purple-600" /> : <Building2 className="w-3.5 h-3.5 text-purple-600" />}
+            <h4 className="text-[15px] font-bold text-gray-900">About Client</h4>
+          </div>
+          <div className="space-y-0.5">
+            {isIndividual ? (
+              <>
+                {clientDetails.individual?.patient_name && (
+                  <DetailRow
+                    label="Name"
+                    value={formatName(clientDetails.individual.patient_name)}
+                  />
+                )}
+                {(clientDetails.individual?.patient_age ?? 0) > 0 && (
+                  <DetailRow
+                    label="Age"
+                    value={`${clientDetails.individual?.patient_age} years`}
+                    subValue={clientDetails.individual?.patient_gender ? `Gender: ${clientDetails.individual.patient_gender}` : undefined}
+                  />
+                )}
+                {clientDetails.individual?.service_required && (
+                  <DetailRow
+                    label="Service"
+                    value={getServiceLabel(serviceOptions, clientDetails.individual.service_required)}
+                  />
+                )}
+                {clientDetails.individual?.requestor_name && (
+                  <DetailRow
+                    label="Contact"
+                    value={formatName(clientDetails.individual.requestor_name)}
+                    subValue={clientDetails.individual.relation_to_patient ? `Relation: ${clientDetails.individual.relation_to_patient}` : undefined}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {clientDetails.organization?.organization_name && (
+                  <DetailRow
+                    label="Name"
+                    value={clientDetails.organization.organization_name}
+                    subValue={clientDetails.organization.organization_type ? `Type: ${clientDetails.organization.organization_type}` : undefined}
+                  />
+                )}
+                {clientDetails.organization?.organization_address && (
+                  <DetailRow
+                    label="Address"
+                    value={clientDetails.organization.organization_address}
+                  />
+                )}
+                {clientDetails.organization?.contact_person_name && (
+                  <DetailRow
+                    label="Contact"
+                    value={clientDetails.organization.contact_person_name}
+                    subValue={
+                      (clientDetails.organization.contact_person_role || clientDetails.organization.contact_phone) ? (
+                        <span>
+                          {clientDetails.organization.contact_person_role && `Role: ${clientDetails.organization.contact_person_role}`}<br />
+                          {clientDetails.organization.contact_phone && `Phone: ${clientDetails.organization.contact_phone}`}
+                        </span>
+                      ) : undefined
+                    }
+                  />
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </div>
+      <NotesModal
+        open={notesModalOpen}
+        initialNotes={notes}
+        onSave={handleSaveNotes}
+        onClose={() => setNotesModalOpen(false)}
+        title="Note"
+        isSaving={notesLoading}
+      />
+      {notesError && (
+        <div className="bg-red-50 px-5 py-2 text-xs text-red-600 border-t border-red-100 font-medium">
+          {notesError}
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default AssignmentCard;

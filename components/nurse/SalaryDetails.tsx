@@ -240,6 +240,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
 
   const handleApprove = async (payment: SalaryPayment) => {
     setApprovingId(payment.id);
+    console.log("Approving payment:", payment, nurseId);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
         method: "POST",
@@ -248,7 +249,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         },
         body: JSON.stringify({
           salary_id: payment.id,
-          nurseId: nurseId,
+          nurse_id: String(nurseId),
           amount: payment.netSalary,
           payment_type: "outgoing",
           pay_status: "un_paid",

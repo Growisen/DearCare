@@ -31,6 +31,8 @@ export interface NurseAssignmentWithClient {
     shift_end_time: string | null;
     salary_hour: number | null;
     salary_per_day?: number | null;
+    notes?: string | null;
+    end_notes?: string | null;
   };
   client: {
     type: 'individual' | 'hospital' | 'carehome' | 'organization';
@@ -399,6 +401,8 @@ interface AssignmentResponse {
   salary_hour: number | null;
   client_id: string;
   salary_per_day?: number | null;
+  notes?: string | null;
+  end_notes?: string | null;
   clients: {
     client_type: 'individual' | 'hospital' | 'carehome' | 'organization';
   };
@@ -429,6 +433,8 @@ export async function fetchNurseAssignments(
         salary_hour,
         salary_per_day,
         client_id,
+        notes, 
+        end_notes,
         clients!inner (
           client_type
         )
@@ -462,7 +468,9 @@ export async function fetchNurseAssignments(
             shift_start_time: assignment.shift_start_time,
             shift_end_time: assignment.shift_end_time,
             salary_hour: assignment.salary_hour,
-            salary_per_day: assignment.salary_per_day
+            salary_per_day: assignment.salary_per_day,
+            notes: assignment.notes,
+            end_notes: assignment.end_notes,
           },
           client: {
             type: assignment.clients.client_type,
