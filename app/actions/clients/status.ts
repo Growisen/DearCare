@@ -59,13 +59,13 @@ export async function updateClientStatus(
           return { success: false, error: error.message };
         }
         
-        // Send rejection email only in production environments
         const env = process.env.NODE_ENV;
         if ((env === 'production') && clientEmail && clientName) {
           try {
             await sendClientRejectionNotification(clientEmail, {
               name: clientName,
-              rejectionReason: rejectionReason
+              rejectionReason: rejectionReason,
+              clientCategory: client.client_category
             });
             logger.info(`Rejection notification sent to ${clientEmail}`);
           } catch (emailError) {
@@ -86,7 +86,7 @@ export async function updateClientStatus(
         );
         
         if (clientEmail) {
-          await createUserAccountIfNeeded(supabase, clientEmail, clientName, clientId);
+          await createUserAccountIfNeeded(supabase, clientEmail, clientName, clientId, client.client_category);
         }
   
         const { data, error } = await supabase

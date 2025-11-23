@@ -221,9 +221,9 @@ export async function sendClientAssessmentFormLink(clientId: string): Promise<{ 
   try {
     const supabase = await createSupabaseServerClient();
 
-    const { error: clientError } = await supabase
+    const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('client_type')
+      .select('client_type, client_category')
       .eq('id', clientId)
       .single();
 
@@ -259,7 +259,8 @@ export async function sendClientAssessmentFormLink(clientId: string): Promise<{ 
       const emailResult = await sendClientFormLink(clientEmail, {
         name: clientName,
         clientId: clientId,
-        formLink: formLink
+        formLink: formLink,
+        clientCategory: client.client_category
       });
 
       if (!emailResult.success) {
