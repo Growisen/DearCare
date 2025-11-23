@@ -113,7 +113,8 @@ export async function createUserAccountIfNeeded(
   supabase: SupabaseClient<Database>,
   clientEmail: string,
   clientName: string,
-  clientId: string
+  clientId: string,
+  clientCategory: ClientCategory
 ): Promise<void> {
   const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
 
@@ -161,7 +162,8 @@ export async function createUserAccountIfNeeded(
         const emailResult = await sendClientCredentials(clientEmail, {
           name: clientName,
           password: password,
-          appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download'
+          appDownloadLink: process.env.MOBILE_APP_DOWNLOAD_LINK || 'https://example.com/download',
+          clientCategory: clientCategory,
         });
 
         if (emailResult.error) {
