@@ -413,3 +413,25 @@ entrypoint = "./functions/mark-attendance-long-shift/index.js"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/mark-attendance-long-shift/*.html" ]
+
+[functions.dc-calc-salary-cycle-based]
+enabled = true
+verify_jwt = true
+import_map = "./functions/dc-calc-salary-cycle-based/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/dc-calc-salary-cycle-based/index.js"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/dc-calc-salary-cycle-based/*.html" ]
+
+[functions.th-calc-salary-cycle-based]
+enabled = true
+verify_jwt = true
+import_map = "./functions/th-calc-salary-cycle-based/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/th-calc-salary-cycle-based/index.js"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/th-calc-salary-cycle-based/*.html" ]

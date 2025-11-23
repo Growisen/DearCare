@@ -284,6 +284,7 @@ const PatientProfilePage = () => {
                       onEditAssignment={handleEditAssignment}
                       onEndAssignment={handleEndAssignment}
                       onDeleteAssignment={handleDeleteAssignment}
+                      refetchAssignments={refetch}
                     />
                   </div>
                 )}
@@ -382,7 +383,7 @@ const PatientProfilePage = () => {
               </label>
               <input
                 type="date"
-                className="border rounded px-2 py-1"
+                className="border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 max={new Date().toISOString().slice(0, 10)}
@@ -393,7 +394,7 @@ const PatientProfilePage = () => {
                 End Assignment Notes
               </label>
               <textarea
-                className="border rounded px-2 py-1 w-full"
+                className="border rounded px-2 py-1 w-full resize-none focus:outline-none focus:ring-1 focus:ring-gray-300"
                 rows={3}
                 value={endAssignmentNotes}
                 onChange={e => setEndAssignmentNotes(e.target.value)}

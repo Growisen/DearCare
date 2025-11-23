@@ -460,6 +460,7 @@ export interface NurseAssignmentData {
   salary_per_day?: number;
   nurse_reg_no?: string;
   end_notes?: string;
+  notes?: string;
 }
 
 export async function getNurseAssignments(clientId: string): Promise<{

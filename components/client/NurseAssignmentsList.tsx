@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Modal from '../ui/Modal';
+import NotesModal from '../ui/NotesModal';
 import Link from 'next/link';
 import {
   formatDate,
@@ -8,6 +9,8 @@ import {
   calculatePeriodSalary,
   getAssignmentPeriodStatus
 } from '@/utils/nurseAssignmentUtils';
+import { Plus } from 'lucide-react';
+import { updateNurseClientNotes } from '@/app/actions/clients/assessment';
 
 interface NurseAssignment {
   id?: number;
@@ -24,6 +27,7 @@ interface NurseAssignment {
   salaryPerMonth?: number;
   nurseRegNo?: string;
   endNotes?: string;
+  notes?: string;
 }
 
 interface Nurse {
@@ -38,6 +42,8 @@ interface NurseAssignmentsListProps {
   onEditAssignment: (assignment: NurseAssignment) => void;
   onEndAssignment: (assignment: NurseAssignment) => void;
   onDeleteAssignment: (assignmentId: number | string) => void;
+  onAddNotes?: (assignment: NurseAssignment) => void;
+  refetchAssignments?: () => void;
 }
 
 const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
@@ -46,8 +52,12 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
   onEditAssignment,
   onEndAssignment,
   onDeleteAssignment,
+  onAddNotes,
+  refetchAssignments,
 }) => {
   const [deleteId, setDeleteId] = useState<number | string | null>(null);
+  const [notesModalOpen, setNotesModalOpen] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<NurseAssignment | null>(null);
 
   const getDisplayStatus = (assignment: NurseAssignment) => {
     if (assignment.status === 'cancelled') return 'cancelled';
@@ -67,6 +77,21 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
     if (deleteId !== null) {
       onDeleteAssignment(deleteId);
       setDeleteId(null);
+    }
+  };
+
+  const handleAddNotes = (assignment: NurseAssignment) => {
+    setSelectedAssignment(assignment);
+    setNotesModalOpen(true);
+  };
+
+  const handleSaveNotes = async (notes: string) => {
+    if (selectedAssignment && selectedAssignment.id) {
+      await updateNurseClientNotes(selectedAssignment.id.toString(), notes);
+      setNotesModalOpen(false);
+      if (refetchAssignments) {
+        refetchAssignments();
+      }
     }
   };
 
@@ -119,9 +144,19 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   )}
                 </div>
               </div>
-              <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${statusColors[displayStatus]}`}>
-                {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${statusColors[displayStatus]}`}>
+                  {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+                </span>
+                <button
+                  onClick={() => onAddNotes ? onAddNotes(assignment) : handleAddNotes(assignment)}
+                  className="ml-2 px-2 py-1 text-xs font-medium rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+                  title="Add Notes"
+                >
+                  <Plus className="w-3.5 h-3.5 inline-block mr-1" />
+                  Add Notes
+                </button>
+              </div>
             </div>
 
             <div className="px-4 pb-3 border-t border-gray-100">
@@ -195,9 +230,16 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   </div>
                 )}
 
+                {assignment.notes && (
+                  <div className="col-span-2">
+                    <span className="text-gray-500">Info:</span>
+                    <span className="ml-2 text-gray-900">{assignment.notes}</span>
+                  </div>
+                )}
+
                 {assignment.endNotes && (
                   <div className="col-span-2">
-                    <span className="text-gray-500">Notes:</span>
+                    <span className="text-gray-500">End Notes:</span>
                     <span className="ml-2 text-gray-900">{assignment.endNotes}</span>
                   </div>
                 )}
@@ -247,6 +289,13 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
         description="This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"
+      />
+
+      <NotesModal
+        open={notesModalOpen}
+        initialNotes={selectedAssignment?.notes || ''}
+        onSave={handleSaveNotes}
+        onClose={() => setNotesModalOpen(false)}
       />
     </div>
   );

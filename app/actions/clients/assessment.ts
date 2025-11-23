@@ -333,3 +333,37 @@ export async function getClientNames(
     };
   }
 }
+
+
+/**
+ * Updates the notes column for a nurse-client relationship.
+ *
+ * @param nurseClientId - Unique identifier for the nurse_client row
+ * @param notes - The notes to update
+ * @returns Promise<{ success: boolean; error?: string }>
+ */
+export async function updateNurseClientNotes(
+  assignmentId: string,
+  notes: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('nurse_client')
+      .update({ notes })
+      .eq('id', assignmentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error updating assignment notes:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
