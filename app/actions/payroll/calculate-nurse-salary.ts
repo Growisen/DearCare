@@ -757,6 +757,97 @@ export async function fetchSalaryPaymentsWithNurseInfo({
 }
 
 
+export interface SalaryPaymentDebtRecord {
+  nurse_reg_no: string;
+  full_name: string;
+  salary_payment_id: number;
+  nurse_id: number;
+  pay_period_start: string;
+  pay_period_end: string;
+  net_salary: number;
+  payment_status: string;
+  gross_salary?: number;
+  info?: string;
+  created_at: string;
+  bonus?: number;
+  deductions?: number;
+  total_outstanding_debt: number;
+  total_installments_due: number;
+  active_loan_count: number;
+  has_active_debt: boolean;
+}
+
+export async function fetchSalaryPaymentDebts({
+  page = 1,
+  pageSize = 20,
+  search = "",
+}: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}) {
+  const supabase = await createSupabaseServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const organization = user?.user_metadata?.organization;
+  const { nursesOrg } = getOrgMappings(organization);
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const query = supabase
+    .from("view_salary_payment_debts")
+    .select("*", { count: "exact" })
+    .eq("admitted_type", nursesOrg)
+    .order("pay_period_end", { ascending: false })
+    .range(from, to);
+
+  if (search.trim()) {
+    const { data, error } = await query;
+    if (error) {
+      return {
+        success: false,
+        error: error.message,
+        records: [],
+        page,
+        pageSize,
+        total: 0,
+      };
+    }
+    const lowerSearch = search.trim().toLowerCase();
+    const filtered = (data ?? []).filter((record: SalaryPaymentDebtRecord) =>
+      record.full_name?.toLowerCase().includes(lowerSearch) ||
+      record.nurse_reg_no?.toLowerCase().includes(lowerSearch)
+    );
+    return {
+      success: true,
+      records: filtered,
+      page,
+      pageSize,
+      total: filtered.length,
+    };
+  } else {
+    const { data, error, count } = await query;
+    if (error) {
+      return {
+        success: false,
+        error: error.message,
+        records: [],
+        page,
+        pageSize,
+        total: 0,
+      };
+    }
+    return {
+      success: true,
+      records: data ?? [],
+      page,
+      pageSize,
+      total: count ?? (data?.length ?? 0),
+    };
+  }
+}
+
 interface AdvanceSalaryPayment {
   id: number;
   pay_period_start: string;

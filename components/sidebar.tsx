@@ -86,7 +86,7 @@ const orgLabel = organization === 'TataHomeNursing' ? 'Tata Home Nursing' : (org
             { icon: Users, label: "Clients", href: "/clients" },
             { icon: CreditCard, label: "Client Payments", href: "/client-payments" },
             { icon: HeartPulse, label: "Nurses", href: "/nurses" },
-            { icon: ClipboardCheck, label: "Nurse Salary", href: "/dearcare-nurses-salary" },
+            { icon: ClipboardCheck, label: "Nurse Salary", href: "/nurses-salary" },
             { icon: Building, label: "Staff", href: "/staff" },
             { icon: Clipboard, label: "Assignments", href: "/assignments" },
             { icon: ClipboardCheck, label: "Staff Attendance", href: "/staff-attendance" },
