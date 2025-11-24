@@ -24,13 +24,10 @@ export function getExperienceFromJoiningDate(joiningDate: string) {
   if (!joiningDate) return 'N/A';
 
   let start: Date;
-
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(joiningDate)) {
-    // dd/mm/yyyy
     const [day, month, year] = joiningDate.split('/').map(Number);
     start = new Date(year, month - 1, day);
   } else if (/^\d{4}-\d{2}-\d{2}$/.test(joiningDate)) {
-    // yyyy-mm-dd
     const [year, month, day] = joiningDate.split('-').map(Number);
     start = new Date(year, month - 1, day);
   } else {
@@ -38,6 +35,8 @@ export function getExperienceFromJoiningDate(joiningDate: string) {
   }
 
   const now = new Date();
+  
+  now.setDate(now.getDate() + 1);
 
   let years = now.getFullYear() - start.getFullYear();
   let months = now.getMonth() - start.getMonth();
@@ -57,5 +56,6 @@ export function getExperienceFromJoiningDate(joiningDate: string) {
   if (years > 0) result += `${years} year${years > 1 ? 's' : ''} `;
   if (months > 0) result += `${months} month${months > 1 ? 's' : ''} `;
   if (days > 0) result += `${days} day${days > 1 ? 's' : ''}`;
+  
   return result.trim() || '0 days';
 }
