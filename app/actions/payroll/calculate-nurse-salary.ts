@@ -136,50 +136,48 @@ async function checkOverlappingPayments(
   };
 }
 
-/**
- * Build salary breakdown info string
- */
-function buildSalaryInfo(
-  daysWorked: number,
-  salaryDayMap: Map<number, number>,
-  skippedRecords: SkippedRecord[]
-): string {
-  let info = `${daysWorked} days`;
+// /**
+//  * Build salary breakdown info string
+//  */
+// function buildSalaryInfo(
+//   daysWorked: number,
+//   salaryDayMap: Map<number, number>,
+//   skippedRecords: SkippedRecord[]
+// ): string {
+//   let info = `${daysWorked} days`;
 
-  if (salaryDayMap.size > 0) {
-    const breakdown = Array.from(salaryDayMap.entries())
-      .map(([salary, count]) => `${count} days (${salary}/day)`)
-      .join(", ");
-    info += ` [${breakdown}]`;
-  }
+//   if (salaryDayMap.size > 0) {
+//     const breakdown = Array.from(salaryDayMap.entries())
+//       .map(([salary, count]) => `${count} days (${salary}/day)`)
+//       .join(", ");
+//     info += ` [${breakdown}]`;
+//   }
 
-  if (skippedRecords.length > 0) {
-    const missingDataCount = skippedRecords.filter(
-      (r) => r.reason === "Missing attendance data"
-    ).length;
-    const invalidHoursCount = skippedRecords.filter(
-      (r) => r.reason === "Invalid or zero worked hours"
-    ).length;
-    const noAssignmentCount = skippedRecords.filter(
-      (r) => r.reason === "No valid nurse_client assignment"
-    ).length;
+//   if (skippedRecords.length > 0) {
+//     const missingDataCount = skippedRecords.filter(
+//       (r) => r.reason === "Missing attendance data"
+//     ).length;
+//     const invalidHoursCount = skippedRecords.filter(
+//       (r) => r.reason === "Invalid or zero worked hours"
+//     ).length;
+//     const noAssignmentCount = skippedRecords.filter(
+//       (r) => r.reason === "No valid nurse_client assignment"
+//     ).length;
 
-    info += ` | SKIPPED: ${skippedRecords.length} records`;
-    const details: string[] = [];
-    if (missingDataCount > 0) details.push(`${missingDataCount} missing data`);
-    if (invalidHoursCount > 0) details.push(`${invalidHoursCount} invalid hours`);
-    if (noAssignmentCount > 0) details.push(`${noAssignmentCount} no assignment`);
-    if (details.length > 0) {
-      info += ` (${details.join(", ")})`;
-    }
-  }
+//     info += ` | SKIPPED: ${skippedRecords.length} records`;
+//     const details: string[] = [];
+//     if (missingDataCount > 0) details.push(`${missingDataCount} missing data`);
+//     if (invalidHoursCount > 0) details.push(`${invalidHoursCount} invalid hours`);
+//     if (noAssignmentCount > 0) details.push(`${noAssignmentCount} no assignment`);
+//     if (details.length > 0) {
+//       info += ` (${details.join(", ")})`;
+//     }
+//   }
 
-  return info;
-}
+//   return info;
+// }
 
-/**
- * Validate date range
- */
+
 function validateDateRange(startDate: string, endDate: string): string | null {
   if (startDate > endDate) {
     return "Start date must be before or equal to end date";
@@ -212,8 +210,6 @@ export async function calculateNurseSalary({
     };
   }
 
-  console.log(`Calculating salary for nurseId=${nurseId}, startDate=${startDate}, endDate=${endDate}, id=${id}`);
-
   const overlapCheck = await checkOverlappingPayments(
     supabase,
     nurseId,
@@ -234,7 +230,6 @@ export async function calculateNurseSalary({
   }
 
   if (overlapCheck.hasOverlap) {
-    console.log("Overlapping payments found:", overlapCheck.overlapping);
     return {
       success: false,
       error: "A salary payment for this nurse already exists for an overlapping period.",
@@ -270,7 +265,6 @@ export async function calculateNurseSalary({
     };
   }
 
-  // Build assignment map and collect valid IDs
   const assignmentMap = new Map<number, AssignmentData>();
   const assignmentIds: number[] = [];
   const skippedAssignments: Array<{ id: number; reason: string }> = [];
@@ -340,7 +334,6 @@ export async function calculateNurseSalary({
     };
   }
 
-  // Process attendance records
   let totalSalary = 0;
   let totalBillableHours = 0;
   let totalActualHours = 0;
@@ -360,7 +353,6 @@ export async function calculateNurseSalary({
       continue;
     }
 
-    // Trim and validate attendance data
     const startTime = record.start_time?.trim();
     const endTime = record.end_time?.trim();
     const totalHours = record.total_hours?.trim();
@@ -385,35 +377,51 @@ export async function calculateNurseSalary({
       continue;
     }
 
-    // Calculate billable hours (capped at standard shift hours)
     const billableHours = Math.min(workedHours, assignment.standard_shift_hours);
-    const hourlyRate = assignment.salary_per_day / assignment.standard_shift_hours;
-    const dayEarnings = billableHours * hourlyRate;
+    const dayEarnings = (assignment.salary_per_day * billableHours) / assignment.standard_shift_hours;
 
     totalSalary += dayEarnings;
     totalBillableHours += billableHours;
     totalActualHours += workedHours;
     daysWorked += 1;
 
-    // Track days per salary rate
     const prev = salaryDayMap.get(assignment.salary_per_day) || 0;
     salaryDayMap.set(assignment.salary_per_day, prev + 1);
   }
 
-  // Build info string
-  const info = buildSalaryInfo(daysWorked, salaryDayMap, skippedRecords);
+  let info = `Salary calculated for ${daysWorked} working days.`;
 
-  // Calculate average hourly rate
+  const breakdowns: string[] = [];
+  salaryDayMap.forEach((days, rate) => {
+    breakdowns.push(`${days} days at salary ${rate}`);
+  });
+  
+  if (breakdowns.length > 0) {
+    info += ` Breakdown: ${breakdowns.join(", ")}.`;
+  }
+
+  if (skippedRecords.length > 0) {
+    const formattedDates = skippedRecords
+      .map((r) => {
+        if (!r.date) return "";
+        const [year, month, day] = r.date.split("-");
+        return `${day}/${month}/${year}`;
+      })
+      .filter(Boolean)
+      .join(", ");
+    info += ` NOTE: ${skippedRecords.length} records were skipped due to incomplete data on these dates: [${formattedDates}]. Please check attendance logs.`;
+  } else {
+    info += ` All attendance records were processed successfully.`;
+  }
+
   const averageHourlyRate =
     totalActualHours > 0
-      ? Number((totalSalary / totalActualHours).toFixed(2))
+      ? Math.ceil(totalSalary / totalActualHours)
       : 0;
 
-  // Round values
-  const finalSalary = Number(totalSalary.toFixed(2));
-  const finalHours = Number(totalBillableHours.toFixed(2));
+  const finalSalary = Math.ceil(totalSalary);
+  const finalHours = Math.ceil(totalBillableHours);
 
-  // Prepare payment data
   const paymentData = {
     nurse_id: nurseId,
     pay_period_start: startDate,
@@ -430,7 +438,6 @@ export async function calculateNurseSalary({
     average_hourly_rate: averageHourlyRate,
   };
 
-  // Insert or update salary payment
   let upsertError;
   if (id) {
     const { error } = await supabase

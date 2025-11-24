@@ -35,6 +35,8 @@ export async function createSupabaseServerClient() {
 export async function signIn(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+
+  console.log('Signing in:', email, password);
   
   const supabase = await createSupabaseServerClient()
   
@@ -42,6 +44,8 @@ export async function signIn(formData: FormData) {
     email,
     password,
   })
+
+  console.log('Sign-in response:', data, error);
   
   if (error) {
     return { error: error.message, success: false }

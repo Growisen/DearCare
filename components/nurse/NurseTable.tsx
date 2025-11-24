@@ -1,7 +1,6 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle } from "lucide-react"
 import { NurseBasicDetails } from "@/types/staff.types"
 import Loader from '@/components/Loader'
-import { useRouter } from 'next/navigation'
 import { formatName } from "@/utils/formatters"
 
 const statusColors = {
@@ -32,15 +31,10 @@ const NurseTable = ({
   nurses,  
   isLoading = false
 }: NurseTableProps) => {
-  const router = useRouter();
 
   if (isLoading) {
     return <Loader />;
   }
-
-  const handleReviewDetails = (nurse: NurseBasicDetails) => {
-    router.push(`/nurses/${nurse.nurse_id}`);
-  };
 
   return (
     <div>
@@ -91,12 +85,14 @@ const NurseTable = ({
                   </div>
                 </td>
                 <td className="py-4 px-6">
-                <button 
-                className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
-                onClick={() => handleReviewDetails(nurse)}
-              >
-                Review Details
-              </button>
+                  <a
+                    href={`/nurses/${nurse.nurse_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                  >
+                    Review Details
+                  </a>
                 </td>
               </tr>
             );
