@@ -6,6 +6,7 @@ import { format12HourTime, formatDate, getServiceLabel, formatName } from '@/uti
 import { serviceOptions } from '@/utils/constants';
 import { getAssignmentPeriodStatus, calculatePeriodSalary } from '@/utils/nurseAssignmentUtils';
 import { updateNurseClientNotes } from '@/app/actions/clients/assessment';
+import Link from 'next/link';
 
 interface AssignmentCardProps {
   assignment: NurseAssignmentWithClient;
@@ -114,9 +115,14 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
         <div>
           <div className="flex items-center gap-3">
             <h3 className="text-base font-bold text-gray-900">
-              {isIndividual
-                ? formatName(clientDetails.individual?.patient_name || '')
-                : formatName(clientDetails.organization?.organization_name || '')}
+              <Link
+                href={`/client-profile/${assignment.client.clientId}`}
+                className="hover:underline text-blue-700"
+              >
+                {isIndividual
+                  ? formatName(clientDetails.individual?.patient_name || '')
+                  : formatName(clientDetails.organization?.organization_name || '')}
+              </Link>
             </h3>
             <span className={`px-2.5 py-0.5 text-[13px] font-bold rounded border ${status.color}`}>
               {status.label}

@@ -36,6 +36,7 @@ export interface NurseAssignmentWithClient {
   };
   client: {
     type: 'individual' | 'hospital' | 'carehome' | 'organization';
+    clientId: string;
     details: {
       individual?: {
         patient_name: string;
@@ -474,6 +475,7 @@ export async function fetchNurseAssignments(
           },
           client: {
             type: assignment.clients.client_type,
+            clientId: assignment.client_id,
             details: isIndividual
               ? { individual: clientDetails, organization: undefined }
               : { organization: clientDetails, individual: undefined }
