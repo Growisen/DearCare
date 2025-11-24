@@ -9,7 +9,7 @@ import {
   calculatePeriodSalary,
   getAssignmentPeriodStatus
 } from '@/utils/nurseAssignmentUtils';
-import { Plus } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 import { updateNurseClientNotes } from '@/app/actions/clients/assessment';
 
 interface NurseAssignment {
@@ -132,11 +132,12 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                     <Link
                       href={`/nurses/${assignment.nurseId}`}
                       title="View profile"
-                      className="hover:text-blue-600"
+                      className="hover:text-blue-600 flex items-center gap-1"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {firstName} {lastName}
+                      <ExternalLink className="w-4 h-4 text-blue-400 ml-1" aria-label="External link" />
                     </Link>
                   </h3>
                   {assignment.nurseRegNo && (
@@ -167,18 +168,20 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                     {formatDate(assignment.startDate)}
                     {assignment.endDate && ` - ${formatDate(assignment.endDate)}`}
                     {assignment.endDate && (() => {
-                      const { daysCompleted, daysRemaining, totalDays } = 
+                      const { daysCompleted, daysRemaining, totalDays } =
                         getAssignmentPeriodStatus(
                           assignment.startDate,
                           assignment.endDate
                         );
                       return (
-                        <span className="ml-2 text-xs text-gray-500">
-                          (
-                            {daysCompleted} completed
-                            {daysRemaining > 0 && `, ${daysRemaining} remaining`}
-                            , {totalDays} total
-                          )
+                        <span className="block mt-0.5">
+                          <span className="text-emerald-700 font-medium">{daysCompleted} days completed</span>
+                          <span className="mx-1 text-gray-300">|</span>
+                          <span className={daysRemaining > 0 ? "text-blue-600" : "text-red-600 font-semibold"}>
+                            {daysRemaining > 0 ? `${daysRemaining} left` : 'Ended'}
+                          </span>
+                          <span className="mx-1 text-gray-300">|</span>
+                          <span className="text-gray-900 font-semibold">{totalDays} days total</span>
                         </span>
                       );
                     })()}

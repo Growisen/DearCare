@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NotesModal from '@/components/ui/NotesModal';
-import { Plus, Calendar, User, Building2, FileText, Clock } from 'lucide-react';
+import { Plus, Calendar, User, Building2, FileText, Clock, ExternalLink } from 'lucide-react';
 import { NurseAssignmentWithClient } from '@/app/actions/staff-management/add-nurse';
 import { format12HourTime, formatDate, getServiceLabel, formatName } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
@@ -25,7 +25,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
       return { label: 'Ongoing', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
     }
     if (endDate < now) {
-      return { label: 'Completed', color: 'bg-green-100 text-green-800 border-green-200' };
+      return { label: 'Completed', color: 'bg-red-100 text-red-800 border-red-200' };
     }
     return { label: 'Ongoing', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
   };
@@ -117,11 +117,14 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
             <h3 className="text-base font-bold text-gray-900">
               <Link
                 href={`/client-profile/${assignment.client.clientId}`}
-                className="hover:underline text-blue-700"
+                className="hover:underline text-blue-700 flex items-center gap-1"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 {isIndividual
                   ? formatName(clientDetails.individual?.patient_name || '')
                   : formatName(clientDetails.organization?.organization_name || '')}
+                <ExternalLink className="w-4 h-4 text-blue-400 ml-1" aria-label="External link" />
               </Link>
             </h3>
             <span className={`px-2.5 py-0.5 text-[13px] font-bold rounded border ${status.color}`}>
