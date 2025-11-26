@@ -130,6 +130,16 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
             <span className={`px-2.5 py-0.5 text-[13px] font-bold rounded border ${status.color}`}>
               {status.label}
             </span>
+            <Link
+              href={`/assignments/${assignment.assignment.id}`}
+              className="ml-2 px-2 py-1 text-xs font-medium rounded border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="View Assignment Details"
+            >
+              Assignment Details
+              <ExternalLink className="w-3 h-3 text-indigo-400 ml-1" aria-label="External link" />
+            </Link>
           </div>
           <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
             {isIndividual ? <User className="w-3 h-3" /> : <Building2 className="w-3 h-3" />}
