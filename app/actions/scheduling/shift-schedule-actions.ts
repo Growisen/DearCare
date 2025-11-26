@@ -83,6 +83,9 @@ function timeToSeconds(timeStr: string): number {
     throw new Error(`Invalid time format: ${timeStr}`);
   }
   const [h, m, s = 0] = parts;
+  if (h === 24 && m === 0 && s === 0) {
+    return 86400;
+  }
   if (h < 0 || h >= 24 || m < 0 || m >= 60 || s < 0 || s >= 60) {
     throw new Error(`Invalid time values: ${timeStr}`);
   }
@@ -117,6 +120,8 @@ export async function scheduleNurseShifts(
 ): Promise<ScheduleResponse> {
   try {
     const supabase = await createSupabaseServerClient();
+
+    console.log("shiftes", shifts, clientId);
 
     if (!shifts || !Array.isArray(shifts) || shifts.length === 0) {
       return {
@@ -306,6 +311,12 @@ export async function scheduleNurseShifts(
 
           if (newStart <= existingEnd && newEnd >= existingStart) {
             try {
+              console.log('DEBUG shift times:', {
+        newShiftStart: newShift.shiftStart,
+        newShiftEnd: newShift.shiftEnd,
+        existingStartTime: existing.shift_start_time,
+        existingEndTime: existing.shift_end_time,
+      });
               const newStartTime = timeToSeconds(newShift.shiftStart);
               const newEndTime = timeToSeconds(newShift.shiftEnd);
               const existingStartTime = timeToSeconds(existing.shift_start_time);

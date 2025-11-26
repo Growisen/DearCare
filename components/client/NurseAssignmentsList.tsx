@@ -132,7 +132,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                     <Link
                       href={`/nurses/${assignment.nurseId}`}
                       title="View profile"
-                      className="hover:text-blue-600 flex items-center gap-1"
+                      className="hover:text-blue-600 flex items-center gap-1 text-blue-700"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -146,6 +146,16 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <Link
+                  href={`/assignments/${assignment.id}`}
+                  className="ml-2 px-2 py-1 text-xs font-medium rounded border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="View Assignment Details"
+                >
+                  Assignment Details
+                  <ExternalLink className="w-3 h-3 text-indigo-400 ml-1" aria-label="External link" />
+                </Link>
                 <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${statusColors[displayStatus]}`}>
                   {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
                 </span>
