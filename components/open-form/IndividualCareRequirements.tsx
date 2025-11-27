@@ -68,13 +68,13 @@ export const IndividualCareRequirements = ({ formData, handleInputChange, formEr
           </select>
         </div> */}
         <InputField 
-          label="Start Date"
+          label="Expected Start Date"
           type="date" 
           placeholder="Select start date" 
           id="startDate" 
           value={formData.startDate} 
           onChange={handleInputChange}
-          min={new Date().toISOString().split('T')[0]}
+          min={new Date(Date.now() - 86400000).toISOString().split('T')[0]}
           onBlur={() => handleBlur('startDate')}
           error={formErrors.startDate}
           required
