@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import {
   getAssignmentPeriodStatus
 } from "@/utils/nurseAssignmentUtils";
+import { getServiceLabel } from "@/utils/formatters";
+import { serviceOptions } from "@/utils/constants";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
@@ -30,6 +32,7 @@ interface BackendServicePeriod {
   start_date: string;
   end_date: string;
   note?: string;
+  service_required?: string;
 }
 
 const mapBackendPeriod = (item: BackendServicePeriod): ServicePeriod => ({
@@ -38,6 +41,7 @@ const mapBackendPeriod = (item: BackendServicePeriod): ServicePeriod => ({
   endDate: item.end_date,
   notes: item.note,
   status: new Date(item.end_date) < new Date() ? "completed" : "active",
+  serviceRequired: item.service_required,
 });
 
 
@@ -75,7 +79,6 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
     setIsModalOpen(true);
   };
 
-
   const handleSave = async (data: ServicePeriodFormValues) => {
     setIsSubmitting(true);
     
@@ -84,13 +87,15 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
       result = await updateServiceHistoryItem(clientId, editingPeriod.id, {
         start_date: data.startDate,
         end_date: data.endDate,
-        note: data.notes
+        note: data.notes,
+        service_required: data.serviceRequired,
       });
     } else {
       result = await addServiceHistoryItem(clientId, {
         start_date: data.startDate,
         end_date: data.endDate,
         note: data.notes,
+        service_required: data.serviceRequired,
       });
     }
 
@@ -194,6 +199,13 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
                         {assignment.notes || <span className="text-gray-400 italic">No notes</span>}
                       </span>
                     </div>
+
+                    {assignment.serviceRequired && (
+                      <div className="col-span-2 sm:col-span-1">
+                        <span className="text-gray-500">Service Required:</span>
+                        <span className="ml-2 text-gray-900">{getServiceLabel(serviceOptions, assignment.serviceRequired)}</span>
+                      </div>
+                    )}
 
                     <div className="col-span-2 mt-1">
                       <span className="text-gray-500">Duration:</span>

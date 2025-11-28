@@ -109,7 +109,7 @@ const NurseProfilePage: React.FC = () => {
             ) : activeTab === 'salaryDetails' ? (
               <SalaryDetails nurseId={Number(params.id)} />
             ) : activeTab === 'advancePayments' ? (
-              <AdvancePayments nurseId={Number(params.id)} />
+              <AdvancePayments nurseId={Number(params.id)} tenant={nurse.basic.admitted_type ?? ""} />
             ) : null}
           </div>
         </div>

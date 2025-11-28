@@ -18,13 +18,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
   const activeElementSelectionStart = useRef<number | null>(null);
   const activeElementSelectionEnd = useRef<number | null>(null);
   
-  // New state for baby age handling
   const [isLessThanOneYear, setIsLessThanOneYear] = useState(false);
 
   const isIndividual = client.client_type === 'individual';
   const isBabyCare = isIndividual && (formData as DetailedClientIndividual).details?.service_required === 'baby_care';
 
-  // Detect if age is in months format when component loads
   useEffect(() => {
     if (isBabyCare && isIndividual) {
       const details = (client as DetailedClientIndividual).details || {};
@@ -32,7 +30,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       const isMonthFormat = /\d+\s*months?$/.test(ageValue);
       setIsLessThanOneYear(isMonthFormat);
     }
-  // Only run when client or isBabyCare changes, not on every formData change
   }, [client, isBabyCare]);
 
   const saveActiveElementState = () => {
@@ -57,7 +54,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     }
   }, [formData]);
 
-  // Extract numeric month value from formatted string
   const getSelectedMonth = () => {
     if (isIndividual) {
       const details = (formData as DetailedClientIndividual).details || {};
@@ -78,7 +74,6 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       setFormData(prevData => {
         const parentObj = { ...(prevData[parent as keyof typeof prevData] as Record<string, string | number | boolean | null | undefined> || {}) };
         
-        // Special handling for baby age in months
         if (isBabyCare && child === 'patient_age' && isLessThanOneYear) {
           const monthValue = parseInt(value);
           if (!isNaN(monthValue)) {
@@ -103,16 +98,13 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     }
   };
 
-  // Handle age group toggle
   const handleAgeGroupChange = (isMonths: boolean) => {
     setIsLessThanOneYear(isMonths);
 
-    // Always reset age value when switching between months and years
     if (isIndividual) {
       setFormData(prevData => {
         const prevIndividual = prevData as DetailedClientIndividual;
         const details = { ...(prevIndividual.details || {}) };
-        // Always clear patient_age when toggling
         details.patient_age = '';
         return {
           ...prevData,
@@ -204,6 +196,16 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     }
   };
 
+  const baseInputStyles = `
+    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    placeholder:text-gray-400
+    focus:border-gray-400 focus:outline-none focus:ring-0 
+    transition-colors duration-200 appearance-none
+  `;
+  const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
+  const sectionStyles = "p-5 bg-white rounded-sm border border-gray-100 mb-4";
+  const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
+
   const FormField = ({ 
     label, 
     name, 
@@ -229,7 +231,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     
     return (
       <div>
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor={inputId} className={labelStyles}>
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -239,10 +241,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             name={name}
             value={value || ''}
             onChange={onChange}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 bg-white"
+            className={baseInputStyles}
             required={required}
+            style={{ backgroundImage: 'none' }}
           >
-            <option value="" className="text-gray-500">Select {label}</option>
+            <option value="" className="text-gray-400">Select {label}</option>
             {options.map(option => (
               <option key={option.value} value={option.value} className="text-gray-900">
                 {option.label}
@@ -257,7 +260,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             onChange={onChange}
             placeholder={placeholder}
             rows={3}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 bg-white"
+            className={baseInputStyles}
             required={required}
           />
         ) : (
@@ -268,7 +271,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             value={value || ''}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 bg-white"
+            className={baseInputStyles}
             required={required}
             min={min}
           />
@@ -283,13 +286,12 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     
     return (
       <>
-        {/* Requestor Information */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-800 mb-4">Requestor Information</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+        <div className={sectionStyles}>
+          <h4 className={sectionHeaderStyles}>Requestor Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
             <div className="space-y-4">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Details</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <FormField label="Requestor Name" name="details.requestor_name" value={details.requestor_name} onChange={handleInputChange} required />
                 <FormField
                   label="Relation to Patient"
@@ -307,8 +309,8 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
             </div>
             
             <div className="space-y-4">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Requestor Address</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Requestor Address</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <FormField label="Address" name="details.requestor_address" type="textarea" value={details.requestor_address} onChange={handleInputChange} />
                 <FormField label="City" name="details.requestor_city" value={details.requestor_city} onChange={handleInputChange} />
                 <FormField label="District" name="details.requestor_district" value={details.requestor_district} onChange={handleInputChange} />
@@ -319,38 +321,36 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
           </div>
         </div>
 
-        {/* Patient Information */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-800 mb-4">Patient Information</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+        <div className={sectionStyles}>
+          <h4 className={sectionHeaderStyles}>Patient Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
             <div className="space-y-4">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Personal Details</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Personal Details</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <FormField label="Patient Name" name="details.patient_name" value={details.patient_name} onChange={handleInputChange} />
                 
-                {/* Conditional rendering for baby care age input */}
                 {isBabyCare ? (
-                  <div>
+                  <div className="col-span-1 sm:col-span-2">
                     <div className="mb-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Baby&apos;s Age Group</label>
-                      <div className="flex gap-4">
-                        <label className="inline-flex items-center">
+                      <label className={labelStyles}>Baby&apos;s Age Group</label>
+                      <div className="flex gap-6">
+                        <label className="inline-flex items-center cursor-pointer">
                           <input
                             type="radio"
                             name="ageGroup"
                             checked={isLessThanOneYear}
                             onChange={() => handleAgeGroupChange(true)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-3.5 w-3.5 text-gray-700 border-gray-300 focus:ring-0"
                           />
                           <span className="ml-2 text-sm text-gray-700">Less than 1 year</span>
                         </label>
-                        <label className="inline-flex items-center">
+                        <label className="inline-flex items-center cursor-pointer">
                           <input
                             type="radio"
                             name="ageGroup"
                             checked={!isLessThanOneYear}
                             onChange={() => handleAgeGroupChange(false)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-3.5 w-3.5 text-gray-700 border-gray-300 focus:ring-0"
                           />
                           <span className="ml-2 text-sm text-gray-700">1 year or older</span>
                         </label>
@@ -359,7 +359,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                     
                     {isLessThanOneYear ? (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="details_patient_age">
+                        <label className={labelStyles} htmlFor="details_patient_age">
                           Baby&apos;s Age (in months)
                         </label>
                         <select
@@ -367,7 +367,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                           name="details.patient_age"
                           value={getSelectedMonth()}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 border text-gray-800 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                          className={baseInputStyles}
                         >
                           <option value="">Select month...</option>
                           {[...Array(12)].map((_, i) => (
@@ -426,8 +426,8 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
               </div>
             </div>
             <div className="space-y-4">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Address</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Patient Address</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <FormField 
                   label="Address" 
                   name="details.patient_address" 
@@ -444,10 +444,9 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
           </div>
         </div>
 
-        {/* Care Details */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-800 mb-4">Care Requirements</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={sectionStyles}>
+          <h4 className={sectionHeaderStyles}>Care Requirements</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
             <FormField 
               label="Service Required" 
               name="details.service_required" 
@@ -465,14 +464,14 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
               options={dutyPeriodOptions}
               required
             />
-            <FormField label="Start Date" name="details.start_date" type="date" value={details.start_date} onChange={handleInputChange} />
+            <FormField label="Expected Start Date" name="details.start_date" type="date" value={details.start_date} onChange={handleInputChange} />
             <div className="md:col-span-3">
               <FormField 
                 label="Period Reason" 
                 name="duty_period_reason" 
                 type="textarea" 
                 value={individualClient.duty_period_reason} 
-                onChange={handleInputChange}
+                onChange={handleInputChange} 
                 placeholder="Please provide details about the care duration requirements..."
               />
             </div>
@@ -487,20 +486,20 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
     const details = orgClient.details || {};
     
     return (
-      <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-800 mb-4">Organization Information</h4>
+      <div className={sectionStyles}>
+        <h4 className={sectionHeaderStyles}>Organization Information</h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 mb-6">
           <div className="space-y-4">
-            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Organization Details</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Organization Details</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <FormField label="Organization Name" name="details.organization_name" value={details.organization_name} onChange={handleInputChange} required />
             </div>
           </div>
           
           <div className="space-y-4">
-            <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Person</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Person</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <FormField label="Contact Person Name" name="details.contact_person_name" value={details.contact_person_name} onChange={handleInputChange} required />
               <FormField label="Contact Person Role" name="details.contact_person_role" value={details.contact_person_role} onChange={handleInputChange} />
               <FormField label="Contact Email" name="details.contact_email" type="email" value={details.contact_email} onChange={handleInputChange} required />
@@ -509,10 +508,9 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
           </div>
         </div>
         
-        {/* Organization Address Section */}
         <div>
-          <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Organization Address</h5>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Organization Address</h5>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
             <FormField label="Address" name="details.organization_address" type="textarea" value={details.organization_address} onChange={handleInputChange} required />
             <FormField label="City" name="details.organization_city" value={details.organization_city} onChange={handleInputChange} required />
             <FormField label="District" name="details.organization_district" value={details.organization_district} onChange={handleInputChange} />
@@ -525,16 +523,14 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
   };
 
   return (
-    <div className="relative flex flex-col h-full">
-      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-6 mb-0">
-        {/* Client Type Specific Fields */}
+    <div className="relative flex flex-col h-full bg-gray-50/30">
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 mb-0">
         {isIndividual ? renderIndividualForm() : renderOrganizationForm()}
         
-        {/* Notes Field */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-800 mb-2">Additional Notes</h4>
+        <div className={sectionStyles}>
+          <h4 className={sectionHeaderStyles}>Additional Notes</h4>
           <FormField 
-            label="" 
+            label="Notes" 
             name="general_notes" 
             type="textarea" 
             value={formData.general_notes} 
@@ -544,12 +540,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
         </div>
       </form>
       
-      {/* Fixed Footer with Form Actions */}
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex justify-end items-center space-x-4 z-10">
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-5 py-3 flex justify-end items-center space-x-3 z-10 rounded-b-sm">
         <button
           type="button"
           onClick={onCancel}
-          className="px-5 py-2.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+          className="px-4 py-2 border border-gray-200 rounded-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
           disabled={isSubmitting}
         >
           Cancel
@@ -564,7 +559,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
               formElement.dispatchEvent(submitEvent);
             }
           }}
-          className="px-5 py-2.5 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="px-4 py-2 bg-blue-600 border border-transparent rounded-sm text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-0 transition-colors shadow-sm"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}

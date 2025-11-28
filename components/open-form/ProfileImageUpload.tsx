@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
+import { User, Upload, X } from 'lucide-react';
 
 interface ProfileImageUploadProps {
   id: string;
@@ -18,23 +19,24 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   required = false,
 }) => {
   const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     const file = e.target.files?.[0] || null;
+    
     if (file) {
-      // Validate file size (limit to 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        alert('File size must be less than 2MB');
+        setError('File size must be less than 2MB');
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
         return;
       }
-      
-      // Validate file type
+
       if (!file.type.startsWith('image/')) {
-        alert('Only image files are allowed');
+        setError('Only image files are allowed');
         return;
       }
       
@@ -52,71 +54,79 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
 
   const handleRemoveImage = () => {
     setPreview(null);
+    setError(null);
     onChange(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
+  const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2";
+  const buttonBaseStyles = "inline-flex items-center px-3 py-1.5 border border-gray-200 rounded-sm text-xs font-medium bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer select-none";
+  const removeButtonStyles = "inline-flex items-center px-3 py-1.5 border border-transparent rounded-sm text-xs font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer ml-2";
+
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={id}>
+      <label className={labelStyles} htmlFor={id}>
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       
-      <div className="mt-1 flex items-center">
-        {preview ? (
-          <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 mr-4">
+      <div className="flex items-center gap-4">
+        <div className="relative w-14 h-14 shrink-0 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+          {preview ? (
             <Image 
               src={preview} 
               alt="Profile preview" 
               fill 
               className="object-cover"
             />
-          </div>
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mr-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-        )}
-        
-        <div className="flex flex-col space-y-2">
-          <label className="block">
-            <span className="sr-only">Choose profile photo</span>
-            <input
-              ref={fileInputRef}
-              id={id}
-              name={id}
-              type="file"
-              accept="image/*"
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-              onChange={handleFileChange}
-              required={required}
-            />
-          </label>
-          
-          {preview && (
-            <button
-              type="button"
-              onClick={handleRemoveImage}
-              className="text-sm text-red-600 hover:text-red-800"
-            >
-              Remove image
-            </button>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <User size={24} strokeWidth={1.5} />
+            </div>
           )}
         </div>
+
+        <div className="flex flex-col justify-center">
+          <div className="flex items-center">
+            <label className={buttonBaseStyles}>
+              <Upload size={14} className="mr-2 text-gray-500" />
+              Choose Image
+              <input
+                ref={fileInputRef}
+                id={id}
+                name={id}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleFileChange}
+                required={required}
+              />
+            </label>
+            
+            {preview && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className={removeButtonStyles}
+              >
+                <X size={14} className="mr-1" />
+                Remove
+              </button>
+            )}
+          </div>
+          
+          <div className="mt-1.5">
+             {error ? (
+                <p className="text-xs text-red-500 animate-in fade-in">{error}</p>
+             ) : (
+                <p className="text-[10px] text-gray-400 uppercase tracking-wide">
+                  Max 2MB • JPG/PNG
+                </p>
+             )}
+          </div>
+        </div>
       </div>
-      
-      <p className="mt-1 text-sm text-gray-500">
-        JPG, PNG or GIF up to 2MB
-      </p>
     </div>
   );
 };

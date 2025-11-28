@@ -2,7 +2,8 @@ import { FormPage } from '@/types/agreement.types';
 
 export const dutyPeriodOptions = [
   { value: '', label: 'Select duty period' },
-  { value: '1_month', label: '1 Month' },
+  { value: '1_month_28_days', label: '1 Month (28 Days)' },
+  { value: '1_month_30_days', label: '1 Month (30 Days)' },
   { value: '2_months', label: '2 Months' },
   { value: '3_months', label: '3 Months' },
   { value: 'above_3_months', label: 'Above 3 Months' },

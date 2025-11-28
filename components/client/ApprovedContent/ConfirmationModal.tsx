@@ -44,7 +44,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className={`px-4 py-2 text-gray-700 border border-gray-300 rounded-lg ${
+            className={`px-4 py-2 text-gray-700 border border-gray-300 rounded-sm ${
               isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
             }`}
           >
@@ -53,7 +53,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={handleConfirm}
             disabled={isProcessing}
-            className={`px-4 py-2 text-white rounded-lg flex items-center justify-center min-w-[100px] ${
+            className={`px-4 py-2 text-white rounded-sm flex items-center justify-center min-w-[100px] ${
               isProcessing ? 'opacity-75 cursor-not-allowed' : confirmButtonClassName
             }`}
           >

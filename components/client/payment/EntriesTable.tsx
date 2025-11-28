@@ -7,6 +7,8 @@ interface EntriesTableProps {
   onDelete: (id: number) => void;
   deletingId: string | null;
   onEdit: (id: number) => void;
+  onApprove: (group: EntryGroup) => void;
+  approvingId?: number | null;
 }
 
 const EntriesTable: React.FC<EntriesTableProps> = ({
@@ -14,6 +16,8 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
   onDelete,
   deletingId,
   onEdit,
+  onApprove,
+  approvingId,
 }) => {
 
   console.log("Rendering EntriesTable with entries:", entries);
@@ -155,6 +159,22 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                   >
                     Edit
                   </button>
+                  {!group.approved && (
+                    <button 
+                      onClick={() => onApprove(group)}
+                      className={`text-green-600 hover:text-green-900 text-sm font-medium hover:bg-green-50 px-3 py-1 rounded transition-colors mr-2 ${
+                        approvingId === group.id ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={approvingId === group.id}
+                    >
+                      {approvingId === group.id ? "Approving..." : "Approve"}
+                    </button>
+                  )}
+                  {group.approved && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+                      Approved
+                    </span>
+                  )}
                   <button 
                     onClick={() => onDelete(group.id)} 
                     className="text-red-600 hover:text-red-900 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"

@@ -36,6 +36,7 @@ import { useClientFiles } from '@/hooks/useClientFiles';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
 import { useReassessmentForm } from '@/hooks/useReassessment';
+import HomeMaidPreferences from '@/components/client/Profile/HomeMaidPreferences';
 
 const PatientProfilePage = () => {
   const { invalidateDashboardCache } = useDashboardData()
@@ -297,7 +298,13 @@ const PatientProfilePage = () => {
 
             {activeTab === 'paymentDetails' && status === 'approved' && (
               <div className="space-y-6">
-                <ClientPaymentHistory clientId={id} />
+                <ClientPaymentHistory clientId={id}  tenant={patient.clientCategory} />
+              </div>
+            )}
+
+            {activeTab === 'homeMaidPreferences' && status === 'approved' && (
+              <div className="space-y-6">
+                <HomeMaidPreferences clientId={id} />
               </div>
             )}
           </div>

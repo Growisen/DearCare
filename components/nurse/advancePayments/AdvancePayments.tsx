@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import Table, { TableColumn } from "../../common/Table";
 import { IoAdd, IoTrash, IoDocumentTextOutline, IoEyeOutline } from 'react-icons/io5';
 import CreateAdvancePaymentModal from "./CreateAdvancePaymentModal";
-import { fetchAdvancePayments, deleteAdvancePayment } from "@/app/actions/staff-management/advance-payments";
+import { fetchAdvancePayments, deleteAdvancePayment, approveAdvancePayment } from "@/app/actions/staff-management/advance-payments";
 import Modal from "../../ui/Modal";
 import AddInstallmentModal from "./AddInstallmentModal";
 import { formatDate } from "@/utils/formatters";
 import { toast } from 'sonner';
 import TransactionHistoryModal from "./TransactionHistoryModal";
+import { getNurseTenantName } from "@/utils/formatters";
 
 type Deduction = {
   date: string;
@@ -34,9 +35,11 @@ type AdvancePayment = {
   payment_method?: string;
   receipt_url?: string | null;
   info?: string | null;
+  approved: boolean;
 };
 
-export default function AdvancePayments({ nurseId }: { nurseId: number }) {
+export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, tenant: string }) {
+  const nurseTenantName = getNurseTenantName(tenant);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [payments, setPayments] = useState<AdvancePayment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -107,6 +110,49 @@ export default function AdvancePayments({ nurseId }: { nurseId: number }) {
     setAddInstallmentModalOpen(true);
   };
 
+  const handleSendAdvanceAmount = async (payment: AdvancePayment) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nurse_id: String(nurseId),
+          amount: payment.advance_amount,
+          description: payment.info,
+          tenant: nurseTenantName,
+          payment_type: "outgoing",
+          pay_status: "paid",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.error) {
+        if (!payment.approved) {
+          console.log("Approving advance payment with ID:", payment.id);
+          await approveAdvancePayment(payment.id);
+        }
+        toast.success("Advance amount sent and payment approved!", {
+          action: {
+            label: "OK",
+            onClick: () => toast.dismiss(),
+          },
+        });
+        await loadPayments();
+      } else {
+        toast.error("Failed to send: " + (result.error || response.statusText));
+      }
+    } catch (error) {
+      console.error("Send advance error:", error);
+      toast.error("Error sending advance amount.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns: TableColumn<AdvancePayment>[] = [
     { 
       key: "date", 
@@ -135,6 +181,16 @@ export default function AdvancePayments({ nurseId }: { nurseId: number }) {
           )}
         </div>
       )
+    },
+    {
+      key: "info",
+      header: "Info",
+      align: "left",
+      render: (v) => (
+        <div style={{ maxWidth: 180, whiteSpace: "pre-wrap", overflowWrap: "break-word" }}>
+          {v ? String(v) : "-"}
+        </div>
+      ),
     },
     { key: "return_amount", header: "Return Amount", align: "left", render: (v) => v ? `₹${v}` : "-" },
     { key: "return_type", header: "Return Type" },
@@ -170,7 +226,7 @@ export default function AdvancePayments({ nurseId }: { nurseId: number }) {
       key: "actions",
       header: "Actions",
       align: "center",
-      render: (_v, row,) => (
+      render: (_v, row) => (
         <div className="flex gap-2 justify-center">
           <button
             type="button"
@@ -180,6 +236,24 @@ export default function AdvancePayments({ nurseId }: { nurseId: number }) {
           >
             <IoAdd size={18} />
           </button>
+          {row.approved ? (
+            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-200">
+              Approved
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="text-blue-600 hover:text-blue-800 px-2 py-1 transition-colors flex items-center gap-1"
+              onClick={() => handleSendAdvanceAmount(row)}
+              disabled={loading}
+              title="Approve"
+            >
+              {loading ? (
+                <span className="animate-spin mr-1 w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full"></span>
+              ) : null}
+              Approve
+            </button>
+          )}
           <button
             type="button"
             className="text-red-600 hover:text-red-800 px-2 py-1 transition-colors"

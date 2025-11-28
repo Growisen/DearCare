@@ -28,7 +28,8 @@ export async function fetchAdvancePayments(nurseId: number) {
       info,
       payment_method,
       receipt_file,
-      deductions
+      deductions,
+      approved
     `)
     .eq('nurse_id', nurseId)
     .order('date', { ascending: false })
@@ -330,4 +331,17 @@ export async function addManualInstallment(paymentId: string, installmentAmount:
 
   if (updateError) throw updateError
   return updateData?.[0]
+}
+
+
+export async function approveAdvancePayment(paymentId: string) {
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .from('advance_payments')
+    .update({ approved: true })
+    .eq('id', paymentId)
+    .select()
+
+  if (error) throw error
+  return data?.[0]
 }

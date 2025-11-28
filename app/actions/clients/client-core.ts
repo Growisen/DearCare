@@ -917,6 +917,7 @@ export type ServiceHistoryItem = {
   end_date: string;
   note?: string;
   created_at?: string;
+  service_required?: string;
 };
 
 /**
@@ -926,7 +927,7 @@ export type ServiceHistoryItem = {
  */
 export async function addServiceHistoryItem(
   clientId: string,
-  serviceItem: { start_date: string; end_date: string; note?: string }
+  serviceItem: { start_date: string; end_date: string; note?: string; service_required?: string }
 ) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -938,6 +939,7 @@ export async function addServiceHistoryItem(
         start_date: serviceItem.start_date,
         end_date: serviceItem.end_date,
         note: serviceItem.note,
+        service_required: serviceItem.service_required,
       })
       .select()
       .single();
@@ -964,7 +966,7 @@ export async function addServiceHistoryItem(
 export async function updateServiceHistoryItem(
   clientId: string,
   itemId: string,
-  updates: Partial<{ start_date: string; end_date: string; note: string }>
+  updates: Partial<{ start_date: string; end_date: string; note: string; service_required: string }>
 ) {
   try {
     const supabase = await createSupabaseServerClient();

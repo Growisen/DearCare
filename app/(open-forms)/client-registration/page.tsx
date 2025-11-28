@@ -23,6 +23,10 @@ export default function ClientFormPage() {
     handleStaffRequirementsChange,
     handleClientTypeChange,
     handleSameAddressToggle,
+    homeMaidFormData,
+    homeMaidFormErrors,
+    handleHomeMaidInputChange,
+    handleHomeMaidDutyChange,
     handleSubmit,
   } = useClientForm({
     onSuccess: () => {
@@ -33,12 +37,21 @@ export default function ClientFormPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-200 pt-4">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-t-lg shadow-lg p-6 mb-2 border-b-4 border-dCblue flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center rounded-full p-3 mr-3 shadow-md bg-white border-2 border-dCblue">
-              <div className="relative w-12 h-12">
+    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-6 border-b border-gray-200">
+
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+              Client Registration
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Create a new client profile and for getting care requirements.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 opacity-90">
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded border border-gray-100">
+              <div className="relative w-20 h-10">
                 <Image
                   src="/DearCare.png"
                   alt="DearCare Logo"
@@ -46,46 +59,44 @@ export default function ClientFormPage() {
                   className="object-contain"
                 />
               </div>
+              <span className="font-bold text-lg leading-none tracking-tight">
+                <span className='text-dCblue'>Dear</span><span className='text-amber-500'>C</span><span className='text-dCblue'>are</span>
+              </span>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">
-                <div className="flex items-center whitespace-nowrap">
-                  <span className='text-dCblue'>Dear</span><span className='text-amber-500'>C</span><span className='text-dCblue'>are</span>
-                </div>
-              </h1>
-              <p className="text-sm text-gray-500">Healthcare & Caregiving Services</p>
-            </div>
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm text-gray-600 font-medium">Client Support: <span className="text-blue-600">+91 9645400035</span></p>
-            <p className="text-sm text-gray-600 mt-1">info@dearcare.in</p>
           </div>
         </div>
-
         {isSuccess ? (
-          <SuccessMessage onGoBack={() => router.back()} />
+          <div className="max-w-2xl mx-auto mt-12">
+            <SuccessMessage />
+          </div>
         ) : (
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
-              <h1 className="text-xl font-semibold text-gray-800">Client Registration Form</h1>
-              <p className="text-sm text-gray-600 mt-1">Please fill out the form below to register a new client</p>
+          <div className="bg-white border border-gray-200 rounded-md">
+            <div className="p-6 sm:p-10">
+              <ClientFormComponent
+                formData={formData}
+                formErrors={formErrors}
+                clientType={clientType}
+                isSubmitting={isSubmitting}
+                isSameAddress={isSameAddress}
+                handleInputChange={handleInputChange}
+                handleBlur={handleBlur}
+                handleProfileImageChange={handleProfileImageChange}
+                handleStaffRequirementsChange={handleStaffRequirementsChange}
+                handleClientTypeChange={handleClientTypeChange}
+                handleSameAddressToggle={handleSameAddressToggle}
+                handleSubmit={handleSubmit}
+                homeMaidFormData={homeMaidFormData}
+                homeMaidFormErrors={homeMaidFormErrors}
+                handleHomeMaidInputChange={handleHomeMaidInputChange}
+                handleHomeMaidDutyChange={handleHomeMaidDutyChange}
+                submitButtonText="Register Client"
+              />
             </div>
 
-            <ClientFormComponent
-              formData={formData}
-              formErrors={formErrors}
-              clientType={clientType}
-              isSubmitting={isSubmitting}
-              isSameAddress={isSameAddress}
-              handleInputChange={handleInputChange}
-              handleBlur={handleBlur}
-              handleProfileImageChange={handleProfileImageChange}
-              handleStaffRequirementsChange={handleStaffRequirementsChange}
-              handleClientTypeChange={handleClientTypeChange}
-              handleSameAddressToggle={handleSameAddressToggle}
-              handleSubmit={handleSubmit}
-              submitButtonText="Submit Registration"
-            />
+            <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 rounded-b-md flex justify-between items-center text-xs text-gray-500">
+                <p>Fields marked with <span className="text-red-500">*</span> are mandatory.</p>
+                <p>Need help? Call <span className="font-medium text-gray-900">+91 9645400035</span></p>
+            </div>
           </div>
         )}
       </div>

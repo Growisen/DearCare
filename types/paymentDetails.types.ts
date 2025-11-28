@@ -17,6 +17,7 @@ export interface EntryGroup {
   modeOfPayment?: string;
   startDate?: string;
   endDate?: string;
+  approved: boolean;
 }
 
 export interface FormLineItem {
@@ -29,6 +30,7 @@ export interface FormLineItem {
 
 export interface DynamicFieldTrackerProps {
   clientId: string;
+  tenant: string;
 }
 
 export interface ApiLineItem {
@@ -50,4 +52,5 @@ export interface ApiEntryGroup {
   mode_of_payment?: string | null;
   start_date?: string | null;
   end_date?: string | null;
+  approved: boolean;
 }

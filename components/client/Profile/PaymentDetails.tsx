@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSaveClientPaymentGroup } from "@/hooks/useSaveClientPaymentGroup";
 import Loader from '@/components/Loader';
-import { deleteClientPaymentGroup } from "@/app/actions/clients/client-payment-records";
+import { deleteClientPaymentGroup, updateClientPaymentGroup } from "@/app/actions/clients/client-payment-records";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import ModalPortal from "@/components/ui/ModalPortal";
 import PaymentEntryForm from "@/components/client/payment/PaymentEntryForm";
@@ -16,12 +16,16 @@ import {
   ApiEntryGroup,
 } from "@/types/paymentDetails.types";
 import { toast } from "sonner";
+import { getTenantKey } from "@/utils/formatters";
 
 import EditEntryGroupModal from "@/components/client/payment/EditEntryGroupModal";
 
-const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) => {
-  const { saveGroup, fetchGroups, loading, isSaving } = useSaveClientPaymentGroup();
-  
+const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, tenant }) => {
+  const { saveGroup, useFetchGroups, invalidateGroups, isSaving } = useSaveClientPaymentGroup();
+  const tenantKey = getTenantKey(tenant);
+
+  const { data: apiEntries, isLoading } = useFetchGroups(clientId);
+
   const [entries, setEntries] = useState<EntryGroup[]>([]);
   const [groupName, setGroupName] = useState("");
   const [lineItems, setLineItems] = useState<FormLineItem[]>([
@@ -38,34 +42,32 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [editModal, setEditModal] = useState<{ open: boolean; group: EntryGroup | null }>({ open: false, group: null });
-
-  const fetchData = async () => {
-    const apiEntries = await fetchGroups(clientId);
-
-    const updatedEntries: EntryGroup[] = (apiEntries ?? []).map((group: ApiEntryGroup) => ({
-      id: typeof group.id === "string" ? parseInt(group.id, 10) : group.id,
-      groupName: group.payment_group_name,
-      lineItems: group.lineItems.map((item: ApiLineItem) => ({
-        id: item.id,
-        fieldName: item.field_name,
-        amount: item.amount,
-        gst: item.gst,
-        amountWithGst: item.amount_with_gst,
-        commission: item.commission,
-      })),
-      dateAdded: group.date_added,
-      notes: group.notes ?? undefined,
-      showToClient: group.show_to_client,
-      modeOfPayment: group.mode_of_payment ?? "",
-      startDate: group.start_date ?? "",
-      endDate: group.end_date ?? "",
-    }));
-    setEntries(updatedEntries);
-  };
+  const [approvingId, setApprovingId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchData();
-  }, [clientId]);
+    if (apiEntries) {
+      const updatedEntries: EntryGroup[] = apiEntries.map((group: ApiEntryGroup) => ({
+        id: typeof group.id === "string" ? parseInt(group.id, 10) : group.id,
+        groupName: group.payment_group_name,
+        lineItems: group.lineItems.map((item: ApiLineItem) => ({
+          id: item.id,
+          fieldName: item.field_name,
+          amount: item.amount,
+          gst: item.gst,
+          amountWithGst: item.amount_with_gst,
+          commission: item.commission,
+        })),
+        dateAdded: group.date_added,
+        notes: group.notes ?? undefined,
+        showToClient: group.show_to_client,
+        modeOfPayment: group.mode_of_payment ?? "",
+        startDate: group.start_date ?? "",
+        endDate: group.end_date ?? "",
+        approved: group.approved ?? false,
+      }));
+      setEntries(updatedEntries);
+    }
+  }, [apiEntries]);
 
   const resetForm = () => {
     setGroupName("");
@@ -126,7 +128,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     });
 
     if (result.success) {
-      fetchData();
+      invalidateGroups(clientId);
       resetForm();
       toast.success("Entry group saved!", {
         action: { label: "OK", onClick: () => {} },
@@ -160,7 +162,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
     setDeletingId(null);
 
     if (result.success) {
-      fetchData();
+      invalidateGroups(clientId);
       toast.success("Entry group deleted!", {
         action: { label: "OK", onClick: () => {} },
         duration: 7000,
@@ -180,6 +182,51 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
 
   const closeEditModal = () => setEditModal({ open: false, group: null });
 
+  const handleApprove = async (group: EntryGroup) => {
+    setApprovingId(group.id);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: String(clientId),
+          amount: group.lineItems.reduce((sum, item) => sum + (item.amountWithGst || 0), 0),
+          payment_type: "incoming",
+          pay_status: "paid",
+          description: group.notes,
+          tenant: tenantKey,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.error) {
+        await updateClientPaymentGroup({
+          paymentRecordId: group.id,
+          approved: true,
+        });
+        invalidateGroups(clientId);
+        toast.success("Payment group approved!", {
+          action: {
+            label: "OK",
+            onClick: async () => {
+              toast.dismiss();
+            },
+          },
+        });
+      } else {
+        toast.error("Failed to approve: " + (result.error || response.statusText));
+      }
+    } catch (error) {
+      console.error("Approve error:", error);
+      toast.error("Error approving payment group.");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
   return (
     <div className="mx-auto space-y-6">
       <PaymentEntryForm
@@ -194,7 +241,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
         onSave={saveEntryGroup}
         onCancel={resetForm}
         isSaving={isSaving}
-        loading={loading}
+        loading={isLoading}
         modeOfPayment={modeOfPayment}
         setModeOfPayment={setModeOfPayment}
         startDate={startDate}
@@ -203,7 +250,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
         setEndDate={setEndDate}
       />
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center py-16">
           <Loader message="Loading data..." />
         </div>
@@ -224,12 +271,16 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
             onDelete={handleDeleteClick}
             deletingId={deletingId}
             onEdit={handleEditClick}
+            onApprove={handleApprove}
+            approvingId={approvingId}
           />
           
           <EntriesMobileView
             entries={entries}
             onDelete={handleDeleteClick}
             deletingId={deletingId}
+            onApprove={handleApprove}
+            approvingId={approvingId}
           />
         </div>
       )}
@@ -254,7 +305,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId }) =
             onClose={closeEditModal}
             onSave={() => {
               closeEditModal();
-              fetchData();
+              invalidateGroups(clientId);
             }}
           />
         )}

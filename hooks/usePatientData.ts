@@ -37,6 +37,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
           registrationNumber: clientData.registration_number || '',
           firstName: clientData.details?.patient_name?.split(' ')[0] || '',
           lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
+          dob: clientData.details?.patient_dob || '',
           age: clientData.details?.patient_age || 0,
           gender: clientData.details?.patient_gender || '',
           bloodGroup: '',
@@ -63,6 +64,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
           },
           requestor: {
             name: clientData.details?.requestor_name || '',
+            dob: clientData.details?.requestor_dob || '',
             relation: clientData.details?.relation_to_patient || '',
             phone: clientData.details?.requestor_phone || '',
             email: clientData.details?.requestor_email || '',
