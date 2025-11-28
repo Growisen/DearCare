@@ -1,6 +1,15 @@
-export const getServiceLabel = (serviceOptions: { value: string, label: string }[], value: string): string => {
+export const getServiceLabel = (
+  serviceOptions: { value: string, label: string }[],
+  value: string
+): string => {
   const option = serviceOptions.find(opt => opt.value === value);
-  return option ? option.label : value;
+  if (option) return option.label;
+
+  return value
+    .split('_')
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 };
 
 export const formatDate = (dateString: string, showTime?: boolean): string => {

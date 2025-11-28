@@ -70,6 +70,7 @@ export interface StaffRequirement {
   shiftType: string;
   shift_type?: string;
   staff_type?:string
+  customShiftTiming?: string;
 }
 
 export interface BaseFormData {
@@ -94,7 +95,9 @@ export interface IndividualFormData extends BaseFormData {
   requestorCity: string;
   relationToPatient: RelationToPatient;
   patientName: string;
-  patientAge: string;
+  patientAge?: string;
+  patientDOB?: string;
+  requestorDOB?: string;
   patientGender: Gender;
   patientPhone: string;
   patientAddress: string,  
@@ -196,6 +199,8 @@ export interface DetailedClientIndividual {
     patient_profile_pic_url?: string | null;
     patient_location_link?: string;
     requestor_location_link?: string;
+    requestor_dob?: string;
+    patient_dob?: string;
   };
   general_notes?: string;
   created_at?: string;
@@ -369,6 +374,7 @@ export interface Patient {
   registrationNumber?: string;
   firstName: string;
   lastName: string;
+  dob: string;
   age: number | string;
   gender: string;
   bloodGroup: string;
@@ -387,6 +393,7 @@ export interface Patient {
   };
   requestor: { 
     name: string;
+    dob: string;
     relation: string;
     phone: string;
     email: string;

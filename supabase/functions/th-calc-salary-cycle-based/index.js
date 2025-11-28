@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js";
-
 import { addDays, parseISO, format, isAfter } from "https://esm.sh/date-fns@2.30.0";
 import { utcToZonedTime } from "https://esm.sh/date-fns-tz@2.0.0?deps=date-fns@2.30.0";
 
@@ -42,7 +41,7 @@ const getDatesInRange = (startStr, endStr) => {
 Deno.serve(async () => {
   const logData = {
     run_date: new Date().toISOString(),
-    status: "dry_run",
+    status: "processing",
     processed_nurses: 0,
     calculated_records: 0,
     errors: [],
@@ -94,8 +93,14 @@ Deno.serve(async () => {
         const lastPayEnd = lastPayMap.get(assignment.nurse_id) || null;
 
         let cycleStart = assignment.start_date;
+
         if (lastPayEnd) {
-          cycleStart = format(addDays(parseISO(lastPayEnd), 1), "yyyy-MM-dd");
+          const dayAfterLastPay = addDays(parseISO(lastPayEnd), 1);
+          const assignStartObj = parseISO(assignment.start_date);
+
+          if (isAfter(dayAfterLastPay, assignStartObj)) {
+            cycleStart = format(dayAfterLastPay, "yyyy-MM-dd");
+          }
         }
 
         if (isAfter(parseISO(cycleStart), parseISO(todayStr))) continue;
@@ -174,27 +179,19 @@ Deno.serve(async () => {
         const finalSalary = Math.ceil(grossSalaryRaw);
 
         const infoParts = [];
-        
         infoParts.push(`✅ Worked: ${daysWorked} days (${finalHours} hrs)`);
         infoParts.push(`💰 Calc: ${finalHours}hr x ₹${hourlyRate.toFixed(2)}`);
 
         if (absentDatesRaw.length > 0) {
           const formattedDates = absentDatesRaw.map(d => format(parseISO(d), "dd/MM/yyyy"));
-          
           const dateStr = formattedDates.length > 5 
             ? `[${formattedDates.slice(0, 5).join(", ")} +${formattedDates.length - 5} more]` 
             : `[${formattedDates.join(", ")}]`;
-            
           infoParts.push(`❌ Absent: ${absentDatesRaw.length} ${dateStr}`);
         }
 
-        if (errorDates.length > 0) {
-           infoParts.push(`⚠️ Missing Time: ${errorDates.length} [${errorDates.join(", ")}]`);
-        }
-
-        if (zeroHourDates.length > 0) {
-           infoParts.push(`⚠️ Zero-Hr: ${zeroHourDates.length} [${zeroHourDates.join(", ")}]`);
-        }
+        if (errorDates.length > 0) infoParts.push(`⚠️ Missing Time: ${errorDates.length}`);
+        if (zeroHourDates.length > 0) infoParts.push(`⚠️ Zero-Hr: ${zeroHourDates.length}`);
 
         const infoStr = infoParts.join(" | ");
 

@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { IndividualFormData } from '@/types/client.types';
 import { uploadProfilePicture } from './utils';
 import { logger } from '@/utils/logger';
+import { FormData } from '@/types/homemaid.types';
 
 interface IndividualClientUpdateProfileData {
     patient_name: string;
@@ -111,6 +112,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         requestor_district: formData.requestorDistrict || null,
         requestor_city: formData.requestorCity || null,
         requestor_state: formData.requestorState || null,
+        patient_dob: formData.patientDOB || null,
+        requestor_dob: formData.requestorDOB || null,
       });
     
     if (individualError) {
@@ -289,4 +292,52 @@ export async function updateIndividualClientProfile(
         error: error instanceof Error ? error.message : 'An unknown error occurred' 
       };
     }
+}
+
+interface HousemaidRequestData extends FormData {
+  clientId: string;
+}
+
+/**
+ * Adds a new housemaid request to the database
+ */
+export async function addHousemaidRequest(formData: HousemaidRequestData) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    console.log("Adding housemaid request for client:", formData);
+
+    const { error } = await supabase
+      .from('housemaid_requests')
+      .insert({
+        client_id: formData.clientId,
+        service_type: formData.serviceType,
+        service_type_other: formData.serviceTypeOther ?? null,
+        frequency: formData.frequency ?? null,
+        preferred_schedule: formData.preferredSchedule ?? null,
+        home_type: formData.homeType ?? null,
+        bedrooms: formData.bedrooms ?? 0,
+        bathrooms: formData.bathrooms ?? 0,
+        household_size: formData.householdSize ?? 1,
+        has_pets: formData.hasPets ?? false,
+        pet_details: formData.petDetails ?? null,
+        duties: formData.duties ?? {},
+        meal_prep_details: formData.mealPrepDetails ?? null,
+        childcare_details: formData.childcareDetails ?? null,
+        allergies: formData.allergies ?? null,
+        restricted_areas: formData.restrictedAreas ?? null,
+        special_instructions: formData.specialInstructions ?? null,
+      });
+
+    if (error) {
+      logger.error('Error adding housemaid request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error adding housemaid request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
 }

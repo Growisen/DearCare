@@ -1,43 +1,32 @@
 import React from 'react';
-import { useRouter } from 'next/navigation';
 
-interface SuccessMessageProps {
-  onGoBack?: () => void;
-}
-
-export const SuccessMessage = ({ onGoBack }: SuccessMessageProps) => {
-  const router = useRouter();
-  
-  const handleGoBack = () => {
-    if (onGoBack) {
-      onGoBack();
-    } else {
-      router.back();
-    }
-  };
-
+export const SuccessMessage = () => {
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="p-8 text-center">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-          <svg className="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    <div className="bg-white border border-gray-200 rounded-md animate-in fade-in zoom-in-95 duration-300">
+      <div className="p-10 sm:p-12 text-center flex flex-col items-center">
+        <div className="flex items-center justify-center h-14 w-14 rounded-full bg-green-50 border border-green-100 mb-6">
+          <svg 
+            className="h-6 w-6 text-green-600" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
-        <p className="text-md text-gray-600 mb-6">
-          Thank you for requesting service from DearCare. Your information has been submitted successfully.
+        <h2 className="text-xl font-semibold tracking-tight text-gray-900 mb-3">
+          Registration Complete
+        </h2>
+        <p className="text-gray-500 mb-2 max-w-sm mx-auto">
+          The client profile has been successfully created in the system.
         </p>
-        <p className="text-sm text-gray-500 mb-6">
-          Our team will review your details and contact you shortly.
-          You&apos;ll be redirected to the home page in a few seconds.
+        <p className="text-gray-500 mb-2 max-w-sm mx-auto">
+          Our team will contact you shortly.
         </p>
-        <button 
-          onClick={handleGoBack}
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
-        >
-          Go Back
-        </button>
+        <p className="text-sm text-gray-400 mb-8">
+          You can now close this window.
+        </p>
       </div>
     </div>
   );
