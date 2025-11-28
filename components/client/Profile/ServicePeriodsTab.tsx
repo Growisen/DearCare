@@ -79,7 +79,6 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
     setIsModalOpen(true);
   };
 
-
   const handleSave = async (data: ServicePeriodFormValues) => {
     setIsSubmitting(true);
     

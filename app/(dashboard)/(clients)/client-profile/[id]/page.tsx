@@ -298,7 +298,7 @@ const PatientProfilePage = () => {
 
             {activeTab === 'paymentDetails' && status === 'approved' && (
               <div className="space-y-6">
-                <ClientPaymentHistory clientId={id} />
+                <ClientPaymentHistory clientId={id}  tenant={patient.clientCategory} />
               </div>
             )}
 
