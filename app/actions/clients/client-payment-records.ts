@@ -33,6 +33,8 @@ interface ClientPaymentRecord {
   date_added: string;
   notes?: string | null;
   show_to_client: boolean;
+  approved: boolean;
+  mode_of_payment?: string | null;
   // start_date?: string;
   // end_date?: string;  
 }
@@ -432,6 +434,7 @@ export interface UpdatePaymentGroupInput {
   modeOfPayment?: string;
   startDate?: string;
   endDate?: string;
+  approved?: boolean;
 }
 
 export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
@@ -445,7 +448,8 @@ export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
     if (input.modeOfPayment !== undefined) updateFields.mode_of_payment = input.modeOfPayment;
     if (input.startDate !== undefined) updateFields.start_date = input.startDate ? new Date(input.startDate).toISOString() : null;
     if (input.endDate !== undefined) updateFields.end_date = input.endDate ? new Date(input.endDate).toISOString() : null;
-
+    if (input.approved !== undefined) updateFields.approved = input.approved;
+    
     const { error } = await supabase
       .from('client_payment_records')
       .update(updateFields)

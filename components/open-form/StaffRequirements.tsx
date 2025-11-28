@@ -1,4 +1,6 @@
+import React from 'react';
 import { StaffRequirement } from '@/types/client.types';
+import { Trash2, Plus } from 'lucide-react';
 
 interface StaffRequirementsProps {
   clientType: 'organization' | 'hospital' | 'carehome';
@@ -9,8 +11,8 @@ interface StaffRequirementsProps {
   onChange: (staffRequirements: StaffRequirement[], startDate?: string) => void;
 }
 
-
 export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequirementsProps) => {
+
   const staffTypeOptions = {
     hospital: [
       { value: "msc_nursing", label: "MSC NURSING" },
@@ -99,6 +101,7 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
   };
 
   const handleRemoveStaffRequirement = (index: number) => {
+    if (formData.staffRequirements.length <= 1) return; // Prevent removing last requirement
     const updatedRequirements = formData.staffRequirements.filter((_, i) => i !== index);
     onChange(updatedRequirements);
   };
@@ -124,85 +127,124 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
     }
   };
 
+  const baseInputStyles = `
+    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    placeholder:text-gray-400
+    focus:border-gray-400 focus:outline-none focus:ring-0 
+    transition-colors duration-200 appearance-none
+  `;
+  const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
+
   return (
-    <div className="space-y-4">
-      {formData.staffRequirements.map((requirement, index) => (
-        <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <div className="flex justify-between items-center">
-                <h4 className="font-medium text-gray-900">Staff Requirement #{index + 1}</h4>
-                <button
-                type="button"
-                onClick={() => handleRemoveStaffRequirement(index)}
-                className="text-red-600 hover:text-red-700 text-sm"
-                >
-                Remove
-                </button>
+    <div className="mb-8 border-b border-gray-100 pb-8">
+      <h2 className="text-base font-semibold text-gray-800 mb-6">Staffing Requirements</h2>
+      
+      <div className="space-y-4">
+        {formData.staffRequirements.map((requirement, index) => (
+          <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-end p-4 bg-gray-50 border border-gray-100 rounded-sm">
+
+            <div className="w-full sm:flex-1">
+              <label className={labelStyles}>Staff Type</label>
+              <select 
+                value={requirement.staffType} 
+                onChange={(e) => handleStaffRequirementChange(index, 'staffType', e.target.value)}
+                className={baseInputStyles}
+                style={{ backgroundImage: 'none' }}
+              >
+                <option value="">Select staff type...</option>
+                {staffTypeOptions[clientType]?.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Staff Type Required</label>
-                    <select 
-                    value={requirement.staffType} 
-                    onChange={(e) => handleStaffRequirementChange(index, 'staffType', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                    <option value="" className="text-gray-500">Select staff type...</option>
-                    {staffTypeOptions[clientType].map(option => (
-                        <option key={option.value} value={option.value} className="text-gray-900 font-medium">
-                        {option.label}
-                        </option>
-                    ))}
-                    </select>
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Number of Staff</label>
-                    <input
-                    type="number"
-                    min="1"
-                    value={requirement.count.toString()}
-                    onChange={(e) => handleStaffRequirementChange(index, 'count', parseInt(e.target.value))}
-                    className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter number of staff"
-                    />
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Shift Type</label>
-                    <select 
-                    value={requirement.shiftType}
-                    onChange={(e) => handleStaffRequirementChange(index, 'shiftType', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                    <option value="" className="text-gray-500">Select shift type...</option>
-                    <option value="day" className="text-gray-900 font-medium">Day Shift (8 AM - 8 PM)</option>
-                    <option value="night" className="text-gray-900 font-medium">Night Shift (8 PM - 8 AM)</option>
-                    <option value="rotating" className="text-gray-900 font-medium">Rotating Shifts</option>
-                    <option value="custom" className="text-gray-900 font-medium">Custom Hours</option>
-                    </select>
-                </div>
+            
+            <div className="w-full sm:w-24">
+              <label className={labelStyles}>Count</label>
+              <input
+                type="number"
+                min="1"
+                value={requirement.count.toString()}
+                onChange={(e) => handleStaffRequirementChange(index, 'count', parseInt(e.target.value))}
+                className={baseInputStyles}
+                placeholder="1"
+              />
             </div>
+
+            <div className="w-full sm:w-48">
+              <label className={labelStyles}>Shift</label>
+              <select 
+                value={requirement.shiftType}
+                onChange={(e) => handleStaffRequirementChange(index, 'shiftType', e.target.value)}
+                className={baseInputStyles}
+                style={{ backgroundImage: 'none' }}
+              >
+                <option value="">Select...</option>
+                
+                <optgroup label="Standard">
+                    <option value="morning_8">Morning (6 AM - 2 PM)</option>
+                    <option value="general_9_5">General (9 AM - 5 PM)</option>
+                    <option value="night_8">Night (10 PM - 6 AM)</option>
+                </optgroup>
+
+                <optgroup label="Long Shift">
+                    <option value="day_12">Day (8 AM - 8 PM)</option>
+                    <option value="night_12">Night (8 PM - 8 AM)</option>
+                </optgroup>
+
+                <optgroup label="Other">
+                    <option value="custom">Custom</option>
+                </optgroup>
+              </select>
+            </div>
+
+            {requirement.shiftType === 'custom' && (
+              <div className="w-full sm:w-48 animate-in fade-in slide-in-from-left-2 duration-300">
+                <label className={labelStyles}>Specify Hours</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 10:00 AM - 3:00 PM"
+                  value={requirement.customShiftTiming || ''} 
+                  onChange={(e) => handleStaffRequirementChange(index, 'customShiftTiming', e.target.value)}
+                  className={baseInputStyles}
+                />
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => handleRemoveStaffRequirement(index)}
+              className="mb-[5px] p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-sm transition-colors"
+              title="Remove Requirement"
+              disabled={formData.staffRequirements.length <= 1}
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={handleAddStaffRequirement}
+          className="w-full py-2.5 border border-dashed border-gray-300 text-sm font-medium text-gray-600 rounded-sm hover:border-gray-400 hover:bg-gray-50 hover:text-gray-800 transition-all flex items-center justify-center gap-2"
+        >
+          <Plus size={16} />
+          Add Another Staff Requirement
+        </button>
+
+        <div className="mt-6 pt-4 border-t border-gray-100">
+          <div className="max-w-xs">
+            <label className={labelStyles}>Expected Service Start Date</label>
+            <input
+              type="date"
+              value={formData.staffReqStartDate || ''}
+              onChange={handleStartDateChange}
+              min={new Date().toISOString().split('T')[0]}
+              className={baseInputStyles}
+            />
+          </div>
         </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={handleAddStaffRequirement}
-        className="w-full py-2 px-4 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition-colors duration-200"
-      >
-        + Add Another Staff Requirement
-      </button>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Expected Service Start Date</label>
-        <input
-          type="date"
-          value={formData.staffReqStartDate || ''}
-          onChange={handleStartDateChange}
-          min={new Date().toISOString().split('T')[0]}
-          className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
       </div>
     </div>
   );

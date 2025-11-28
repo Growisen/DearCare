@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { saveClientPaymentGroup, getClientPaymentGroups } from "@/app/actions/clients/client-payment-records";
 
 interface LineItemInput {
@@ -20,11 +21,10 @@ interface SavePaymentGroupInput {
   endDate?: string;  
 }
 
-
 export function useSaveClientPaymentGroup() {
-  const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const saveGroup = async (input: SavePaymentGroupInput) => {
     setIsSaving(true);
@@ -37,19 +37,24 @@ export function useSaveClientPaymentGroup() {
     return result;
   };
 
-  const fetchGroups = async (clientId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const groups = await getClientPaymentGroups(clientId);
-      setLoading(false);
-      return groups.records;
-    } catch {
-      setError("Failed to fetch groups");
-      setLoading(false);
-      return [];
-    }
+  const useFetchGroups = (clientId: string) => {
+    return useQuery({
+      queryKey: ["clientPaymentGroups", clientId],
+      queryFn: async () => {
+        try {
+          const groups = await getClientPaymentGroups(clientId);
+          return groups.records;
+        } catch {
+          throw new Error("Failed to fetch groups");
+        }
+      }
+    });
   };
 
-  return { saveGroup, fetchGroups, loading, isSaving, error };
+
+  const invalidateGroups = (clientId: string) => {
+    queryClient.invalidateQueries({ queryKey: ["clientPaymentGroups", clientId] });
+  };
+
+  return { saveGroup, useFetchGroups, invalidateGroups, isSaving, error };
 }

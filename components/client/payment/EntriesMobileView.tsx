@@ -6,31 +6,51 @@ interface EntriesMobileViewProps {
   entries: EntryGroup[];
   onDelete: (id: number) => void;
   deletingId: string | null;
+  onApprove?: (group: EntryGroup) => void;
+  approvingId?: number | null;
 }
 
 const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
   entries,
   onDelete,
   deletingId,
+  onApprove,
+  approvingId,
 }) => {
   return (
     <div className="lg:hidden divide-y divide-gray-200">
       {entries.map((group) => {
         const groupTotal = calculateGroupTotal(group);
-        
+
         return (
           <div key={group.id} className="p-6">
             <div className="flex justify-between items-start mb-3">
               <h3 className="font-semibold text-gray-900 text-lg">
                 {group.groupName}
               </h3>
-              <button 
-                onClick={() => onDelete(group.id)} 
-                className="text-red-600 hover:text-red-800 text-sm font-medium ml-4 flex-shrink-0 hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                disabled={deletingId === group.id.toString()}
-              >
-                {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
-              </button>
+              <div className="flex flex-col items-end space-y-2 ml-4">
+                <button
+                  onClick={() => onDelete(group.id)}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                  disabled={deletingId === group.id.toString()}
+                >
+                  {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
+                </button>
+                {onApprove && group.approved === false && (
+                  <button
+                    onClick={() => onApprove(group)}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                    disabled={approvingId === group.id}
+                  >
+                    {approvingId === group.id ? "Approving..." : "Approve"}
+                  </button>
+                )}
+                {group.approved && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Approved
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="text-xl font-bold text-gray-900 mb-4">

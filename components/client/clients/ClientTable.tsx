@@ -43,7 +43,7 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
         {formatDate(createdAt)}
         {daysSinceJoined !== null && (
           <span className="block text-xs text-gray-400 mt-1">
-            {daysSinceJoined} days ago
+            {daysSinceJoined} ago
           </span>
         )}
       </td>

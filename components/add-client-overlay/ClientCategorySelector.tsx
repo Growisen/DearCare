@@ -26,17 +26,20 @@ export const ClientCategorySelector = ({ selectedCategory, onCategoryChange }: C
 
   if (!orgLabel) return null;
 
+  const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
+  const buttonBaseStyle = "w-full py-2 px-3 border rounded-sm text-sm font-medium transition-all duration-200 select-none flex items-center justify-center";
+  const selectedStyle = "bg-blue-50 border-blue-200 text-blue-700";
+  const unselectedStyle = "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50";
+
   return (
-    <div>
-      <div className="grid grid-cols-1 gap-3">
+    <div className="mb-4">
+      <label className={labelStyles}>Client Category</label>
+      <div className="grid grid-cols-1">
         <button
+          type="button"
           key={orgLabel}
           onClick={() => onCategoryChange(orgLabel as ClientCategory)}
-          className={`p-3 rounded-lg border ${
-            selectedCategory === orgLabel
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-200 hover:border-gray-300 text-gray-900 font-medium'
-          } transition-colors duration-200`}
+          className={`${buttonBaseStyle} ${selectedCategory === orgLabel ? selectedStyle : unselectedStyle}`}
         >
           {orgLabel}
         </button>

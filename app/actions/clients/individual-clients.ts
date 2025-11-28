@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { IndividualFormData } from '@/types/client.types';
 import { uploadProfilePicture } from './utils';
 import { logger } from '@/utils/logger';
+import { FormData } from '@/types/homemaid.types';
 
 interface IndividualClientUpdateProfileData {
     patient_name: string;
@@ -111,6 +112,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
         requestor_district: formData.requestorDistrict || null,
         requestor_city: formData.requestorCity || null,
         requestor_state: formData.requestorState || null,
+        patient_dob: formData.patientDOB || null,
+        requestor_dob: formData.requestorDOB || null,
       });
     
     if (individualError) {
@@ -289,4 +292,136 @@ export async function updateIndividualClientProfile(
         error: error instanceof Error ? error.message : 'An unknown error occurred' 
       };
     }
+}
+
+interface HousemaidRequestData extends FormData {
+  clientId: string;
+}
+
+/**
+ * Adds a new housemaid request to the database
+ * Only one request per client_id is allowed
+ */
+export async function addHousemaidRequest(formData: HousemaidRequestData) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('housemaid_requests')
+      .select('id')
+      .eq('client_id', formData.clientId)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      logger.error('Error checking existing housemaid request:', fetchError);
+      return { success: false, error: fetchError.message };
+    }
+
+    if (existing) {
+      return { success: false, error: 'You already have a housemaid request.' };
+    }
+
+    const { error } = await supabase
+      .from('housemaid_requests')
+      .insert({
+        client_id: formData.clientId,
+        service_type: formData.serviceType,
+        service_type_other: formData.serviceTypeOther ?? null,
+        frequency: formData.frequency ?? null,
+        preferred_schedule: formData.preferredSchedule ?? null,
+        home_type: formData.homeType ?? null,
+        bedrooms: formData.bedrooms ?? 0,
+        bathrooms: formData.bathrooms ?? 0,
+        household_size: formData.householdSize ?? 1,
+        has_pets: formData.hasPets ?? false,
+        pet_details: formData.petDetails ?? null,
+        duties: formData.duties ?? {},
+        meal_prep_details: formData.mealPrepDetails ?? null,
+        childcare_details: formData.childcareDetails ?? null,
+        allergies: formData.allergies ?? null,
+        restricted_areas: formData.restrictedAreas ?? null,
+        special_instructions: formData.specialInstructions ?? null,
+      });
+
+    if (error) {
+      logger.error('Error adding housemaid request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error adding housemaid request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
+}
+
+
+export async function fetchHousemaidRequestsByClientId(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('housemaid_requests')
+      .select('*')
+      .eq('client_id', clientId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const mappedData = Array.isArray(data)
+      ? data.map((item) => ({
+          ...item,
+          has_pets: item.has_pets ? "Yes" : "No"
+        }))
+      : [];
+
+    return { success: true, data: mappedData };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
+  }
+}
+
+
+export async function updateHousemaidRequest(clientId: string, formData: Partial<FormData>) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('housemaid_requests')
+      .update({
+        service_type: formData.serviceType,
+        service_type_other: formData.serviceTypeOther ?? null,
+        frequency: formData.frequency ?? null,
+        preferred_schedule: formData.preferredSchedule ?? null,
+        home_type: formData.homeType ?? null,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        household_size: formData.householdSize,
+        has_pets: formData.hasPets,
+        pet_details: formData.petDetails ?? null,
+        duties: formData.duties ?? {},
+        meal_prep_details: formData.mealPrepDetails ?? null,
+        childcare_details: formData.childcareDetails ?? null,
+        allergies: formData.allergies ?? null,
+        restricted_areas: formData.restrictedAreas ?? null,
+        special_instructions: formData.specialInstructions ?? null,
+      })
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error updating housemaid request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error updating housemaid request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
 }

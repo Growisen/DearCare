@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { ClientCategory, FormData, StaffRequirement, ClientType } from '@/types/client.types';
+import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
 import { toast } from 'react-hot-toast';
-import { addIndividualClient, addOrganizationClient } from '@/app/actions/clients/client-actions';
+import { addIndividualClient, addOrganizationClient, addHousemaidRequest } from '@/app/actions/clients/client-actions';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface FormErrors {
@@ -12,6 +13,38 @@ interface UseClientFormProps {
   onSuccess?: () => void;
   initialData?: Partial<FormData>;
 }
+
+const INITIAL_DUTIES: Duties = {
+  kitchen: false,
+  bathroom: false,
+  floors: false,
+  dusting: false,
+  tidying: false,
+  mealPrep: false,
+  laundry: false,
+  ironing: false,
+  errands: false,
+  childcare: false,
+};
+
+const INITIAL_HOME_MAID_DATA: HomeMaidFormData = {
+  serviceType: 'part-time',
+  serviceTypeOther: '',
+  frequency: '',
+  preferredSchedule: '',
+  homeType: '',
+  bedrooms: 1,
+  bathrooms: 1,
+  householdSize: 1,
+  hasPets: undefined,
+  petDetails: '',
+  duties: INITIAL_DUTIES,
+  mealPrepDetails: '',
+  childcareDetails: '',
+  allergies: '',
+  restrictedAreas: '',
+  specialInstructions: '',
+};
 
 export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProps = {}) => {
   const { invalidateDashboardCache } = useDashboardData();
@@ -42,7 +75,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     requestorDistrict: '',
     requestorCity: '',
     patientName: '',
-    patientAge: '',
+    patientDOB: '',
     patientGender: '',
     patientPhone: '',
     patientAddress: '',
@@ -71,11 +104,16 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     staffRequirements: [{
       staffType: '',
       count: 1,
-      shiftType: ''
+      shiftType: '',
+      customShiftTiming: '',
     }],
     staffReqStartDate: '',
+    requestorDOB: '',
     ...initialData
   });
+
+  const [homeMaidFormData, setHomeMaidFormData] = useState<HomeMaidFormData>(INITIAL_HOME_MAID_DATA);
+  const [homeMaidFormErrors, setHomeMaidFormErrors] = useState<FormErrors>({});
 
   const fieldLabels: {[key: string]: string} = {
     dutyPeriod: 'Duty period',
@@ -85,7 +123,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     requestorEmail: 'Your email address',
     relationToPatient: 'Relation to patient',
     patientName: 'Patient name',
-    patientAge: 'Patient age',
+    patientDOB: 'Patient date of birth',
     patientGender: 'Patient gender',
     patientPhone: 'Patient phone number',
     serviceRequired: 'Service required',
@@ -115,10 +153,10 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     patientDistrict: 'Patient district',
     patientState: 'Patient State',
     requestorJobDetails: 'Your job details',
-    requestorEmergencyPhone: 'Emergency contact number'
+    requestorEmergencyPhone: 'Emergency contact number',
+    requestorDOB: 'Your date of birth',
   };
 
-  // Field validation functions
   const validateField = (id: string, value: string): string => {
     if (!value.trim()) return '';
     
@@ -130,15 +168,15 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       case 'patientPhone':
       case 'contactPhone':
         return validatePhone(value);
-      case 'patientAge':
-        return validateAge(value);
+      case 'patientDOB':
+      case 'requestorDOB':
+        return isValidDate(value) ? '' : 'Please enter a valid date';
       case 'patientGender':
       case 'preferredCaregiverGender':
         return value === '' ? 'Please select a gender option' : '';
       case 'serviceRequired':
         return value === '' ? 'Please select a required service' : '';
-      // case 'careDuration':
-      //   return value === '' ? 'Please select a care duration' : '';
+
       case 'dutyPeriod':
         return value === '' ? 'Please select a duty period' : '';
       case 'dutyPeriodReason':
@@ -169,21 +207,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     return phoneRegex.test(phone) ? '' : 'Please enter a valid phone number';
   };
 
-  const validateAge = (age: string): string => {
-
-    const monthMatch = age.match(/^(\d{1,2})\s*months?$/i);
-    if (monthMatch) {
-      const months = Number(monthMatch[1]);
-      if (months < 1 || months > 12) return 'Please enter a valid age in months (1-12)';
-      return '';
-    }
-    
-    const ageNum = Number(age);
-    if (isNaN(ageNum)) return 'Age must be a number';
-    if (ageNum <= 0 || ageNum > 120) return 'Please enter a valid age';
-    return '';
-  };
-
   // Helper to determine if a field is required based on client type
   const isRequiredField = (id: string, type: ClientType): boolean => {
     const commonRequired = ['dutyPeriod'];
@@ -192,24 +215,12 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       return true;
     }
 
-    // const individualRequired = [
-    //   'requestorName', 'requestorPhone', 'requestorEmail',
-    //   'relationToPatient', 'patientName', 'patientAge', 'patientGender',
-    //   'serviceRequired', 'startDate',
-    //   'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
-    //   'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict'
-    // ];
-    
-    // const organizationRequired = [
-    //   'organizationName', 'organizationType', 'contactPersonName', 
-    //   'contactPersonRole', 'contactPhone', 'contactEmail', 
-    //   'organizationState', 'organizationDistrict', 'organizationCity',
-    //   'organizationAddress', 'organizationPincode', 'staffReqStartDate'
-    // ];
     const individualRequired = [
       'requestorName', 'requestorPhone', 'requestorEmail',
       'serviceRequired', 'startDate', 'requestorState',
       'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+      'requestorDOB', // new required field
+      'patientDOB',   // replaces patientAge
     ];
     
     const organizationRequired = [
@@ -321,30 +332,21 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       isValid = false;
     }
     
-    // const requiredFields = [
-    //   ...commonRequired,
-    //   ...(clientType === 'individual' 
-    //     ? ['requestorName', 'requestorPhone', 'requestorEmail', 'relationToPatient', 
-    //        'patientName', 'patientAge', 'patientGender', 
-    //        'serviceRequired', 'startDate',
-    //        'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
-    //        'patientAddress', 'patientPincode', 'patientCity', 'patientDistrict']
-    //     : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
-    //        'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
-    //         'organizationAddress', 'organizationPincode', 'staffReqStartDate'])
-    // ];
     const requiredFields = [
       ...commonRequired,
       ...(clientType === 'individual' 
-        ? ['requestorName', 'requestorPhone', 'requestorEmail', 
-           'serviceRequired', 'startDate', 'requestorState',
-           'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict']
-        : ['organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
-           'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
+        ? [
+            'requestorName', 'requestorPhone', 'requestorEmail', 
+            'serviceRequired', 'startDate', 'requestorState',
+            'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
+            'requestorDOB',
+          ]
+        : [
+            'organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
+            'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
             'organizationAddress', 'organizationPincode', 'staffReqStartDate'])
     ];
-    
-    // Check required fields
+
     for (const field of requiredFields) {
       const value = formData[field as keyof FormData];
       if (!value || (typeof value === 'string' && !value.trim())) {
@@ -352,8 +354,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         isValid = false;
       }
     }
-    
-    // Validate field formats
+
     for (const field of Object.keys(formData)) {
       const value = formData[field as keyof FormData];
       if (typeof value === 'string' && value.trim()) {
@@ -365,7 +366,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       }
     }
     
-    // Validate staff requirements for organizations
     if (clientType !== 'individual') {
       if (!formData.staffRequirements || formData.staffRequirements.length === 0) {
         newErrors.staffRequirements = 'Please add at least one staff requirement';
@@ -428,17 +428,19 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     if (e) {
       e.preventDefault();
     }
-    
-    // Validate form before submission
+
     if (!validateForm()) {
+      console.log("validation failed")
       toast.error("Please correct the errors in the form");
       return;
     }
 
+    console.log("submitting")
+
     try {
       setIsSubmitting(true);
       let result;
-      
+
       if (clientType === 'individual') {
         result = await addIndividualClient({
           prevRegisterNumber: formData.prevRegisterNumber,
@@ -459,7 +461,8 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
           requestorState: formData.requestorState,
           requestorCity: formData.requestorCity,
           patientName: formData.patientName,
-          patientAge: formData.patientAge,
+          patientDOB: formData.patientDOB,
+          requestorDOB: formData.requestorDOB,
           patientGender: formData.patientGender,
           patientPhone: formData.patientPhone || '',
           patientAddress: formData.patientAddress,
@@ -502,21 +505,51 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         throw new Error(result.error || 'Failed to add client');
       }
 
+      const homeMaidResult = await addHousemaidRequest({
+        clientId: result.id, 
+        ...homeMaidFormData,
+      });
+
+      if (!homeMaidResult.success) {
+        throw new Error(homeMaidResult.error || 'Failed to add home maid request');
+      }
+
       invalidateDashboardCache();
       setIsSuccess(true);
-      toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client added successfully!`);
-      
+      toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client and Home Maid request added successfully!`);
+
       if (onSuccess) {
         onSuccess();
       }
-      
+
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      console.error('Error adding client:', errorMessage);
+      console.error('Error adding client or home maid request:', errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleHomeMaidInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setHomeMaidFormData(prev => ({ ...prev, [name]: value }));
+      if (homeMaidFormErrors[name]) {
+        setHomeMaidFormErrors(prev => ({ ...prev, [name]: '' }));
+      }
+    },
+    [homeMaidFormErrors]
+  );
+
+  const handleHomeMaidDutyChange = (key: keyof Duties) => {
+    setHomeMaidFormData(prev => ({
+      ...prev,
+      duties: {
+        ...prev.duties,
+        [key]: !prev.duties[key],
+      },
+    }));
   };
 
   return {
@@ -535,6 +568,12 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     handleSameAddressToggle,
     handleSubmit,
     validateForm,
-    setIsSuccess
+    setIsSuccess,
+    homeMaidFormData,
+    setHomeMaidFormData,
+    homeMaidFormErrors,
+    setHomeMaidFormErrors,
+    handleHomeMaidInputChange,
+    handleHomeMaidDutyChange,
   };
 };
