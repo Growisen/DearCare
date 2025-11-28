@@ -23,6 +23,10 @@ export default function ClientFormPage() {
     handleStaffRequirementsChange,
     handleClientTypeChange,
     handleSameAddressToggle,
+    homeMaidFormData,
+    homeMaidFormErrors,
+    handleHomeMaidInputChange,
+    handleHomeMaidDutyChange,
     handleSubmit,
   } = useClientForm({
     onSuccess: () => {
@@ -81,6 +85,10 @@ export default function ClientFormPage() {
                 handleClientTypeChange={handleClientTypeChange}
                 handleSameAddressToggle={handleSameAddressToggle}
                 handleSubmit={handleSubmit}
+                homeMaidFormData={homeMaidFormData}
+                homeMaidFormErrors={homeMaidFormErrors}
+                handleHomeMaidInputChange={handleHomeMaidInputChange}
+                handleHomeMaidDutyChange={handleHomeMaidDutyChange}
                 submitButtonText="Register Client"
               />
             </div>

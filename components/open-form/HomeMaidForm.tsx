@@ -13,6 +13,7 @@ export default function HousemaidServiceForm({
   formData,
   handleInputChange,
   handleDutyChange,
+  formErrors
 }: HousemaidServiceFormProps) {
   const baseInputStyles = `
     w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
@@ -50,15 +51,23 @@ export default function HousemaidServiceForm({
                 </label>
               ))}
             </div>
+            {formErrors.serviceType && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.serviceType}</p>
+            )}
             {formData.serviceType === 'other' && (
-              <input
-                type="text"
-                name="serviceTypeOther"
-                value={formData.serviceTypeOther}
-                onChange={handleInputChange}
-                className={`${baseInputStyles} mt-2`}
-                placeholder="Please specify..."
-              />
+              <>
+                <input
+                  type="text"
+                  name="serviceTypeOther"
+                  value={formData.serviceTypeOther}
+                  onChange={handleInputChange}
+                  className={`${baseInputStyles} mt-2`}
+                  placeholder="Please specify..."
+                />
+                {formErrors.serviceTypeOther && (
+                  <p className="text-xs text-red-500 mt-1">{formErrors.serviceTypeOther}</p>
+                )}
+              </>
             )}
           </div>
 
@@ -78,6 +87,9 @@ export default function HousemaidServiceForm({
               <option value="monthly">Monthly</option>
               <option value="one-time">One-time Only</option>
             </select>
+            {formErrors.frequency && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.frequency}</p>
+            )}
           </div>
 
           <div className="md:col-span-4">
@@ -89,6 +101,9 @@ export default function HousemaidServiceForm({
               placeholder="e.g., Mon & Thu, 9am-1pm"
               className={baseInputStyles}
             />
+            {formErrors.preferredSchedule && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.preferredSchedule}</p>
+            )}
           </div>
         </div>
       </div>
@@ -113,6 +128,9 @@ export default function HousemaidServiceForm({
                 </label>
               ))}
             </div>
+            {formErrors.homeType && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.homeType}</p>
+            )}
           </div>
 
           <div className="md:col-span-4">
@@ -125,6 +143,9 @@ export default function HousemaidServiceForm({
               min={0}
               className={baseInputStyles}
             />
+            {formErrors.bedrooms && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.bedrooms}</p>
+            )}
           </div>
           <div className="md:col-span-4">
             <label className={labelStyles}>Bathrooms</label>
@@ -136,6 +157,9 @@ export default function HousemaidServiceForm({
               min={0}
               className={baseInputStyles}
             />
+            {formErrors.bathrooms && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.bathrooms}</p>
+            )}
           </div>
           <div className="md:col-span-4">
             <label className={labelStyles}>Household Size</label>
@@ -147,6 +171,9 @@ export default function HousemaidServiceForm({
               min={1}
               className={baseInputStyles}
             />
+            {formErrors.householdSize && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.householdSize}</p>
+            )}
           </div>
 
           <div className="md:col-span-12">
@@ -175,6 +202,9 @@ export default function HousemaidServiceForm({
                 <span className="text-sm text-gray-700">No</span>
               </label>
             </div>
+            {formErrors.hasPets && (
+              <p className="text-xs text-red-500 mt-1">{formErrors.hasPets}</p>
+            )}
             {formData.hasPets === 'yes' && (
               <>
                 <label className={labelStyles}>Pet Details</label>
@@ -185,6 +215,9 @@ export default function HousemaidServiceForm({
                   placeholder="Specify type and number"
                   className={baseInputStyles}
                 />
+                {formErrors.petDetails && (
+                  <p className="text-xs text-red-500 mt-1">{formErrors.petDetails}</p>
+                )}
               </>
             )}
           </div>
@@ -215,6 +248,10 @@ export default function HousemaidServiceForm({
                   {label}
                 </label>
               ))}
+              {/* Duty errors */}
+              {formErrors.duties && (
+                <p className="text-xs text-red-500 mt-1">{formErrors.duties}</p>
+              )}
             </div>
           </div>
 
@@ -241,6 +278,9 @@ export default function HousemaidServiceForm({
                         className={baseInputStyles}
                         placeholder="Veg/Non-veg details..."
                       />
+                      {formErrors.mealPrepDetails && (
+                        <p className="text-xs text-red-500 mt-1">{formErrors.mealPrepDetails}</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -279,6 +319,9 @@ export default function HousemaidServiceForm({
                         className={baseInputStyles}
                         placeholder="Specify ages/hours..."
                       />
+                      {formErrors.childcareDetails && (
+                        <p className="text-xs text-red-500 mt-1">{formErrors.childcareDetails}</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -300,6 +343,9 @@ export default function HousemaidServiceForm({
                 className={baseInputStyles}
                 placeholder="e.g., Must use hypoallergenic products"
              />
+             {formErrors.allergies && (
+               <p className="text-xs text-red-500 mt-1">{formErrors.allergies}</p>
+             )}
            </div>
 
            <div className="md:col-span-12">
@@ -311,6 +357,9 @@ export default function HousemaidServiceForm({
                 placeholder="e.g., Home Office, Garage"
                 className={baseInputStyles}
               />
+              {formErrors.restrictedAreas && (
+                <p className="text-xs text-red-500 mt-1">{formErrors.restrictedAreas}</p>
+              )}
            </div>
 
            <div className="md:col-span-12">
@@ -323,6 +372,9 @@ export default function HousemaidServiceForm({
                 className={baseInputStyles}
                 placeholder="Any specific protocols..."
               />
+              {formErrors.specialInstructions && (
+                <p className="text-xs text-red-500 mt-1">{formErrors.specialInstructions}</p>
+              )}
            </div>
         </div>
       </div>

@@ -305,8 +305,6 @@ export async function addHousemaidRequest(formData: HousemaidRequestData) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    console.log("Adding housemaid request for client:", formData);
-
     const { error } = await supabase
       .from('housemaid_requests')
       .insert({
