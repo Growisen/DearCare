@@ -170,6 +170,11 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                       {approvingId === group.id ? "Approving..." : "Approve"}
                     </button>
                   )}
+                  {group.approved && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+                      Approved
+                    </span>
+                  )}
                   <button 
                     onClick={() => onDelete(group.id)} 
                     className="text-red-600 hover:text-red-900 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"
