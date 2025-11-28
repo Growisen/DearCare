@@ -25,9 +25,74 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
 
   const selectedRequest = housemaidRequests[0];
 
-  if (isLoading) return <div className="py-12 text-center text-gray-500 animate-pulse">Loading preferences...</div>;
-  if (error) return <div className="py-12 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">{error}</div>;
-  if (!selectedRequest) return <div className="py-12 text-center text-gray-500 italic">No home maid preferences found.</div>;
+  // Always show copy button
+  const CopyLinkButton = (
+    <button
+      className={`px-4 py-2 rounded flex items-center gap-1 ${
+        copySuccess
+          ? "bg-green-100 text-green-700 border border-green-300"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`}
+      onClick={() => {
+        navigator.clipboard.writeText(`/home-maid-preferences/${clientId}`);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000);
+      }}
+      title="Copy link to open form"
+    >
+      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <path d="M15 7h2a5 5 0 0 1 0 10h-2M9 17H7a5 5 0 0 1 0-10h2" />
+        <path d="M8 12h8" />
+      </svg>
+      {copySuccess ? "Copied!" : "Copy Link"}
+    </button>
+  );
+
+  // New: External link button
+  const ExternalLinkButton = (
+    <a
+      href={`/home-maid-preferences/${clientId}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+      title="Open preferences in new tab"
+    >
+      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+      Open in New Tab
+    </a>
+  );
+
+  if (isLoading) return (
+    <div className="py-12 text-center text-gray-500 animate-pulse">
+      <div className="flex justify-end mb-4 space-x-2">
+        {CopyLinkButton}
+        {ExternalLinkButton}
+      </div>
+      Loading preferences...
+    </div>
+  );
+  if (error) return (
+    <div className="py-12 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">
+      <div className="flex justify-end mb-4 space-x-2">
+        {CopyLinkButton}
+        {ExternalLinkButton}
+      </div>
+      {error}
+    </div>
+  );
+  if (!selectedRequest) return (
+    <div className="py-12 text-center text-gray-500 italic">
+      <div className="flex justify-end mb-4 space-x-2">
+        {CopyLinkButton}
+        {ExternalLinkButton}
+      </div>
+      No home maid preferences found.
+    </div>
+  );
 
   const dutiesList = selectedRequest.duties && typeof selectedRequest.duties === "object"
     ? Object.entries(selectedRequest.duties)
@@ -69,25 +134,8 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
         >
           Edit
         </button>
-        <button
-          className={`px-4 py-2 rounded flex items-center gap-1 ${
-            copySuccess
-              ? "bg-green-100 text-green-700 border border-green-300"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-          onClick={() => {
-            navigator.clipboard.writeText(`/home-maid-preferences/${clientId}`);
-            setCopySuccess(true);
-            setTimeout(() => setCopySuccess(false), 3000);
-          }}
-          title="Copy link to open form"
-        >
-          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M15 7h2a5 5 0 0 1 0 10h-2M9 17H7a5 5 0 0 1 0-10h2" />
-            <path d="M8 12h8" />
-          </svg>
-          {copySuccess ? "Copied!" : "Copy Link"}
-        </button>
+        {CopyLinkButton}
+        {ExternalLinkButton}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title="Service Schedule" icon={<Calendar className="w-4 h-4" />}>
