@@ -300,10 +300,26 @@ interface HousemaidRequestData extends FormData {
 
 /**
  * Adds a new housemaid request to the database
+ * Only one request per client_id is allowed
  */
 export async function addHousemaidRequest(formData: HousemaidRequestData) {
   try {
     const supabase = await createSupabaseServerClient();
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('housemaid_requests')
+      .select('id')
+      .eq('client_id', formData.clientId)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      logger.error('Error checking existing housemaid request:', fetchError);
+      return { success: false, error: fetchError.message };
+    }
+
+    if (existing) {
+      return { success: false, error: 'You already have a housemaid request.' };
+    }
 
     const { error } = await supabase
       .from('housemaid_requests')
@@ -341,9 +357,6 @@ export async function addHousemaidRequest(formData: HousemaidRequestData) {
 }
 
 
-/**
- * Fetches housemaid requests for a specific client from the database
- */
 export async function fetchHousemaidRequestsByClientId(clientId: string) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -357,11 +370,58 @@ export async function fetchHousemaidRequestsByClientId(clientId: string) {
       throw new Error(error.message);
     }
 
-    return { success: true, data };
+    const mappedData = Array.isArray(data)
+      ? data.map((item) => ({
+          ...item,
+          has_pets: item.has_pets ? "Yes" : "No"
+        }))
+      : [];
+
+    return { success: true, data: mappedData };
   } catch (error) {
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred' 
     };
+  }
+}
+
+
+export async function updateHousemaidRequest(clientId: string, formData: Partial<FormData>) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('housemaid_requests')
+      .update({
+        service_type: formData.serviceType,
+        service_type_other: formData.serviceTypeOther ?? null,
+        frequency: formData.frequency ?? null,
+        preferred_schedule: formData.preferredSchedule ?? null,
+        home_type: formData.homeType ?? null,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        household_size: formData.householdSize,
+        has_pets: formData.hasPets,
+        pet_details: formData.petDetails ?? null,
+        duties: formData.duties ?? {},
+        meal_prep_details: formData.mealPrepDetails ?? null,
+        childcare_details: formData.childcareDetails ?? null,
+        allergies: formData.allergies ?? null,
+        restricted_areas: formData.restrictedAreas ?? null,
+        special_instructions: formData.specialInstructions ?? null,
+      })
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error updating housemaid request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error updating housemaid request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
 }

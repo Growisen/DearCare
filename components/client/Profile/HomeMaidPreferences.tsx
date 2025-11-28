@@ -1,21 +1,27 @@
 "use client"
 
-import React from "react";
+import React, { useState } from "react";
 import { formatDate } from "@/utils/formatters";
 import { useHousemaidData } from "@/hooks/useHousemaidData";
 import InfoField from "./InfoField";
-import { Duties } from "@/types/homemaid.types";
 import { 
   Calendar, Home, Users, CheckSquare, 
   AlertCircle, Clock, FileText 
 } from "lucide-react";
+import EditHomeMaidForm from "@/components/open-form/EditHomeMaidForm";
+import ModalPortal from "@/components/ui/ModalPortal";
 
 interface HomeMaidPreferencesProps {
   clientId: string;
 }
 
 const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) => {
-  const { housemaidRequests, isLoading, error } = useHousemaidData(clientId, true);
+  const { 
+    housemaidRequests, isLoading, error, 
+    editHousemaidPreferences 
+  } = useHousemaidData(clientId, true);
+  const [showModal, setShowModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const selectedRequest = housemaidRequests[0];
 
@@ -23,12 +29,66 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
   if (error) return <div className="py-12 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">{error}</div>;
   if (!selectedRequest) return <div className="py-12 text-center text-gray-500 italic">No home maid preferences found.</div>;
 
-  const dutiesList = Array.isArray(selectedRequest.duties) 
-    ? selectedRequest.duties 
+  const dutiesList = selectedRequest.duties && typeof selectedRequest.duties === "object"
+    ? Object.entries(selectedRequest.duties)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, value]) => value === true)
+        .map(([key]) => key)
     : [];
+
+  const initialData = {
+    serviceType: selectedRequest.service_type,
+    serviceTypeOther: selectedRequest.service_type_other,
+    frequency: selectedRequest.frequency,
+    preferredSchedule: selectedRequest.preferred_schedule,
+    homeType: selectedRequest.home_type,
+    householdSize: selectedRequest.household_size,
+    bedrooms: selectedRequest.bedrooms,
+    bathrooms: selectedRequest.bathrooms,
+    restrictedAreas: selectedRequest.restricted_areas,
+    hasPets: selectedRequest.has_pets,
+    petDetails: selectedRequest.pet_details,
+    mealPrepDetails: selectedRequest.meal_prep_details,
+    childcareDetails: selectedRequest.childcare_details,
+    allergies: selectedRequest.allergies,
+    duties: selectedRequest.duties,
+    specialInstructions: selectedRequest.special_instructions,
+  };
+
+  const handleEditSubmit = (data: typeof initialData) => {
+    editHousemaidPreferences(data);
+    setShowModal(false);
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="flex justify-end mb-4 space-x-2">
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => setShowModal(true)}
+        >
+          Edit
+        </button>
+        <button
+          className={`px-4 py-2 rounded flex items-center gap-1 ${
+            copySuccess
+              ? "bg-green-100 text-green-700 border border-green-300"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+          onClick={() => {
+            navigator.clipboard.writeText(`/home-maid-preferences/${clientId}`);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 3000);
+          }}
+          title="Copy link to open form"
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M15 7h2a5 5 0 0 1 0 10h-2M9 17H7a5 5 0 0 1 0-10h2" />
+            <path d="M8 12h8" />
+          </svg>
+          {copySuccess ? "Copied!" : "Copy Link"}
+        </button>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title="Service Schedule" icon={<Calendar className="w-4 h-4" />}>
           <div className="grid grid-cols-2 gap-x-4 gap-y-6">
@@ -66,7 +126,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
              </div>
              <div className="grid grid-cols-1 gap-4">
                 <InfoField label="Meal Prep" value={selectedRequest.meal_prep_details} fallback="Not requested" />
-                <InfoField label="Childcare" value={selectedRequest.childcare_details} fallback="Not requested" />
+                <InfoField label="Childcare Assistance Requirement" value={selectedRequest.childcare_details} fallback="Not requested" />
                 <InfoField label="Allergies" value={selectedRequest.allergies} icon={<AlertCircle className="w-3 h-3"/>} fallback="None reported" />
              </div>
           </div>
@@ -74,12 +134,12 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
         <SectionCard title="Duties & Instructions" icon={<CheckSquare className="w-4 h-4" />}>
           <div className="space-y-6">
             <div>
-              <p className="text-xs text-gray-500 font-medium mb-3 uppercase tracking-wider">Requested Duties</p>
+              <p className="text-xs text-gray-500 font-medium mb-3 uppercase tracking-wider">Core Cleaning Duties Requested</p>
               {dutiesList.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {dutiesList.map((duty: Duties, idx: number) => (
+                  {dutiesList.map((duty: string, idx: number) => (
                     <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                      {typeof duty === 'string' ? duty : JSON.stringify(duty)}
+                      {duty}
                     </span>
                   ))}
                 </div>
@@ -98,6 +158,28 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
           </div>
         </SectionCard>
       </div>
+      {showModal && (
+        <ModalPortal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-sm shadow-lg p-6 relative w-full max-w-4xl max-h-[80vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between mb-6 border-b pb-3">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Edit Home Maid Preferences
+                </h2>
+                <button
+                  className="text-2xl text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowModal(false)}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <EditHomeMaidForm initialData={initialData} onSubmit={handleEditSubmit} />
+            </div>
+          </div>
+        </ModalPortal>
+      )}
     </div>
   );
 };

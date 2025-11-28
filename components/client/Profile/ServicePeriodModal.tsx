@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { serviceOptions } from "@/utils/constants";
 
 export type ServicePeriodFormValues = {
   startDate: string;
   endDate: string;
   notes: string;
+  serviceRequired?: string;
 };
 
 export interface ServicePeriod {
@@ -12,6 +14,7 @@ export interface ServicePeriod {
   endDate: string;
   notes?: string;
   status: "active" | "completed" | "cancelled";
+  serviceRequired?: string;
 }
 
 interface ServicePeriodModalProps {
@@ -42,9 +45,10 @@ const ServicePeriodModal: React.FC<ServicePeriodModalProps> = ({
           startDate: initialData.startDate,
           endDate: initialData.endDate,
           notes: initialData.notes || "",
+          serviceRequired: initialData.serviceRequired || "",
         });
       } else {
-        setForm({ startDate: "", endDate: "", notes: "" });
+        setForm({ startDate: "", endDate: "", notes: "", serviceRequired: "" });
       }
     }
   }, [isOpen, initialData]);
@@ -66,7 +70,7 @@ const ServicePeriodModal: React.FC<ServicePeriodModalProps> = ({
             <label className="block text-xs font-medium text-gray-500 mb-1">Start Date</label>
             <input
               type="date"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm outline-none"
               value={form.startDate}
               onChange={(e) => setForm({ ...form, startDate: e.target.value })}
             />
@@ -75,7 +79,7 @@ const ServicePeriodModal: React.FC<ServicePeriodModalProps> = ({
             <label className="block text-xs font-medium text-gray-500 mb-1">End Date</label>
             <input
               type="date"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm outline-none"
               value={form.endDate}
               onChange={(e) => setForm({ ...form, endDate: e.target.value })}
             />
@@ -85,10 +89,27 @@ const ServicePeriodModal: React.FC<ServicePeriodModalProps> = ({
             <input
               type="text"
               placeholder="Optional notes..."
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm outline-none"
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Service Required <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm outline-none appearance-none"
+              value={form.serviceRequired || ""}
+              onChange={e => setForm({ ...form, serviceRequired: e.target.value })}
+              required
+            >
+              {serviceOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">

@@ -14,7 +14,6 @@ export interface Duties {
 export interface FormData {
   serviceType: 'live-in' | 'part-time' | 'other';
   serviceTypeOther: string;
-  startDate: string;
   frequency: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'one-time' | '';
   preferredSchedule: string;
 

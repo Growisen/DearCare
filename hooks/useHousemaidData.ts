@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { fetchHousemaidRequestsByClientId } from "@/app/actions/clients/individual-clients"
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import { fetchHousemaidRequestsByClientId, updateHousemaidRequest } from "@/app/actions/clients/individual-clients"
 import { FormData } from "@/types/homemaid.types"
 
 export function useHousemaidData(clientId: string, shouldFetch: boolean) {
@@ -22,6 +22,13 @@ export function useHousemaidData(clientId: string, shouldFetch: boolean) {
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
     refetchInterval: 1000 * 60 * 10,
+  })
+
+  const editMutation = useMutation({
+    mutationFn: (formData: Partial<FormData>) => updateHousemaidRequest(clientId, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['housemaidRequests', clientId] })
+    },
   })
 
   const invalidateHousemaidCache = () => {
@@ -51,5 +58,12 @@ export function useHousemaidData(clientId: string, shouldFetch: boolean) {
     handleSearch,
     refetch,
     invalidateHousemaidCache,
+    editHousemaidPreferences: editMutation.mutate,
+    editStatus: {
+      isLoading: editMutation.isPending,
+      isSuccess: editMutation.isSuccess,
+      isError: editMutation.isError,
+      error: editMutation.error,
+    },
   }
 }
