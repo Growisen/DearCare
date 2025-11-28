@@ -30,7 +30,6 @@ const INITIAL_DUTIES: Duties = {
 const INITIAL_HOME_MAID_DATA: HomeMaidFormData = {
   serviceType: 'part-time',
   serviceTypeOther: '',
-  startDate: '',
   frequency: '',
   preferredSchedule: '',
   homeType: '',
