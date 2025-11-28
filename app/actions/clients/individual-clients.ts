@@ -339,3 +339,29 @@ export async function addHousemaidRequest(formData: HousemaidRequestData) {
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
 }
+
+
+/**
+ * Fetches housemaid requests for a specific client from the database
+ */
+export async function fetchHousemaidRequestsByClientId(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('housemaid_requests')
+      .select('*')
+      .eq('client_id', clientId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
+  }
+}
