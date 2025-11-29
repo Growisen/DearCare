@@ -4,6 +4,8 @@ import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
 import { toast } from 'react-hot-toast';
 import { addIndividualClient, addOrganizationClient, addHousemaidRequest } from '@/app/actions/clients/client-actions';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { clientSchema, homeMaidSchema } from '@/validation/clientSchemas';
+import { z } from 'zod';
 
 interface FormErrors {
   [key: string]: string;
@@ -54,7 +56,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   );
   const [isSuccess, setIsSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<{[key: string]: boolean}>({});
+  // Removed unused 'touched' state
   const [isSameAddress, setIsSameAddress] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
@@ -115,173 +117,54 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   const [homeMaidFormData, setHomeMaidFormData] = useState<HomeMaidFormData>(INITIAL_HOME_MAID_DATA);
   const [homeMaidFormErrors, setHomeMaidFormErrors] = useState<FormErrors>({});
 
-  const fieldLabels: {[key: string]: string} = {
-    dutyPeriod: 'Duty period',
-    dutyPeriodReason: 'Reason for extended duration',
-    requestorName: 'Your name',
-    requestorPhone: 'Your phone number',
-    requestorEmail: 'Your email address',
-    relationToPatient: 'Relation to patient',
-    patientName: 'Patient name',
-    patientDOB: 'Patient date of birth',
-    patientGender: 'Patient gender',
-    patientPhone: 'Patient phone number',
-    serviceRequired: 'Service required',
-    careDuration: 'Care duration',
-    startDate: 'Start date',
-    organizationName: 'Organization name',
-    organizationType: 'Organization type',
-    contactPersonName: 'Contact person name',
-    contactPersonRole: 'Contact person role',
-    contactPhone: 'Contact phone',
-    contactEmail: 'Contact email',
-    organizationState: 'Organization state',
-    organizationDistrict: 'Organization district',
-    organizationCity: 'Organization city',
-    organizationAddress: 'Organization address',
-    organizationPincode: 'Organization pincode',
-    preferredCaregiverGender: 'Preferred caregiver gender',
-    staffReqStartDate: 'Staff requirement start date',
-    requestorAddress: 'Your address',
-    requestorPincode: 'Your pincode',
-    requestorCity: 'Your city',
-    requestorDistrict: 'Your district',
-    requestorState: 'Your State',
-    patientAddress: 'Patient address',
-    patientPincode: 'Patient pincode',
-    patientCity: 'Patient city',
-    patientDistrict: 'Patient district',
-    patientState: 'Patient State',
-    requestorJobDetails: 'Your job details',
-    requestorEmergencyPhone: 'Emergency contact number',
-    requestorDOB: 'Your date of birth',
-  };
+  const toErrorMap = (issues: z.ZodIssue[]): Record<string,string> =>
+    issues.reduce((acc, issue) => {
+      const pathKey = issue.path.join('.');
+      if (!acc[pathKey]) acc[pathKey] = issue.message;
+      return acc;
+    }, {} as Record<string,string>);
 
-  const validateField = (id: string, value: string): string => {
-    if (!value.trim()) return '';
-    
-    switch (id) {
-      case 'requestorEmail':
-      case 'contactEmail':
-        return validateEmail(value);
-      case 'requestorPhone':
-      case 'patientPhone':
-      case 'contactPhone':
-        return validatePhone(value);
-      case 'patientDOB':
-      case 'requestorDOB':
-        return isValidDate(value) ? '' : 'Please enter a valid date';
-      case 'patientGender':
-      case 'preferredCaregiverGender':
-        return value === '' ? 'Please select a gender option' : '';
-      case 'serviceRequired':
-        return value === '' ? 'Please select a required service' : '';
-
-      case 'dutyPeriod':
-        return value === '' ? 'Please select a duty period' : '';
-      case 'dutyPeriodReason':
-        if (formData.dutyPeriod === 'above_3_months' && !value.trim()) {
-          return 'Please provide a reason for extended duration';
-        }
-        return '';
-      case 'startDate':
-      case 'staffReqStartDate':
-        return isValidDate(value) ? '' : 'Please enter a valid date';
-      default:
-        return '';
+  const handleBlur = (id: string) => {
+    const parsed = clientSchema.safeParse({ ...formData });
+    if (!parsed.success) {
+      const errs = toErrorMap(parsed.error.issues);
+      setFormErrors(prev => ({ ...prev, [id]: errs[id] || '' }));
+    } else {
+      setFormErrors(prev => ({ ...prev, [id]: '' }));
     }
   };
 
-  const isValidDate = (dateString: string): boolean => {
-    const date = new Date(dateString);
-    return !isNaN(date.getTime());
-  };
-
-  const validateEmail = (email: string): string => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) ? '' : 'Please enter a valid email address';
-  };
-
-  const validatePhone = (phone: string): string => {
-    const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
-    return phoneRegex.test(phone) ? '' : 'Please enter a valid phone number';
-  };
-
-  // Helper to determine if a field is required based on client type
-  const isRequiredField = (id: string, type: ClientType): boolean => {
-    const commonRequired = ['dutyPeriod'];
-
-    if (id === 'dutyPeriodReason' && formData.dutyPeriod === 'above_3_months') {
-      return true;
-    }
-
-    const individualRequired = [
-      'requestorName', 'requestorPhone', 'requestorEmail',
-      'serviceRequired', 'startDate', 'requestorState',
-      'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
-      'requestorDOB', // new required field
-      'patientDOB',   // replaces patientAge
-    ];
-    
-    const organizationRequired = [
-      'organizationName', 'organizationType', 'contactPersonName', 
-      'contactPersonRole', 'contactPhone', 'contactEmail', 
-      'organizationState', 'organizationDistrict', 'organizationCity',
-      'organizationAddress', 'organizationPincode', 'staffReqStartDate'
-    ];
-    
-    return commonRequired.includes(id) || (type === 'individual' 
-      ? individualRequired.includes(id)
-      : organizationRequired.includes(id));
-  };
-
-  // Updated handleInputChange to clear errors
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => {
-      // Basic update
-      const newState = {
-        ...prev,
-        [id as keyof FormData]: value
-      };
-      
-      // If addresses are synced and a requestor address field changes, update corresponding patient field
-      if (isSameAddress && 
-          ['requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict', 'requestorState'].includes(id)) {
-        const patientField = id.replace('requestor', 'patient');
-        (newState[patientField as keyof Pick<FormData, 'patientAddress' | 'patientPincode' | 'patientCity' | 'patientDistrict' | 'patientState'>]) = value;
+      const next = { ...prev, [id]: value };
+      if (isSameAddress && ['requestorAddress','requestorPincode','requestorCity','requestorDistrict','requestorState'].includes(id)) {
+        const patientField = id.replace('requestor','patient');
+        if (patientField in next) {
+          (next as Record<string, unknown>)[patientField] = value;
+        }
       }
-      
-      return newState;
+      return next;
     });
-  
-    // Clear error when user starts typing
-    if (formErrors[id]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [id]: ''
-      }));
+    setFormErrors(prev => ({ ...prev, [id]: '' }));
+  }, [isSameAddress]);
+
+  const validateForm = (): boolean => {
+    const parsed = clientSchema.safeParse(formData);
+    if (!parsed.success) {
+      setFormErrors(toErrorMap(parsed.error.issues));
+      return false;
     }
-  }, [formErrors, isSameAddress]);
-
-  const handleBlur = (id: string) => {
-    setTouched(prev => ({
-      ...prev,
-      [id]: true
-    }));
-
-    // Validate field
-    const value = formData[id as keyof FormData] as string;
-    const error = validateField(id, value);
-    
-    // Set error if field is required and empty
-    const isRequired = isRequiredField(id, clientType);
-    const isEmpty = !value || (typeof value === 'string' && !value.trim());
-    
-    setFormErrors(prev => ({
-      ...prev,
-      [id]: error || (touched[id] && isRequired && isEmpty ? `${fieldLabels[id] || 'This field'} is required` : '')
-    }));
+    if (formData.clientType === 'individual' && formData.serviceRequired === 'home_maid') {
+      const hmParsed = homeMaidSchema.safeParse(homeMaidFormData);
+      if (!hmParsed.success) {
+        setHomeMaidFormErrors(toErrorMap(hmParsed.error.issues));
+        return false;
+      }
+    }
+    setFormErrors({});
+    setHomeMaidFormErrors({});
+    return true;
   };
 
   const handleProfileImageChange = (field: 'requestorProfilePic' | 'patientProfilePic', file: File | null) => {
@@ -307,7 +190,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }));
 
     setFormErrors({});
-    setTouched({});
   };
 
   const handleClientCategoryChange = (category: ClientCategory) => {
@@ -317,78 +199,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }));
 
     setFormErrors({});
-    setTouched({});
-  };
-
-  // Validate all fields before submission
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-    let isValid = true;
-
-    const commonRequired = ['dutyPeriod'];
-    
-    if (formData.dutyPeriod === 'above_3_months' && !formData.dutyPeriodReason?.trim()) {
-      newErrors.dutyPeriodReason = 'Please provide a reason for extended duration';
-      isValid = false;
-    }
-    
-    const requiredFields = [
-      ...commonRequired,
-      ...(clientType === 'individual' 
-        ? [
-            'requestorName', 'requestorPhone', 'requestorEmail', 
-            'serviceRequired', 'startDate', 'requestorState',
-            'requestorAddress', 'requestorPincode', 'requestorCity', 'requestorDistrict',
-            'requestorDOB',
-          ]
-        : [
-            'organizationName', 'organizationType', 'contactPersonName', 'contactPersonRole',
-            'contactPhone', 'contactEmail', 'organizationState', 'organizationDistrict', 'organizationCity',
-            'organizationAddress', 'organizationPincode', 'staffReqStartDate'])
-    ];
-
-    for (const field of requiredFields) {
-      const value = formData[field as keyof FormData];
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        newErrors[field] = `${fieldLabels[field] || 'This field'} is required`;
-        isValid = false;
-      }
-    }
-
-    for (const field of Object.keys(formData)) {
-      const value = formData[field as keyof FormData];
-      if (typeof value === 'string' && value.trim()) {
-        const error = validateField(field, value);
-        if (error) {
-          newErrors[field] = error;
-          isValid = false;
-        }
-      }
-    }
-    
-    if (clientType !== 'individual') {
-      if (!formData.staffRequirements || formData.staffRequirements.length === 0) {
-        newErrors.staffRequirements = 'Please add at least one staff requirement';
-        isValid = false;
-      } else {
-        for (let i = 0; i < formData.staffRequirements.length; i++) {
-          const req = formData.staffRequirements[i];
-          if (!req.staffType || !req.shiftType) {
-            newErrors[`staffRequirement-${i}`] = 'Please complete all staff requirement fields';
-            isValid = false;
-            break;
-          }
-        }
-      }
-      
-      if (!formData.staffReqStartDate) {
-        newErrors.staffReqStartDate = 'Start date is required';
-        isValid = false;
-      }
-    }
-    
-    setFormErrors(newErrors);
-    return isValid;
   };
 
   const handleSameAddressToggle = (checked: boolean) => {
@@ -430,12 +240,9 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }
 
     if (!validateForm()) {
-      console.log("validation failed")
       toast.error("Please correct the errors in the form");
       return;
     }
-
-    console.log("submitting")
 
     try {
       setIsSubmitting(true);
@@ -567,7 +374,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     handleClientCategoryChange,
     handleSameAddressToggle,
     handleSubmit,
-    validateForm,
     setIsSuccess,
     homeMaidFormData,
     setHomeMaidFormData,
