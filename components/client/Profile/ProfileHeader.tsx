@@ -223,7 +223,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       </div>
       
       <div className="w-full mt-8 border-t border-gray-200 bg-gray-50/50 pt-4 pb-2">
-        <div className="overflow-x-auto scrollbar-hide">
+        <div className="overflow-x-auto scrollbar-hide slim-scrollbar">
           <div className="flex flex-row items-center gap-6 min-w-max px-1">
 
             <div className="flex items-center">
