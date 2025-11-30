@@ -478,6 +478,104 @@ export async function addDeliveryCareRequest(formData: DeliveryCareRequestData) 
 }
 
 
+export async function fetchDeliveryCareRequestsByClientId(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('delivery_care_requests')
+      .select('*')
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error fetching delivery care requests:', error);
+      return { success: false, error: error.message };
+    }
+
+    const mappedData = Array.isArray(data)
+      ? data.map(item => ({
+          id: item.id,
+          clientId: item.client_id,
+          carePreferred: item.care_preferred,
+          deliveryDate: item.delivery_date,
+          deliveryType: item.delivery_type,
+          motherAllergies: item.mother_allergies,
+          motherMedications: item.mother_medications,
+          numberOfBabies: item.number_of_babies,
+          feedingMethod: item.feeding_method,
+          babyAllergies: item.baby_allergies,
+          preferredSchedule: item.preferred_schedule,
+          duties: item.duties,
+          expectedDueDate: item.expected_due_date,
+          backupContactName: item.backup_contact_name,
+          backupContactNumber: item.backup_contact_number,
+          medicalHistory: item.medical_history,
+          hospitalName: item.hospital_name,
+          doctorName: item.doctor_name,
+          birthDateTime: item.birth_date_time,
+          roomDetails: item.room_details,
+          babyGender: item.baby_gender,
+          babyWeight: item.baby_weight,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at
+        }))
+      : [];
+
+    return { success: true, data: mappedData };
+  } catch (error) {
+    logger.error('Error fetching delivery care requests:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
+  }
+}
+
+
+export async function updateDeliveryCareRequest(clientId: string, formData: Partial<DeliveryCareFormData>) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('delivery_care_requests')
+      .update({
+        care_preferred: formData.carePreferred,
+        delivery_date: formData.deliveryDate ?? null,
+        delivery_type: formData.deliveryType ?? null,
+        mother_allergies: formData.motherAllergies ?? null,
+        mother_medications: formData.motherMedications ?? null,
+        number_of_babies: formData.numberOfBabies ?? null,
+        feeding_method: formData.feedingMethod ?? null,
+        baby_allergies: formData.babyAllergies ?? null,
+        preferred_schedule: formData.preferredSchedule ?? null,
+        duties: formData.duties ?? { babyCare: false, motherCare: false },
+        expected_due_date: formData.expectedDueDate ?? null,
+        backup_contact_name: formData.backupContactName ?? null,
+        backup_contact_number: formData.backupContactNumber ?? null,
+        medical_history: formData.medicalHistory ?? null,
+        hospital_name: formData.hospitalName ?? null,
+        doctor_name: formData.doctorName ?? null,
+        birth_date_time: formData.birthDateTime ?? null,
+        room_details: formData.roomDetails ?? null,
+        baby_gender: formData.babyGender ?? null,
+        baby_weight: formData.babyWeight ?? null,
+      })
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error updating delivery care request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error updating delivery care request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
+}
+
+
 interface ChildCareRequestData extends ChildCareFormData {
   clientId: string;
 }
@@ -588,4 +686,35 @@ export async function updateChildCareRequest(clientId: string, formData: Partial
     logger.error('Error updating child care request:', error);
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
+}
+
+
+export async function isDeliveryCareRequestSubmitted(clientId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('delivery_care_requests')
+    .select('id')
+    .eq('client_id', clientId)
+    .single();
+  return { submitted: !!data && !error };
+}
+
+export async function isHousemaidRequestSubmitted(clientId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('housemaid_requests')
+    .select('id')
+    .eq('client_id', clientId)
+    .single();
+  return { submitted: !!data && !error };
+}
+
+export async function isChildCareRequestSubmitted(clientId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('child_care_requests')
+    .select('id')
+    .eq('client_id', clientId)
+    .single();
+  return { submitted: !!data && !error };
 }

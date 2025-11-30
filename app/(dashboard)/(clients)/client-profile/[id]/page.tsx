@@ -29,6 +29,7 @@ import ProfileTabs from '@/components/client/Profile/ProfileTabs';
 import Reassessment from '@/components/client/Profile/Reassessment'; 
 import HomeMaidPreferences from '@/components/client/Profile/HomeMaidPreferences';
 import ChildCarePreferences from '@/components/client/Profile/BabyCarePreferences';
+import DeliveryCarePreferences from '@/components/client/Profile/DeliveryCarePreferences';
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -312,6 +313,12 @@ const PatientProfilePage = () => {
             {activeTab === 'babyCarePreferences' && status === 'approved' && (
               <div className="space-y-6">
                 <ChildCarePreferences clientId={id} />
+              </div>
+            )}
+
+            {activeTab === 'deliveryCarePreferences' && status === 'approved' && (
+              <div className="space-y-6">
+                <DeliveryCarePreferences clientId={id} />
               </div>
             )}
           </div>

@@ -4,17 +4,19 @@ import { ChildCareFormData } from '@/types/childCare.types';
 
 interface ChildCareFormProps {
   formData: ChildCareFormData;
-  setFormData: React.Dispatch<React.SetStateAction<ChildCareFormData>>;
+  setFormData?: React.Dispatch<React.SetStateAction<ChildCareFormData>>;
   handleInputChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => void;
   handleCheckboxChange: (section: 'careNeeds' | 'homeTasks', key: string) => void;
+  formErrors?: Record<string, string>;
 }
 
 export default function ChildCareForm({
   formData,
   handleInputChange,
   handleCheckboxChange,
+  formErrors
 }: ChildCareFormProps) {
   const baseInputStyles = `
     w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
@@ -48,6 +50,9 @@ export default function ChildCareForm({
               min={1}
               placeholder="e.g. 2"
             />
+            {formErrors?.numberOfChildren && (
+              <div className="text-xs text-red-500 mt-1">{formErrors.numberOfChildren}</div>
+            )}
           </div>
           <div className="md:col-span-8">
             <InputField 
@@ -57,6 +62,9 @@ export default function ChildCareForm({
               onChange={handleInputChange}
               placeholder="e.g. 2 years, 5 years"
             />
+            {formErrors?.agesOfChildren && (
+              <div className="text-xs text-red-500 mt-1">{formErrors.agesOfChildren}</div>
+            )}
           </div>
 
           <div className="md:col-span-12">
@@ -80,6 +88,9 @@ export default function ChildCareForm({
                 </label>
               ))}
             </div>
+            {formErrors?.careNeeds && (
+              <div className="text-xs text-red-500 mt-1">{formErrors.careNeeds}</div>
+            )}
 
             {showCareDetailsInput && (
               <div className="mt-3 animate-in fade-in slide-in-from-top-1">
@@ -91,6 +102,9 @@ export default function ChildCareForm({
                   className={baseInputStyles}
                   placeholder="Please specify details regarding special needs or health issues..."
                 />
+                {formErrors?.careNeedsDetails && (
+                  <div className="text-xs text-red-500 mt-1">{formErrors.careNeedsDetails}</div>
+                )}
               </div>
             )}
           </div>
@@ -105,6 +119,9 @@ export default function ChildCareForm({
               className={baseInputStyles}
               placeholder="Any additional information about the children..."
             />
+            {formErrors?.notes && (
+              <div className="text-xs text-red-500 mt-1">{formErrors.notes}</div>
+            )}
           </div>
         </div>
       </div>
@@ -140,6 +157,9 @@ export default function ChildCareForm({
                 <span className="text-sm text-gray-700">Both Are Equally Important</span>
               </label>
             </div>
+            {formErrors?.primaryFocus && (
+              <div className="text-xs text-red-500 mt-1">{formErrors.primaryFocus}</div>
+            )}
           </div>
 
           <div className="md:col-span-12 bg-gray-50 p-4 border border-gray-100 rounded-sm">
@@ -164,6 +184,9 @@ export default function ChildCareForm({
                 </label>
               ))}
             </div>
+            {formErrors?.homeTasks && (
+              <div className="text-xs text-red-500 mt-1">{formErrors.homeTasks}</div>
+            )}
 
             {formData.homeTasks.other && (
               <div className="mt-3 animate-in fade-in slide-in-from-top-1">
@@ -175,6 +198,9 @@ export default function ChildCareForm({
                   className={baseInputStyles}
                   placeholder="Please specify other tasks..."
                 />
+                {formErrors?.homeTasksDetails && (
+                  <div className="text-xs text-red-500 mt-1">{formErrors.homeTasksDetails}</div>
+                )}
               </div>
             )}
           </div>

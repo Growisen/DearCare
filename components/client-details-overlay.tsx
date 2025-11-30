@@ -307,7 +307,7 @@ export function ClientDetailsOverlay({
         <h4 className={sectionHeaderStyles}>Care Requirements</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
           <DetailItem label="Service Required" value={getServiceLabel(serviceOptions, client.details?.service_required || '')} />
-          <DetailItem label="Care Duration" value={client.details?.care_duration || 'Not specified'} />
+          {/* <DetailItem label="Care Duration" value={client.details?.care_duration || 'Not specified'} /> */}
           <DetailItem label="Duty Period" value={getServiceLabel(dutyPeriodOptions, client.duty_period || '')} />
           <DetailItem label="Preferred Gender" value={client.details?.preferred_caregiver_gender} />
           <DetailItem label="Expected Start Date" value={formatDate(client.details?.start_date || '') || 'Not specified'} />

@@ -17,6 +17,7 @@ const TAB_CONFIG: { id: TabType; label: string; requiresApproval?: boolean }[] =
   { id: 'paymentDetails', label: 'Payment Details', requiresApproval: true },
   { id: 'homeMaidPreferences', label: 'Home Maid Preferences', requiresApproval: true },
   { id: 'babyCarePreferences', label: 'Baby Care Preferences', requiresApproval: true },
+  { id: 'deliveryCarePreferences', label: 'Delivery Care Preferences', requiresApproval: true },
 ];
 
 const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChange }) => {
