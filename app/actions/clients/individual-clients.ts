@@ -6,6 +6,7 @@ import { IndividualFormData } from '@/types/client.types';
 import { uploadProfilePicture } from './utils';
 import { logger } from '@/utils/logger';
 import { FormData } from '@/types/homemaid.types';
+import { DeliveryCareFormData } from '@/types/deliveryCare.types';
 
 interface IndividualClientUpdateProfileData {
     patient_name: string;
@@ -422,6 +423,55 @@ export async function updateHousemaidRequest(clientId: string, formData: Partial
     return { success: true };
   } catch (error) {
     logger.error('Error updating housemaid request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
+}
+
+
+interface DeliveryCareRequestData extends DeliveryCareFormData {
+  clientId: string;
+}
+
+
+export async function addDeliveryCareRequest(formData: DeliveryCareRequestData) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('delivery_care_requests')
+      .insert({
+        client_id: formData.clientId,
+        care_preferred: formData.carePreferred,
+        delivery_date: formData.deliveryDate ?? null,
+        delivery_type: formData.deliveryType ?? null,
+        mother_allergies: formData.motherAllergies ?? null,
+        mother_medications: formData.motherMedications ?? null,
+        number_of_babies: formData.numberOfBabies ?? null,
+        feeding_method: formData.feedingMethod ?? null,
+        baby_allergies: formData.babyAllergies ?? null,
+        preferred_schedule: formData.preferredSchedule ?? null,
+        duties: formData.duties ?? { babyCare: false, motherCare: false },
+        expected_due_date: formData.expectedDueDate ?? null,
+        backup_contact_name: formData.backupContactName ?? null,
+        backup_contact_number: formData.backupContactNumber ?? null,
+        medical_history: formData.medicalHistory ?? null,
+        hospital_name: formData.hospitalName ?? null,
+        doctor_name: formData.doctorName ?? null,
+        birth_date_time: formData.birthDateTime ?? null,
+        room_details: formData.roomDetails ?? null,
+        baby_gender: formData.babyGender ?? null,
+        baby_weight: formData.babyWeight ?? null,
+      });
+
+    if (error) {
+      logger.error('Error adding delivery care request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error adding delivery care request:', error);
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
 }

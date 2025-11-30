@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { ClientCategory, FormData, StaffRequirement, ClientType } from '@/types/client.types';
 import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
+import { DeliveryCareFormData } from '@/types/deliveryCare.types';
 import { toast } from 'react-hot-toast';
-import { addIndividualClient, addOrganizationClient, addHousemaidRequest } from '@/app/actions/clients/client-actions';
+import { addIndividualClient, addOrganizationClient, addHousemaidRequest, addDeliveryCareRequest } from '@/app/actions/clients/client-actions';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { clientSchema, homeMaidSchema } from '@/validation/clientSchemas';
 import { z } from 'zod';
@@ -48,6 +49,33 @@ const INITIAL_HOME_MAID_DATA: HomeMaidFormData = {
   specialInstructions: '',
 };
 
+// Add initial delivery care data
+const INITIAL_DELIVERY_CARE_DATA: DeliveryCareFormData = {
+  carePreferred: 'post_delivery',
+  deliveryDate: '',
+  deliveryType: '',
+  motherAllergies: '',
+  motherMedications: '',
+  numberOfBabies: 'single',
+  feedingMethod: '',
+  babyAllergies: '',
+  preferredSchedule: '',
+  duties: {
+    babyCare: false,
+    motherCare: false,
+  },
+  expectedDueDate: '',
+  backupContactName: '',
+  backupContactNumber: '',
+  hospitalName: '',
+  doctorName: '',
+  medicalHistory: '',
+  birthDateTime: '',
+  roomDetails: '',
+  babyGender: '',
+  babyWeight: '',
+};
+
 export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProps = {}) => {
   const { invalidateDashboardCache } = useDashboardData();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +84,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   );
   const [isSuccess, setIsSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  // Removed unused 'touched' state
   const [isSameAddress, setIsSameAddress] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
@@ -116,6 +143,9 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
 
   const [homeMaidFormData, setHomeMaidFormData] = useState<HomeMaidFormData>(INITIAL_HOME_MAID_DATA);
   const [homeMaidFormErrors, setHomeMaidFormErrors] = useState<FormErrors>({});
+
+  const [deliveryCareFormData, setDeliveryCareFormData] = useState<DeliveryCareFormData>(INITIAL_DELIVERY_CARE_DATA);
+  const [deliveryCareFormErrors, setDeliveryCareFormErrors] = useState<FormErrors>({});
 
   const toErrorMap = (issues: z.ZodIssue[]): Record<string,string> =>
     issues.reduce((acc, issue) => {
@@ -312,18 +342,31 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
         throw new Error(result.error || 'Failed to add client');
       }
 
-      const homeMaidResult = await addHousemaidRequest({
-        clientId: result.id, 
-        ...homeMaidFormData,
-      });
+      if (formData.serviceRequired === 'home_maid') {
+        const homeMaidResult = await addHousemaidRequest({
+          clientId: result.id, 
+          ...homeMaidFormData,
+        });
 
-      if (!homeMaidResult.success) {
-        throw new Error(homeMaidResult.error || 'Failed to add home maid request');
+        if (!homeMaidResult.success) {
+          throw new Error(homeMaidResult.error || 'Failed to add home maid request');
+        }
+      }
+
+      if (formData.serviceRequired === 'delivery_care') {
+        const deliveryCareResult = await addDeliveryCareRequest({
+          clientId: result.id,
+          ...deliveryCareFormData,
+        });
+
+        if (!deliveryCareResult.success) {
+          throw new Error(deliveryCareResult.error || 'Failed to add delivery care request');
+        }
       }
 
       invalidateDashboardCache();
       setIsSuccess(true);
-      toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client and Home Maid request added successfully!`);
+      toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client and ${formData.serviceRequired === 'home_maid' ? 'Home Maid' : formData.serviceRequired === 'delivery_care' ? 'Delivery Care' : ''} request added successfully!`);
 
       if (onSuccess) {
         onSuccess();
@@ -359,6 +402,27 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }));
   };
 
+  const handleDeliveryCareInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setDeliveryCareFormData(prev => ({ ...prev, [name]: value }));
+      if (deliveryCareFormErrors[name]) {
+        setDeliveryCareFormErrors(prev => ({ ...prev, [name]: '' }));
+      }
+    },
+    [deliveryCareFormErrors]
+  );
+
+  const handleDeliveryCareDutyChange = (key: keyof DeliveryCareFormData['duties']) => {
+    setDeliveryCareFormData(prev => ({
+      ...prev,
+      duties: {
+        ...prev.duties,
+        [key]: !prev.duties[key],
+      },
+    }));
+  };
+
   return {
     formData,
     formErrors,
@@ -381,5 +445,11 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     setHomeMaidFormErrors,
     handleHomeMaidInputChange,
     handleHomeMaidDutyChange,
+    deliveryCareFormData,
+    setDeliveryCareFormData,
+    deliveryCareFormErrors,
+    setDeliveryCareFormErrors,
+    handleDeliveryCareInputChange,
+    handleDeliveryCareDutyChange,
   };
 };

@@ -163,7 +163,7 @@ const PatientProfilePage = () => {
     }
   };
 
-  console.log("sda", patient.assessments)
+  console.log('Patient Profile Rendered');
 
   return (
     <div className="min-h-screen bg-gray-50">

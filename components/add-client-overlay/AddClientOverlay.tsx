@@ -23,6 +23,10 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     homeMaidFormErrors,
     handleHomeMaidInputChange,
     handleHomeMaidDutyChange,
+    deliveryCareFormData,
+    deliveryCareFormErrors,
+    handleDeliveryCareInputChange,
+    handleDeliveryCareDutyChange,
   } = useClientForm({
     onSuccess: onAdd || onClose,
   });
@@ -64,6 +68,10 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
             homeMaidFormErrors={homeMaidFormErrors}
             handleHomeMaidInputChange={handleHomeMaidInputChange}
             handleHomeMaidDutyChange={handleHomeMaidDutyChange}
+            deliveryCareFormData={deliveryCareFormData}
+            deliveryCareFormErrors={deliveryCareFormErrors}
+            handleDeliveryCareInputChange={handleDeliveryCareInputChange}
+            handleDeliveryCareDutyChange={handleDeliveryCareDutyChange}
           />
         </div>
       </div>

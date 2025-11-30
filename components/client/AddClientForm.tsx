@@ -10,6 +10,8 @@ import { DutyPeriodSelector } from '@/components/add-client-overlay/DutyPeriodSe
 import { ClientCategorySelector } from '@/components/add-client-overlay/ClientCategorySelector';
 import HousemaidServiceForm from '@/components/open-form/HomeMaidForm';
 import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
+import DeliveryCareForm from '@/components/open-form/DeliveryCareForm';
+import { DeliveryCareFormData } from '@/types/deliveryCare.types';
 
 interface FormErrors {
   [key: string]: string;
@@ -37,6 +39,10 @@ interface ClientFormComponentProps {
   homeMaidFormErrors?: FormErrors;
   handleHomeMaidInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleHomeMaidDutyChange?: (key: keyof Duties) => void;
+  deliveryCareFormData?: DeliveryCareFormData;
+  deliveryCareFormErrors?: FormErrors;
+  handleDeliveryCareInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleDeliveryCareDutyChange?: (key: keyof DeliveryCareFormData['duties']) => void;
 }
 
   const baseInputStyles = `
@@ -70,7 +76,11 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
   homeMaidFormData,
   homeMaidFormErrors,
   handleHomeMaidInputChange,
-  handleHomeMaidDutyChange
+  handleHomeMaidDutyChange,
+  deliveryCareFormData,
+  deliveryCareFormErrors,
+  handleDeliveryCareInputChange,
+  handleDeliveryCareDutyChange
 }) => {
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="p-6">
@@ -135,6 +145,13 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
               formErrors={homeMaidFormErrors!}
               handleInputChange={handleHomeMaidInputChange!}
               handleDutyChange={handleHomeMaidDutyChange!}
+            />
+          ) : formData.serviceRequired === 'delivery_care' ? (
+            <DeliveryCareForm
+              formData={deliveryCareFormData!}
+              formErrors={deliveryCareFormErrors!}
+              handleInputChange={handleDeliveryCareInputChange!}
+              handleDutyChange={handleDeliveryCareDutyChange!}
             />
           ) : (
             <PatientInfoForm 

@@ -43,6 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     '/',
     '/about',
     '/client-registration',
+    '/dc/client-registration',
+    '/th/client-registration',
     '/forgot-password',
     '/client-enquiry',
     '/reassessment/:id',
