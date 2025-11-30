@@ -751,10 +751,238 @@ export async function markLongShiftAttendance(
   }
 }
 
-/**
- * REPORTING FUNCTIONS
- * -----------------
- */
+// /**
+//  * REPORTING FUNCTIONS
+//  * -----------------
+//  */
+
+// export async function fetchStaffAttendance(
+//   date?: string,
+//   page: number = 1,
+//   pageSize: number = 50,
+//   includeAbsent: boolean = true,
+//   admittedType?: string,
+//   debouncedSearchTerm?: string
+// ): Promise<{ 
+//   success: boolean; 
+//   data: AttendanceRecord[]; 
+//   pagination?: {
+//     currentPage: number;
+//     totalPages: number;
+//     totalRecords: number;
+//     pageSize: number;
+//   };
+//   error?: string 
+// }> {
+//   try {
+//     const supabase = await createSupabaseServerClient();
+//     const targetDate = date || new Date().toISOString().split('T')[0];
+    
+//     const from = (page - 1) * pageSize;
+//     const to = from + pageSize - 1;
+    
+//     let attendanceQuery = supabase
+//       .from('attendence_individual')
+//       .select(`
+//         id,
+//         date,
+//         start_time,
+//         end_time,
+//         total_hours,
+//         location,
+//         assigned_id,
+//         nurse_client:assigned_id (
+//           id,
+//           nurse_id,
+//           shift_start_time,
+//           shift_end_time,
+//           nurse:nurse_id (
+//             nurse_id,
+//             first_name,
+//             last_name,
+//             full_name, 
+//             nurse_reg_no,
+//             nurse_prev_reg_no,
+//             admitted_type
+//           )
+//         )
+//       `, { count: 'exact' })
+//       .eq('date', targetDate)
+//       .not('nurse_client', 'is', null);
+      
+//     if (admittedType) {
+//       attendanceQuery = attendanceQuery.eq('nurse_client.nurse.admitted_type', admittedType);
+//     }
+    
+//     if (!includeAbsent) {
+//       attendanceQuery.range(from, to);
+//     }
+    
+//     const { data: attendanceData, error: attendanceError } = await attendanceQuery;
+    
+//     if (attendanceError) throw new Error(attendanceError.message);
+    
+//     const validAttendanceData = attendanceData.filter(record => {
+//       const nurseClient = record.nurse_client && 
+//         (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
+        
+//       const nurse = nurseClient?.nurse &&
+//         (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
+        
+//       return nurse && nurse.first_name && 
+//         (!admittedType || nurse.admitted_type === admittedType);
+//     });
+    
+//     const presentAssignmentIds = new Set(
+//       validAttendanceData
+//         .filter(record => record.assigned_id !== null)
+//         .map(record => record.assigned_id)
+//     );
+    
+//     let formattedAttendanceData = validAttendanceData.map(processAttendanceRecord);
+    
+//     let absentRecords: AttendanceRecord[] = [];
+//     if (includeAbsent) {
+//       let nurseClientQuery = supabase
+//         .from('nurse_client')
+//         .select(`
+//           id,
+//           nurse_id,
+//           shift_start_time,
+//           shift_end_time,
+//           start_date,
+//           end_date,
+//           nurse:nurse_id (
+//             nurse_id,
+//             first_name,
+//             last_name,
+//             admitted_type
+//           )
+//         `)
+//         .lte('start_date', targetDate)
+//         .gte('end_date', targetDate)
+//         .not('nurse', 'is', null);
+      
+//       if (admittedType) {
+//         nurseClientQuery = nurseClientQuery.eq('nurse.admitted_type', admittedType);
+//       }
+      
+//       const { data: scheduledNurses, error: scheduledError } = await nurseClientQuery;
+      
+//       if (scheduledError) throw new Error(scheduledError.message);
+      
+//       if (scheduledNurses && scheduledNurses.length > 0) {
+//         const validScheduledNurses = scheduledNurses.filter(assignment => {
+//           const nurse = assignment.nurse && 
+//             (Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse);
+          
+//           return nurse && nurse.first_name && 
+//             (!admittedType || nurse.admitted_type === admittedType);
+//         });
+                
+//         const absentNurses = validScheduledNurses.filter(
+//           assignment => !presentAssignmentIds.has(assignment.id)
+//         );
+        
+//         if (absentNurses.length > 0) {
+//           const nurseIds = absentNurses.map(assignment => assignment.nurse_id).filter(Boolean);
+          
+//           const { data: leaveData } = await supabase
+//             .from('nurse_leave_requests')
+//             .select('nurse_id, leave_type')
+//             .eq('status', 'approved')
+//             .lte('start_date', targetDate)
+//             .gte('end_date', targetDate)
+//             .in('nurse_id', nurseIds);
+            
+//           const leaveMap = new Map();
+//           if (leaveData) {
+//             leaveData.forEach(leave => {
+//               leaveMap.set(leave.nurse_id, leave.leave_type);
+//             });
+//           }
+          
+//           absentRecords = absentNurses.map(assignment => {
+//             let nurse = null;
+//             if (assignment.nurse) {
+//               nurse = Array.isArray(assignment.nurse)
+//                 ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
+//                 : assignment.nurse;
+//             }
+            
+//             const nurseId = nurse?.nurse_id || null;
+//             const nurseName = nurse?.first_name && nurse?.last_name
+//               ? `${nurse.first_name} ${nurse.last_name}`
+//               : 'Unknown Nurse';
+            
+//             const scheduledStart = assignment.shift_start_time 
+//               ? convertTo12HourFormat(assignment.shift_start_time) 
+//               : '';
+//             const scheduledEnd = assignment.shift_end_time 
+//               ? convertTo12HourFormat(assignment.shift_end_time) 
+//               : '';
+            
+//             let status = 'Absent';
+//             if (nurseId && leaveMap.has(nurseId)) {
+//               status = `On Leave (${formatLeaveType(leaveMap.get(nurseId))})`;
+//             }
+            
+//             return {
+//               id: -assignment.id,
+//               nurseName,
+//               date: targetDate,
+//               shiftStart: '',
+//               shiftEnd: '',
+//               scheduledStart,
+//               scheduledEnd,
+//               hoursWorked: 0,
+//               status,
+//               location: null,
+//               nurseId
+//             };
+//           });
+//         }
+//       }
+//     }
+
+//     if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
+//       const searchLower = debouncedSearchTerm.trim().toLowerCase();
+//       formattedAttendanceData = formattedAttendanceData.filter(record =>
+//         record.nurseName.toLowerCase().includes(searchLower)
+//       );
+//       absentRecords = absentRecords.filter(record =>
+//         record.nurseName.toLowerCase().includes(searchLower)
+//       );
+//     }
+    
+//     let allRecords = [...formattedAttendanceData, ...absentRecords];
+//     const totalRecords = allRecords.length;
+    
+//     allRecords.sort((a, b) => a.nurseName.localeCompare(b.nurseName));
+    
+//     if (includeAbsent) {
+//       allRecords = allRecords.slice(from, from + pageSize);
+//     }
+    
+//     return {
+//       success: true,
+//       data: allRecords,
+//       pagination: {
+//         currentPage: page,
+//         totalPages: Math.ceil(totalRecords / pageSize),
+//         totalRecords,
+//         pageSize
+//       }
+//     };
+//   } catch (error) {
+//     logger.error('Error fetching attendance records:', error);
+//     return {
+//       success: false,
+//       data: [],
+//       error: error instanceof Error ? error.message : 'An unknown error occurred'
+//     };
+//   }
+// }
 
 export async function fetchStaffAttendance(
   date?: string,
@@ -777,196 +1005,126 @@ export async function fetchStaffAttendance(
   try {
     const supabase = await createSupabaseServerClient();
     const targetDate = date || new Date().toISOString().split('T')[0];
-    
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-    
+    const searchTerm = debouncedSearchTerm?.trim().toLowerCase();
+
     let attendanceQuery = supabase
       .from('attendence_individual')
       .select(`
-        id,
-        date,
-        start_time,
-        end_time,
-        total_hours,
-        location,
-        assigned_id,
-        nurse_client:assigned_id (
-          id,
-          nurse_id,
-          shift_start_time,
-          shift_end_time,
-          nurse:nurse_id (
-            nurse_id,
-            first_name,
-            last_name,
-            full_name, 
-            nurse_reg_no,
-            nurse_prev_reg_no,
-            admitted_type
+        id, date, start_time, end_time, total_hours, location, assigned_id,
+        nurse_client:assigned_id!inner (
+          id, nurse_id, shift_start_time, shift_end_time,
+          nurse:nurse_id!inner (
+            nurse_id, first_name, last_name, full_name, 
+            nurse_reg_no, admitted_type
           )
         )
       `, { count: 'exact' })
-      .eq('date', targetDate)
-      .not('nurse_client', 'is', null);
-      
+      .eq('date', targetDate);
+
     if (admittedType) {
       attendanceQuery = attendanceQuery.eq('nurse_client.nurse.admitted_type', admittedType);
     }
-    
-    if (!includeAbsent) {
-      attendanceQuery.range(from, to);
-    }
-    
-    const { data: attendanceData, error: attendanceError } = await attendanceQuery;
-    
-    if (attendanceError) throw new Error(attendanceError.message);
-    
-    const validAttendanceData = attendanceData.filter(record => {
-      const nurseClient = record.nurse_client && 
-        (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
-        
-      const nurse = nurseClient?.nurse &&
-        (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
-        
-      return nurse && nurse.first_name && 
-        (!admittedType || nurse.admitted_type === admittedType);
-    });
-    
-    const presentAssignmentIds = new Set(
-      validAttendanceData
-        .filter(record => record.assigned_id !== null)
-        .map(record => record.assigned_id)
-    );
-    
-    let formattedAttendanceData = validAttendanceData.map(processAttendanceRecord);
-    
-    let absentRecords: AttendanceRecord[] = [];
+
+    let scheduleQuery = null;
     if (includeAbsent) {
-      let nurseClientQuery = supabase
+      scheduleQuery = supabase
         .from('nurse_client')
         .select(`
-          id,
-          nurse_id,
-          shift_start_time,
-          shift_end_time,
-          start_date,
-          end_date,
-          nurse:nurse_id (
-            nurse_id,
-            first_name,
-            last_name,
-            admitted_type
+          id, nurse_id, shift_start_time, shift_end_time, start_date, end_date,
+          nurse:nurse_id!inner (
+            nurse_id, first_name, last_name, full_name, admitted_type
           )
         `)
         .lte('start_date', targetDate)
-        .gte('end_date', targetDate)
-        .not('nurse', 'is', null);
-      
+        .gte('end_date', targetDate);
+
       if (admittedType) {
-        nurseClientQuery = nurseClientQuery.eq('nurse.admitted_type', admittedType);
-      }
-      
-      const { data: scheduledNurses, error: scheduledError } = await nurseClientQuery;
-      
-      if (scheduledError) throw new Error(scheduledError.message);
-      
-      if (scheduledNurses && scheduledNurses.length > 0) {
-        const validScheduledNurses = scheduledNurses.filter(assignment => {
-          const nurse = assignment.nurse && 
-            (Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse);
-          
-          return nurse && nurse.first_name && 
-            (!admittedType || nurse.admitted_type === admittedType);
-        });
-                
-        const absentNurses = validScheduledNurses.filter(
-          assignment => !presentAssignmentIds.has(assignment.id)
-        );
-        
-        if (absentNurses.length > 0) {
-          const nurseIds = absentNurses.map(assignment => assignment.nurse_id).filter(Boolean);
-          
-          const { data: leaveData } = await supabase
-            .from('nurse_leave_requests')
-            .select('nurse_id, leave_type')
-            .eq('status', 'approved')
-            .lte('start_date', targetDate)
-            .gte('end_date', targetDate)
-            .in('nurse_id', nurseIds);
-            
-          const leaveMap = new Map();
-          if (leaveData) {
-            leaveData.forEach(leave => {
-              leaveMap.set(leave.nurse_id, leave.leave_type);
-            });
-          }
-          
-          absentRecords = absentNurses.map(assignment => {
-            let nurse = null;
-            if (assignment.nurse) {
-              nurse = Array.isArray(assignment.nurse)
-                ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
-                : assignment.nurse;
-            }
-            
-            const nurseId = nurse?.nurse_id || null;
-            const nurseName = nurse?.first_name && nurse?.last_name
-              ? `${nurse.first_name} ${nurse.last_name}`
-              : 'Unknown Nurse';
-            
-            const scheduledStart = assignment.shift_start_time 
-              ? convertTo12HourFormat(assignment.shift_start_time) 
-              : '';
-            const scheduledEnd = assignment.shift_end_time 
-              ? convertTo12HourFormat(assignment.shift_end_time) 
-              : '';
-            
-            let status = 'Absent';
-            if (nurseId && leaveMap.has(nurseId)) {
-              status = `On Leave (${formatLeaveType(leaveMap.get(nurseId))})`;
-            }
-            
-            return {
-              id: -assignment.id,
-              nurseName,
-              date: targetDate,
-              shiftStart: '',
-              shiftEnd: '',
-              scheduledStart,
-              scheduledEnd,
-              hoursWorked: 0,
-              status,
-              location: null,
-              nurseId
-            };
-          });
-        }
+        scheduleQuery = scheduleQuery.eq('nurse.admitted_type', admittedType);
       }
     }
 
-    if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
-      const searchLower = debouncedSearchTerm.trim().toLowerCase();
-      formattedAttendanceData = formattedAttendanceData.filter(record =>
-        record.nurseName.toLowerCase().includes(searchLower)
-      );
-      absentRecords = absentRecords.filter(record =>
-        record.nurseName.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    let allRecords = [...formattedAttendanceData, ...absentRecords];
-    const totalRecords = allRecords.length;
-    
-    allRecords.sort((a, b) => a.nurseName.localeCompare(b.nurseName));
-    
+    let leaveQuery = null;
     if (includeAbsent) {
-      allRecords = allRecords.slice(from, from + pageSize);
+      leaveQuery = supabase
+        .from('nurse_leave_requests')
+        .select('nurse_id, leave_type')
+        .eq('status', 'approved')
+        .lte('start_date', targetDate)
+        .gte('end_date', targetDate);
     }
+
+    const [attendanceRes, scheduleRes, leaveRes] = await Promise.all([
+      attendanceQuery,
+      includeAbsent ? scheduleQuery : Promise.resolve({ data: [] }),
+      includeAbsent ? leaveQuery : Promise.resolve({ data: [] })
+    ]);
+
+    if (attendanceRes.error) throw new Error(attendanceRes.error.message);
+    if (scheduleRes && 'error' in scheduleRes && scheduleRes.error) throw new Error(scheduleRes.error.message);
+
+    const rawAttendance = attendanceRes.data || [];
+    const rawSchedules = scheduleRes?.data || [];
+    const rawLeaves = leaveRes?.data || [];
+
+    const presentAssignmentIds = new Set<number>();
     
+    let allRecords: AttendanceRecord[] = rawAttendance.map(record => {
+      const nc = Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client;
+      if (nc) presentAssignmentIds.add(nc.id);
+      return processAttendanceRecord(record); 
+    }).filter(r => r !== null);
+
+    if (includeAbsent && rawSchedules.length > 0) {
+      const leaveMap = new Map(rawLeaves.map(l => [l.nurse_id, l.leave_type]));
+
+      const absentRecords = rawSchedules
+        .filter(assignment => !presentAssignmentIds.has(assignment.id))
+        .map(assignment => {
+          const nurse = Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse;
+          if (!nurse) return null;
+
+          const nurseId = nurse.nurse_id;
+          const nurseName = nurse.full_name || `${nurse.first_name} ${nurse.last_name}`;
+          
+          let status = 'Absent';
+          if (nurseId && leaveMap.has(nurseId)) {
+            status = `On Leave (${formatLeaveType(leaveMap.get(nurseId))})`;
+          }
+
+          return {
+            id: -assignment.id,
+            nurseName,
+            date: targetDate,
+            shiftStart: '',
+            shiftEnd: '',
+            scheduledStart: assignment.shift_start_time ? convertTo12HourFormat(assignment.shift_start_time) : '',
+            scheduledEnd: assignment.shift_end_time ? convertTo12HourFormat(assignment.shift_end_time) : '',
+            hoursWorked: 0,
+            status,
+            location: null,
+            nurseId
+          } as AttendanceRecord;
+        })
+        .filter((r): r is AttendanceRecord => r !== null);
+
+      allRecords = [...allRecords, ...absentRecords];
+    }
+
+    if (searchTerm) {
+      allRecords = allRecords.filter(record => 
+        record.nurseName.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    allRecords.sort((a, b) => a.nurseName.localeCompare(b.nurseName));
+
+    const totalRecords = allRecords.length;
+    const from = (page - 1) * pageSize;
+    const paginatedRecords = allRecords.slice(from, from + pageSize);
+
     return {
       success: true,
-      data: allRecords,
+      data: paginatedRecords,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalRecords / pageSize),
@@ -974,8 +1132,9 @@ export async function fetchStaffAttendance(
         pageSize
       }
     };
+
   } catch (error) {
-    logger.error('Error fetching attendance records:', error);
+    console.error('Error fetching attendance records:', error);
     return {
       success: false,
       data: [],

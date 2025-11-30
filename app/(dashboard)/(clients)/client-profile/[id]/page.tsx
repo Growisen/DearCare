@@ -27,6 +27,9 @@ import ProfileSkeletonLoader from '@/components/ProfileSkeletonLoader';
 import ServicePeriodsTab from '@/components/client/Profile/ServicePeriodsTab';
 import ProfileTabs from '@/components/client/Profile/ProfileTabs';
 import Reassessment from '@/components/client/Profile/Reassessment'; 
+import HomeMaidPreferences from '@/components/client/Profile/HomeMaidPreferences';
+import ChildCarePreferences from '@/components/client/Profile/BabyCarePreferences';
+import DeliveryCarePreferences from '@/components/client/Profile/DeliveryCarePreferences';
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -36,7 +39,6 @@ import { useClientFiles } from '@/hooks/useClientFiles';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
 import { useReassessmentForm } from '@/hooks/useReassessment';
-import HomeMaidPreferences from '@/components/client/Profile/HomeMaidPreferences';
 
 const PatientProfilePage = () => {
   const { invalidateDashboardCache } = useDashboardData()
@@ -163,7 +165,7 @@ const PatientProfilePage = () => {
     }
   };
 
-  console.log("sda", patient.assessments)
+  console.log('Patient Profile Rendered');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -305,6 +307,18 @@ const PatientProfilePage = () => {
             {activeTab === 'homeMaidPreferences' && status === 'approved' && (
               <div className="space-y-6">
                 <HomeMaidPreferences clientId={id} />
+              </div>
+            )}
+
+            {activeTab === 'babyCarePreferences' && status === 'approved' && (
+              <div className="space-y-6">
+                <ChildCarePreferences clientId={id} />
+              </div>
+            )}
+
+            {activeTab === 'deliveryCarePreferences' && status === 'approved' && (
+              <div className="space-y-6">
+                <DeliveryCarePreferences clientId={id} />
               </div>
             )}
           </div>

@@ -128,7 +128,7 @@ export const RequestorInfoForm = ({
         {serviceType !== 'home_maid' && (
           <div className="md:col-span-12">
             <label className={labelStyles} htmlFor="relationToPatient">
-              Relation to Patient
+              Relation
             </label>
             <select 
               id="relationToPatient" 

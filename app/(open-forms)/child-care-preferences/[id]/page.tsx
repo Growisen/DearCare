@@ -4,14 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import HomeMaidForm from '@/components/open-form/HomeMaidForm';
+import BabyCareForm from '@/components/open-form/BabyCareForm';
 import { getClientNames } from '@/app/actions/clients/assessment';
-import { addHousemaidRequest } from '@/app/actions/clients/client-actions';
+import { addChildCareRequest, isChildCareRequestSubmitted } from '@/app/actions/clients/individual-clients';
 import { notFound } from 'next/navigation';
-import { FormData, Duties } from '@/types/homemaid.types';
-import { isHousemaidRequestSubmitted } from '@/app/actions/clients/individual-clients';
+import { ChildCareFormData } from '@/types/childCare.types';
 
-export default function HomeMaidPreferencesPage() {
+export default function BabyCareRequirementsPage() {
   const params = useParams();
   const id = params.id;
   const router = useRouter();
@@ -20,35 +19,28 @@ export default function HomeMaidPreferencesPage() {
   const [clientNames, setClientNames] = useState<{ patientName?: string; requestorName?: string; clientCategory?: string } | null>(null);
   const [nameLoading, setNameLoading] = useState(true);
 
-  // Form state
-  const [formData, setFormData] = useState<FormData>({
-    serviceType: 'live-in',
-    serviceTypeOther: '',
-    frequency: '',
-    preferredSchedule: '',
-    homeType: '',
-    bedrooms: 0,
-    bathrooms: 0,
-    householdSize: 0,
-    hasPets: undefined,
-    petDetails: '',
-    duties: {
-      kitchen: false,
-      bathroom: false,
-      floors: false,
-      dusting: false,
-      tidying: false,
-      mealPrep: false,
-      laundry: false,
-      ironing: false,
-      errands: false,
-      childcare: false,
+  const [formData, setFormData] = useState<ChildCareFormData>({
+    numberOfChildren: '',
+    agesOfChildren: '',
+    careNeeds: {
+      infantCare: false,
+      youngChildCare: false,
+      schoolAgeSupport: false,
+      specialNeeds: false,
+      healthIssues: false,
     },
-    mealPrepDetails: '',
-    childcareDetails: '',
-    allergies: '',
-    restrictedAreas: '',
-    specialInstructions: '',
+    careNeedsDetails: '',
+    homeTasks: {
+      laundry: false,
+      mealPrep: false,
+      tidyAreas: false,
+      washDishes: false,
+      generalTidyUp: false,
+      other: false,
+    },
+    homeTasksDetails: '',
+    primaryFocus: 'child_care_priority',
+    notes: '',
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -61,12 +53,15 @@ export default function HomeMaidPreferencesPage() {
     }));
   };
 
-  const handleDutyChange = (key: keyof Duties) => {
-    setFormData(prev => ({
+  const handleCheckboxChange = (
+    section: 'careNeeds' | 'homeTasks',
+    key: string
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      duties: {
-        ...prev.duties,
-        [key]: !prev.duties[key],
+      [section]: {
+        ...prev[section],
+        [key]: !(prev[section] as Record<string, boolean>)[key],
       },
     }));
   };
@@ -74,9 +69,9 @@ export default function HomeMaidPreferencesPage() {
   useEffect(() => {
     async function checkSubmissionAndFetchName() {
       setNameLoading(true);
-      const submissionStatus = await isHousemaidRequestSubmitted(id as string);
+
+      const submissionStatus = await isChildCareRequestSubmitted(id as string);
       if (submissionStatus.submitted) {
-        setNameLoading(false);
         if (typeof window !== "undefined") {
           notFound();
         }
@@ -133,7 +128,7 @@ export default function HomeMaidPreferencesPage() {
         clientId: id as string,
       };
 
-      const result = await addHousemaidRequest(submissionData);
+      const result = await addChildCareRequest(submissionData);
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to save preferences');
@@ -184,7 +179,7 @@ export default function HomeMaidPreferencesPage() {
                 </div>
               </div>
               <div className="flex flex-col md:items-end">
-                <h2 className="text-lg font-semibold text-slate-800">Home Maid Preferences Form</h2>
+                <h2 className="text-lg font-semibold text-slate-800">Baby Care Preferences Form</h2>
               </div>
             </div>
 
@@ -225,10 +220,10 @@ export default function HomeMaidPreferencesPage() {
 
             <div className="p-6 md:p-10">
               <form onSubmit={handleSubmit} className="space-y-10">
-                <HomeMaidForm
+                <BabyCareForm
                   formData={formData}
                   handleInputChange={handleInputChange}
-                  handleDutyChange={handleDutyChange}
+                  handleCheckboxChange={handleCheckboxChange}
                   formErrors={formErrors}
                 />
                 <div className="flex items-center justify-end gap-4 pt-8 border-t border-gray-100 mt-12">

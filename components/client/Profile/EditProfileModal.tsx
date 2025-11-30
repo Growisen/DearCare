@@ -493,7 +493,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     required
                   />
                   <FormField
-                    label="Relation to Patient"
+                    label="Relation"
                     id="relationToPatient"
                     type="select"
                     value={formData.relationToPatient}

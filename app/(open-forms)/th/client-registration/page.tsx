@@ -37,14 +37,17 @@ export default function ClientFormPage() {
     childCareFormData,
     setChildCareFormData,
     handleChildCareInputChange,
-    handleChildCareCheckboxChange,
+    handleChildCareCheckboxChange
   } = useClientForm({
     onSuccess: () => {
       setTimeout(() => {
         router.back();
       }, 5000);
-    }
+    },
+    initialData: { clientCategory: 'Tata HomeNursing' }
   });
+
+  console.log('ClientFormPage rendered with formData:', childCareFormData);
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
@@ -60,17 +63,17 @@ export default function ClientFormPage() {
             </p>
           </div>
           <div className="flex items-center gap-3 opacity-90">
-            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded border border-gray-100">
+            <div className="flex items-center gap-4 bg-white px-3 py-2 rounded border border-gray-100">
               <div className="relative w-20 h-10">
                 <Image
-                  src="/DearCare.png"
-                  alt="DearCare Logo"
+                  src="/TATA.png"
+                  alt="TATA Logo"
                   fill
                   className="object-contain"
                 />
               </div>
               <span className="font-bold text-lg leading-none tracking-tight">
-                <span className='text-dCblue'>Dear</span><span className='text-amber-500'>C</span><span className='text-dCblue'>are</span>
+                <span className="text-amber-600">Tata HomeNursing</span>
               </span>
             </div>
           </div>
