@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from "../ui/card";
-import { MdWifiOff, MdWifi } from "react-icons/md";
-import { BiLoaderAlt } from "react-icons/bi";
-import { X } from "lucide-react";
+import { WifiOff, Wifi, Loader2, X } from "lucide-react";
 import ModalPortal from "../ui/ModalPortal";
 
 type OfflineOverlayProps = {
@@ -74,15 +72,15 @@ export default function OfflineOverlay({
             {isOnline ? (
               <div className="flex justify-center mb-4">
                 <div className="relative">
-                  <MdWifi className="w-16 h-16 text-emerald-600" />
+                  <Wifi className="w-16 h-16 text-emerald-600" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <BiLoaderAlt className="w-8 h-8 text-emerald-700 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-emerald-700 animate-spin" />
                   </div>
                 </div>
               </div>
             ) : (
               <div className="flex justify-center mb-4">
-                <MdWifiOff className="w-16 h-16 text-slate-700" />
+                <WifiOff className="w-16 h-16 text-slate-700" />
               </div>
             )}
             
