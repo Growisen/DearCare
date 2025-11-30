@@ -27,6 +27,11 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
     deliveryCareFormErrors,
     handleDeliveryCareInputChange,
     handleDeliveryCareDutyChange,
+
+    childCareFormData,
+    setChildCareFormData,
+    handleChildCareInputChange,
+    handleChildCareCheckboxChange,
   } = useClientForm({
     onSuccess: onAdd || onClose,
   });
@@ -72,6 +77,10 @@ export function AddClientOverlay({ onClose, onAdd }: AddClientProps) {
             deliveryCareFormErrors={deliveryCareFormErrors}
             handleDeliveryCareInputChange={handleDeliveryCareInputChange}
             handleDeliveryCareDutyChange={handleDeliveryCareDutyChange}
+            childCareFormData={childCareFormData}
+            setChildCareFormData={setChildCareFormData}
+            handleChildCareInputChange={handleChildCareInputChange}
+            handleChildCareCheckboxChange={handleChildCareCheckboxChange}
           />
         </div>
       </div>

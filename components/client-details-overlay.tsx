@@ -241,7 +241,7 @@ export function ClientDetailsOverlay({
             <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Details</h5>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <DetailItem label="Name" value={formatName(client.details?.requestor_name || "")} />
-              <DetailItem label="Relation to Patient" value={getRelationLabel(relationOptions, client.details?.relation_to_patient || '')} />
+              <DetailItem label="Relation" value={getRelationLabel(relationOptions, client.details?.relation_to_patient || '')} />
               <DetailItem label="Email" value={client.details?.requestor_email} />
               <DetailItem label="Phone" value={client.details?.requestor_phone} />
               <DetailItem label="Emergency Phone" value={client.details?.requestor_emergency_phone} />

@@ -3,7 +3,7 @@ import { ClientCategory, FormData, StaffRequirement, ClientType } from '@/types/
 import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
 import { DeliveryCareFormData } from '@/types/deliveryCare.types';
 import { toast } from 'react-hot-toast';
-import { addIndividualClient, addOrganizationClient, addHousemaidRequest, addDeliveryCareRequest } from '@/app/actions/clients/client-actions';
+import { addIndividualClient, addOrganizationClient, addHousemaidRequest, addDeliveryCareRequest, addChildCareRequest } from '@/app/actions/clients/client-actions';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { clientSchema, homeMaidSchema } from '@/validation/clientSchemas';
 import { z } from 'zod';
@@ -49,7 +49,6 @@ const INITIAL_HOME_MAID_DATA: HomeMaidFormData = {
   specialInstructions: '',
 };
 
-// Add initial delivery care data
 const INITIAL_DELIVERY_CARE_DATA: DeliveryCareFormData = {
   carePreferred: 'post_delivery',
   deliveryDate: '',
@@ -74,6 +73,54 @@ const INITIAL_DELIVERY_CARE_DATA: DeliveryCareFormData = {
   roomDetails: '',
   babyGender: '',
   babyWeight: '',
+};
+
+export interface ChildCareFormData {
+  numberOfChildren: string;
+  agesOfChildren: string;
+  careNeeds: {
+    infantCare: boolean;
+    youngChildCare: boolean;
+    schoolAgeSupport: boolean;
+    specialNeeds: boolean;
+    healthIssues: boolean;
+  };
+  careNeedsDetails: string;
+  notes: string;
+  primaryFocus: 'child_care_priority' | 'both_equal';
+  homeTasks: {
+    laundry: boolean;
+    mealPrep: boolean;
+    tidyAreas: boolean;
+    washDishes: boolean;
+    generalTidyUp: boolean;
+    other: boolean;
+  };
+  homeTasksDetails: string;
+}
+
+const INITIAL_CHILD_CARE_DATA: ChildCareFormData = {
+  numberOfChildren: '',
+  agesOfChildren: '',
+  careNeeds: {
+    infantCare: false,
+    youngChildCare: false,
+    schoolAgeSupport: false,
+    specialNeeds: false,
+    healthIssues: false,
+  },
+  careNeedsDetails: '',
+  notes: '',
+  primaryFocus: 'child_care_priority',
+  homeTasks: {
+    laundry: false,
+    mealPrep: false,
+    tidyAreas: false,
+    washDishes: false,
+    generalTidyUp: false,
+    other: false,
+  },
+  homeTasksDetails: '',
 };
 
 export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProps = {}) => {
@@ -146,6 +193,8 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
 
   const [deliveryCareFormData, setDeliveryCareFormData] = useState<DeliveryCareFormData>(INITIAL_DELIVERY_CARE_DATA);
   const [deliveryCareFormErrors, setDeliveryCareFormErrors] = useState<FormErrors>({});
+
+  const [childCareFormData, setChildCareFormData] = useState<ChildCareFormData>(INITIAL_CHILD_CARE_DATA);
 
   const toErrorMap = (issues: z.ZodIssue[]): Record<string,string> =>
     issues.reduce((acc, issue) => {
@@ -265,121 +314,144 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
+  if (e) {
+    e.preventDefault();
+  }
+
+  if (!validateForm()) {
+    toast.error("Please correct the errors in the form");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+    let result;
+
+    if (clientType === 'individual') {
+      result = await addIndividualClient({
+        prevRegisterNumber: formData.prevRegisterNumber,
+        clientType,
+        clientCategory: formData.clientCategory as ClientCategory,
+        generalNotes: formData.generalNotes,
+        dutyPeriod: formData.dutyPeriod,
+        dutyPeriodReason: formData.dutyPeriodReason,
+        requestorName: formData.requestorName,
+        requestorPhone: formData.requestorPhone,
+        requestorEmail: formData.requestorEmail,
+        relationToPatient: formData.relationToPatient,
+        requestorAddress: formData.requestorAddress,
+        requestorJobDetails: formData.requestorJobDetails,
+        requestorEmergencyPhone: formData.requestorEmergencyPhone,
+        requestorPincode: formData.requestorPincode,
+        requestorDistrict: formData.requestorDistrict,
+        requestorState: formData.requestorState,
+        requestorCity: formData.requestorCity,
+        patientName: formData.patientName,
+        patientDOB: formData.patientDOB,
+        requestorDOB: formData.requestorDOB,
+        patientGender: formData.patientGender,
+        patientPhone: formData.patientPhone || '',
+        patientAddress: formData.patientAddress,
+        patientPincode: formData.patientPincode,
+        patientDistrict: formData.patientDistrict,
+        patientState: formData.patientState,
+        patientCity: formData.patientCity,     
+        serviceRequired: formData.serviceRequired,
+        careDuration: formData.careDuration,
+        startDate: formData.startDate,
+        preferredCaregiverGender: formData.preferredCaregiverGender || '',
+        patientProfilePic: formData.patientProfilePic,
+        requestorProfilePic: formData.requestorProfilePic,
+      });
+    } else {
+      result = await addOrganizationClient({
+        prevRegisterNumber: formData.prevRegisterNumber,
+        clientType,
+        clientCategory: formData.clientCategory as ClientCategory,
+        generalNotes: formData.generalNotes,
+        dutyPeriod: formData.dutyPeriod,
+        dutyPeriodReason: formData.dutyPeriodReason,
+        organizationName: formData.organizationName,
+        organizationType: formData.organizationType || '',
+        contactPersonName: formData.contactPersonName,
+        contactPersonRole: formData.contactPersonRole || '',
+        contactPhone: formData.contactPhone,
+        contactEmail: formData.contactEmail,
+        organizationState: formData.organizationState || '',
+        organizationDistrict: formData.organizationDistrict || '',
+        organizationCity: formData.organizationCity || '',
+        organizationAddress: formData.organizationAddress,
+        organizationPincode: formData.organizationPincode || '',
+        staffRequirements: formData.staffRequirements,
+        staffReqStartDate: formData.staffReqStartDate || '',
+      });
     }
 
-    if (!validateForm()) {
-      toast.error("Please correct the errors in the form");
-      return;
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to add client');
     }
 
-    try {
-      setIsSubmitting(true);
-      let result;
+    if (formData.serviceRequired === 'home_maid') {
+      const homeMaidResult = await addHousemaidRequest({
+        clientId: result.id, 
+        ...homeMaidFormData,
+      });
 
-      if (clientType === 'individual') {
-        result = await addIndividualClient({
-          prevRegisterNumber: formData.prevRegisterNumber,
-          clientType,
-          clientCategory: formData.clientCategory as ClientCategory,
-          generalNotes: formData.generalNotes,
-          dutyPeriod: formData.dutyPeriod,
-          dutyPeriodReason: formData.dutyPeriodReason,
-          requestorName: formData.requestorName,
-          requestorPhone: formData.requestorPhone,
-          requestorEmail: formData.requestorEmail,
-          relationToPatient: formData.relationToPatient,
-          requestorAddress: formData.requestorAddress,
-          requestorJobDetails: formData.requestorJobDetails,
-          requestorEmergencyPhone: formData.requestorEmergencyPhone,
-          requestorPincode: formData.requestorPincode,
-          requestorDistrict: formData.requestorDistrict,
-          requestorState: formData.requestorState,
-          requestorCity: formData.requestorCity,
-          patientName: formData.patientName,
-          patientDOB: formData.patientDOB,
-          requestorDOB: formData.requestorDOB,
-          patientGender: formData.patientGender,
-          patientPhone: formData.patientPhone || '',
-          patientAddress: formData.patientAddress,
-          patientPincode: formData.patientPincode,
-          patientDistrict: formData.patientDistrict,
-          patientState: formData.patientState,
-          patientCity: formData.patientCity,     
-          serviceRequired: formData.serviceRequired,
-          careDuration: formData.careDuration,
-          startDate: formData.startDate,
-          preferredCaregiverGender: formData.preferredCaregiverGender || '',
-          patientProfilePic: formData.patientProfilePic,
-          requestorProfilePic: formData.requestorProfilePic,
-        });
-      } else {
-        result = await addOrganizationClient({
-          prevRegisterNumber: formData.prevRegisterNumber,
-          clientType,
-          clientCategory: formData.clientCategory as ClientCategory,
-          generalNotes: formData.generalNotes,
-          dutyPeriod: formData.dutyPeriod,
-          dutyPeriodReason: formData.dutyPeriodReason,
-          organizationName: formData.organizationName,
-          organizationType: formData.organizationType || '',
-          contactPersonName: formData.contactPersonName,
-          contactPersonRole: formData.contactPersonRole || '',
-          contactPhone: formData.contactPhone,
-          contactEmail: formData.contactEmail,
-          organizationState: formData.organizationState || '',
-          organizationDistrict: formData.organizationDistrict || '',
-          organizationCity: formData.organizationCity || '',
-          organizationAddress: formData.organizationAddress,
-          organizationPincode: formData.organizationPincode || '',
-          staffRequirements: formData.staffRequirements,
-          staffReqStartDate: formData.staffReqStartDate || '',
-        });
+      if (!homeMaidResult.success) {
+        throw new Error(homeMaidResult.error || 'Failed to add home maid request');
       }
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to add client');
-      }
-
-      if (formData.serviceRequired === 'home_maid') {
-        const homeMaidResult = await addHousemaidRequest({
-          clientId: result.id, 
-          ...homeMaidFormData,
-        });
-
-        if (!homeMaidResult.success) {
-          throw new Error(homeMaidResult.error || 'Failed to add home maid request');
-        }
-      }
-
-      if (formData.serviceRequired === 'delivery_care') {
-        const deliveryCareResult = await addDeliveryCareRequest({
-          clientId: result.id,
-          ...deliveryCareFormData,
-        });
-
-        if (!deliveryCareResult.success) {
-          throw new Error(deliveryCareResult.error || 'Failed to add delivery care request');
-        }
-      }
-
-      invalidateDashboardCache();
-      setIsSuccess(true);
-      toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client and ${formData.serviceRequired === 'home_maid' ? 'Home Maid' : formData.serviceRequired === 'delivery_care' ? 'Delivery Care' : ''} request added successfully!`);
-
-      if (onSuccess) {
-        onSuccess();
-      }
-
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      console.error('Error adding client or home maid request:', errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    if (formData.serviceRequired === 'delivery_care') {
+      const deliveryCareResult = await addDeliveryCareRequest({
+        clientId: result.id,
+        ...deliveryCareFormData,
+      });
+
+      if (!deliveryCareResult.success) {
+        throw new Error(deliveryCareResult.error || 'Failed to add delivery care request');
+      }
+    }
+
+    // ADD THIS BLOCK FOR BABY CARE SERVICES
+    if (
+      formData.serviceRequired === 'baby_care' ||
+      formData.serviceRequired === 'baby_care_with_house_keeping'
+    ) {
+      const childCareResult = await addChildCareRequest({
+        clientId: result.id,
+        ...childCareFormData,
+      });
+
+      if (!childCareResult.success) {
+        throw new Error(childCareResult.error || 'Failed to add child care request');
+      }
+    }
+
+    invalidateDashboardCache();
+    setIsSuccess(true);
+    toast.success(`${clientType === 'individual' ? 'Individual' : 'Organization'} client and ${
+      formData.serviceRequired === 'home_maid'
+        ? 'Home Maid'
+        : formData.serviceRequired === 'delivery_care'
+        ? 'Delivery Care'
+        : formData.serviceRequired === 'baby_care' || formData.serviceRequired === 'baby_care_with_house_keeping'
+        ? 'Child Care'
+        : ''
+    } request added successfully!`);
+
+    if (onSuccess) {
+      onSuccess();
+    }
+
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    console.error('Error adding client or request:', errorMessage);
+    toast.error(errorMessage);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleHomeMaidInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -423,6 +495,24 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }));
   };
 
+  const handleChildCareInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setChildCareFormData(prev => ({ ...prev, [name]: value }));
+    },
+    []
+  );
+
+  const handleChildCareCheckboxChange = (section: 'careNeeds' | 'homeTasks', key: string) => {
+    setChildCareFormData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: !prev[section][key as keyof typeof prev[typeof section]],
+      },
+    }));
+  };
+
   return {
     formData,
     formErrors,
@@ -451,5 +541,9 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     setDeliveryCareFormErrors,
     handleDeliveryCareInputChange,
     handleDeliveryCareDutyChange,
+    childCareFormData,
+    setChildCareFormData,
+    handleChildCareInputChange,
+    handleChildCareCheckboxChange,
   };
 };

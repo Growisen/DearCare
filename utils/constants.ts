@@ -29,6 +29,7 @@ export const serviceOptions = [
   { value: 'orthopedic_care', label: 'Orthopedic Care' },
   { value: 'on_call_doctor_nurse', label: 'On Call Doctor/Nurse At-Home' },
   { value: 'baby_care', label: 'Baby Care' },
+  { value: 'baby_care_with_house_keeping', label: 'Baby Care with House Keeping' },
   { value: 'home_maid', label: 'Home Maid Services' },
   { value: 'home_maid_helper', label: 'Home Maid (Helper)' },
   { value: 'home_nurse_housekeeper', label: 'Home Nurse & Home maid' } 

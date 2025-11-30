@@ -12,6 +12,8 @@ import HousemaidServiceForm from '@/components/open-form/HomeMaidForm';
 import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
 import DeliveryCareForm from '@/components/open-form/DeliveryCareForm';
 import { DeliveryCareFormData } from '@/types/deliveryCare.types';
+import ChildCareForm from '@/components/open-form/BabyCareForm';
+import { ChildCareFormData } from '@/types/childCare.types';
 
 interface FormErrors {
   [key: string]: string;
@@ -43,6 +45,10 @@ interface ClientFormComponentProps {
   deliveryCareFormErrors?: FormErrors;
   handleDeliveryCareInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleDeliveryCareDutyChange?: (key: keyof DeliveryCareFormData['duties']) => void;
+  childCareFormData?: ChildCareFormData;
+  setChildCareFormData?: React.Dispatch<React.SetStateAction<ChildCareFormData>>;
+  handleChildCareInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+   handleChildCareCheckboxChange?: (section: 'careNeeds' | 'homeTasks', key: string) => void;
 }
 
   const baseInputStyles = `
@@ -80,7 +86,11 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
   deliveryCareFormData,
   deliveryCareFormErrors,
   handleDeliveryCareInputChange,
-  handleDeliveryCareDutyChange
+  handleDeliveryCareDutyChange,
+  childCareFormData,
+  setChildCareFormData,
+  handleChildCareInputChange,
+  handleChildCareCheckboxChange
 }) => {
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="p-6">
@@ -153,6 +163,13 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
               handleInputChange={handleDeliveryCareInputChange!}
               handleDutyChange={handleDeliveryCareDutyChange!}
             />
+          ) : formData.serviceRequired === 'baby_care' || formData.serviceRequired === 'baby_care_with_house_keeping' ? (
+            <ChildCareForm 
+              formData={childCareFormData!}
+              setFormData={setChildCareFormData!}
+              handleInputChange={handleChildCareInputChange!}
+              handleCheckboxChange={handleChildCareCheckboxChange!}
+            />
           ) : (
             <PatientInfoForm 
               formData={formData}
@@ -162,7 +179,6 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
               handleProfileImageChange={handleProfileImageChange} 
               handleSameAddressToggle={handleSameAddressToggle}
               isSameAddress={isSameAddress}
-              isBabyCare={formData.serviceRequired === 'baby_care'} 
               clearError={clearError}
             />
           )}

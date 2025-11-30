@@ -7,6 +7,7 @@ import { uploadProfilePicture } from './utils';
 import { logger } from '@/utils/logger';
 import { FormData } from '@/types/homemaid.types';
 import { DeliveryCareFormData } from '@/types/deliveryCare.types';
+import { ChildCareFormData } from '@/types/childCare.types';
 
 interface IndividualClientUpdateProfileData {
     patient_name: string;
@@ -473,5 +474,69 @@ export async function addDeliveryCareRequest(formData: DeliveryCareRequestData) 
   } catch (error) {
     logger.error('Error adding delivery care request:', error);
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
+}
+
+
+interface ChildCareRequestData extends ChildCareFormData {
+  clientId: string;
+}
+
+/**
+ * Adds a new child care request to the database
+ */
+export async function addChildCareRequest(formData: ChildCareRequestData) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('child_care_requests')
+      .insert({
+        client_id: formData.clientId,
+        number_of_children: formData.numberOfChildren,
+        ages_of_children: formData.agesOfChildren,
+        care_needs: formData.careNeeds,
+        care_needs_details: formData.careNeedsDetails,
+        notes: formData.notes,
+        primary_focus: formData.primaryFocus,
+        home_tasks: formData.homeTasks,
+        home_tasks_details: formData.homeTasksDetails,
+      });
+
+    if (error) {
+      logger.error('Error adding child care request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error adding child care request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+  }
+}
+
+
+export async function fetchChildCareRequestsByClientId(clientId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from('child_care_requests')
+      .select('*')
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error fetching child care requests:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    logger.error('Error fetching child care requests:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    };
   }
 }

@@ -33,6 +33,11 @@ export default function ClientFormPage() {
     deliveryCareFormErrors,
     handleDeliveryCareInputChange,
     handleDeliveryCareDutyChange,
+
+    childCareFormData,
+    setChildCareFormData,
+    handleChildCareInputChange,
+    handleChildCareCheckboxChange,
   } = useClientForm({
     onSuccess: () => {
       setTimeout(() => {
@@ -98,6 +103,10 @@ export default function ClientFormPage() {
                 deliveryCareFormErrors={deliveryCareFormErrors}
                 handleDeliveryCareInputChange={handleDeliveryCareInputChange}
                 handleDeliveryCareDutyChange={handleDeliveryCareDutyChange}
+                childCareFormData={childCareFormData}
+                setChildCareFormData={setChildCareFormData}
+                handleChildCareInputChange={handleChildCareInputChange}
+                handleChildCareCheckboxChange={handleChildCareCheckboxChange}
                 submitButtonText="Register Client"
               />
             </div>

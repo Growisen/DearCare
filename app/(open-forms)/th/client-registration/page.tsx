@@ -33,6 +33,11 @@ export default function ClientFormPage() {
     deliveryCareFormErrors,
     handleDeliveryCareInputChange,
     handleDeliveryCareDutyChange,
+
+    childCareFormData,
+    setChildCareFormData,
+    handleChildCareInputChange,
+    handleChildCareCheckboxChange
   } = useClientForm({
     onSuccess: () => {
       setTimeout(() => {
@@ -41,6 +46,8 @@ export default function ClientFormPage() {
     },
     initialData: { clientCategory: 'Tata HomeNursing' }
   });
+
+  console.log('ClientFormPage rendered with formData:', childCareFormData);
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
@@ -99,6 +106,10 @@ export default function ClientFormPage() {
                 deliveryCareFormErrors={deliveryCareFormErrors}
                 handleDeliveryCareInputChange={handleDeliveryCareInputChange}
                 handleDeliveryCareDutyChange={handleDeliveryCareDutyChange}
+                childCareFormData={childCareFormData}
+                setChildCareFormData={setChildCareFormData}
+                handleChildCareInputChange={handleChildCareInputChange}
+                handleChildCareCheckboxChange={handleChildCareCheckboxChange}
                 submitButtonText="Register Client"
               />
             </div>
