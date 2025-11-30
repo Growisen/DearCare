@@ -48,6 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     '/forgot-password',
     '/client-enquiry',
     '/reassessment/:id',
+    '/delivery-care-preferences/:id',
+    '/home-maid-preferences/:id',
+    '/child-care-preferences/:id',
   ];
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
@@ -55,6 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     pathname.startsWith('/patient-assessment/') ||
     pathname.startsWith('/client-enquiry') ||
     pathname.startsWith('/reassessment/') ||
+    pathname.startsWith('/delivery-care-preferences/') ||
+    pathname.startsWith('/home-maid-preferences/') ||
+    pathname.startsWith('/child-care-preferences/') ||
     pathname.includes('.');
 
   useEffect(() => {

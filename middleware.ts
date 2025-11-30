@@ -37,16 +37,20 @@ export async function middleware(request: NextRequest) {
     
     // Define public routes that don't require authentication
     const pathname = request.nextUrl.pathname
-    const publicRoutes = ['/signin', '/register', '/', '/about', '/client-registration', '/dc/client-registration', '/th/client-registration',  '/forgot-password', '/client-enquiry', '/reassessment/:id']
+    const publicRoutes = ['/signin', '/register', '/', '/about', '/client-registration', '/dc/client-registration', '/th/client-registration',  '/forgot-password', '/client-enquiry', '/reassessment/:id', '/delivery-care-preferences/:id']
     const isPublicRoute = publicRoutes.includes(pathname) || 
                           pathname.startsWith('/api/') || 
                           pathname.startsWith('/patient-assessment/') ||
                           pathname.startsWith('/reassessment/') ||
                           pathname.startsWith('/client-enquiry') ||
+                          pathname.startsWith('/delivery-care-preferences/') ||
+                          pathname.startsWith('/home-maid-preferences/') ||
+                          pathname.startsWith('/child-care-preferences/') ||
                           pathname.includes('.')
 
     // Check auth status and redirect if needed
     if (!user && !isPublicRoute) {
+      console.log('Middleware: Unauthenticated access to', pathname)
       // Redirect unauthenticated users to login page
       const redirectUrl = new URL('/signin', request.url)
       redirectUrl.searchParams.set('redirectTo', pathname)
