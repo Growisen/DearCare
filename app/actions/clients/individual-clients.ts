@@ -531,12 +531,61 @@ export async function fetchChildCareRequestsByClientId(clientId: string) {
       return { success: false, error: error.message };
     }
 
-    return { success: true, data };
+    const mappedData = Array.isArray(data)
+      ? data.map(item => ({
+          id: item.id,
+          clientId: item.client_id,
+          numberOfChildren: item.number_of_children,
+          agesOfChildren: item.ages_of_children,
+          careNeeds: item.care_needs,
+          careNeedsDetails: item.care_needs_details,
+          notes: item.notes,
+          primaryFocus: item.primary_focus,
+          homeTasks: item.home_tasks,
+          homeTasksDetails: item.home_tasks_details,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at
+        }))
+      : [];
+
+    return { success: true, data: mappedData };
   } catch (error) {
     logger.error('Error fetching child care requests:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred' 
     };
+  }
+}
+
+
+export async function updateChildCareRequest(clientId: string, formData: Partial<ChildCareFormData>) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase
+      .from('child_care_requests')
+      .update({
+        number_of_children: formData.numberOfChildren,
+        ages_of_children: formData.agesOfChildren,
+        care_needs: formData.careNeeds,
+        care_needs_details: formData.careNeedsDetails,
+        notes: formData.notes,
+        primary_focus: formData.primaryFocus,
+        home_tasks: formData.homeTasks,
+        home_tasks_details: formData.homeTasksDetails,
+      })
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error updating child care request:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/clients');
+    return { success: true };
+  } catch (error) {
+    logger.error('Error updating child care request:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }
 }
