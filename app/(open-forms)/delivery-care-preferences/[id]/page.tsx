@@ -4,14 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import HomeMaidForm from '@/components/open-form/HomeMaidForm';
+import DeliveryCareForm from '@/components/open-form/DeliveryCareForm';
 import { getClientNames } from '@/app/actions/clients/assessment';
-import { addHousemaidRequest } from '@/app/actions/clients/client-actions';
+import { addDeliveryCareRequest, isDeliveryCareRequestSubmitted } from '@/app/actions/clients/individual-clients';
 import { notFound } from 'next/navigation';
-import { FormData, Duties } from '@/types/homemaid.types';
-import { isHousemaidRequestSubmitted } from '@/app/actions/clients/individual-clients';
+import { DeliveryCareFormData } from '@/types/deliveryCare.types';
 
-export default function HomeMaidPreferencesPage() {
+export default function DeliveryCareRequirementsPage() {
   const params = useParams();
   const id = params.id;
   const router = useRouter();
@@ -19,49 +18,45 @@ export default function HomeMaidPreferencesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientNames, setClientNames] = useState<{ patientName?: string; requestorName?: string; clientCategory?: string } | null>(null);
   const [nameLoading, setNameLoading] = useState(true);
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState<FormData>({
-    serviceType: 'live-in',
-    serviceTypeOther: '',
-    frequency: '',
+  const [formData, setFormData] = useState<DeliveryCareFormData>({
+    carePreferred: 'post_delivery',
+    deliveryDate: '',
+    deliveryType: '',
+    motherAllergies: '',
+    motherMedications: '',
+    numberOfBabies: '',
+    feedingMethod: '',
+    babyAllergies: '',
     preferredSchedule: '',
-    homeType: '',
-    bedrooms: 0,
-    bathrooms: 0,
-    householdSize: 0,
-    hasPets: undefined,
-    petDetails: '',
     duties: {
-      kitchen: false,
-      bathroom: false,
-      floors: false,
-      dusting: false,
-      tidying: false,
-      mealPrep: false,
-      laundry: false,
-      ironing: false,
-      errands: false,
-      childcare: false,
+      babyCare: false,
+      motherCare: false,
     },
-    mealPrepDetails: '',
-    childcareDetails: '',
-    allergies: '',
-    restrictedAreas: '',
-    specialInstructions: '',
+    expectedDueDate: '',
+    backupContactName: '',
+    backupContactNumber: '',
+    hospitalName: '',
+    doctorName: '',
+    medicalHistory: '',
+    birthDateTime: '',
+    roomDetails: '',
+    babyGender: '',
+    babyWeight: '',
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { id, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [id]: value,
     }));
   };
 
-  const handleDutyChange = (key: keyof Duties) => {
+  const handleDutyChange = (key: keyof DeliveryCareFormData['duties']) => {
     setFormData(prev => ({
       ...prev,
       duties: {
@@ -74,12 +69,11 @@ export default function HomeMaidPreferencesPage() {
   useEffect(() => {
     async function checkSubmissionAndFetchName() {
       setNameLoading(true);
-      const submissionStatus = await isHousemaidRequestSubmitted(id as string);
+
+      const submissionStatus = await isDeliveryCareRequestSubmitted(id as string);
       if (submissionStatus.submitted) {
+        setAlreadySubmitted(true);
         setNameLoading(false);
-        if (typeof window !== "undefined") {
-          notFound();
-        }
         return;
       }
 
@@ -108,6 +102,10 @@ export default function HomeMaidPreferencesPage() {
     if (id) checkSubmissionAndFetchName();
   }, [id]);
 
+  if (alreadySubmitted) {
+    notFound();
+  }
+
   if (
     !nameLoading &&
     (
@@ -133,7 +131,7 @@ export default function HomeMaidPreferencesPage() {
         clientId: id as string,
       };
 
-      const result = await addHousemaidRequest(submissionData);
+      const result = await addDeliveryCareRequest(submissionData);
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to save preferences');
@@ -184,7 +182,7 @@ export default function HomeMaidPreferencesPage() {
                 </div>
               </div>
               <div className="flex flex-col md:items-end">
-                <h2 className="text-lg font-semibold text-slate-800">Home Maid Preferences Form</h2>
+                <h2 className="text-lg font-semibold text-slate-800">Delivery Care Preferences Form</h2>
               </div>
             </div>
 
@@ -225,7 +223,7 @@ export default function HomeMaidPreferencesPage() {
 
             <div className="p-6 md:p-10">
               <form onSubmit={handleSubmit} className="space-y-10">
-                <HomeMaidForm
+                <DeliveryCareForm
                   formData={formData}
                   handleInputChange={handleInputChange}
                   handleDutyChange={handleDutyChange}

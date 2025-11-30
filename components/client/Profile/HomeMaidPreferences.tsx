@@ -134,8 +134,8 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
         >
           Edit
         </button>
-        {CopyLinkButton}
-        {ExternalLinkButton}
+        {/* {CopyLinkButton}
+        {ExternalLinkButton} */}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title="Service Schedule" icon={<Calendar className="w-4 h-4" />}>

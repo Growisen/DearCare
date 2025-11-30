@@ -10,7 +10,7 @@ interface InputFieldProps {
   required?: boolean;
   min?: string | number;
   onBlur?: () => void;
-  error?: string; // Add error prop
+  error?: string;
 }
 
 const InputField = memo(({ 

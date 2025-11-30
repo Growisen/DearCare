@@ -26,7 +26,7 @@ export function useExportClients(selectedStatus: ClientFilters, searchQuery: str
         'Patient Name', 'Patient Age', 'Patient Gender',
         'Requestor Address', 'Requestor District', 'Requestor City', 
         'Requestor Pincode', 'Service Required', 'Start Date',
-        'Care Duration', 'Relation to Patient'
+        'Care Duration', 'Relation'
       ];
       
       const organizationHeaders = [
