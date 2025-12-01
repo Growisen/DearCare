@@ -292,7 +292,7 @@ export async function updateAdvancePayment(paymentId: number, updates: {
   return data?.[0]
 }
 
-export async function addManualInstallment(paymentId: string, installmentAmount: number, installmentDate: string) {
+export async function addManualInstallment(paymentId: string, installmentAmount: number, installmentDate: string, note: string) {
   const supabase = await createSupabaseServerClient()
 
   const { data: paymentData, error: fetchError } = await supabase
@@ -315,7 +315,8 @@ export async function addManualInstallment(paymentId: string, installmentAmount:
   const newDeduction = {
     amount_paid: installmentAmount,
     date: installmentDate,
-    remaining: newRemaining
+    remaining: newRemaining,
+    info: note
   }
   const updatedDeductions = [...prevDeductions, newDeduction]
 
