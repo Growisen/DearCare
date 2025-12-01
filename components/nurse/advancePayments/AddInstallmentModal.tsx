@@ -2,6 +2,7 @@
 
 import ModalPortal from '@/components/ui/ModalPortal'
 import React, { useState } from 'react'
+import { IoClose, IoCashOutline, IoAlertCircleOutline } from 'react-icons/io5'
 import { addManualInstallment } from '@/app/actions/staff-management/advance-payments'
 
 type InstallmentModalProps = {
@@ -9,166 +10,144 @@ type InstallmentModalProps = {
   onClose: () => void
   onConfirm: () => void
   paymentId: string
-  title?: string
-  description?: string
-  confirmText?: string
-  cancelText?: string
-  placeholder?: string
 }
 
-export default function AddInstallmentModal({
+export default function RecordRepaymentModal({
   open,
   onClose,
   onConfirm,
   paymentId,
-  title = 'Add Installment Amount',
-  description,
-  confirmText = 'Add Amount',
-  cancelText = 'Cancel',
-  placeholder = 'Enter amount',
 }: InstallmentModalProps) {
   const [amount, setAmount] = useState('')
+  const [note, setNote] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (!open) return null
 
   const handleConfirm = async () => {
     if (!amount.trim()) {
-      setError('Amount is required')
+      setError('Repayment amount is required.')
       return
     }
 
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount) || numAmount <= 0) {
-      setError('Please enter a valid amount')
+      setError('Please enter a valid positive amount.')
       return
     }
 
+    setIsSubmitting(true)
+
     try {
       const today = new Date().toISOString().slice(0, 10)
-      await addManualInstallment(paymentId, numAmount, today)
+      
+      await addManualInstallment(paymentId, numAmount, today, note)
+      
       setAmount('')
+      setNote('')
       setError('')
       onConfirm()
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError('Failed to add installmen')
-      } else {
-        setError('Failed to add installment')
-      }
+    } catch {
+      setError('Unable to record transaction. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleClose = () => {
     setAmount('')
     setError('')
+    setNote('')
     onClose()
-  }
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(e.target.value)
-    if (error) setError('')
   }
 
   return (
     <ModalPortal>
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-        onClick={handleClose}
-      >
-        <div
-          className="relative w-full max-w-md rounded-lg bg-white shadow-xl border border-gray-200"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50">
-                <svg
-                  className="h-5 w-5 text-green-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-sm w-full max-w-md flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                <IoCashOutline className="text-slate-500" />
+                Record Repayment
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Enter details of funds received.
+              </p>
             </div>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Close modal"
+              disabled={isSubmitting}
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors text-slate-400 hover:text-slate-700 disabled:opacity-50"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <IoClose size={22} />
             </button>
           </div>
-
-          <div className="p-6 space-y-4">
-            {description && (
-              <p className="text-sm text-gray-600">{description}</p>
-            )}
+          <div className="p-6 space-y-5">
 
             <div>
-              <label
-                htmlFor="installment-amount"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Amount
+              <label htmlFor="amount" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Amount Received
               </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                  $
+              <div className="relative group">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium group-focus-within:text-slate-600">
+                  ₹
                 </span>
                 <input
-                  id="installment-amount"
+                  id="amount"
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
                   value={amount}
-                  onChange={handleAmountChange}
-                  placeholder={placeholder}
-                  className={`w-full pl-8 pr-4 py-2 border rounded-md text-gray-800 transition-colors focus:outline-none ${
-                    error
-                      ? 'border-red-300 focus:border-red-500'
-                      : 'border-gray-300 focus:border-gray-500'
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    if (error) setError('');
+                  }}
+                  placeholder="0.00"
+                  className={`w-full pl-8 pr-4 py-2.5 bg-white border rounded text-slate-800 placeholder:text-slate-300 transition-all outline-none focus:ring-2 focus:ring-slate-100 ${
+                    error ? 'border-red-300' : 'border-gray-300 focus:border-slate-400'
                   }`}
                 />
               </div>
-              {error && (
-                <p className="mt-1 text-sm text-red-600">{error}</p>
-              )}
             </div>
+
+            <div>
+              <label htmlFor="note" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Remarks (Optional)
+              </label>
+              <textarea
+                id="note"
+                rows={2}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g. Returned via GPay, early settlement..."
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-slate-700 placeholder:text-slate-300 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 resize-none"
+              />
+            </div>
+
+            {error && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100 rounded text-red-600 text-sm">
+                <IoAlertCircleOutline size={18} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 p-6 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-200 bg-gray-50">
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              disabled={isSubmitting}
+              className="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
-              {cancelText}
+              Cancel
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+              disabled={isSubmitting}
+              className="px-5 py-2 text-sm font-medium text-white bg-slate-800 border border-slate-800 rounded hover:bg-slate-700 hover:border-slate-700 transition-all shadow-sm disabled:opacity-70 flex items-center gap-2"
             >
-              {confirmText}
+              {isSubmitting ? 'Processing...' : 'Confirm Repayment'}
             </button>
           </div>
         </div>

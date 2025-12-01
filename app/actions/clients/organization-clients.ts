@@ -62,7 +62,8 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
         client_id: clientData.id,
         staff_type: requirement.staffType,
         count: requirement.count,
-        shift_type: requirement.shiftType
+        shift_type: requirement.shiftType,
+        custom_shift_timing: requirement.customShiftTiming || null
       }));
       
       const { error: staffError } = await supabase

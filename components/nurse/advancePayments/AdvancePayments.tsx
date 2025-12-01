@@ -159,7 +159,7 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       header: "Date", 
       render: (v) => formatDate(v as string) 
     },
-    { 
+        { 
       key: "advance_amount", 
       header: "Advance Payment", 
       align: "left", 
@@ -169,7 +169,7 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
           {row.payment_method && (
             <div className="text-xs text-gray-500">Method: {row.payment_method}</div>
           )}
-          {row.receipt_url && (
+          {row.receipt_url ? (
             <a 
               href={row.receipt_url} 
               target="_blank" 
@@ -178,6 +178,8 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
             >
               <IoDocumentTextOutline /> Receipt
             </a>
+          ) : (
+            <div className="text-xs text-gray-400 mt-0.5">No receipt added</div>
           )}
         </div>
       )
@@ -227,23 +229,28 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       header: "Actions",
       align: "center",
       render: (_v, row) => (
-        <div className="flex gap-2 justify-center">
+        <div className="flex flex-col gap-2 items-center justify-center">
           <button
             type="button"
-            className="text-green-600 hover:text-green-800 px-2 py-1 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 border border-green-300 rounded-md
+             bg-green-50 text-green-700 text-xs font-medium shadow-sm hover:bg-green-100
+              hover:text-green-800 transition-all focus:outline-none focus:ring-2 focus:ring-green-400"
             onClick={() => handleAddInstallment(row)}
             title="Add Installment"
           >
             <IoAdd size={18} />
+            Repayment
           </button>
           {row.approved ? (
-            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-200">
+            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs 
+            font-semibold border border-green-200">
               Approved
             </span>
           ) : (
             <button
               type="button"
-              className="text-blue-600 hover:text-blue-800 px-2 py-1 transition-colors flex items-center gap-1"
+              className="text-blue-600 hover:text-blue-800 px-2 py-1 transition-colors 
+              flex items-center gap-1"
               onClick={() => handleSendAdvanceAmount(row)}
               disabled={loading}
               title="Approve"
@@ -308,11 +315,6 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
           setAddInstallmentModalOpen(false);
           setInstallmentPayment(null);
         }}
-        description={
-          installmentPayment
-            ? `Date: ${installmentPayment.date}\nAdvance Amount: ₹${installmentPayment.advance_amount}\nRemaining: ₹${installmentPayment.remaining_amount}`
-            : undefined
-        }
       />
 
       <Modal
