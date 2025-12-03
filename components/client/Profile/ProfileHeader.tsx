@@ -316,7 +316,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center pl-6 border-l-2 border-gray-200 ml-auto">
+            <div className="flex items-center pl-6 border-l-2 border-gray-200">
               <button
                 onClick={onDelete}
                 className="flex items-center justify-center p-2.5 text-sm font-medium text-red-600 bg-white border border-gray-200 hover:border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm group"

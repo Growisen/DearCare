@@ -22,7 +22,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
 
   console.log("Rendering EntriesTable with entries:", entries);
   return (
-    <div className="hidden lg:block overflow-x-auto">
+    <div className="hidden xl:block overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

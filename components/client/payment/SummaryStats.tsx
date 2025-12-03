@@ -23,7 +23,7 @@ const SummaryStats: React.FC<SummaryStatsProps> = ({ entries }) => {
   const totalCommission = calculateTotalCommission(entries);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
         <div className="text-2xl font-bold text-gray-900 mb-1">
           {entries.length}
