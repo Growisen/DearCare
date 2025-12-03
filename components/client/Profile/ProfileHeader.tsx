@@ -229,7 +229,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className="flex items-center">
               <button
                 onClick={onEditProfile}
-                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all group"
+                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white 
+                border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all group"
               >
                 <FiEdit className="h-4 w-4 mr-2 text-gray-400 group-hover:text-gray-600" />
                 Edit Profile
@@ -252,7 +253,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                       window.open(`/patient-assessment/${patient._id}`, '_blank');
                     }
                   }}
-                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all shadow-sm"
+                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600
+                   border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all shadow-sm"
                 >
                   <FiExternalLink className="h-4 w-4 mr-1.5" />
                   Open
@@ -273,7 +275,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
                 <button
                   onClick={handleEdit}
-                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-blue-900 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-blue-900 bg-white
+                   border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
                 >
                   <FiEdit2 className="h-4 w-4 mr-1.5" />
                   Edit
@@ -295,7 +298,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                       window.open(`/reassessment/${patient._id}`, '_blank');
                     }
                   }}
-                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 transition-all shadow-sm"
+                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white
+                   bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:ring-2
+                    focus:ring-offset-1 focus:ring-emerald-500 transition-all shadow-sm"
                 >
                   <FiExternalLink className="h-4 w-4 mr-1.5" />
                   Open
@@ -319,7 +324,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className="flex items-center pl-6 border-l-2 border-gray-200">
               <button
                 onClick={onDelete}
-                className="flex items-center justify-center p-2.5 text-sm font-medium text-red-600 bg-white border border-gray-200 hover:border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm group"
+                className="flex items-center justify-center p-2.5 text-sm font-medium text-red-600 bg-white
+                 border border-gray-200 hover:border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm group"
                 title="Delete Patient"
               >
                 <FiTrash2 className="h-5 w-5 group-hover:scale-110 transition-transform" />

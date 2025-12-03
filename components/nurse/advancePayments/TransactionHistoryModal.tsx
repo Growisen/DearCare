@@ -28,6 +28,7 @@ type AdvancePayment = {
   status?: string;
   return_type: string;
   return_amount?: number;
+  info?: string | null;
   installment_amount?: number;
   remaining_amount: number;
   deductions?: Deduction[];
@@ -55,6 +56,30 @@ export default function TransactionHistoryModal({
       currency: 'INR', 
       maximumFractionDigits: 0 
     }).format(amount);
+
+  const extraAdvances = Array.isArray(payment.deductions)
+    ? payment.deductions.reduce((sum, d) => sum + (d.lend ?? 0), 0)
+    : 0;
+
+  const initialAdvance = payment.advance_amount - extraAdvances;
+
+  const initialHistoryItem = initialAdvance > 0 ? [{
+    date: payment.date,
+    amount_paid: undefined,
+    lend: initialAdvance,
+    remaining: payment.advance_amount,
+    type: "Initial Advance",
+    payment_method: payment.payment_method,
+    receipt_file: payment.receipt_url,
+    info: payment.info,
+  }] : [];
+
+  const historyItems = [
+    ...initialHistoryItem,
+    ...(payment.deductions ?? [])
+  ];
+
+  console.log('Payment Data:', payment);
 
   return (
     <ModalPortal>
@@ -109,12 +134,11 @@ export default function TransactionHistoryModal({
           </div>
 
           <div className="flex-1 overflow-y-auto bg-white p-6">
-            {Array.isArray(payment.deductions) && payment.deductions.length > 0 ? (
+            {historyItems.length > 0 ? (
               <div className="space-y-0 divide-y divide-gray-100 border border-gray-200 rounded-lg">
-                {payment.deductions.map((d: Deduction, idx: number) => {
+                {historyItems.map((d: Deduction, idx: number) => {
                   const isMoneyGiven = d.lend !== undefined && d.lend > 0;
                   const amount = isMoneyGiven ? d.lend : d.amount_paid ?? 0;
-                  
                   return (
                     <div 
                       key={idx} 
@@ -128,25 +152,25 @@ export default function TransactionHistoryModal({
                         }`}>
                           {isMoneyGiven ? <IoArrowUp size={18} /> : <IoArrowDown size={18} />}
                         </div>
-                        
                         <div className="space-y-1">
                           <h5 className="font-semibold text-slate-700 text-sm">
-                            {isMoneyGiven ? "Additional Advance" : "Repayment Received"}
+                            {d.type === "Initial Advance"
+                              ? "Initial Advance Issued"
+                              : isMoneyGiven
+                                ? "Additional Advance"
+                                : "Repayment Received"}
                           </h5>
-                          
                           <div className="grid grid-cols-1 gap-1 mt-1">
                             <p className="text-xs text-slate-600 flex items-center gap-1">
                               <span className="text-slate-400 w-16">Date:</span> 
                               {d.date ? formatDate(d.date) : "Not entered"}
                             </p>
-                            
-                            {isMoneyGiven && (
+                            {(isMoneyGiven || d.type === "Initial Advance") && (
                               <p className="text-xs text-slate-600 flex items-center gap-1">
                                 <span className="text-slate-400 w-16">Payment Method:</span> 
                                 {d.payment_method || "Not entered"}
                               </p>
                             )}
-
                             <p className="text-xs text-slate-600 flex items-start gap-1">
                               <span className="text-slate-400 w-16 shrink-0">Notes:</span> 
                               <span className="leading-tight">
@@ -156,7 +180,6 @@ export default function TransactionHistoryModal({
                           </div>
                         </div>
                       </div>
-
                       <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start pl-14 sm:pl-0 gap-2">
                         <div className="text-right">
                           <p className={`font-medium text-base ${isMoneyGiven ? 'text-amber-700' : 'text-emerald-700'}`}>
@@ -166,7 +189,6 @@ export default function TransactionHistoryModal({
                             Balance: {formatCurrency(d.remaining)}
                           </p>
                         </div>
-
                         {d.receipt_file ? (
                           <a 
                             href={d.receipt_file} 
