@@ -118,6 +118,7 @@ export const getTenantKey = (tenant: string) => {
 };
 
 export const getNurseTenantName= (tenantKey: string) => {
+  if (tenantKey === "Tata_Homenursing") return "TATANursing";
   if (tenantKey === "Tata_homenursing") return "TATANursing";
   if (tenantKey === "Dearcare_Llp") return "Dearcare";
   return tenantKey;
