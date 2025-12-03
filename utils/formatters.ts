@@ -112,13 +112,13 @@ export function formatOrganizationName(name: string) {
 }
 
 export const getTenantKey = (tenant: string) => {
-  if (tenant === "Tata HomeNursing") return "TATA_nursing";
+  if (tenant === "Tata HomeNursing") return "TATANursing";
   if (tenant === "DearCare LLP") return "Dearcare";
   return tenant;
 };
 
 export const getNurseTenantName= (tenantKey: string) => {
-  if (tenantKey === "Tata_homenursing") return "TATA_nursing";
+  if (tenantKey === "Tata_homenursing") return "TATANursing";
   if (tenantKey === "Dearcare_Llp") return "Dearcare";
   return tenantKey;
 }
