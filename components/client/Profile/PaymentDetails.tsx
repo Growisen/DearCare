@@ -279,6 +279,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
             entries={entries}
             onDelete={handleDeleteClick}
             deletingId={deletingId}
+            onEdit={handleEditClick}
             onApprove={handleApprove}
             approvingId={approvingId}
           />

@@ -6,6 +6,7 @@ interface EntriesMobileViewProps {
   entries: EntryGroup[];
   onDelete: (id: number) => void;
   deletingId: string | null;
+  onEdit?: (id: number) => void;
   onApprove?: (group: EntryGroup) => void;
   approvingId?: number | null;
 }
@@ -14,11 +15,12 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
   entries,
   onDelete,
   deletingId,
+  onEdit,
   onApprove,
   approvingId,
 }) => {
   return (
-    <div className="lg:hidden divide-y divide-gray-200">
+    <div className="xl:hidden divide-y divide-gray-200">
       {entries.map((group) => {
         const groupTotal = calculateGroupTotal(group);
 
@@ -29,6 +31,14 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
                 {group.groupName}
               </h3>
               <div className="flex flex-col items-end space-y-2 ml-4">
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(group.id)}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                  >
+                    Edit
+                  </button>
+                )}
                 <button
                   onClick={() => onDelete(group.id)}
                   className="text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition-colors"
@@ -39,7 +49,7 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
                 {onApprove && group.approved === false && (
                   <button
                     onClick={() => onApprove(group)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                    className="text-green-600 hover:text-green-800 text-sm font-medium hover:bg-green-50 px-2 py-1 rounded transition-colors"
                     disabled={approvingId === group.id}
                   >
                     {approvingId === group.id ? "Approving..." : "Approve"}

@@ -25,26 +25,26 @@ interface SavePaymentGroupInput {
   endDate?: string;  
 }
 
-interface ClientPaymentRecord {
-  id: string;
-  client_id: string;
-  payment_group_name: string;
-  total_amount: number;
-  date_added: string;
-  notes?: string | null;
-  show_to_client: boolean;
-  approved: boolean;
-  mode_of_payment?: string | null;
-  // start_date?: string;
-  // end_date?: string;  
-}
+// interface ClientPaymentRecord {
+//   id: string;
+//   client_id: string;
+//   payment_group_name: string;
+//   total_amount: number;
+//   date_added: string;
+//   notes?: string | null;
+//   show_to_client: boolean;
+//   approved: boolean;
+//   mode_of_payment?: string | null;
+//   // start_date?: string;
+//   // end_date?: string;  
+// }
 
-interface ClientPaymentLineItem {
-  id: string;
-  payment_record_id: string;
-  field_name: string;
-  amount: number;
-}
+// interface ClientPaymentLineItem {
+//   id: string;
+//   payment_record_id: string;
+//   field_name: string;
+//   amount: number;
+// }
 
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
@@ -121,35 +121,22 @@ export async function getClientPaymentGroups(clientId: string) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    const { data: records, error: recordsError } = await supabase
+    const { data: records, error } = await supabase
       .from('client_payment_records')
-      .select('*')
+      .select(`
+        *,
+        lineItems:client_payment_line_items (*)
+      `)
       .eq('client_id', clientId)
       .order('date_added', { ascending: false });
 
-    if (recordsError) {
-      logger.error('Error fetching payment records:', recordsError);
-      return { success: false, error: recordsError.message };
+    if (error) {
+      logger.error('Error fetching payment groups:', error);
+      return { success: false, error: error.message };
     }
 
-    const recordIds = (records as ClientPaymentRecord[]).map((r) => r.id);
+    return { success: true, records };
 
-    const { data: lineItems, error: lineItemsError } = await supabase
-      .from('client_payment_line_items')
-      .select('*')
-      .in('payment_record_id', recordIds);
-
-    if (lineItemsError) {
-      logger.error('Error fetching payment line items:', lineItemsError);
-      return { success: false, error: lineItemsError.message };
-    }
-
-    const recordsWithItems = (records as ClientPaymentRecord[]).map((record: ClientPaymentRecord) => ({
-      ...record,
-      lineItems: (lineItems as ClientPaymentLineItem[]).filter((item: ClientPaymentLineItem) => item.payment_record_id === record.id),
-    }));
-
-    return { success: true, records: recordsWithItems };
   } catch (error: unknown) {
     logger.error('Error fetching client payment groups:', error);
     return {
