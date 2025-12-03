@@ -155,12 +155,12 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
   const columns: TableColumn<AdvancePayment>[] = [
     { 
       key: "date", 
-      header: "Date", 
+      header: "Issue Date", 
       render: (v) => formatDate(v as string) 
     },
         { 
       key: "advance_amount", 
-      header: "Amount", 
+      header: "Total Advance", 
       align: "left", 
       render: (_v, row) => (
         <div>

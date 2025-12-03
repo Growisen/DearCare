@@ -84,10 +84,15 @@ export default function TransactionHistoryModal({
             <div className="bg-white p-6">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Advance</p>
               <p className="text-2xl font-medium text-slate-800">{formatCurrency(payment.advance_amount)}</p>
-              <div className="flex items-center gap-2 mt-2">
+              {/* <div className="flex items-center gap-2 mt-2">
                 <span className="text-xs text-slate-400">Date Issued:</span>
                 <span className="text-xs text-slate-600 font-medium">
                    {payment.date ? formatDate(payment.date) : "Not entered"}
+                </span>
+              </div> */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs text-slate-600 font-medium">
+                   Advance Given 
                 </span>
               </div>
             </div>
