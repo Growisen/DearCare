@@ -353,84 +353,85 @@ export async function getUnifiedClients(
 
 /**
  * Fetches detailed information for a specific client by ID
+ * OPTIMIZED: Uses relational joins to reduce DB round trips and Promise.all for parallel storage calls.
  */
 export async function getClientDetails(clientId: string) {
   try {
     const supabase = await createSupabaseServerClient()
-    
-    const { data: client, error: clientError } = await supabase
+    const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .select('*')
+      .select(`
+        *,
+        individual_clients (*),
+        organization_clients (*),
+        staff_requirements (*)
+      `)
       .eq('id', clientId)
       .single()
-    
+
     if (clientError) {
       return { success: false, error: clientError.message }
     }
-    
-    if (!client) {
+
+    if (!clientData) {
       return { success: false, error: 'Client not found' }
     }
 
-    if (client.client_type === 'individual') {
-      const { data: individualClient, error: individualError } = await supabase
-        .from('individual_clients')
-        .select('*')
-        .eq('client_id', clientId)
-        .single()
-        
-      if (individualError) {
-        return { success: false, error: individualError.message }
+    const { 
+      individual_clients, 
+      organization_clients, 
+      staff_requirements, 
+      ...baseClient 
+    } = clientData
+
+    if (baseClient.client_type === 'individual') {
+      const individualDetails = individual_clients
+
+      if (!individualDetails) {
+         return { success: false, error: 'Individual client details not found' }
       }
-      
-      const patientPicUrl = individualClient.patient_profile_pic ? 
-        await getStorageUrl(individualClient.patient_profile_pic) : null;
-      const requestorPicUrl = individualClient.requestor_profile_pic ? 
-        await getStorageUrl(individualClient.requestor_profile_pic) : null;
-      
-      return { 
-        success: true, 
+      const [patientPicUrl, requestorPicUrl] = await Promise.all([
+        individualDetails.patient_profile_pic 
+          ? getStorageUrl(individualDetails.patient_profile_pic) 
+          : null,
+        individualDetails.requestor_profile_pic 
+          ? getStorageUrl(individualDetails.requestor_profile_pic) 
+          : null
+      ])
+
+      return {
+        success: true,
         client: {
-          ...client,
+          ...baseClient,
           details: {
-            ...individualClient,
+            ...individualDetails,
             patient_profile_pic_url: patientPicUrl,
             requestor_profile_pic_url: requestorPicUrl,
-            patient_profile_pic: individualClient.patient_profile_pic,
-            requestor_profile_pic: individualClient.requestor_profile_pic,
+            patient_profile_pic: individualDetails.patient_profile_pic,
+            requestor_profile_pic: individualDetails.requestor_profile_pic,
           }
         }
       }
     } else {
-      const { data: organizationClient, error: organizationError } = await supabase
-        .from('organization_clients')
-        .select('*')
-        .eq('client_id', clientId)
-        .single()
-        
-      if (organizationError) {
-        return { success: false, error: organizationError.message }
+      const organizationDetails = organization_clients
+
+      if (!organizationDetails) {
+        return { success: false, error: 'Organization client details not found' }
       }
-      
-      // Fetch staff requirements if any
-      const { data: staffRequirements } = await supabase
-        .from('staff_requirements')
-        .select('*')
-        .eq('client_id', clientId)
-        
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         client: {
-          ...client,
-          details: organizationClient,
-          staffRequirements: staffRequirements || []
+          ...baseClient,
+          details: organizationDetails,
+          staffRequirements: staff_requirements || []
         }
       }
     }
   } catch (error: unknown) {
     logger.error('Error fetching client details:', error)
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: error instanceof Error ? error.message : 'An unknown error occurred'
     }
   }
