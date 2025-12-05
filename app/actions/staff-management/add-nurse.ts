@@ -448,58 +448,79 @@ export async function fetchNurseAssignments(
       .order('start_date', { ascending: false });
 
     if (assignmentError) throw assignmentError;
-    if (!assignments) return { data: null, error: 'No assignments found' };
+    if (!assignments || assignments.length === 0) return { data: [], error: null };
 
-    const assignmentsWithDetails = await Promise.all(
-      assignments.map(async (assignment) => {
-        const isIndividual = assignment.clients.client_type === 'individual';
+    const individualIds: string[] = [];
+    const organizationIds: string[] = [];
 
-        const { data: clientDetails, error: clientError } = await supabase
-          .from(isIndividual ? 'individual_clients' : 'organization_clients')
-          .select('*')
-          .eq('client_id', assignment.client_id)
-          .single();
+    assignments.forEach(a => {
+      if (a.clients.client_type === 'individual') {
+        individualIds.push(a.client_id);
+      } else {
+        organizationIds.push(a.client_id);
+      }
+    });
 
-        if (clientError) {
-          console.error(`Error fetching client details: ${clientError.message}`);
-          return null;
+    const [indivResult, orgResult] = await Promise.all([
+      individualIds.length > 0 
+        ? supabase.from('individual_clients').select('*').in('client_id', individualIds) 
+        : Promise.resolve({ data: [], error: null }),
+      organizationIds.length > 0 
+        ? supabase.from('organization_clients').select('*').in('client_id', organizationIds) 
+        : Promise.resolve({ data: [], error: null })
+    ]);
+
+    if (indivResult.error) throw indivResult.error;
+    if (orgResult.error) throw orgResult.error;
+
+    const indivMap = new Map(indivResult.data?.map(c => [c.client_id, c]));
+    const orgMap = new Map(orgResult.data?.map(c => [c.client_id, c]));
+
+    const assignmentsWithDetails = assignments.map((assignment) => {
+      const isIndividual = assignment.clients.client_type === 'individual';
+      let clientDetails;
+
+      if (isIndividual) {
+        clientDetails = indivMap.get(assignment.client_id);
+      } else {
+        clientDetails = orgMap.get(assignment.client_id);
+      }
+
+      if (!clientDetails) return null;
+
+      return {
+        assignment: {
+          id: assignment.id,
+          start_date: assignment.start_date,
+          end_date: assignment.end_date,
+          shift_start_time: assignment.shift_start_time,
+          shift_end_time: assignment.shift_end_time,
+          salary_hour: assignment.salary_hour,
+          salary_per_day: assignment.salary_per_day,
+          notes: assignment.notes,
+          end_notes: assignment.end_notes,
+        },
+        client: {
+          type: assignment.clients.client_type,
+          clientId: assignment.client_id,
+          details: isIndividual
+            ? { individual: clientDetails, organization: undefined }
+            : { organization: clientDetails, individual: undefined }
         }
-
-        return {
-          assignment: {
-            id: assignment.id,
-            start_date: assignment.start_date,
-            end_date: assignment.end_date,
-            shift_start_time: assignment.shift_start_time,
-            shift_end_time: assignment.shift_end_time,
-            salary_hour: assignment.salary_hour,
-            salary_per_day: assignment.salary_per_day,
-            notes: assignment.notes,
-            end_notes: assignment.end_notes,
-          },
-          client: {
-            type: assignment.clients.client_type,
-            clientId: assignment.client_id,
-            details: isIndividual
-              ? { individual: clientDetails, organization: undefined }
-              : { organization: clientDetails, individual: undefined }
-          }
-        } as NurseAssignmentWithClient;
-      })
-    );
+      } as NurseAssignmentWithClient;
+    });
 
     const validAssignments = assignmentsWithDetails.filter(
-      (assignment): assignment is NurseAssignmentWithClient => assignment !== null
+      (a): a is NurseAssignmentWithClient => a !== null
     );
-    
 
     return { data: validAssignments, error: null };
+
   } catch (error) {
     console.error('Error fetching nurse assignments:', error);
     return { data: null, error: 'Failed to fetch assignments' };
   }
 }
-
 
 
 export async function fetchBasicDetails(
