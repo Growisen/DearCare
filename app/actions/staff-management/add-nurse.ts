@@ -343,40 +343,45 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
       return { data: null, error: 'Not authenticated' }
     }
 
-    const { data: basicData, error: basicError } = await supabase
-      .from('nurses')
-      .select('*')
-      .eq('nurse_id', nurseId)
-      .single()
+    const [dbResult, ...documentUrls] = await Promise.all([
+      supabase
+        .from('nurses')
+        .select(`
+          *,
+          nurse_health ( health_status, disability, source ),
+          nurse_references ( referer_name, phone_number, relation, description, family_references, staff_reference )
+        `)
+        .eq('nurse_id', nurseId)
+        .single(),
+      getProtectedDocumentUrl(supabase, nurseId, 'image'),
+      getProtectedDocumentUrl(supabase, nurseId, 'adhar'),
+      getProtectedDocumentUrl(supabase, nurseId, 'Educational_Certificates'),
+      getProtectedDocumentUrl(supabase, nurseId, 'Experience_Certificates'),
+      getProtectedDocumentUrl(supabase, nurseId, 'Noc_Certificate'),
+      getProtectedDocumentUrl(supabase, nurseId, 'ration_card')
+    ]);
 
-    if (basicError) throw basicError
+    if (dbResult.error) throw dbResult.error;
 
-    const { data: healthData } = await supabase
-      .from('nurse_health')
-      .select('health_status, disability, source')
-      .eq('nurse_id', nurseId)
-      .single()
+    const { nurse_health, nurse_references, ...basicData } = dbResult.data;
 
-    const { data: referenceData } = await supabase
-      .from('nurse_references')
-      .select('referer_name, phone_number, relation, description, family_references, staff_reference')
-      .eq('nurse_id', nurseId)
-      .single()
+    const healthData = Array.isArray(nurse_health) ? nurse_health[0] : nurse_health;
+    const referenceData = Array.isArray(nurse_references) ? nurse_references[0] : nurse_references;
 
     const documents = {
-      profile_image: await getProtectedDocumentUrl(supabase, nurseId, 'image'),
-      adhar: await getProtectedDocumentUrl(supabase, nurseId, 'adhar'),
-      educational: await getProtectedDocumentUrl(supabase, nurseId, 'Educational_Certificates'),
-      experience: await getProtectedDocumentUrl(supabase, nurseId, 'Experience_Certificates'),
-      noc: await getProtectedDocumentUrl(supabase, nurseId, 'Noc_Certificate'),
-      ration: await getProtectedDocumentUrl(supabase, nurseId, 'ration_card')
+      profile_image: documentUrls[0],
+      adhar: documentUrls[1],
+      educational: documentUrls[2],
+      experience: documentUrls[3],
+      noc: documentUrls[4],
+      ration: documentUrls[5]
     };
 
     return {
       data: {
         basic: basicData,
-        health: healthData,
-        references: referenceData,
+        health: healthData || null,
+        references: referenceData || null,
         documents
       },
       error: null
@@ -390,7 +395,6 @@ export async function fetchNurseDetailsmain(nurseId: number): Promise<{
     }
   }
 }
-
 
 
 interface AssignmentResponse {
@@ -444,58 +448,79 @@ export async function fetchNurseAssignments(
       .order('start_date', { ascending: false });
 
     if (assignmentError) throw assignmentError;
-    if (!assignments) return { data: null, error: 'No assignments found' };
+    if (!assignments || assignments.length === 0) return { data: [], error: null };
 
-    const assignmentsWithDetails = await Promise.all(
-      assignments.map(async (assignment) => {
-        const isIndividual = assignment.clients.client_type === 'individual';
+    const individualIds: string[] = [];
+    const organizationIds: string[] = [];
 
-        const { data: clientDetails, error: clientError } = await supabase
-          .from(isIndividual ? 'individual_clients' : 'organization_clients')
-          .select('*')
-          .eq('client_id', assignment.client_id)
-          .single();
+    assignments.forEach(a => {
+      if (a.clients.client_type === 'individual') {
+        individualIds.push(a.client_id);
+      } else {
+        organizationIds.push(a.client_id);
+      }
+    });
 
-        if (clientError) {
-          console.error(`Error fetching client details: ${clientError.message}`);
-          return null;
+    const [indivResult, orgResult] = await Promise.all([
+      individualIds.length > 0 
+        ? supabase.from('individual_clients').select('*').in('client_id', individualIds) 
+        : Promise.resolve({ data: [], error: null }),
+      organizationIds.length > 0 
+        ? supabase.from('organization_clients').select('*').in('client_id', organizationIds) 
+        : Promise.resolve({ data: [], error: null })
+    ]);
+
+    if (indivResult.error) throw indivResult.error;
+    if (orgResult.error) throw orgResult.error;
+
+    const indivMap = new Map(indivResult.data?.map(c => [c.client_id, c]));
+    const orgMap = new Map(orgResult.data?.map(c => [c.client_id, c]));
+
+    const assignmentsWithDetails = assignments.map((assignment) => {
+      const isIndividual = assignment.clients.client_type === 'individual';
+      let clientDetails;
+
+      if (isIndividual) {
+        clientDetails = indivMap.get(assignment.client_id);
+      } else {
+        clientDetails = orgMap.get(assignment.client_id);
+      }
+
+      if (!clientDetails) return null;
+
+      return {
+        assignment: {
+          id: assignment.id,
+          start_date: assignment.start_date,
+          end_date: assignment.end_date,
+          shift_start_time: assignment.shift_start_time,
+          shift_end_time: assignment.shift_end_time,
+          salary_hour: assignment.salary_hour,
+          salary_per_day: assignment.salary_per_day,
+          notes: assignment.notes,
+          end_notes: assignment.end_notes,
+        },
+        client: {
+          type: assignment.clients.client_type,
+          clientId: assignment.client_id,
+          details: isIndividual
+            ? { individual: clientDetails, organization: undefined }
+            : { organization: clientDetails, individual: undefined }
         }
-
-        return {
-          assignment: {
-            id: assignment.id,
-            start_date: assignment.start_date,
-            end_date: assignment.end_date,
-            shift_start_time: assignment.shift_start_time,
-            shift_end_time: assignment.shift_end_time,
-            salary_hour: assignment.salary_hour,
-            salary_per_day: assignment.salary_per_day,
-            notes: assignment.notes,
-            end_notes: assignment.end_notes,
-          },
-          client: {
-            type: assignment.clients.client_type,
-            clientId: assignment.client_id,
-            details: isIndividual
-              ? { individual: clientDetails, organization: undefined }
-              : { organization: clientDetails, individual: undefined }
-          }
-        } as NurseAssignmentWithClient;
-      })
-    );
+      } as NurseAssignmentWithClient;
+    });
 
     const validAssignments = assignmentsWithDetails.filter(
-      (assignment): assignment is NurseAssignmentWithClient => assignment !== null
+      (a): a is NurseAssignmentWithClient => a !== null
     );
-    
 
     return { data: validAssignments, error: null };
+
   } catch (error) {
     console.error('Error fetching nurse assignments:', error);
     return { data: null, error: 'Failed to fetch assignments' };
   }
 }
-
 
 
 export async function fetchBasicDetails(
@@ -636,7 +661,6 @@ export async function fetchBasicDetails(
   }
 }
 
-
 export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | null, error: string | null }> {
   try {
     const supabase = await createSupabaseServerClient()
@@ -646,80 +670,54 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
       return { data: null, error: 'Not authenticated' }
     }
 
-    const { data, error } = await supabase
-      .from('nurses')
-      .select(`
-        nurse_id,
-        first_name,
-        last_name,
-        email,
-        phone_number,
-        experience,
-        service_type
-      `)
-      .order('first_name')
-
-    if (error) throw error
-
-
-    const get47 = async (nurseId:number) => {
-      const { data, error } = await supabase
-        .from('nurse_client')
+    const [nursesResult, imagesResult] = await Promise.all([
+      supabase
+        .from('nurses')
         .select(`
-          id,
           nurse_id,
-          client_id,
-          assigned_type,
-          start_date,
-          end_date,
-          shift_start_time,
-          shift_end_time,
-          salary_hour,
-          created_at
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          experience,
+          service_type
         `)
-        .eq('nurse_id', nurseId)
-    
-      if (error) {
-        console.error('Error fetching nurse_client:', error)
-        return null
-      }
-    
-      console.log('Nurse 47 Assignments:', data)
-      return data
-    }
-
-    const getNurseImageUrl = async (nurseId: number): Promise<string | null> => {
-      const { data: files } = await supabase
+        .order('first_name'),
+      supabase
         .storage
         .from('DearCare')
-        .list(`Nurses/image`, {
-          limit: 1,
-          search: nurseId.toString(),
-        })
+        .list('Nurses/image', { limit: 1000 })
+    ])
 
-      if (files && files.length > 0) {
-        const { data: imageUrl } = supabase
+    if (nursesResult.error) throw nursesResult.error
+
+    const files = imagesResult.data || []
+
+    const transformedData = nursesResult.data.map(nurse => {
+      const nurseIdStr = nurse.nurse_id.toString()
+      const matchingFile = files.find(file => file.name.includes(nurseIdStr))
+      
+      let photo: string | null = null
+      
+      if (matchingFile) {
+        const { data } = supabase
           .storage
           .from('DearCare')
-          .getPublicUrl(`Nurses/image/${files[0].name}`)
-
-        return imageUrl.publicUrl
+          .getPublicUrl(`Nurses/image/${matchingFile.name}`)
+        photo = data.publicUrl
       }
-      return null
-    }
 
-    const transformedData = await Promise.all(data.map(async nurse => ({
-      nurse_id: nurse.nurse_id,
-      first_name: nurse.first_name,
-      last_name: nurse.last_name,
-      status: 'unassigned',
-      email: nurse.email,
-      phone_number: nurse.phone_number,
-      experience: nurse.experience,
-      photo: await getNurseImageUrl(nurse.nurse_id) 
-    } as NurseBasicInfo)))
-
-    await get47(transformedData[0].nurse_id) 
+      return {
+        nurse_id: nurse.nurse_id,
+        first_name: nurse.first_name,
+        last_name: nurse.last_name,
+        status: 'unassigned',
+        email: nurse.email,
+        phone_number: nurse.phone_number,
+        experience: nurse.experience,
+        photo
+      } as NurseBasicInfo
+    })
 
     return { 
       data: transformedData, 
@@ -734,6 +732,8 @@ export async function fetchNurseDetails(): Promise<{ data: NurseBasicInfo[] | nu
     }
   }
 }
+
+
 interface ExcelNurseData {
   'Nurse ID': number;
   'First Name': string;
