@@ -15,20 +15,22 @@ export const getProtectedDocumentUrl = async (
   const { data: files } = await supabase
     .storage
     .from('DearCare')
-    .list(`Nurses/${folder}`, {
-      limit: 1,
-      search: nurseId.toString(),
-    });
+    .list(`Nurses/${folder}`);
 
   if (files && files.length > 0) {
-    const filePath = `Nurses/${folder}/${files[0].name}`;
-    const { data, error } = await supabase
-      .storage
-      .from('DearCare')
-      .createSignedUrl(filePath, 60 * 30);
+    const match = files.find(
+      (file) => file.name.split('.')[0] === nurseId.toString()
+    );
+    if (match) {
+      const filePath = `Nurses/${folder}/${match.name}`;
+      const { data, error } = await supabase
+        .storage
+        .from('DearCare')
+        .createSignedUrl(filePath, 60 * 30);
 
-    if (error || !data?.signedUrl) return null;
-    return data.signedUrl;
+      if (error || !data?.signedUrl) return null;
+      return data.signedUrl;
+    }
   }
   return null;
 };

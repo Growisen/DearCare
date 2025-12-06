@@ -166,7 +166,6 @@ export async function createNurse(
   
 ): Promise<{ success: boolean; nurseId?: number; error?: string }> {
   
-
   try {
 
     const supabase = await createSupabaseServerClient()
