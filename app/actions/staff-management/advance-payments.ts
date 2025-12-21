@@ -346,3 +346,90 @@ export async function approveAdvancePayment(paymentId: string) {
   if (error) throw error
   return data?.[0]
 }
+
+
+export async function deleteDeductionFromPayment(input: {
+  payment_id: string,
+  deduction: {
+    date: string;
+    amount_paid?: number;
+    lend?: number;
+    remaining: number;
+    type?: string;
+    payment_method?: string;
+    receipt_file?: string | null;
+    info?: string | null;
+  }
+}) {
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    const { data: payment, error: fetchError } = await supabase
+      .from('advance_payments')
+      .select('deductions, advance_amount, remaining_amount, return_amount')
+      .eq('id', input.payment_id)
+      .single();
+
+    if (fetchError || !payment) {
+      return { success: false, data: null };
+    }
+
+    const prevDeductions = Array.isArray(payment.deductions) ? payment.deductions : [];
+
+    const fields = [
+      'date', 'amount_paid', 'lend', 'remaining', 'type', 'payment_method', 'receipt_file', 'info'
+    ];
+    const deductionToDelete = prevDeductions.find((ded: Deduction) =>
+      fields.every(field => {
+        const a = ded[field as keyof Deduction];
+        const b = input.deduction[field as keyof Deduction];
+        return (a === b) || (a == null && b == null);
+      })
+    );
+
+    const updatedDeductions = prevDeductions.filter((ded: Deduction) =>
+      !fields.every(field => {
+        const a = ded[field as keyof Deduction];
+        const b = input.deduction[field as keyof Deduction];
+        return (a === b) || (a == null && b == null);
+      })
+    );
+
+    let newAdvanceAmount = payment.advance_amount;
+    let newRemainingAmount = payment.remaining_amount;
+    let newReturnAmount = payment.return_amount ?? 0;
+
+    if (deductionToDelete) {
+      if (deductionToDelete.lend) {
+        newAdvanceAmount = (payment.advance_amount ?? 0) - (deductionToDelete.lend ?? 0);
+        newRemainingAmount = (payment.remaining_amount ?? 0) - (deductionToDelete.lend ?? 0);
+      } else if (deductionToDelete.amount_paid) {
+        newRemainingAmount = (payment.remaining_amount ?? 0) + (deductionToDelete.amount_paid ?? 0);
+        newReturnAmount = (payment.return_amount ?? 0) - (deductionToDelete.amount_paid ?? 0);
+      }
+    }
+
+    if (newReturnAmount === 0) {
+      newReturnAmount = null;
+    }
+
+    const { data: updateData, error: updateError } = await supabase
+      .from('advance_payments')
+      .update({
+        deductions: updatedDeductions,
+        advance_amount: newAdvanceAmount,
+        remaining_amount: newRemainingAmount,
+        return_amount: newReturnAmount
+      })
+      .eq('id', input.payment_id)
+      .select();
+
+    if (updateError || !updateData?.[0]) {
+      return { success: false, data: null };
+    }
+
+    return { success: true, data: updateData[0] };
+  } catch {
+    return { success: false, data: null };
+  }
+}
