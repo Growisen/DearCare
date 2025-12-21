@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   IoClose, 
   IoDocumentTextOutline, 
@@ -9,6 +9,7 @@ import {
 } from 'react-icons/io5';
 import { formatDate } from "@/utils/formatters";
 import ModalPortal from "@/components/ui/ModalPortal";
+import Modal from "@/components/ui/Modal";
 
 type Deduction = {
   date: string;
@@ -19,6 +20,7 @@ type Deduction = {
   payment_method?: string;
   receipt_file?: string | null;
   info?: string | null;
+  payment_id?: string | null;
 };
 
 type AdvancePayment = {
@@ -41,13 +43,18 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   payment: AdvancePayment | null;
+  onDeleteItem?: (item: Deduction) => void;
 };
 
 export default function TransactionHistoryModal({
   isOpen,
   onClose,
   payment,
+  onDeleteItem,
 }: Props) {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedDeduction, setSelectedDeduction] = useState<Deduction | null>(null);
+
   if (!isOpen || !payment) return null;
 
   const formatCurrency = (amount: number) => 
@@ -79,7 +86,8 @@ export default function TransactionHistoryModal({
     ...(payment.deductions ?? [])
   ];
 
-  console.log('Payment Data:', payment);
+
+  console.log('Rendering TransactionHistoryModal with payment:', payment);
 
   return (
     <ModalPortal>
@@ -202,6 +210,18 @@ export default function TransactionHistoryModal({
                         ) : (
                           <span className="text-xs text-slate-400 mt-1">Not receipt available</span>
                         )}
+                        {d.type !== "Initial Advance" && (
+                          <button
+                            onClick={() => {
+                              setSelectedDeduction(d);
+                              setDeleteModalOpen(true);
+                            }}
+                            className="ml-2 px-2 py-1 text-xs text-red-600 border border-red-200 rounded hover:bg-red-50 transition"
+                            title="Delete this transaction"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -226,6 +246,23 @@ export default function TransactionHistoryModal({
           </div>
         </div>
       </div>
+
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => {
+          if (selectedDeduction && onDeleteItem) {
+            onDeleteItem({ ...selectedDeduction, payment_id: payment.id });
+          }
+          setDeleteModalOpen(false);
+          setSelectedDeduction(null);
+        }}
+        variant="delete"
+        title="Delete Transaction"
+        description="Are you sure you want to delete this transaction? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </ModalPortal>
   );
 }

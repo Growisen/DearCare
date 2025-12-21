@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import Table, { TableColumn } from "../../common/Table";
 import { IoAdd, IoTrash, IoDocumentTextOutline, IoTimeOutline } from 'react-icons/io5';
 import CreateAdvancePaymentModal from "./CreateAdvancePaymentModal";
-import { fetchAdvancePayments, deleteAdvancePayment, approveAdvancePayment } from "@/app/actions/staff-management/advance-payments";
+import { 
+  fetchAdvancePayments,
+  deleteAdvancePayment, 
+  approveAdvancePayment,
+  deleteDeductionFromPayment,
+ } from "@/app/actions/staff-management/advance-payments";
 import Modal from "../../ui/Modal";
 import AddInstallmentModal from "./AddInstallmentModal";
 import { formatDate } from "@/utils/formatters";
@@ -151,6 +156,50 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       setLoading(false);
     }
   };
+
+  const handleDeleteDeduction = async (item: Deduction) => {
+    if (!selectedHistoryPayment) return;
+    try {
+      const res = await deleteDeductionFromPayment({
+        payment_id: selectedHistoryPayment.id,
+        deduction: item,
+      });
+      if (res.success && res.data) {
+        toast.success("Deduction deleted successfully.", {
+          action: {
+            label: "OK",
+            onClick: () => toast.dismiss(),
+          },
+        });
+        setSelectedHistoryPayment({
+          ...selectedHistoryPayment,
+          advance_amount: res.data.advance_amount,
+          deductions: res.data.deductions,
+          remaining_amount: res.data.remaining_amount ?? selectedHistoryPayment.remaining_amount,
+          return_amount: res.data.return_amount ?? selectedHistoryPayment.return_amount,
+        });
+        setPayments((prev) =>
+          prev.map((p) =>
+            p.id === selectedHistoryPayment.id
+              ? { ...p, deductions: res.data.deductions, remaining_amount: res.data.remaining_amount ?? p.remaining_amount, return_amount: res.data.return_amount ?? p.return_amount }
+              : p
+          )
+        );
+      } else {
+        throw new Error("Failed to delete deduction.");
+      }
+    } catch (err: unknown) {
+      const errorMessage = typeof err === "object" && err !== null && "message" in err
+        ? (err as { message?: string }).message
+        : "Failed to delete deduction.";
+      toast.error(errorMessage || "Failed to delete deduction.", {
+        action: {
+          label: "OK",
+          onClick: () => toast.dismiss(),
+        },
+      });
+    }
+  }; 
 
   const columns: TableColumn<AdvancePayment>[] = [
     { 
@@ -334,6 +383,7 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
             setSelectedHistoryPayment(null);
         }}
         payment={selectedHistoryPayment}
+        onDeleteItem={handleDeleteDeduction}
       />
     </div>
   );
