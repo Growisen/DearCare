@@ -78,28 +78,15 @@ export const getRelationLabel = (
 export function formatName(fullName: string): string {
   if (!fullName) return "";
 
-  fullName = fullName.trim().replace(/\s+/g, ' ').toLowerCase();
+  // 1. Normalize: Trim and lowercase everything
+  let formatted = fullName.trim().toLowerCase();
 
-  fullName = fullName.replace(/([a-z]{2,})\.([a-z])/g, '$1. $2');
-  fullName = fullName.replace(/([a-z])\.([a-z])/g, '$1. $2');
-  fullName = fullName.replace(/([a-z])\.([a-z]{2,})/g, '$1. $2');
+  // 2. Capitalize the first letter of every word
+  // \b finds boundaries (start of line, space, dot, hyphen)
+  // This turns "j.doe" -> "J.Doe" and "j doe" -> "J Doe"
+  formatted = formatted.replace(/\b[a-z]/g, (char) => char.toUpperCase());
 
-  const parts = fullName.split(' ');
-
-  const formattedParts = [];
-
-  for (const part of parts) {
-    if (!part) continue;
-
-    if (part.replace(/\./g, '').length === 1) {
-      const letter = part.replace(/\./g, '').toUpperCase();
-      formattedParts.push(letter + '.');
-    } else {
-      formattedParts.push(part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
-    }
-  }
-
-  return formattedParts.join(' ');
+  return formatted;
 }
 
 export function formatOrganizationName(name: string) {

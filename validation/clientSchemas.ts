@@ -9,6 +9,8 @@ const dateStrOptional = z.string().refine(
   'Invalid date'
 );
 
+const nameRegex = /^[A-Za-z]+([ .'-][A-Za-z]+)*$/;
+
 const emailStr = z.string().email('Please enter a valid email address');
 const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
 
@@ -43,7 +45,7 @@ const baseCommon = z.object({
 
 const individualSchema = baseCommon.extend({
   clientType: z.literal('individual'),
-  requestorName: z.string().min(1, 'Your name is required'),
+  requestorName: z.string().min(1, 'Requestor name is required').regex(nameRegex, 'Requestor name can contain only letters, spaces, dots, hyphens, and apostrophes'),
   requestorPhone: phoneStr,
   requestorEmail: emailStr,
   relationToPatient: z.string().optional(),
@@ -55,7 +57,7 @@ const individualSchema = baseCommon.extend({
   requestorDistrict: z.string().min(1, 'Your district is required'),
   requestorCity: z.string().min(1, 'Your city is required'),
   requestorDOB: dateStr,
-  patientName: z.string().optional(),
+  patientName: z.string().min(1, 'Patient name is required').regex(nameRegex, 'Patient name can contain only letters, spaces, dots, hyphens, and apostrophes'),
   patientDOB: dateStrOptional.optional(),
   patientGender: z.string().optional(),
   patientPhone: patientPhoneStr.optional(),
