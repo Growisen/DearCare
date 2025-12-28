@@ -1,4 +1,4 @@
-import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Eye } from "lucide-react"
+import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Eye, MapPin } from "lucide-react"
 import { NurseBasicDetails } from "@/types/staff.types"
 import Loader from '@/components/Loader'
 import { formatName } from "@/utils/formatters"
@@ -40,14 +40,15 @@ const NurseTable = ({
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1000px]">
+        <table className="w-full min-w-[1200px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className={`${thClass} min-w-[200px]`}>Nurse Name</th>
               <th className={`${thClass} min-w-[140px]`}>Reg No</th>
-              <th className={`${thClass} min-w-[120px]`}>Status</th>
+              {/* <th className={`${thClass} min-w-[120px]`}>Status</th> */}
               <th className={`${thClass} min-w-[100px]`}>Experience</th>
               <th className={`${thClass} min-w-[100px]`}>Rating</th>
+              <th className={`${thClass} min-w-[180px]`}>Location</th> 
               <th className={`${thClass} min-w-[200px]`}>Contact</th>
               <th className={`${thClass} w-[100px] sticky right-0 bg-gray-50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] text-right`}>Actions</th>
             </tr>
@@ -58,7 +59,19 @@ const NurseTable = ({
               return (
                 <tr key={nurse.nurse_id} className="hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors">
                   <td className="py-3 px-6 text-gray-900 font-medium align-top min-w-[200px]">
-                    {`${formatName(nurse.name.first || "")} ${formatName(nurse.name.last || "")}`}
+                    <div>
+                      {`${formatName(nurse.name.first || "")} ${formatName(nurse.name.last || "")}`}
+                      <div className="mt-1">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            statusColors[nurse.status as keyof typeof statusColors]
+                          }`}
+                        >
+                          {StatusIcon && <StatusIcon className="w-3 h-3" />}
+                          {nurse.status.replace("_", " ").toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
                   </td>
 
                   <td className="py-3 px-6 text-gray-600 align-top whitespace-nowrap">
@@ -74,7 +87,7 @@ const NurseTable = ({
                     </div>
                   </td>
 
-                  <td className="py-3 px-6 align-top whitespace-nowrap">
+                  {/* <td className="py-3 px-6 align-top whitespace-nowrap">
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                         statusColors[nurse.status as keyof typeof statusColors]
@@ -83,7 +96,7 @@ const NurseTable = ({
                       {StatusIcon && <StatusIcon className="w-3 h-3" />}
                       {nurse.status.replace("_", " ").toUpperCase()}
                     </span>
-                  </td>
+                  </td> */}
 
                   <td className="py-3 px-6 text-gray-700 align-top text-sm">
                     {nurse.experience || 0} years
@@ -91,6 +104,27 @@ const NurseTable = ({
 
                   <td className="py-3 px-6 text-gray-700 align-top text-sm">
                     {nurse.rating || 0}/5
+                  </td>
+
+                  <td className="py-3 px-6 align-top min-w-[180px]">
+                    <div className="flex flex-col gap-0.5">
+                      {(nurse.city || nurse.taluk) && (
+                        <div className="text-gray-900 text-sm font-medium flex items-center gap-1.5">
+                          <span>
+                            {[nurse.city, nurse.taluk].filter(Boolean).join(", ")}
+                          </span>
+                        </div>
+                      )}
+                      {nurse.address && (
+                        <div
+                          className="text-gray-800 text-xs max-w-[170px] break-words whitespace-pre-line"
+                          style={{ overflowWrap: "anywhere" }}
+                          title={nurse.address}
+                        >
+                          {nurse.address.replace(/, /g, ",\u200B")}
+                        </div>
+                      )}
+                    </div>
                   </td>
 
                   <td className="py-3 px-6 align-top min-w-[200px]">

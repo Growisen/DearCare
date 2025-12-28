@@ -191,6 +191,9 @@ export interface NurseDocuments {
     email: string | null;
     phone: string | null;
   };
+  taluk?: string;
+  city?: string;
+  address?: string;
 }
 
 
