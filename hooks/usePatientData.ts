@@ -4,6 +4,7 @@ import { Patient, ClientResponse, ClientCategory } from '@/types/client.types';
 import { toast } from 'sonner';
 import { getServiceLabel } from '@/utils/formatters';
 import { serviceOptions } from '@/utils/constants';
+import { calculateAge } from '@/utils/dateUtils';
 
 export const usePatientData = (id: string, activeTab?: string) => {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -38,7 +39,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
           firstName: clientData.details?.patient_name?.split(' ')[0] || '',
           lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
           dob: clientData.details?.patient_dob || '',
-          age: clientData.details?.patient_age || 0,
+          age: calculateAge(clientData.details?.patient_dob || ''),
           gender: clientData.details?.patient_gender || '',
           bloodGroup: '',
           location: clientData.details?.complete_address || '',

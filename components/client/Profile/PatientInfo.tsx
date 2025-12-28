@@ -9,6 +9,7 @@ import { MapPin, Phone, Mail, Briefcase, User, Heart, Ruler, Weight, Users } fro
 import { createMapLink } from '../../../utils/mapUtils';
 import { formatName } from '@/utils/formatters';
 import { updateIndividualClientLocationLink } from '@/app/actions/clients/client-actions';
+import  { calculateAge, formatDateToDDMMYYYY }  from '@/utils/dateUtils';
 
 interface PatientInfoProps {
   patient: {
@@ -16,6 +17,7 @@ interface PatientInfoProps {
     email: string;
     phoneNumber: string;
     serviceRequired?: string;
+    dob?: string;
     address?: {
       fullAddress: string;
       city: string;
@@ -45,6 +47,7 @@ interface PatientInfoProps {
       relation: string;
       phone: string;
       email: string;
+      dob?: string;
       profileImage?: string | null;
       emergencyPhone?: string;
       jobDetails?: string;
@@ -149,9 +152,15 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
     !!patient.requestor.address.pincode
   );
 
+  const patientDob = patient.dob;
+  const patientAge = patientDob ? calculateAge(patientDob) : undefined;
+
+  const requestorDob = patient.requestor.dob;
+  const requestorAge = requestorDob ? calculateAge(requestorDob) : undefined;
+
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-      
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"> 
       {isPersonalInfoAvailable && (
         <InfoSection title="Personal Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
           <div className="space-y-3">
@@ -165,7 +174,26 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
               value={patient.phoneNumber} 
               icon={<Phone className="w-4 h-4 text-blue-500" />} 
             />
-            
+            {(patientDob || patientAge !== undefined) && (
+              <div className="flex gap-4">
+                {patientDob && (
+                  <InfoField 
+                    label="Date of Birth" 
+                    value={formatDateToDDMMYYYY(patientDob)}
+                    icon={<User className="w-4 h-4 text-blue-500" />}
+                    className="flex-1"
+                  />
+                )}
+                {patientAge !== undefined && (
+                  <InfoField 
+                    label="Age" 
+                    value={patientAge}
+                    icon={<User className="w-4 h-4 text-blue-500" />}
+                    className="flex-1"
+                  />
+                )}
+              </div>
+            )}
             {(patient.emergencyContact?.name || patient.emergencyContact?.phone) && (
               <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
                 <p className="text-xs font-medium text-gray-500 mb-1 flex items-center">
@@ -283,6 +311,26 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
               </div>
             </div>
             <div className="space-y-3">
+              {(requestorDob || requestorAge !== undefined) && (
+                <div className="flex gap-4">
+                  {requestorDob && (
+                    <InfoField 
+                      label="Date of Birth" 
+                      value={formatDateToDDMMYYYY(requestorDob)}
+                      icon={<User className="w-4 h-4 text-blue-500" />}
+                      className="flex-1"
+                    />
+                  )}
+                  {requestorAge !== undefined && (
+                    <InfoField 
+                      label="Age" 
+                      value={requestorAge}
+                      icon={<User className="w-4 h-4 text-blue-500" />}
+                      className="flex-1"
+                    />
+                  )}
+                </div>
+              )}
               <InfoField 
                 label="Phone" 
                 value={patient.requestor.phone}
