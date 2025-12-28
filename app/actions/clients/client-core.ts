@@ -265,6 +265,8 @@ export async function getUnifiedClients(
       .select(`
         id,
         client_type,
+        registration_number,
+        prev_registration_number,
         status,
         created_at,
         client_category,
@@ -327,6 +329,8 @@ export async function getUnifiedClients(
         status: record.status,
         email: isIndividual ? record.requestor_email : record.contact_email,
         phone: isIndividual ? record.requestor_phone : record.contact_phone,
+        registrationNumber: record.registration_number || undefined,
+        previousRegistrationNumber: record.prev_registration_number || undefined,
       };
     });
 

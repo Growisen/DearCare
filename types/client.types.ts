@@ -36,6 +36,7 @@ export interface Client {
   clientLocation?: { lat: number; lng: number };
   rejection_reason?: string
   createdAt?: string;
+  previousRegistrationNumber?: string;
 }
 
 export interface Review {
@@ -372,6 +373,7 @@ export interface NurseAssignment {
 export interface Patient {
   _id?: string;
   registrationNumber?: string;
+  previousRegistrationNumber?: string;
   firstName: string;
   lastName: string;
   dob: string;

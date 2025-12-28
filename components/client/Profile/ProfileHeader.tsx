@@ -12,6 +12,7 @@ import { updateClientCreatedAt } from '@/app/actions/clients/client-core';
 interface ProfileHeaderProps {
   patient: {
     registrationNumber?: string;
+    previousRegistrationNumber?: string;
     _id?: string;
     firstName?: string;
     lastName?: string;
@@ -183,6 +184,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-gray-200">
                 <span className="font-medium text-gray-400">Reg:</span>
                 <span className="text-gray-900 font-medium">{patient.registrationNumber || "N/A"}</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-gray-200">
+                <span className="font-medium text-gray-400">Prev. Reg:</span>
+                <span className="text-gray-900 font-medium">{patient.previousRegistrationNumber || "N/A"}</span>
               </div>
             </div>
 
