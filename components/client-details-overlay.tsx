@@ -18,6 +18,7 @@ import ImageViewer from './common/ImageViewer';
 import ClientEditForm from './client/ClientEditFormOverlay';
 import { relationOptions } from '@/utils/constants';
 import { getRelationLabel, formatDate } from '@/utils/formatters';
+import { calculateAge } from '@/utils/dateUtils';
 
 type DetailedClient = DetailedClientIndividual | DetailedClientOrganization;
 
@@ -283,7 +284,8 @@ export function ClientDetailsOverlay({
               <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Personal Details</h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
-                <DetailItem label="Age" value={client.details?.patient_age} />
+                <DetailItem label="Date of Birth" value={formatDate(client.details?.patient_dob || "")} />
+                <DetailItem label="Age" value={calculateAge(client.details?.patient_dob || '')} />
                 <DetailItem label="Gender" value={client.details?.patient_gender} />
                 <DetailItem label="Phone" value={client.details?.patient_phone} />
               </div>
