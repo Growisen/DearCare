@@ -560,33 +560,31 @@ export async function fetchBasicDetails(
         experience,
         status,
         nurse_reg_no,
-        nurse_prev_reg_no
+        nurse_prev_reg_no,
+        taluk,
+        city,
+        address
       `, { count: 'exact' })
       .eq('admitted_type', nursesOrg)
 
     if (searchQuery && searchQuery.trim() !== '') {
-      // OLD WAY: const q = `%${searchQuery.trim()}%`
-      
-      // NEW WAY: Split by space and join with %
-      // Input: "John Doe" -> Output: "%John%Doe%"
-      // This matches "John Doe", "John  Doe", "John Middle Doe", etc.
-      const q = `%${searchQuery.trim().split(/\s+/).join('%')}%`;
-      
-      console.log('Search Query:', q);
-      nursesQuery = nursesQuery.or(
-        [
-          `full_name.ilike.${q}`,
-          `city.ilike.${q}`,
-          `email.ilike.${q}`,
-          `phone_number.ilike.${q}`,
-          `state.ilike.${q}`,
-          `address.ilike.${q}`,
-          `taluk.ilike.${q}`,
-          `category.ilike.${q}`,
-          `nurse_reg_no.ilike.${q}`,
-          `nurse_prev_reg_no.ilike.${q}`
-        ].join(',')
-      );
+      const terms = searchQuery.split(',').map(t => t.trim()).filter(Boolean);
+
+      const orConditions: string[] = [];
+      for (const term of terms) {
+        const q = `%${term.split(/\s+/).join('%')}%`;
+        orConditions.push(`full_name.ilike.${q}`);
+        orConditions.push(`city.ilike.${q}`);
+        orConditions.push(`email.ilike.${q}`);
+        orConditions.push(`phone_number.ilike.${q}`);
+        orConditions.push(`state.ilike.${q}`);
+        orConditions.push(`address.ilike.${q}`);
+        orConditions.push(`taluk.ilike.${q}`);
+        orConditions.push(`category.ilike.${q}`);
+        orConditions.push(`nurse_reg_no.ilike.${q}`);
+        orConditions.push(`nurse_prev_reg_no.ilike.${q}`);
+      }
+      nursesQuery = nursesQuery.or(orConditions.join(','));
     }
 
     if (status && status.trim() !== '' && status !== 'all') {
@@ -651,7 +649,10 @@ export async function fetchBasicDetails(
       contact: {
         email: nurse.email,
         phone: nurse.phone_number
-      }
+      },
+      taluk: nurse.taluk || '',
+      city: nurse.city || '',
+      address: nurse.address || ''
     }))
 
     return {
