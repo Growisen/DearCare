@@ -559,7 +559,8 @@ export async function fetchBasicDetails(
         phone_number,
         experience,
         status,
-        nurse_reg_no
+        nurse_reg_no,
+        nurse_prev_reg_no
       `, { count: 'exact' })
       .eq('admitted_type', nursesOrg)
 
@@ -575,7 +576,8 @@ export async function fetchBasicDetails(
           `address.ilike.${q}`,
           `taluk.ilike.${q}`,
           `category.ilike.${q}`,
-          `nurse_reg_no.ilike.${q}`
+          `nurse_reg_no.ilike.${q}`,
+          `nurse_prev_reg_no.ilike.${q}`
         ].join(',')
       );
     }
@@ -637,6 +639,7 @@ export async function fetchBasicDetails(
       status: nurse.status || 'unassigned',
       experience: nurse.experience,
       regno: nurse.nurse_reg_no || null,
+      previous_regno: nurse.nurse_prev_reg_no || null,
       rating: 0,
       contact: {
         email: nurse.email,

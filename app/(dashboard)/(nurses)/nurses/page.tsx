@@ -116,6 +116,10 @@ export default function NursesPage() {
   }, [searchQuery])
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedStatus, selectedExperience, debouncedSearch]);
+
+  useEffect(() => {
     loadNurses()
   }, [currentPage, debouncedSearch, selectedStatus, selectedExperience])
 
