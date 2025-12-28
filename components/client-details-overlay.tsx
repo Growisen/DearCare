@@ -75,6 +75,7 @@ function DetailItem({
     2: 'sm:col-span-2',
     3: 'sm:col-span-3'
   };
+  console.log(`DetailItem - ${label}:`, displayValue);
   return (
     <div className={`border-b border-gray-100 pb-2 h-full ${colSpanClasses[columns]}`}>
       <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>

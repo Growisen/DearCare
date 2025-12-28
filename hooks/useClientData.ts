@@ -11,8 +11,8 @@ export function useClientData() {
   const queryClient = useQueryClient();
   const { organization } = useOrgStore();
   const [searchInput, setSearchInput] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState<ClientFilters>("pending")
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedStatus, setSelectedStatus] = useState<ClientFilters>("pending")
   const [isStatusLoaded, setIsStatusLoaded] = useState(false)
   const [createdAt, setCreatedAt] = useState<Date | null>(null)
 
@@ -67,6 +67,14 @@ export function useClientData() {
 
   const totalPages = data?.pagination?.totalPages || 1;
   const totalCount = data?.pagination?.totalCount || 0;
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchQuery(searchInput)
+      setCurrentPage(1)
+    }, 400)
+    return () => clearTimeout(handler)
+  }, [searchInput])
 
   const handleSearch = () => {
     setCurrentPage(1) 
