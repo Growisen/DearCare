@@ -240,7 +240,7 @@ export async function getUnifiedClients(
       }
 
       if (searchQuery && searchQuery.trim() !== '') {
-        const searchTerm = `%${searchQuery.toLowerCase().trim()}%`;
+        const searchTerm = `%${searchQuery.toLowerCase().trim().split(/\s+/).join('%')}%`;
         q = q.ilike('search_text', searchTerm);
       }
 

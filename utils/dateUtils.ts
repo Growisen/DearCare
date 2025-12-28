@@ -61,6 +61,7 @@ export function getExperienceFromJoiningDate(joiningDate: string) {
 }
 
 export const calculateAge = (dob?: string) => {
+  console.log('Calculating age for DOB:', dob);
   if (!dob) return '';
   const birthDate = new Date(dob);
   const today = new Date();

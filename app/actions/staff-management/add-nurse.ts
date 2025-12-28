@@ -565,7 +565,14 @@ export async function fetchBasicDetails(
       .eq('admitted_type', nursesOrg)
 
     if (searchQuery && searchQuery.trim() !== '') {
-      const q = `%${searchQuery.trim()}%`
+      // OLD WAY: const q = `%${searchQuery.trim()}%`
+      
+      // NEW WAY: Split by space and join with %
+      // Input: "John Doe" -> Output: "%John%Doe%"
+      // This matches "John Doe", "John  Doe", "John Middle Doe", etc.
+      const q = `%${searchQuery.trim().split(/\s+/).join('%')}%`;
+      
+      console.log('Search Query:', q);
       nursesQuery = nursesQuery.or(
         [
           `full_name.ilike.${q}`,
