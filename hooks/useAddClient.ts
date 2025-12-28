@@ -7,7 +7,7 @@ import {
 } from '@/types/client.types';
 import { Duties, FormData as HomeMaidFormData } from '@/types/homemaid.types';
 import { DeliveryCareFormData } from '@/types/deliveryCare.types';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { 
   addIndividualClient, 
   addOrganizationClient, 
@@ -218,6 +218,7 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     const parsed = clientSchema.safeParse({ ...formData });
     if (!parsed.success) {
       const errs = toErrorMap(parsed.error.issues);
+      console.log('Validation errors on blur:', errs);
       setFormErrors(prev => ({ ...prev, [id]: errs[id] || '' }));
     } else {
       setFormErrors(prev => ({ ...prev, [id]: '' }));
@@ -324,13 +325,21 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     }
   };
 
+  const showAllErrorsAsToast = (errors: FormErrors) => {
+    Object.values(errors).forEach((msg) => {
+      if (msg) toast.error(msg);
+    });
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
   if (e) {
     e.preventDefault();
   }
 
   if (!validateForm()) {
-    toast.error("Please correct the errors in the form");
+    showAllErrorsAsToast(formErrors);
+    showAllErrorsAsToast(homeMaidFormErrors);
+    showAllErrorsAsToast(deliveryCareFormErrors);
     return;
   }
 
