@@ -1,6 +1,5 @@
 import React, { memo } from "react"
-import { Eye } from "lucide-react"
-import { CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { Eye, CheckCircle, Clock, AlertCircle } from "lucide-react"
 import { formatDate, formatName, getServiceLabel } from "@/utils/formatters"
 import { serviceOptions } from "@/utils/constants"
 import { Client, ClientFilters } from "@/types/client.types"
@@ -30,45 +29,64 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
     : null;
 
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="py-4 px-6 text-gray-800 font-medium">
+    <tr className="hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors">
+      <td className="py-3 px-6 text-gray-800 font-medium align-top min-w-[200px]">
         {formatName(client.name)}
         {isNewClient && (
-          <span className="inline-block mt-1 ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold border border-green-300">
-            ✨ New Client
+          <span className="block mt-1 px-1.5 py-0.5 max-w-fit bg-green-100 text-green-700 text-[10px] rounded-full font-semibold border border-green-300">
+            ✨ New
           </span>
         )}
       </td>
-      <td className="py-4 px-6 text-gray-600">
-        {formatDate(createdAt)}
+
+      <td className="py-3 px-6 text-gray-600 align-top whitespace-nowrap">
+        <div className="flex flex-col gap-0.5 text-sm">
+          <span className="block">
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide mr-1.5">New:</span>
+            <span className="font-medium text-gray-700">{client.registrationNumber || "-"}</span>
+          </span>
+          <span className="block">
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide mr-1.5">Old:</span>
+            <span>{client.previousRegistrationNumber || "-"}</span>
+          </span>
+        </div>
+      </td>
+
+      <td className="py-3 px-6 text-gray-600 align-top whitespace-nowrap">
+        <div className="font-medium text-sm">{formatDate(createdAt)}</div>
         {daysSinceJoined !== null && (
-          <span className="block text-xs text-gray-400 mt-1">
+          <span className="block text-[10px] text-gray-400 mt-0.5">
             {daysSinceJoined} ago
           </span>
         )}
       </td>
-      {/* <td className="py-4 px-6 text-gray-600">{formatDate(client.requestDate)}</td> */}
-      <td className="py-4 px-6 text-gray-600">{getServiceLabel(serviceOptions, client.service || '')}</td>
-      <td className="py-4 px-6">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
-          <StatusIcon className="w-3.5 h-3.5" />
-          {status.replace("_", " ").charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+
+      <td className="py-3 px-6 text-gray-600 align-top min-w-[140px] text-sm">
+        {getServiceLabel(serviceOptions, client.service || '')}
+      </td>
+
+      <td className="py-3 px-6 align-top whitespace-nowrap">
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusColors[status]}`}>
+          <StatusIcon className="w-3 h-3" />
+          {status.replace("_", " ").toUpperCase()}
         </span>
       </td>
-      <td className="py-4 px-6">
-        <div>
-          <div className="text-gray-800">{client.email}</div>
-          <div className="text-gray-500">{client.phone}</div>
+
+      <td className="py-3 px-6 align-top min-w-[180px]">
+        <div className="flex flex-col gap-0.5">
+          <div className="text-gray-800 text-sm font-medium">{client.email}</div>
+          <div className="text-gray-500 text-xs">{client.phone}</div>
         </div>
       </td>
-      <td className="py-4 px-6">
+
+      <td className="py-3 px-6 align-top whitespace-nowrap sticky right-0 bg-white sm:static sm:bg-transparent shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] sm:shadow-none">
         <button 
-          className="px-3.5 py-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium inline-flex items-center gap-1.5"
+          className="px-2.5 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-md transition-colors text-xs font-semibold inline-flex items-center gap-1.5 border border-blue-100"
           onClick={() => onReviewDetails(client)}
-          aria-label={`Review details for ${client.name}`}
+          aria-label={`Review ${client.name}`}
         >
-          <Eye className="h-4 w-4" />
-          Review Details
+          <Eye className="h-3.5 w-3.5" />
+          Review
         </button>
       </td>
     </tr>
@@ -86,36 +104,52 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
   const StatusIcon = statusIcons[status];
   
   return (
-    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+    <div className="p-4 space-y-3 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800">{formatName(client.name)}</h3>
-          <p className="text-sm text-gray-500 mt-1">{getServiceLabel(serviceOptions, client.service || '')}</p>
+          <h3 className="font-semibold text-gray-800 text-sm">{formatName(client.name)}</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{getServiceLabel(serviceOptions, client.service || '')}</p>
         </div>
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
-          <StatusIcon className="w-3.5 h-3.5" />
-          {status.replace("_", " ").charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusColors[status]}`}>
+          <StatusIcon className="w-3 h-3" />
+          {status.replace("_", " ").toUpperCase()}
         </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
-        {/* <p className="text-gray-500">Request Date:</p>
-        <p className="text-gray-800 font-medium">{formatDate(client.requestDate)}</p> */}
-        <p className="text-gray-500">Created At:</p>
-        <p className="text-gray-800 font-medium">{formatDate(client.createdAt ?? '')}</p>
-        <p className="text-gray-500">Email:</p>
-        <p className="text-gray-800 break-all">{client.email}</p>
-        <p className="text-gray-500">Phone:</p>
-        <p className="text-gray-800">{client.phone}</p>
+      <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs bg-white border border-gray-100 p-3 rounded-lg shadow-sm">
+        <div className="col-span-2 sm:col-span-1">
+           <span className="text-gray-400 uppercase tracking-wide mr-2">Created:</span>
+           <span className="text-gray-800 font-medium">{formatDate(client.createdAt ?? '')}</span>
+        </div>
+        
+        <div className="col-span-2 sm:col-span-1">
+           <span className="text-gray-400 uppercase tracking-wide mr-2">Reg:</span>
+           <span className="text-gray-800 font-medium">{client.registrationNumber || "-"}</span>
+        </div>
+
+        <div className="col-span-2 sm:col-span-1">
+           <span className="text-gray-400 uppercase tracking-wide mr-2">Prev Reg:</span>
+           <span className="text-gray-800 font-medium">{client.previousRegistrationNumber || "-"}</span>
+        </div>
+
+        <div className="col-span-2 pt-1 border-t border-gray-50 mt-1 flex flex-col gap-1">
+           <div className="flex items-center gap-2">
+             <span className="text-gray-400 uppercase w-10">Email:</span>
+             <span className="text-gray-800 truncate">{client.email}</span>
+           </div>
+           <div className="flex items-center gap-2">
+             <span className="text-gray-400 uppercase w-10">Phone:</span>
+             <span className="text-gray-800">{client.phone}</span>
+           </div>
+        </div>
       </div>
       
       <button 
-        className="w-full px-4 py-2.5 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+        className="w-full px-3 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors text-xs font-semibold flex items-center justify-center gap-1.5 border border-blue-100"
         onClick={() => onReviewDetails(client)}
-        aria-label={`Review details for ${client.name}`}
       >
-        <Eye className="h-4 w-4" />
-        Review Details
+        <Eye className="h-3.5 w-3.5" />
+        Review
       </button>
     </div>
   );
@@ -124,12 +158,12 @@ ClientMobileCard.displayName = 'ClientMobileCard';
 
 export const ClientTable = memo(function ClientTable({ clients, onReviewDetails }: ClientTableProps) {
   const statusColors: Record<ClientFilters, string> = {
-    pending: "bg-yellow-50 text-yellow-700 border border-yellow-200",
-    under_review: "bg-blue-50 text-blue-700 border border-blue-200",
-    approved: "bg-green-50 text-green-700 border border-green-200",
-    rejected: "bg-red-50 text-red-700 border border-red-200",
-    assigned: "bg-green-100 text-green-700 border border-green-200",
-    all: "bg-gray-50 text-gray-600 border border-gray-200"
+    pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    under_review: "bg-blue-50 text-blue-700 border-blue-200",
+    approved: "bg-green-50 text-green-700 border-green-200",
+    rejected: "bg-red-50 text-red-700 border-red-200",
+    assigned: "bg-green-100 text-green-700 border-green-200",
+    all: "bg-gray-50 text-gray-600 border-gray-200"
   }
 
   const statusIcons: Record<ClientFilters, React.FC<{ className?: string }>> = {
@@ -141,22 +175,24 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
     all: Eye
   }
 
+  const thClass = "py-3 px-6 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap";
+
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-100 border-b border-gray-200">
-            <tr className="text-left">
-              <th className="py-4 px-6 font-medium text-gray-700">Client Name</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Created At</th> 
-              {/* <th className="py-4 px-6 font-medium text-gray-700">Request Date</th> */}
-              <th className="py-4 px-6 font-medium text-gray-700">Service</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Status</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Contact</th>
-              <th className="py-4 px-6 font-medium text-gray-700">Actions</th>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full min-w-[1000px]">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className={`${thClass} min-w-[180px]`}>Client Name</th>
+              <th className={`${thClass} min-w-[140px]`}>Reg No</th>
+              <th className={`${thClass} min-w-[130px]`}>Created At</th>
+              <th className={`${thClass} min-w-[140px]`}>Service</th>
+              <th className={`${thClass} min-w-[110px]`}>Status</th>
+              <th className={`${thClass} min-w-[180px]`}>Contact</th>
+              <th className={`${thClass} w-[100px] sticky right-0 bg-gray-50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] text-right`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-gray-100 bg-white">
             {clients.length > 0 ? (
               clients.map((client) => (
                 <ClientTableRow 
@@ -169,8 +205,11 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-gray-500">
-                  No client requests found
+                <td colSpan={7} className="py-12 text-center text-gray-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <AlertCircle className="h-8 w-8 text-gray-300" />
+                    <p className="text-sm">No client requests found</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -178,7 +217,7 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
         </table>
       </div>
 
-      <div className="sm:hidden bg-white">
+      <div className="md:hidden bg-white">
         {clients.length > 0 ? (
           clients.map((client) => (
             <ClientMobileCard
@@ -190,8 +229,11 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
             />
           ))
         ) : (
-          <div className="p-8 text-center text-gray-500">
-            No client requests found
+          <div className="p-12 text-center text-gray-500">
+             <div className="flex flex-col items-center justify-center gap-2">
+                <AlertCircle className="h-8 w-8 text-gray-300" />
+                <p className="text-sm">No client requests found</p>
+             </div>
           </div>
         )}
       </div>

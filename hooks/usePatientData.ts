@@ -36,6 +36,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
         const transformedPatient: Patient = {
           _id: clientData.details?.client_id,
           registrationNumber: clientData.registration_number || '',
+          previousRegistrationNumber: clientData.prev_registration_number || '',
           firstName: clientData.details?.patient_name?.split(' ')[0] || '',
           lastName: clientData.details?.patient_name?.split(' ').slice(1).join(' ') || '',
           dob: clientData.details?.patient_dob || '',
