@@ -1,12 +1,8 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
 import { logger } from '@/utils/logger';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 
-/**
- * TYPES & INTERFACES
- * -----------------
- */
 export type AttendanceRecord = {
   id: number;
   nurseName: string;
@@ -49,9 +45,9 @@ export interface AttendanceRecordById {
 
 export interface MarkAttendanceParams {
   assignmentId: number;
-  date: string; // 'YYYY-MM-DD'
-  checkIn: string; // 'HH:mm'
-  checkOut: string; // 'HH:mm'
+  date: string;
+  checkIn: string;
+  checkOut: string;
   isAdminAction?: boolean;
 }
 
@@ -87,12 +83,6 @@ interface RawAttendanceRecord {
   nurse_client: NurseClient | NurseClient[] | null;
 }
 
-/**
- * HELPER FUNCTIONS
- * ---------------
- */
-
-// Convert 24-hour format to 12-hour format
 function convertTo12HourFormat(time24: string | null): string {
   if (!time24) return '';
   
@@ -245,10 +235,9 @@ export async function getTodayAttendanceForAssignment(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const today = new Date().toISOString().split('T')[0];
     
-    // First, get the nurse ID associated with this assignment
     const { data: assignmentData, error: assignmentError } = await supabase
       .from('nurse_client')
       .select('nurse_id')
@@ -265,7 +254,6 @@ export async function getTodayAttendanceForAssignment(
     
     const nurseId = assignmentData?.nurse_id;
     
-    // Check if there's an attendance record for today
     const { data, error } = await supabase
       .from('attendence_individual')
       .select('id, start_time, end_time, total_hours, location')
@@ -281,7 +269,6 @@ export async function getTodayAttendanceForAssignment(
       };
     }
     
-    // Check if the nurse is on approved leave for today
     let onLeave = false;
     let leaveType = '';
     
@@ -347,7 +334,7 @@ export async function markAttendance({
   message: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from('attendence_individual')
@@ -423,7 +410,7 @@ export async function unmarkAttendance({
   message: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     let recordId = id;
     let createdAt: string | null = null;
@@ -502,10 +489,6 @@ export async function unmarkAttendance({
   }
 }
 
-/**
- * ADMIN ACTIONS
- * ------------
- */
 
 export async function adminCheckInNurse(
   assignmentId: number
@@ -514,7 +497,7 @@ export async function adminCheckInNurse(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const today = new Date().toISOString().split('T')[0];
     const now = new Date();
     const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
@@ -586,11 +569,10 @@ export async function adminCheckOutNurse(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const now = new Date();
     const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-    
-    // Fetch the attendance record to get check-in time
+
     const { data: attendance, error: fetchError } = await supabase
       .from('attendence_individual')
       .select('start_time')
@@ -604,7 +586,6 @@ export async function adminCheckOutNurse(
       };
     }
     
-    // Calculate hours worked
     let totalHours = '0:00';
     if (attendance.start_time) {
       const [startHours, startMinutes] = attendance.start_time.split(':').map(Number);
@@ -620,7 +601,6 @@ export async function adminCheckOutNurse(
       totalHours = `${hours}:${minutes.toString().padStart(2, '0')}`;
     }
     
-    // Update the attendance record with check-out time and total hours
     const { error: updateError } = await supabase
       .from('attendence_individual')
       .update({
@@ -656,7 +636,7 @@ export async function markLongShiftAttendance(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const today = new Date().toISOString().split('T')[0];
     
     const { data: assignmentData, error: assignmentError } = await supabase
@@ -751,239 +731,6 @@ export async function markLongShiftAttendance(
   }
 }
 
-// /**
-//  * REPORTING FUNCTIONS
-//  * -----------------
-//  */
-
-// export async function fetchStaffAttendance(
-//   date?: string,
-//   page: number = 1,
-//   pageSize: number = 50,
-//   includeAbsent: boolean = true,
-//   admittedType?: string,
-//   debouncedSearchTerm?: string
-// ): Promise<{ 
-//   success: boolean; 
-//   data: AttendanceRecord[]; 
-//   pagination?: {
-//     currentPage: number;
-//     totalPages: number;
-//     totalRecords: number;
-//     pageSize: number;
-//   };
-//   error?: string 
-// }> {
-//   try {
-//     const supabase = await createSupabaseServerClient();
-//     const targetDate = date || new Date().toISOString().split('T')[0];
-    
-//     const from = (page - 1) * pageSize;
-//     const to = from + pageSize - 1;
-    
-//     let attendanceQuery = supabase
-//       .from('attendence_individual')
-//       .select(`
-//         id,
-//         date,
-//         start_time,
-//         end_time,
-//         total_hours,
-//         location,
-//         assigned_id,
-//         nurse_client:assigned_id (
-//           id,
-//           nurse_id,
-//           shift_start_time,
-//           shift_end_time,
-//           nurse:nurse_id (
-//             nurse_id,
-//             first_name,
-//             last_name,
-//             full_name, 
-//             nurse_reg_no,
-//             nurse_prev_reg_no,
-//             admitted_type
-//           )
-//         )
-//       `, { count: 'exact' })
-//       .eq('date', targetDate)
-//       .not('nurse_client', 'is', null);
-      
-//     if (admittedType) {
-//       attendanceQuery = attendanceQuery.eq('nurse_client.nurse.admitted_type', admittedType);
-//     }
-    
-//     if (!includeAbsent) {
-//       attendanceQuery.range(from, to);
-//     }
-    
-//     const { data: attendanceData, error: attendanceError } = await attendanceQuery;
-    
-//     if (attendanceError) throw new Error(attendanceError.message);
-    
-//     const validAttendanceData = attendanceData.filter(record => {
-//       const nurseClient = record.nurse_client && 
-//         (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
-        
-//       const nurse = nurseClient?.nurse &&
-//         (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
-        
-//       return nurse && nurse.first_name && 
-//         (!admittedType || nurse.admitted_type === admittedType);
-//     });
-    
-//     const presentAssignmentIds = new Set(
-//       validAttendanceData
-//         .filter(record => record.assigned_id !== null)
-//         .map(record => record.assigned_id)
-//     );
-    
-//     let formattedAttendanceData = validAttendanceData.map(processAttendanceRecord);
-    
-//     let absentRecords: AttendanceRecord[] = [];
-//     if (includeAbsent) {
-//       let nurseClientQuery = supabase
-//         .from('nurse_client')
-//         .select(`
-//           id,
-//           nurse_id,
-//           shift_start_time,
-//           shift_end_time,
-//           start_date,
-//           end_date,
-//           nurse:nurse_id (
-//             nurse_id,
-//             first_name,
-//             last_name,
-//             admitted_type
-//           )
-//         `)
-//         .lte('start_date', targetDate)
-//         .gte('end_date', targetDate)
-//         .not('nurse', 'is', null);
-      
-//       if (admittedType) {
-//         nurseClientQuery = nurseClientQuery.eq('nurse.admitted_type', admittedType);
-//       }
-      
-//       const { data: scheduledNurses, error: scheduledError } = await nurseClientQuery;
-      
-//       if (scheduledError) throw new Error(scheduledError.message);
-      
-//       if (scheduledNurses && scheduledNurses.length > 0) {
-//         const validScheduledNurses = scheduledNurses.filter(assignment => {
-//           const nurse = assignment.nurse && 
-//             (Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse);
-          
-//           return nurse && nurse.first_name && 
-//             (!admittedType || nurse.admitted_type === admittedType);
-//         });
-                
-//         const absentNurses = validScheduledNurses.filter(
-//           assignment => !presentAssignmentIds.has(assignment.id)
-//         );
-        
-//         if (absentNurses.length > 0) {
-//           const nurseIds = absentNurses.map(assignment => assignment.nurse_id).filter(Boolean);
-          
-//           const { data: leaveData } = await supabase
-//             .from('nurse_leave_requests')
-//             .select('nurse_id, leave_type')
-//             .eq('status', 'approved')
-//             .lte('start_date', targetDate)
-//             .gte('end_date', targetDate)
-//             .in('nurse_id', nurseIds);
-            
-//           const leaveMap = new Map();
-//           if (leaveData) {
-//             leaveData.forEach(leave => {
-//               leaveMap.set(leave.nurse_id, leave.leave_type);
-//             });
-//           }
-          
-//           absentRecords = absentNurses.map(assignment => {
-//             let nurse = null;
-//             if (assignment.nurse) {
-//               nurse = Array.isArray(assignment.nurse)
-//                 ? (assignment.nurse.length > 0 ? assignment.nurse[0] : null)
-//                 : assignment.nurse;
-//             }
-            
-//             const nurseId = nurse?.nurse_id || null;
-//             const nurseName = nurse?.first_name && nurse?.last_name
-//               ? `${nurse.first_name} ${nurse.last_name}`
-//               : 'Unknown Nurse';
-            
-//             const scheduledStart = assignment.shift_start_time 
-//               ? convertTo12HourFormat(assignment.shift_start_time) 
-//               : '';
-//             const scheduledEnd = assignment.shift_end_time 
-//               ? convertTo12HourFormat(assignment.shift_end_time) 
-//               : '';
-            
-//             let status = 'Absent';
-//             if (nurseId && leaveMap.has(nurseId)) {
-//               status = `On Leave (${formatLeaveType(leaveMap.get(nurseId))})`;
-//             }
-            
-//             return {
-//               id: -assignment.id,
-//               nurseName,
-//               date: targetDate,
-//               shiftStart: '',
-//               shiftEnd: '',
-//               scheduledStart,
-//               scheduledEnd,
-//               hoursWorked: 0,
-//               status,
-//               location: null,
-//               nurseId
-//             };
-//           });
-//         }
-//       }
-//     }
-
-//     if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
-//       const searchLower = debouncedSearchTerm.trim().toLowerCase();
-//       formattedAttendanceData = formattedAttendanceData.filter(record =>
-//         record.nurseName.toLowerCase().includes(searchLower)
-//       );
-//       absentRecords = absentRecords.filter(record =>
-//         record.nurseName.toLowerCase().includes(searchLower)
-//       );
-//     }
-    
-//     let allRecords = [...formattedAttendanceData, ...absentRecords];
-//     const totalRecords = allRecords.length;
-    
-//     allRecords.sort((a, b) => a.nurseName.localeCompare(b.nurseName));
-    
-//     if (includeAbsent) {
-//       allRecords = allRecords.slice(from, from + pageSize);
-//     }
-    
-//     return {
-//       success: true,
-//       data: allRecords,
-//       pagination: {
-//         currentPage: page,
-//         totalPages: Math.ceil(totalRecords / pageSize),
-//         totalRecords,
-//         pageSize
-//       }
-//     };
-//   } catch (error) {
-//     logger.error('Error fetching attendance records:', error);
-//     return {
-//       success: false,
-//       data: [],
-//       error: error instanceof Error ? error.message : 'An unknown error occurred'
-//     };
-//   }
-// }
-
 export async function fetchStaffAttendance(
   date?: string,
   page: number = 1,
@@ -1003,7 +750,7 @@ export async function fetchStaffAttendance(
   error?: string 
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const targetDate = date || new Date().toISOString().split('T')[0];
     const searchTerm = debouncedSearchTerm?.trim().toLowerCase();
 
@@ -1162,7 +909,7 @@ export async function fetchStaffAttendanceFromView(
   error?: string 
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const targetDate = date || new Date().toISOString().split('T')[0];
     const from = (page - 1) * pageSize;
 
@@ -1233,7 +980,7 @@ export async function getAttendanceRecords(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     
     const { data: assignmentData, error: assignmentError } = await supabase
       .from('nurse_client')
@@ -1385,9 +1132,8 @@ export async function getNurseAttendanceRecordsByDate(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
-    // 1. Find all assignments for this nurse within the date range
     const { data: assignments, error: assignmentError } = await supabase
       .from('nurse_client')
       .select('id, shift_start_time, shift_end_time, start_date, end_date, salary_per_day')
@@ -1401,7 +1147,6 @@ export async function getNurseAttendanceRecordsByDate(
       return { success: true, data: [], count: 0, totalPages: 0, currentPage: page };
     }
 
-    // 2. Build a map of date => assignment for each day in the range
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dateAssignmentMap: Record<string, any> = {};
     const allDates: string[] = [];
@@ -1410,7 +1155,6 @@ export async function getNurseAttendanceRecordsByDate(
 
     while (currentDate <= lastDate) {
       const dateStr = currentDate.toISOString().split('T')[0];
-      // Find assignment active on this date
       const assignment = assignments.find(a =>
         a.start_date <= dateStr && a.end_date >= dateStr
       );
@@ -1421,7 +1165,6 @@ export async function getNurseAttendanceRecordsByDate(
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // 3. Fetch all attendance records for this nurse in the date range
     const assignmentIds = assignments.map(a => a.id);
     const { data: attendanceData, error: attendanceError } = await supabase
       .from('attendence_individual')

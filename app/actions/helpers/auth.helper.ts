@@ -1,19 +1,13 @@
 "use server";
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { getOrgMappings } from '@/app/utils/org-utils';
 
-/**
- * Retrieves the authenticated Supabase client and user ID.
- * Throws an error if the user is not authenticated.
- *
- * @returns Promise<{ supabase: SupabaseClient<any>; userId: string }>
- * @throws Error if user is not authenticated
- */
 export async function getAuthenticatedClient() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id;
-
+  
   if (!userId) {
     throw new Error("User not authenticated");
   }
@@ -22,5 +16,11 @@ export async function getAuthenticatedClient() {
     throw new Error("Access denied: Admin privileges required");
   }
 
-  return { supabase, userId };
+  const web_user_id = user.user_metadata.user_id
+
+  const organization = user?.user_metadata?.organization;
+
+  const { nursesOrg, clientsOrg } = getOrgMappings(organization);
+
+  return { supabase, userId: web_user_id, nursesOrg, clientsOrg };
 }

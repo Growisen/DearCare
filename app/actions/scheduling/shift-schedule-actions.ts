@@ -1,10 +1,9 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { updateNurseStatus } from '@/app/actions/staff-management/add-nurse';
-import { getOrgMappings } from '@/app/utils/org-utils';
 import { getClientProfileUrl } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 
 export interface ShiftAssignment {
   nurseId: string | number;
@@ -119,9 +118,7 @@ export async function scheduleNurseShifts(
   clientId: string
 ): Promise<ScheduleResponse> {
   try {
-    const supabase = await createSupabaseServerClient();
-
-    console.log("shiftes", shifts, clientId);
+    const { supabase } = await getAuthenticatedClient();
 
     if (!shifts || !Array.isArray(shifts) || shifts.length === 0) {
       return {
@@ -480,7 +477,7 @@ export async function getNurseAssignments(clientId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     
     const { data, error } = await supabase
       .from('nurse_client')
@@ -562,13 +559,8 @@ export async function getAllNurseAssignments(
   noResults?: boolean;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
     const today = new Date().toISOString().split('T')[0];
-
-    const { data: { user } } = await supabase.auth.getUser();
-    const organization = user?.user_metadata?.organization;
-
-    const { nursesOrg } = getOrgMappings(organization);
+    const { supabase, nursesOrg } = await getAuthenticatedClient();
 
     let query = supabase
       .from('nurse_assignments_view_with_service_history')
@@ -683,7 +675,7 @@ export async function updateNurseAssignment(
   message: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     
     if (updates.end_date && updates.start_date) {
       const startDate = new Date(updates.start_date);
@@ -740,7 +732,7 @@ export async function endNurseAssignment(
   message: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     
     // Update the assignment status to completed
     const { error } = await supabase
@@ -779,7 +771,7 @@ export async function deleteNurseAssignment(
   message: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data: attendanceRecords, error: attendanceFetchError } = await supabase
       .from('attendence_individual')
@@ -868,7 +860,7 @@ export async function getAssignmentById(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     
     const { data, error } = await supabase
       .from('nurse_client')

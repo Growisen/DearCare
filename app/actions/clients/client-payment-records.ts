@@ -48,7 +48,7 @@ interface SavePaymentGroupInput {
 
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate } = input;
 
@@ -119,7 +119,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
 
 export async function getClientPaymentGroups(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+     const { supabase } = await getAuthenticatedClient();
 
     const { data: records, error } = await supabase
       .from('client_payment_records')
@@ -146,22 +146,9 @@ export async function getClientPaymentGroups(clientId: string) {
   }
 }
 
-export async function requireAuthenticatedUser(supabase: ReturnType<typeof createSupabaseServerClient>) {
-  const { data: { user }, error } = await (await supabase).auth.getUser();
-  if (error || !user) {
-    return { user: null, error: error?.message || "Not authenticated" };
-  }
-  return { user, error: null };
-}
-
 export async function deleteClientPaymentGroup(paymentRecordId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
-
-    const { user, error: authError } = await requireAuthenticatedUser(Promise.resolve(supabase));
-    if (authError || !user) {
-      return { success: false, error: authError };
-    }
+    const { supabase } = await getAuthenticatedClient();
 
     const { error: lineItemsError } = await supabase
       .from('client_payment_line_items')

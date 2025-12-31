@@ -1,6 +1,7 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
+import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
 import { revalidatePath } from 'next/cache';
 import { IndividualFormData } from '@/types/client.types';
 import { uploadProfilePicture } from './utils';
@@ -10,41 +11,37 @@ import { DeliveryCareFormData } from '@/types/deliveryCare.types';
 import { ChildCareFormData } from '@/types/childCare.types';
 
 interface IndividualClientUpdateProfileData {
-    patient_name: string;
-    patient_phone: string;
-    patient_age: string | null;
-    patient_gender: string | null;
-    patient_address: string;
-    patient_city: string;
-    patient_district: string;
-    patient_pincode: string;
-    requestor_name: string;
-    requestor_phone: string;
-    requestor_email: string;
-    requestor_address: string;
-    requestor_city: string;
-    requestor_state: string;
-    requestor_district: string;
-    requestor_pincode: string;
-    patient_profile_pic?: string | null;
-    requestor_profile_pic?: string | null;
-    preferred_caregiver_gender?: string | null;
-    care_duration?: string | null;
-    service_required?: string | null;
-    start_date?: string | null;
-    relation_to_patient?: string | null;
-    requestor_emergency_phone?: string | null;
-    requestor_job_details?: string | null;
-  }
+  patient_name: string;
+  patient_phone: string;
+  patient_age: string | null;
+  patient_gender: string | null;
+  patient_address: string;
+  patient_city: string;
+  patient_district: string;
+  patient_pincode: string;
+  requestor_name: string;
+  requestor_phone: string;
+  requestor_email: string;
+  requestor_address: string;
+  requestor_city: string;
+  requestor_state: string;
+  requestor_district: string;
+  requestor_pincode: string;
+  patient_profile_pic?: string | null;
+  requestor_profile_pic?: string | null;
+  preferred_caregiver_gender?: string | null;
+  care_duration?: string | null;
+  service_required?: string | null;
+  start_date?: string | null;
+  relation_to_patient?: string | null;
+  requestor_emergency_phone?: string | null;
+  requestor_job_details?: string | null;
+}
 
-/**
- * Adds a new individual client to the database
- */
 export async function addIndividualClient(formData: IndividualFormData) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseAdminClient()
     
-    // First create the base client record
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .insert({
@@ -62,8 +59,7 @@ export async function addIndividualClient(formData: IndividualFormData) {
     if (clientError) {
       throw new Error(`Failed to create client: ${clientError.message}`);
     }
-    
-    // Upload profile pictures if provided
+
     let requestorProfilePicPath: string | null = null;
     let patientProfilePicPath: string | null = null;
     
@@ -83,7 +79,6 @@ export async function addIndividualClient(formData: IndividualFormData) {
       );
     }
     
-    // Now create the individual client record
     const { error: individualError } = await supabase
       .from('individual_clients')
       .insert({
@@ -119,10 +114,8 @@ export async function addIndividualClient(formData: IndividualFormData) {
       });
     
     if (individualError) {
-      // If individual client creation fails, we should remove the base client
       await supabase.from('clients').delete().eq('id', clientData.id);
-      
-      // Also clean up any uploaded files
+
       if (requestorProfilePicPath) {
         await supabase.storage.from('profile-pictures').remove([requestorProfilePicPath]);
       }
@@ -142,9 +135,6 @@ export async function addIndividualClient(formData: IndividualFormData) {
   }
 }
 
-/**
- * Updates a client's profile information
- */
 export async function updateIndividualClientProfile(
     clientId: string,
     profileData: {
@@ -181,7 +171,7 @@ export async function updateIndividualClientProfile(
     }
   ){
     try {
-      const supabase = await createSupabaseServerClient();
+      const { supabase } = await getAuthenticatedClient();
   
       const { data: client, error: clientError } = await supabase
         .from('clients')
@@ -216,7 +206,6 @@ export async function updateIndividualClientProfile(
         );
       }
   
-      // Build updateData with only valid fields
       const rawUpdateData: IndividualClientUpdateProfileData = {
         patient_name: `${profileData.patientFirstName} ${profileData.patientLastName}`.trim(),
         patient_phone: profileData.patientPhone,
@@ -300,13 +289,9 @@ interface HousemaidRequestData extends FormData {
   clientId: string;
 }
 
-/**
- * Adds a new housemaid request to the database
- * Only one request per client_id is allowed
- */
 export async function addHousemaidRequest(formData: HousemaidRequestData) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from('housemaid_requests')
@@ -361,7 +346,7 @@ export async function addHousemaidRequest(formData: HousemaidRequestData) {
 
 export async function fetchHousemaidRequestsByClientId(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data, error } = await supabase
       .from('housemaid_requests')
@@ -391,7 +376,7 @@ export async function fetchHousemaidRequestsByClientId(clientId: string) {
 
 export async function updateHousemaidRequest(clientId: string, formData: Partial<FormData>) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { error } = await supabase
       .from('housemaid_requests')
@@ -436,7 +421,7 @@ interface DeliveryCareRequestData extends DeliveryCareFormData {
 
 export async function addDeliveryCareRequest(formData: DeliveryCareRequestData) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
     const { error } = await supabase
       .from('delivery_care_requests')
@@ -480,7 +465,7 @@ export async function addDeliveryCareRequest(formData: DeliveryCareRequestData) 
 
 export async function fetchDeliveryCareRequestsByClientId(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data, error } = await supabase
       .from('delivery_care_requests')
@@ -534,7 +519,7 @@ export async function fetchDeliveryCareRequestsByClientId(clientId: string) {
 
 export async function updateDeliveryCareRequest(clientId: string, formData: Partial<DeliveryCareFormData>) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { error } = await supabase
       .from('delivery_care_requests')
@@ -575,17 +560,13 @@ export async function updateDeliveryCareRequest(clientId: string, formData: Part
   }
 }
 
-
 interface ChildCareRequestData extends ChildCareFormData {
   clientId: string;
 }
 
-/**
- * Adds a new child care request to the database
- */
 export async function addChildCareRequest(formData: ChildCareRequestData) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
     const { error } = await supabase
       .from('child_care_requests')
@@ -617,7 +598,7 @@ export async function addChildCareRequest(formData: ChildCareRequestData) {
 
 export async function fetchChildCareRequestsByClientId(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data, error } = await supabase
       .from('child_care_requests')
@@ -659,7 +640,7 @@ export async function fetchChildCareRequestsByClientId(clientId: string) {
 
 export async function updateChildCareRequest(clientId: string, formData: Partial<ChildCareFormData>) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { error } = await supabase
       .from('child_care_requests')
@@ -690,7 +671,7 @@ export async function updateChildCareRequest(clientId: string, formData: Partial
 
 
 export async function isDeliveryCareRequestSubmitted(clientId: string) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('delivery_care_requests')
     .select('id')
@@ -700,7 +681,7 @@ export async function isDeliveryCareRequestSubmitted(clientId: string) {
 }
 
 export async function isHousemaidRequestSubmitted(clientId: string) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('housemaid_requests')
     .select('id')
@@ -710,7 +691,7 @@ export async function isHousemaidRequestSubmitted(clientId: string) {
 }
 
 export async function isChildCareRequestSubmitted(clientId: string) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('child_care_requests')
     .select('id')
