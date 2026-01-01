@@ -133,7 +133,7 @@ export default function ClientPaymentsListPage() {
       />
       <div className="mt-6">
         {loading ? (
-          <LoadingState message="Loading payments..." />
+          <LoadingState message="Loading payments..." className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200"/>
         ) : (
           <>
             <PaymentTable payments={payments} />

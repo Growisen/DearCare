@@ -11,84 +11,7 @@ import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"
 import { EmptyState } from "@/components/client/clients/EmptyState"
-
-const PaginationControls = ({ 
-  currentPage, 
-  totalPages, 
-  totalCount, 
-  itemsPerPage, 
-  onPageChange, 
-  isMobile = false 
-}: {
-  currentPage: number
-  totalPages: number
-  totalCount: number
-  itemsPerPage: number
-  onPageChange: (page: number) => void
-  isMobile?: boolean
-}) => {
-  const indexOfFirstItem = (currentPage - 1) * itemsPerPage + 1;
-  const indexOfLastItem = Math.min(currentPage * itemsPerPage, totalCount);
-  
-  return (
-    <div className={`${isMobile ? "flex flex-col" : "flex items-center justify-between"} px-6 py-4 bg-white border-t border-gray-200`}>
-      <div className="text-sm text-gray-700 mb-2">
-        Showing {indexOfFirstItem} to {indexOfLastItem} of {totalCount} nurses
-      </div>
-      <div className="flex gap-2 justify-center">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-        >
-          Previous
-        </button>
-        
-        {!isMobile && Array.from({ length: totalPages }, (_, i) => i + 1)
-          .filter(pageNum => 
-            pageNum === 1 || 
-            pageNum === totalPages || 
-            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-          )
-          .map((pageNum, index, array) => {
-            // Add ellipsis
-            if (index > 0 && pageNum - array[index - 1] > 1) {
-              return (
-                <span key={`ellipsis-${pageNum}`} className="px-3 py-1">...</span>
-              );
-            }
-            return (
-              <button
-                key={pageNum}
-                onClick={() => onPageChange(pageNum)}
-                className={`px-3 py-1 text-sm font-medium rounded-md ${
-                  currentPage === pageNum
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-          
-        {isMobile && (
-          <span className="px-3 py-1 text-sm font-medium bg-blue-600 text-white rounded-md">
-            {currentPage}
-          </span>
-        )}
-        
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
-};
+import { PaginationControls } from "@/components/client/clients/PaginationControls" // <-- Use shared component
 
 export default function NursesPage() {
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
@@ -149,6 +72,9 @@ export default function NursesPage() {
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber)
   }
+
+  const handlePreviousPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
+  const handleNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
 
   const totalPages = Math.ceil(totalCount / limit)
   
@@ -246,8 +172,11 @@ export default function NursesPage() {
               currentPage={currentPage}
               totalPages={totalPages}
               totalCount={totalCount}
-              itemsPerPage={limit}
+              pageSize={limit}
+              itemsLength={nurses.length}
               onPageChange={handlePageChange}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
             />
           )}
 
@@ -278,9 +207,11 @@ export default function NursesPage() {
                   currentPage={currentPage}
                   totalPages={totalPages}
                   totalCount={totalCount}
-                  itemsPerPage={limit}
+                  pageSize={limit}
+                  itemsLength={nurses.length}
                   onPageChange={handlePageChange}
-                  isMobile={true}
+                  onPreviousPage={handlePreviousPage}
+                  onNextPage={handleNextPage}
                 />
               )}
 

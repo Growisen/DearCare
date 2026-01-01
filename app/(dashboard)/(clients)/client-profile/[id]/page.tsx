@@ -165,8 +165,6 @@ const PatientProfilePage = () => {
     }
   };
 
-  console.log('Patient Profile Rendered');
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="w-full pb-2">

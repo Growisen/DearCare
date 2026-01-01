@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { Card } from "@/components/ui/card";
-import { CreditCard, Download, Search, FileText } from "lucide-react";
+import { CreditCard, Download, Search } from "lucide-react";
 import { formatDate } from "@/utils/formatters";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
 
@@ -21,6 +21,8 @@ type AdvancePayment = {
   nurse_id?: number;
   nurse_name: string;
   nurse_admitted_type: string;
+  nurse_reg_no?: string;
+  nurse_prev_reg_no?: string;
 };
 
 export default function AdvancePaymentsOverview({
@@ -140,6 +142,9 @@ export default function AdvancePaymentsOverview({
                 Name
               </th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
+                Reg No
+              </th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
                 Advance Given
               </th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
@@ -151,11 +156,10 @@ export default function AdvancePaymentsOverview({
               <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
                 Installment
               </th>
-              <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
-                Status
-              </th>
-              <th className="py-3 px-4 text-sm font-semibold text-slate-600 min-w-[150px]">
-                Info
+              <th
+                className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-normal break-words max-w-[140px]"
+              >
+                Status / Info
               </th>
             </tr>
           </thead>
@@ -163,7 +167,7 @@ export default function AdvancePaymentsOverview({
             {loading ? (
               Array.from({ length: 5 }).map((_, idx) => (
                 <tr key={idx} className="border-b border-slate-100">
-                  {Array.from({ length: 9 }).map((_, colIdx) => (
+                  {Array.from({ length: 8 }).map((_, colIdx) => (
                     <td key={colIdx} className="py-3 px-4">
                       <div className="h-4 bg-slate-200 rounded animate-pulse w-full"></div>
                     </td>
@@ -172,7 +176,7 @@ export default function AdvancePaymentsOverview({
               ))
             ) : payments.length === 0 ? (
               <tr>
-                <td colSpan={9} className="p-8 text-center">
+                <td colSpan={10} className="p-8 text-center">
                   <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
                     <p className="text-lg font-medium mb-1">No payments found</p>
                     <p className="text-sm">
@@ -195,6 +199,18 @@ export default function AdvancePaymentsOverview({
                       {payment.nurse_name || "-"}
                     </td>
                     <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
+                      <div>
+                        <div>
+                          <span className="font-semibold">Reg:</span>{" "}
+                          {payment.nurse_reg_no || "-"}
+                        </div>
+                        <div>
+                          <span className="font-semibold">Prev:</span>{" "}
+                          {payment.nurse_prev_reg_no || "-"}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
                       ₹{payment.advance_amount.toLocaleString()}
                     </td>
                     <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
@@ -210,18 +226,18 @@ export default function AdvancePaymentsOverview({
                         ? `₹${payment.installment_amount.toLocaleString()}`
                         : "-"}
                     </td>
-                    <td className="py-3 px-4 text-sm whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${payment.approved
+                    <td className="py-3 px-4 text-sm whitespace-normal break-words max-w-[140px]">
+                      <div className="flex flex-col gap-1">
+                        <span className="flex text-slate-500">{payment.info || "-"}</span>
+                        <span
+                          className={`inline-flex max-w-fit items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${payment.approved
                             ? "bg-green-100 text-green-800 border border-green-200"
                             : "bg-yellow-100 text-yellow-800 border border-yellow-200"
                           }`}
-                      >
-                        {payment.approved ? "Approved" : "Pending"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-500">
-                      {payment.info || "-"}
+                        >
+                          {payment.approved ? "Approved" : "Pending"}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 );

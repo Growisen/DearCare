@@ -463,7 +463,16 @@ export async function fetchAdvancePaymentRecords({
     }
 
     if (searchTerm) {
-      q = q.or(`info.ilike.%${searchTerm}%,nurse_name.ilike.%${searchTerm}%`);
+      q = q.or(
+        [
+          `info.ilike.%${searchTerm}%`,
+          `nurse_name.ilike.%${searchTerm}%`,
+          `address.ilike.%${searchTerm}%`,
+          `nurse_reg_no.ilike.%${searchTerm}%`,
+          `nurse_prev_reg_no.ilike.%${searchTerm}%`,
+          `city.ilike.%${searchTerm}%`
+        ].join(',')
+      );
     }
 
     return q;
