@@ -95,7 +95,8 @@ export default function AdvancePaymentsOverview({
           <div className="relative flex items-center">
             <input
               type="text"
-              className="pl-8 pr-3 py-1.5 sm:py-2 text-xs text-gray-800 sm:text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="pl-8 pr-3 py-1.5 sm:py-2 text-xs text-gray-800 sm:text-sm border border-slate-300
+               rounded-sm focus:outline-none"
               placeholder="Search by nurse or info..."
               value={searchTerm ?? ""}
               onChange={e => setSearchTermAction && setSearchTermAction(e.target.value)}
@@ -103,7 +104,8 @@ export default function AdvancePaymentsOverview({
             <Search className="absolute left-2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
           <button
-            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm 
+            font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-sm"
             onClick={onExportAction}
             disabled={exporting}
           >

@@ -77,24 +77,28 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
 
   return (
     <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg">
-      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between
+       mb-3 sm:mb-4 border-b border-slate-200 pb-2"
+      >
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <Users className="w-5 h-5 text-slate-700 mr-2" />
           <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Clients</h3>
         </div>
         <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
-          <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
+          <div className="relative flex-1">
             <Search className="w-3 h-3 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search clients..." 
-              className="pl-10 pr-4 py-2 rounded-md border text-slate-800 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full shadow-sm" 
+              className="pl-8 pr-3 py-1.5 sm:py-2 text-xs text-gray-800 sm:text-sm border border-slate-300
+               rounded-sm focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button 
-            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium
+             bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-sm"
             onClick={handleExport}
           >
             <Download className="w-4 h-4" />
