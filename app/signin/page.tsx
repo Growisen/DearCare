@@ -52,12 +52,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50 before:content-[''] before:absolute before:inset-0 before:bg-[linear-gradient(90deg,rgba(0,0,0,.03)_1px,transparent_1px),linear-gradient(rgba(0,0,0,.03)_1px,transparent_1px)] before:bg-[length:40px_40px] before:opacity-70">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden
+     bg-gradient-to-br from-gray-50 to-blue-50 before:content-[''] before:absolute before:inset-0 
+     before:bg-[linear-gradient(90deg,rgba(0,0,0,.03)_1px,transparent_1px),linear-gradient(rgba(0,0,0,.03)_1px,transparent_1px)]
+     before:bg-[length:40px_40px] before:opacity-70">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 70, damping: 15 }}
-        className="relative z-10 w-full max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden border border-dCblue/10"
+        className="relative z-10 w-full max-w-sm bg-white shadow-md rounded-sm overflow-hidden border border-dCblue/10"
       >
         <div className="p-6 space-y-6">
           <motion.div
@@ -84,7 +87,8 @@ const LoginPage = () => {
                     name={name}
                     required
                     placeholder={placeholder}
-                    className="w-full pl-12 pr-3 py-2 rounded-sm border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
+                    className="w-full pl-12 pr-3 py-2 rounded-sm border border-slate-300 focus:outline-none
+                    transition duration-300 text-dCblack text-sm"
                   />
                   {placeholder === "Password" && (
                     <button
