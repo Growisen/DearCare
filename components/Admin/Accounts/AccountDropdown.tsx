@@ -50,7 +50,7 @@ export default function AccountDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="flex items-center gap-3 px-2 py-1.5 hover:bg-gray-50 rounded-lg transition-colors group"
+        className="flex items-center gap-3 px-2 py-1.5 hover:bg-gray-50 rounded-sm transition-colors group"
       >
         <div className="w-8 h-8 rounded-full ring-2 ring-gray-100 bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white">
           <User className="w-4 h-4" />
@@ -61,7 +61,7 @@ export default function AccountDropdown() {
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-20">
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-sm shadow-lg border border-slate-200 py-2 z-20">
           <div className="py-1">
             <p className="px-4 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">Profile</p>
             <a 
@@ -75,7 +75,7 @@ export default function AccountDropdown() {
             </a>
           </div>
           
-          {/* <div className="py-1 border-t border-gray-100">
+          {/* <div className="py-1 border-t border-slate-200">
             <p className="px-4 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">Security</p>
             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
               <Key className="w-4 h-4 text-gray-500" />
@@ -83,7 +83,7 @@ export default function AccountDropdown() {
             </button>
           </div> */}
           
-          <div className="border-t border-gray-100 pt-1 mt-1">
+          <div className="border-t border-slate-200 pt-1 mt-1">
             <button 
               onClick={handleSignOut}
               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -100,7 +100,7 @@ export default function AccountDropdown() {
         <ModalPortal>
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
             <div 
-              className="bg-white rounded-lg shadow-lg max-w-md w-full p-6"
+              className="bg-white rounded-sm shadow-lg max-w-md w-full p-6"
               style={{ animation: 'fadeIn 0.2s ease-out' }}
             >
               <div className="flex items-center gap-3 text-amber-500 mb-4">
@@ -114,14 +114,14 @@ export default function AccountDropdown() {
                 {!isSigningOut && (
                   <button 
                     onClick={cancelSignOut}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-sm"
                   >
                     Cancel
                   </button>
                 )}
                 <button 
                   onClick={confirmSignOut}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md flex items-center justify-center min-w-[80px]"
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-sm flex items-center justify-center min-w-[80px]"
                   disabled={isSigningOut}
                 >
                   {isSigningOut ? (

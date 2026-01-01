@@ -29,7 +29,7 @@ export const ClientCategorySelector = ({ selectedCategory, onCategoryChange }: C
   const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
   const buttonBaseStyle = "w-full py-2 px-3 border rounded-sm text-sm font-medium transition-all duration-200 select-none flex items-center justify-center";
   const selectedStyle = "bg-blue-50 border-blue-200 text-blue-700";
-  const unselectedStyle = "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50";
+  const unselectedStyle = "bg-white border-slate-200 text-gray-700 hover:border-slate-200 hover:bg-gray-50";
 
   return (
     <div className="mb-4">

@@ -104,13 +104,13 @@ export default function Navbar({
   }, [])
 
   return (
-    <div className="h-14 border-b border-gray-200 fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-20 shadow-sm lg:pl-56 transition-all duration-300">
+    <div className="h-14 border-b border-slate-200 fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-20 shadow-none lg:pl-56 transition-all duration-300">
       <div className="flex items-center justify-between h-full px-4 max-w-[1920px] mx-auto">
         
         <div className="flex items-center gap-3">
           <button 
             onClick={onMenuClick} 
-            className="p-1.5 hover:bg-gray-100 rounded-md transition-colors lg:hidden text-gray-600"
+            className="p-1.5 hover:bg-gray-100 rounded-sm transition-colors lg:hidden text-gray-600"
             aria-label="Toggle Menu"
           >
             <Menu className="w-5 h-5" />
@@ -134,11 +134,11 @@ export default function Navbar({
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="h-9 pl-9 w-full bg-white border-gray-200 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 rounded-md text-sm text-gray-800 placeholder:text-gray-400 transition-all shadow-sm"
+              className="h-9 pl-9 w-full bg-white border-slate-200 focus:border-slate-200 focus:ring-1 focus:ring-gray-200 rounded-sm text-sm text-gray-800 placeholder:text-gray-400 transition-all shadow-none"
             />
             
             {showSearchResults && searchResults && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-md shadow-lg border border-gray-100 max-h-96 overflow-y-auto z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-sm shadow-lg border border-slate-200 max-h-96 overflow-y-auto z-50 animate-in fade-in zoom-in-95 duration-100">
                 {searchResults.length > 0 ? (
                   <div className="py-1">
                     {searchResults.map((result, index) => (
@@ -168,7 +168,7 @@ export default function Navbar({
         
         <div className="flex items-center gap-3">
           
-          <div className="hidden sm:flex items-center rounded-md border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
+          <div className="hidden sm:flex items-center rounded-sm border border-blue-200 bg-blue-50 overflow-hidden shadow-none">
             <a
               href={registrationUrl}
               target="_blank"
@@ -198,7 +198,7 @@ export default function Navbar({
           <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-1.5 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded-md transition-colors"
+              className="relative p-1.5 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded-sm transition-colors"
             >
               <Bell className="w-5 h-5" />
               {hasNotifications && (
@@ -207,8 +207,8 @@ export default function Navbar({
             </button>
 
             {showNotifications && (
-              <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 max-h-[400px] overflow-y-auto z-50">
-                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-sm shadow-xl border border-slate-200 max-h-[400px] overflow-y-auto z-50">
+                <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-gray-50/50">
                   <h3 className="font-semibold text-sm text-gray-900">Notifications</h3>
                   <button onClick={handleCloseNotifications} className="p-1 hover:bg-gray-200 rounded transition-colors">
                     <X className="w-4 h-4 text-gray-500" />

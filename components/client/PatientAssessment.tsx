@@ -207,7 +207,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
 
   if (error) {
     return (
-      <div className="p-4 text-red-600 bg-red-50 border border-red-200 rounded-md m-4">
+      <div className="p-4 text-red-600 bg-red-50 border border-red-200 rounded-sm m-4">
         <p>{error}</p>
       </div>
     );
@@ -240,7 +240,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
       </form>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-sm">
           {error}
         </div>
       )}

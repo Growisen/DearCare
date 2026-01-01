@@ -97,8 +97,8 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded-sm shadow-xl w-full max-w-2xl">
+        <div className="px-6 py-4 border-b border-slate-200">
           <h3 className="text-lg font-semibold text-gray-900">
             Edit Assignment
           </h3>
@@ -110,7 +110,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div className="p-6">
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm">
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
@@ -125,7 +125,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-sm text-gray-900"
                     required
                     disabled={isSubmitting}
                   />
@@ -139,7 +139,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                     type="date"
                     value={endDate || ''}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-sm text-gray-900"
                     min={startDate}
                     disabled={isSubmitting}
                   />
@@ -155,7 +155,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                     type="time"
                     value={shiftStart}
                     onChange={(e) => setShiftStart(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-sm text-gray-900"
                     required
                     disabled={isSubmitting}
                   />
@@ -169,7 +169,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                     type="time"
                     value={shiftEnd}
                     onChange={(e) => setShiftEnd(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-sm text-gray-900"
                     required
                     disabled={isSubmitting}
                   />
@@ -188,7 +188,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                     step="0.01"
                     value={salaryPerDay}
                     onChange={(e) => setSalaryPerDay(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                    className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-sm text-gray-900"
                     required
                     disabled={isSubmitting}
                     placeholder="0.00"
@@ -198,11 +198,11 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
             </div>
           </div>
 
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 rounded-b-lg">
+          <div className="px-6 py-4 bg-gray-50 border-t border-slate-200 flex justify-end gap-3 rounded-b-lg">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-sm transition-colors"
               disabled={isSubmitting}
             >
               Cancel
@@ -210,7 +210,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-5 py-2 text-sm font-medium text-white rounded-md transition-colors min-w-[100px] ${
+              className={`px-5 py-2 text-sm font-medium text-white rounded-sm transition-colors min-w-[100px] ${
                 isSubmitting 
                   ? 'bg-blue-400 cursor-not-allowed' 
                   : 'bg-blue-600 hover:bg-blue-700'

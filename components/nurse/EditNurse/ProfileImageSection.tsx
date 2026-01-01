@@ -76,20 +76,20 @@ export const ProfileImageSection: React.FC<Props> = ({
   }, [formData, tempFiles, onRemoveDocument, onRemoveTempFile]);
 
   return (
-    <section className="bg-gray-50 rounded-lg p-5">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+    <section className="bg-gray-50 rounded-sm p-5">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-slate-200 pb-2">
         Profile Image
       </h2>
       <div className="flex items-start flex-col md:flex-row gap-6">
         {renderProfileImage}
         
         <div className="flex-1 w-full">
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="bg-white p-4 rounded-sm border border-slate-200">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Upload Profile Image</h4>
             <p className="text-xs text-gray-500 mb-3">Please upload a clear photo. Profile image should be JPG or PNG format.</p>
             <label 
               htmlFor="profile-image-upload" 
-              className="flex items-center justify-center w-full p-4 bg-gray-50 border border-gray-200 border-dashed rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+              className="flex items-center justify-center w-full p-4 bg-gray-50 border border-slate-200 border-dashed rounded-sm cursor-pointer hover:bg-gray-100 transition-colors"
             >
               <div className="flex flex-col items-center">
                 {IconCollection.upload}

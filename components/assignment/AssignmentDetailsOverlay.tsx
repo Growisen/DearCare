@@ -185,7 +185,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
         </div>
         
         <div className="p-3 space-y-6"> 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-gray-100 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-slate-200 py-6">
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-gray-700">Nurse Details</h3>
               <div className="space-y-3">
@@ -259,7 +259,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
             </div>
             
             {isAssignmentActive && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-sm">
                 <h4 className="text-sm font-medium text-blue-800 mb-2">Today&apos;s Check-in Status</h4>
                 {loading ? (
                   <div className="flex items-center text-blue-700">
@@ -315,7 +315,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
                         <button
                           onClick={openCheckOutConfirmation}
                           disabled={actionLoading === 'check-out'}
-                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          className={`px-3 py-2 text-sm font-medium rounded-sm ${
                             actionLoading === 'check-out' 
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                               : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
@@ -354,7 +354,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
                         <button
                           onClick={isLongShift ? openCheckInConfirmation : openCheckInConfirmation}
                           disabled={actionLoading === 'check-in'}
-                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          className={`px-3 py-2 text-sm font-medium rounded-sm ${
                             actionLoading === 'check-in' 
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                               : isLongShift
@@ -379,7 +379,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
             )}
             
             {isAssignmentUpcoming && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-sm">
                 <div className="flex items-center text-blue-700">
                   <AlertCircle className="h-5 w-5 mr-2" />
                   <div>
@@ -393,7 +393,7 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
             )}
             
             {isAssignmentEnded && !isAssignmentUpcoming && (
-              <div className="mt-6 p-4 bg-gray-50 border border-gray-100 rounded-lg">
+              <div className="mt-6 p-4 bg-gray-50 border border-slate-200 rounded-sm">
                 <div className="flex items-center text-gray-700">
                   <CheckCircle className="h-5 w-5 mr-2" />
                   <div>
@@ -412,14 +412,14 @@ function calculateShiftDurationInHours(startTime: string, endTime: string): numb
           <Link 
             target="_blank"
             href={`/assignments/${assignment.id}`} 
-            className="px-4 py-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
+            className="px-4 py-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium transition-colors"
           >
             <DocumentTextIcon className="h-5 w-5" />
             View Complete Details
           </Link>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md font-medium"
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-sm font-medium"
           >
             Close
           </button>

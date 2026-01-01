@@ -67,10 +67,10 @@ function renderNurses(nurses?: AssignedNurse[]) {
 export default function PaymentTable({ payments }: PaymentTableProps) {
   return (
     <div className="w-full mx-auto">
-      <div className="hidden md:block bg-gray-50 rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      <div className="hidden md:block bg-gray-50 rounded-sm border border-slate-200 overflow-hidden shadow-none">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-100 border-b border-gray-200">
+            <thead className="bg-gray-100 border-b border-slate-200">
               <tr className="text-left text-sm uppercase tracking-wider">
                 <th className="py-4 px-6 font-semibold text-gray-600">Client</th>
                 <th className="py-4 px-6 font-semibold text-gray-600">Group</th>
@@ -126,7 +126,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
           payments.map((payment) => (
             <div
               key={payment.id}
-              className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+              className="bg-white rounded-sm border border-slate-200 p-4 shadow-none"
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
@@ -146,7 +146,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                   </p>
                 </div>
               </div>
-              <div className="border-t border-gray-100 my-3"></div>
+              <div className="border-t border-slate-200 my-3"></div>
               <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
                 <div className="col-span-2">
                   <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
@@ -174,7 +174,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
             </div>
           ))
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <div className="bg-white rounded-sm border border-slate-200 p-8 text-center">
             <p className="text-gray-500">No payments found</p>
           </div>
         )}

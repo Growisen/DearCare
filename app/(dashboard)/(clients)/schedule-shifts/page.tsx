@@ -209,8 +209,8 @@ function ScheduleShiftsContent() {
 
   return (
     <div className="container max-w-full">
-      <div className="bg-white shadow-sm rounded-lg p-8 border border-gray-200">
-        <div className="mb-8 bg-gray-50 p-5 rounded-lg border border-gray-200">
+      <div className="bg-white shadow-none rounded-sm p-8 border border-slate-200">
+        <div className="mb-8 bg-gray-50 p-5 rounded-sm border border-slate-200">
           <h2 className="text-gray-800 font-semibold text-lg mb-2">
             Assignment Information
           </h2>
@@ -239,10 +239,10 @@ function ScheduleShiftsContent() {
           })}
         </div>
 
-        <div className="mt-8 flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="mt-8 flex justify-end space-x-3 pt-6 border-t border-slate-200">
           <Button
             onClick={() => window.close()}
-            className="border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium"
+            className="border border-slate-200 text-gray-700 hover:bg-gray-100 font-medium"
           >
             Cancel
           </Button>

@@ -173,7 +173,7 @@ export default function AddLeaveModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
       <form
-        className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4"
+        className="relative bg-white rounded-sm shadow-xl w-full max-w-md mx-4"
         onSubmit={handleSubmit}
       >
         <div className="flex justify-between items-center px-6 py-4 border-b">
@@ -207,11 +207,11 @@ export default function AddLeaveModal({
                 placeholder="Search nurse by name or reg no..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-700"
+                className="w-full px-3 py-2 border rounded-sm focus:outline-none text-gray-700"
                 disabled={!!selectedNurse}
               />
               {search && !selectedNurse && (
-                <div className="absolute z-10 bg-white border rounded-md mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
+                <div className="absolute z-10 bg-white border rounded-sm mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
                   {loading ? (
                     <div className="p-2 text-gray-500 text-sm">Loading...</div>
                   ) : nurses.length === 0 ? (
@@ -256,7 +256,7 @@ export default function AddLeaveModal({
             <select
               value={leaveType}
               onChange={(e) => setLeaveType(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-700"
+              className="w-full px-3 py-2 border rounded-sm focus:outline-none text-gray-700"
               required
             >
               <option value="">Select leave type</option>
@@ -277,7 +277,7 @@ export default function AddLeaveModal({
             <select
               value={leaveMode}
               onChange={(e) => setLeaveMode(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-700"
+              className="w-full px-3 py-2 border rounded-sm focus:outline-none text-gray-700"
               required
             >
               <option value="">Select leave mode</option>
@@ -298,7 +298,7 @@ export default function AddLeaveModal({
                 min={todayStr}
                 max={endDate || undefined}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-700"
+                className="w-full px-3 py-2 border rounded-sm focus:outline-none text-gray-700"
                 required
               />
             </div>
@@ -311,7 +311,7 @@ export default function AddLeaveModal({
                 value={endDate}
                 min={startDate || todayStr}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-700"
+                className="w-full px-3 py-2 border rounded-sm focus:outline-none text-gray-700"
                 required
               />
             </div>
@@ -324,24 +324,24 @@ export default function AddLeaveModal({
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full h-20 px-3 py-2 border rounded-md focus:outline-none text-gray-700"
+              className="w-full h-20 px-3 py-2 border rounded-sm focus:outline-none text-gray-700"
               placeholder="Enter reason for leave..."
               required
             />
           </div>
         </div>
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
           <button
             type="button"
             onClick={handleCancel}
             disabled={loading}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
+            className="px-4 py-2 border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium transition cursor-pointer"
+            className="px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 text-sm font-medium transition cursor-pointer"
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit"}

@@ -168,7 +168,7 @@ const PatientProfilePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="w-full pb-2">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-3 sm:mb-4">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden mb-3 sm:mb-4">
           <ProfileHeader
             patient={patient}
             status={status}
@@ -268,7 +268,7 @@ const PatientProfilePage = () => {
                   <h2 className="text-lg font-semibold text-gray-800">Assignments</h2>
                   <button
                     onClick={handleOpenNurseList}
-                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-sm hover:bg-green-700"
                   >
                     + Assign
                   </button>
@@ -278,7 +278,7 @@ const PatientProfilePage = () => {
                     <Loader />
                   </div>
                 ) : (
-                  <div className="bg-white rounded-lg overflow-hidden">
+                  <div className="bg-white rounded-sm overflow-hidden">
                     <NurseAssignmentsList
                       assignments={nurseAssignments}
                       nurses={nurses}
@@ -402,7 +402,7 @@ const PatientProfilePage = () => {
               </label>
               <input
                 type="date"
-                className="border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                className="border rounded px-2 py-1 focus:outline-none"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 max={new Date().toISOString().slice(0, 10)}
@@ -413,7 +413,7 @@ const PatientProfilePage = () => {
                 End Assignment Notes
               </label>
               <textarea
-                className="border rounded px-2 py-1 w-full resize-none focus:outline-none focus:ring-1 focus:ring-gray-300"
+                className="border rounded px-2 py-1 w-full resize-none focus:outline-none"
                 rows={3}
                 value={endAssignmentNotes}
                 onChange={e => setEndAssignmentNotes(e.target.value)}

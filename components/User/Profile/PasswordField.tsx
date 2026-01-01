@@ -52,10 +52,10 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
   }, [passwordError, setPasswordError]);
 
   return (
-    <div className="hidden p-3 sm:p-4 border border-gray-200 hover:border-gray-300 rounded-xl bg-white shadow-sm transition-all duration-300">
+    <div className="hidden p-3 sm:p-4 border border-slate-200 hover:border-slate-200 rounded-sm bg-white shadow-none transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg">
+          <div className="bg-blue-100 p-1.5 sm:p-2 rounded-sm">
             <Lock className="w-4 sm:w-4.5 h-4 sm:h-4.5 text-blue-600" />
           </div>
           <span className="text-gray-600 font-medium text-sm sm:text-base">Password</span>
@@ -65,7 +65,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
           <div className="flex items-center">
             <button
               onClick={() => setIsCurrentPasswordVisible(!isCurrentPasswordVisible)}
-              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 mr-1"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-sm transition-colors duration-200 mr-1"
               aria-label={isCurrentPasswordVisible ? "Hide password" : "Show password"}
             >
               {isCurrentPasswordVisible ? (
@@ -76,7 +76,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
             </button>
             <button
               onClick={() => setIsEditing(true)}
-              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-sm transition-colors duration-200"
               aria-label="Edit password"
             >
               <Edit2 className="w-4 h-4" />
@@ -93,7 +93,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
-              className="border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2
+              className="border border-slate-200 rounded-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2
                focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 pr-10 text-gray-800"
               autoFocus
             />
@@ -120,8 +120,8 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
               className={`text-gray-800 border ${
                 passwordError && confirmPassword ? 'border-red-400 focus:ring-red-500/30' : 
                 passwordsMatch === true ? 'border-green-400 focus:ring-green-500/30' :
-                'border-gray-300'
-              } rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2 focus:border-blue-500 
+                'border-slate-200'
+              } rounded-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full focus:outline-none focus:ring-2 focus:border-blue-500 
                transition-all duration-200 pr-10 ${
                 confirmPassword && passwordsMatch === true ? 'bg-green-50' : 
                 confirmPassword && passwordsMatch === false ? 'bg-red-50' : ''
@@ -154,7 +154,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
           </div>
 
           {passwordError && (
-            <div className="flex items-center gap-1.5 text-red-500 text-xs sm:text-sm bg-red-50 p-2 rounded-lg">
+            <div className="flex items-center gap-1.5 text-red-500 text-xs sm:text-sm bg-red-50 p-2 rounded-sm">
               <AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 flex-shrink-0" />
               <span>{passwordError}</span>
             </div>
@@ -163,7 +163,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
           <div className="flex flex-wrap justify-end gap-2">
             <button
               onClick={handleSave}
-              className={`px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm 
+              className={`px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm shadow-none 
                 transition-colors duration-200 flex items-center gap-1 text-sm order-2 sm:order-1 ${
                 !newPassword || !confirmPassword ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -175,7 +175,7 @@ export default function PasswordField({ currentPassword, onPasswordChange }: Pas
             </button>
             <button
               onClick={handleCancel}
-              className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors
+              className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-sm transition-colors
                duration-200 flex items-center gap-1 text-sm order-1 sm:order-2"
               aria-label="Cancel edit"
             >

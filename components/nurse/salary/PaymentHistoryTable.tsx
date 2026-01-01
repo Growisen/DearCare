@@ -27,7 +27,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
 }) => {
   console.log("sds", payments)
   return (
-    <div className="bg-white rounded border border-gray-300 p-3 overflow-x-auto">
+    <div className="bg-white rounded border border-slate-200 p-3 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-gray-900">
           Payment History
@@ -40,18 +40,18 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
           Create Salary
         </button>
       </div>
-      <table className="min-w-full text-sm border-collapse border border-gray-300 text-gray-800">
+      <table className="min-w-full text-sm border-collapse border border-slate-200 text-gray-800">
         <thead>
           <tr className="bg-gray-100 text-gray-700">
-            <th className="border border-gray-300 px-4 py-2 text-left">Pay Period</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Days Worked</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Hours Worked</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Avg Hourly Rate (₹)</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Salary (₹)</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Net Salary (₹)</th>
-            <th className="border border-gray-300 px-4 py-2 text-left">Payment Details</th>
-            <th className="border border-gray-300 px-4 py-2 text-left">Info</th>
-            <th className="border border-gray-300 px-4 py-2 text-center">Actions</th>
+            <th className="border border-slate-200 px-4 py-2 text-left">Pay Period</th>
+            <th className="border border-slate-200 px-4 py-2 text-right">Days Worked</th>
+            <th className="border border-slate-200 px-4 py-2 text-right">Hours Worked</th>
+            <th className="border border-slate-200 px-4 py-2 text-right">Avg Hourly Rate (₹)</th>
+            <th className="border border-slate-200 px-4 py-2 text-right">Salary (₹)</th>
+            <th className="border border-slate-200 px-4 py-2 text-right">Net Salary (₹)</th>
+            <th className="border border-slate-200 px-4 py-2 text-left">Payment Details</th>
+            <th className="border border-slate-200 px-4 py-2 text-left">Info</th>
+            <th className="border border-slate-200 px-4 py-2 text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -67,23 +67,23 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                 key={payment.id}
                 className="hover:bg-gray-50 transition-colors duration-200"
               >
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border border-slate-200 px-4 py-2">
                   {formatDateToDDMMYYYY(payment.payPeriodStart)} → {formatDateToDDMMYYYY(payment.payPeriodEnd)}
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{payment.daysWorked}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{payment.hoursWorked}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">
+                <td className="border border-slate-200 px-4 py-2 text-right">{payment.daysWorked}</td>
+                <td className="border border-slate-200 px-4 py-2 text-right">{payment.hoursWorked}</td>
+                <td className="border border-slate-200 px-4 py-2 text-right">
                   ₹ {payment.averageHourlyRate?.toLocaleString() ?? "—"}
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-right">
+                <td className="border border-slate-200 px-4 py-2 text-right">
                   ₹ {payment.salary?.toLocaleString() ?? "—"}
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-right">
+                <td className="border border-slate-200 px-4 py-2 text-right">
                   <span className="font-semibold text-gray-900">
                     ₹ {payment.netSalary?.toLocaleString() ?? "—"}
                   </span>
                 </td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border border-slate-200 px-4 py-2">
                   <div className="flex flex-col gap-1">
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold w-fit ${
@@ -103,7 +103,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border border-slate-200 px-4 py-2">
                   {payment.info ? (
                     <span
                       className="text-gray-800"
@@ -115,7 +115,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     <span className="text-gray-400">—</span>
                   )}
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-center">
+                <td className="border border-slate-200 px-4 py-2 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <a
                       href={`/nurses/salary-report?nurseId=${nurseId}&payPeriodStart=${encodeURIComponent(payment.payPeriodStart)}&payPeriodEnd=${encodeURIComponent(payment.payPeriodEnd)}`}

@@ -18,7 +18,7 @@ export default function CommentForm({
       <div>
         <textarea
           rows={4}
-          className="w-full border rounded-md p-2 text-gray-700"
+          className="w-full border rounded-sm p-2 text-gray-700"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Add an official comment about this complaint..."
@@ -28,7 +28,7 @@ export default function CommentForm({
         <button
           onClick={handleAddComment}
           disabled={isAddingComment || !comment.trim()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-400"
+          className="px-4 py-2 bg-blue-600 text-white rounded-sm disabled:bg-blue-400"
         >
           {isAddingComment ? "Adding..." : "Add Comment"}
         </button>

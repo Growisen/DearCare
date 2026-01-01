@@ -18,7 +18,7 @@ const NurseProfileModal: React.FC<NurseProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+      <div className="bg-white rounded-sm p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
         {/* Header section */}
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold text-gray-900">Nurse Profile</h3>
@@ -54,7 +54,7 @@ const NurseProfileModal: React.FC<NurseProfileModalProps> = ({
         
         {/* Details grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="p-4 bg-gray-100 rounded-lg">
+          <div className="p-4 bg-gray-100 rounded-sm">
             <h5 className="font-semibold text-gray-800 mb-2">Personal Details</h5>
             <div className="space-y-2">
               <p><span className="font-medium text-gray-700">Location:</span> <span className="text-gray-900">{nurse.location}</span></p>
@@ -64,7 +64,7 @@ const NurseProfileModal: React.FC<NurseProfileModalProps> = ({
             </div>
           </div>
           
-          <div className="p-4 bg-gray-100 rounded-lg">
+          <div className="p-4 bg-gray-100 rounded-sm">
             <h5 className="font-semibold text-gray-800 mb-2">Reviews ({nurse.reviews && nurse.reviews.length})</h5>
             {nurse.reviews && nurse.reviews.length > 0 ? (
               <div className="space-y-3 max-h-40 overflow-y-auto pr-1">
@@ -92,21 +92,21 @@ const NurseProfileModal: React.FC<NurseProfileModalProps> = ({
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+            className="px-4 py-2 text-gray-700 border border-slate-200 rounded-sm hover:bg-gray-50 font-medium"
           >
             Close
           </button>
           {nurse.status === 'unassigned' ? (
             <button
               onClick={() => onAssign(nurse)}
-              className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 font-medium"
+              className="px-4 py-2 text-white bg-green-600 rounded-sm hover:bg-green-700 font-medium"
             >
               Assign Nurse
             </button>
           ) : (
             <button
               onClick={() => onUnassign(nurse._id)}
-              className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-medium"
+              className="px-4 py-2 text-white bg-red-600 rounded-sm hover:bg-red-700 font-medium"
             >
               Remove Assignment
             </button>

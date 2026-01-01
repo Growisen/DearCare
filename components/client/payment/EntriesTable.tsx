@@ -71,7 +71,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                       {group.lineItems.map((item) => (
                         <div
                           key={item.id}
-                          className="bg-gray-50 px-3 py-2 rounded border border-gray-100"
+                          className="bg-gray-50 px-3 py-2 rounded border border-slate-200"
                         >
                           <div className="flex justify-between items-start gap-4">
                             <span className="text-sm text-gray-700 font-medium break-words">

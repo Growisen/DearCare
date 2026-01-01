@@ -36,7 +36,7 @@ const CategorySelector = ({
       default:
         return {
           bg: isOpen ? 'bg-gray-200' : 'bg-gray-100',
-          border: isOpen ? 'border-gray-300' : 'border-gray-200',
+          border: isOpen ? 'border-slate-200' : 'border-slate-200',
           text: 'text-gray-700'
         };
     }
@@ -104,7 +104,7 @@ const CategorySelector = ({
       </span>
       
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-36 bg-white shadow-lg rounded-md border border-gray-200 z-10 overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 w-36 bg-white shadow-lg rounded-sm border border-slate-200 z-10 overflow-hidden">
           <div className="py-1">
             {categories.map((category) => {
               const catColors = getCategoryColors(category);

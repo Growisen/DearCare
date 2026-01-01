@@ -14,7 +14,7 @@ interface DiagnosisAndCarePlanProps {
 
 export default function DiagnosisAndCarePlan({ formData, handleInputChange }: DiagnosisAndCarePlanProps) {
   return (
-    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+    <div className="bg-white border border-slate-200 p-4 rounded-sm">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Diagnosis & Care Plan</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">

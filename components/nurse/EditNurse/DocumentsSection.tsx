@@ -15,8 +15,8 @@ export const DocumentsSection: React.FC<Props> = ({
   formData, tempFiles, handleFileUpload, handleRemoveDocument, handleRemoveTempFile
 }) => {
   return (
-    <section className="bg-gray-50 rounded-lg p-5">
-      <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
+    <section className="bg-gray-50 rounded-sm p-5">
+      <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-2">
         <h2 className="text-lg font-semibold text-gray-800">Documents</h2>
         <div className="text-xs text-gray-500">All documents must be in PDF, JPG, or PNG format</div>
       </div>

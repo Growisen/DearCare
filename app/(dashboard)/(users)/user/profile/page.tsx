@@ -116,7 +116,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex items-start justify-center p-4 md:p-6 h-full">
-      <div className="w-full max-w-7xl shadow-sm border border-gray-200 rounded-lg bg-white">
+      <div className="w-full max-w-7xl shadow-none border border-slate-200 rounded-sm bg-white">
         {/* Header Section */}
         <div className="p-4 md:p-5 pb-0">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -124,7 +124,7 @@ export default function ProfilePage() {
               <h2 className="text-2xl font-semibold text-gray-800">User Profile</h2>
               <p className="text-sm text-gray-500">Manage your personal information</p>
             </div>
-            <div className="mt-2 sm:mt-0 flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">
+            <div className="mt-2 sm:mt-0 flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-sm text-xs font-medium">
               <Briefcase className="w-3.5 h-3.5" />
               {userData.role}
             </div>

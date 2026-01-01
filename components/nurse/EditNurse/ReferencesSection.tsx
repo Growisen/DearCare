@@ -14,8 +14,8 @@ export const ReferencesSection: React.FC<Props> = ({
   formData, handleInputChange, handleFamilyReferenceChange, handleStaffReferenceChange
 }) => {
   return (
-    <section className="bg-gray-50 rounded-lg p-5">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+    <section className="bg-gray-50 rounded-sm p-5">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-slate-200 pb-2">
         References
       </h2>
       <div className="space-y-6">

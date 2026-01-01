@@ -7,7 +7,7 @@ const statusColors = {
   assigned: "bg-green-200 text-green-800 border border-green-300",
   leave: "bg-yellow-200 text-yellow-800 border border-yellow-300",
   unassigned: "bg-purple-200 text-purple-800 border border-purple-300",
-  pending: "bg-gray-200 text-gray-800 border border-gray-300",
+  pending: "bg-gray-200 text-gray-800 border border-slate-200",
   under_review: "bg-blue-200 text-blue-800 border border-blue-300",
   rejected: "bg-red-200 text-red-800 border border-red-300"
 }
@@ -38,10 +38,10 @@ const NurseTable = ({
   const thClass = "py-3 px-6 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap";
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1200px]">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-50 border-b border-slate-200">
             <tr>
               <th className={`${thClass} min-w-[200px]`}>Nurse Name</th>
               <th className={`${thClass} min-w-[140px]`}>Reg No</th>
@@ -57,7 +57,7 @@ const NurseTable = ({
             {nurses.map((nurse) => {
               const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
               return (
-                <tr key={nurse.nurse_id} className="hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors">
+                <tr key={nurse.nurse_id} className="hover:bg-gray-50 border-b border-slate-200 last:border-0 transition-colors">
                   <td className="py-3 px-6 text-gray-900 font-medium align-top min-w-[200px]">
                     <div>
                       {`${formatName(nurse.name.first || "")} ${formatName(nurse.name.last || "")}`}
@@ -139,7 +139,7 @@ const NurseTable = ({
                       href={`/nurses/${nurse.nurse_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-md transition-colors text-xs font-semibold inline-flex items-center gap-1.5 border border-blue-100"
+                      className="px-2.5 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-sm transition-colors text-xs font-semibold inline-flex items-center gap-1.5 border border-blue-100"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       Review

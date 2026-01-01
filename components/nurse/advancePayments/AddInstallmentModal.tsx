@@ -65,8 +65,8 @@ export default function RecordRepaymentModal({
   return (
     <ModalPortal>
       <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-        <div className="bg-white border border-gray-300 rounded-lg shadow-sm w-full max-w-md flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-          <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+        <div className="bg-white border border-slate-200 rounded-sm shadow-none w-full max-w-md flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gray-50">
             <div>
               <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                 <IoCashOutline className="text-slate-500" />
@@ -106,7 +106,7 @@ export default function RecordRepaymentModal({
                   }}
                   placeholder="0.00"
                   className={`w-full pl-8 pr-4 py-2.5 bg-white border rounded text-slate-800 placeholder:text-slate-300 transition-all outline-none focus:ring-2 focus:ring-slate-100 ${
-                    error ? 'border-red-300' : 'border-gray-300 focus:border-slate-400'
+                    error ? 'border-red-300' : 'border-slate-200 focus:border-slate-400'
                   }`}
                 />
               </div>
@@ -122,7 +122,7 @@ export default function RecordRepaymentModal({
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="e.g. Returned via GPay, early settlement..."
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-slate-700 placeholder:text-slate-300 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 resize-none"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-slate-700 placeholder:text-slate-300 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 resize-none"
               />
             </div>
 
@@ -134,18 +134,18 @@ export default function RecordRepaymentModal({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end gap-3 p-5 border-t border-slate-200 bg-gray-50">
             <button
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={isSubmitting}
-              className="px-5 py-2 text-sm font-medium text-white bg-slate-800 border border-slate-800 rounded hover:bg-slate-700 hover:border-slate-700 transition-all shadow-sm disabled:opacity-70 flex items-center gap-2"
+              className="px-5 py-2 text-sm font-medium text-white bg-slate-800 border border-slate-800 rounded hover:bg-slate-700 hover:border-slate-700 transition-all shadow-none disabled:opacity-70 flex items-center gap-2"
             >
               {isSubmitting ? 'Processing...' : 'Confirm Repayment'}
             </button>

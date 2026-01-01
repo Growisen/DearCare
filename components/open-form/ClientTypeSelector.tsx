@@ -18,12 +18,12 @@ export const ClientTypeSelector = ({ clientType, onClientTypeChange }: ClientTyp
 
   const headerStyle = "text-base font-semibold text-gray-800 mb-4";
   const tileBaseStyle = "relative flex items-center justify-center py-2.5 px-3 border rounded-sm cursor-pointer transition-all duration-200 select-none group";
-  const tileSelectedStyle = "bg-blue-50 border-blue-200 text-blue-700 font-medium shadow-sm";
-  const tileUnselectedStyle = "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50";
+  const tileSelectedStyle = "bg-blue-50 border-blue-200 text-blue-700 font-medium shadow-none";
+  const tileUnselectedStyle = "bg-white border-slate-200 text-gray-600 hover:border-slate-200 hover:bg-gray-50";
   const radioInputStyle = "sr-only";
 
   return (
-    <div className="mb-6 border-b border-gray-100 pb-6">
+    <div className="mb-6 border-b border-slate-200 pb-6">
       <h2 className={headerStyle}>Client Type</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -62,7 +62,7 @@ export const ClientTypeSelector = ({ clientType, onClientTypeChange }: ClientTyp
 };
 
 function getInstructions(clientType: ClientType) {
-  const containerStyle = "p-3 bg-gray-50 rounded-sm border border-gray-100 text-xs text-gray-600 leading-relaxed";
+  const containerStyle = "p-3 bg-gray-50 rounded-sm border border-slate-200 text-xs text-gray-600 leading-relaxed";
   
   switch (clientType) {
     case 'individual':

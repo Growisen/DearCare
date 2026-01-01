@@ -197,13 +197,13 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
   };
 
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200 appearance-none
   `;
   const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
-  const sectionStyles = "p-5 bg-white rounded-sm border border-gray-100 mb-4";
+  const sectionStyles = "p-5 bg-white rounded-sm border border-slate-200 mb-4";
   const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
 
   const FormField = ({ 
@@ -340,7 +340,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                             name="ageGroup"
                             checked={isLessThanOneYear}
                             onChange={() => handleAgeGroupChange(true)}
-                            className="h-3.5 w-3.5 text-gray-700 border-gray-300 focus:ring-0"
+                            className="h-3.5 w-3.5 text-gray-700 border-slate-200 focus:ring-0"
                           />
                           <span className="ml-2 text-sm text-gray-700">Less than 1 year</span>
                         </label>
@@ -350,7 +350,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
                             name="ageGroup"
                             checked={!isLessThanOneYear}
                             onChange={() => handleAgeGroupChange(false)}
-                            className="h-3.5 w-3.5 text-gray-700 border-gray-300 focus:ring-0"
+                            className="h-3.5 w-3.5 text-gray-700 border-slate-200 focus:ring-0"
                           />
                           <span className="ml-2 text-sm text-gray-700">1 year or older</span>
                         </label>
@@ -540,11 +540,11 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
         </div>
       </form>
       
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-5 py-3 flex justify-end items-center space-x-3 z-10 rounded-b-sm">
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-5 py-3 flex justify-end items-center space-x-3 z-10 rounded-b-sm">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-200 rounded-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
+          className="px-4 py-2 border border-slate-200 rounded-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
           disabled={isSubmitting}
         >
           Cancel
@@ -559,7 +559,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
               formElement.dispatchEvent(submitEvent);
             }
           }}
-          className="px-4 py-2 bg-blue-600 border border-transparent rounded-sm text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-0 transition-colors shadow-sm"
+          className="px-4 py-2 bg-blue-600 border border-transparent rounded-sm text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-0 transition-colors shadow-none"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}

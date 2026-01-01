@@ -259,10 +259,10 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
             <button 
                 onClick={() => handleViewHistory(row)}
                 className={`
-                    flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all
+                    flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium transition-all
                     ${count > 0 
                         ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200' 
-                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-200'
+                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-slate-200'
                     }
                 `}
             >
@@ -280,8 +280,8 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         <div className="flex flex-col gap-2 items-center justify-center">
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 border border-green-300 rounded-md
-             bg-green-50 text-green-700 text-xs font-medium shadow-sm hover:bg-green-100
+            className="flex items-center gap-2 px-3 py-1.5 border border-green-300 rounded-sm
+             bg-green-50 text-green-700 text-xs font-medium shadow-none hover:bg-green-100
               hover:text-green-800 transition-all focus:outline-none focus:ring-2 focus:ring-green-400"
             onClick={() => handleAddInstallment(row)}
             title="Repayment"
@@ -328,7 +328,7 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         <h2 className="text-lg font-semibold text-gray-800">Staff Advances</h2>
         <button
           type="button"
-          className="px-5 py-2 bg-white/30 text-gray-800 border border-gray-200 
+          className="px-5 py-2 bg-white/30 text-gray-800 border border-slate-200 
             rounded-sm font-medium tracking-wide flex items-center gap-2 hover:bg-gray-50 transition-colors"
           onClick={() => setIsModalOpen(true)}
         >

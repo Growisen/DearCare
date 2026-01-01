@@ -55,15 +55,19 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
 
   if (loading) {
     return (
-      <Card className="p-6 bg-white border border-slate-200 shadow-sm rounded-lg mt-6 flex items-center justify-center min-h-[300px]">
+      <Card className="p-6 bg-white border border-slate-200 rounded-sm
+       mt-6 flex items-center justify-center min-h-[300px]"
+      >
         <Loader message="Loading payments..." size="large" color="primary" centered />
       </Card>
     )
   }
 
   return (
-    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg mt-6">
-      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
+    <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-sm">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center 
+        sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2"
+      >
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <CreditCard className="w-5 h-5 text-slate-700 mr-2" />
           <h3 className="text-sm sm:text-md font-medium text-slate-800">Clients Payments Overview</h3>
@@ -82,7 +86,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
           </div>
           <button
             className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 
-            sm:text-sm font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-sm"
+            sm:text-sm font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-none"
             onClick={handleExport}
           >
             <Download className="w-4 h-4" />
@@ -104,7 +108,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
       <div className="overflow-x-auto">
         {filteredPayments.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
+            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-sm">
               <p className="text-lg font-medium mb-1">No payments found</p>
               <p className="text-sm">No payments available for the selected date</p>
             </div>

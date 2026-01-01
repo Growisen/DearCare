@@ -84,7 +84,7 @@ const LoginPage = () => {
                     name={name}
                     required
                     placeholder={placeholder}
-                    className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
+                    className="w-full pl-12 pr-3 py-2 rounded-sm border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
                   />
                   {placeholder === "Password" && (
                     <button
@@ -103,7 +103,7 @@ const LoginPage = () => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm"
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-sm text-sm"
               >
                 {error}
               </motion.div>
@@ -114,7 +114,7 @@ const LoginPage = () => {
               whileTap={{ scale: 0.95 }}
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
+              className="w-full py-2 bg-dCblue text-white rounded-sm hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
             >
               {isLoading ? "Signing In..." : "Sign In"}
               <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />

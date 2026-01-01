@@ -35,10 +35,10 @@ export default function Modal({
         onClick={onClose}
       >
         <div
-          className="relative w-full max-w-md rounded-lg bg-white shadow-xl border border-gray-200"
+          className="relative w-full max-w-md rounded-sm bg-white shadow-xl border border-slate-200"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between p-6 border-b border-slate-200">
             <div className="flex items-center gap-3">
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full ${
@@ -109,16 +109,16 @@ export default function Modal({
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-3 p-6 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-3 p-6 bg-gray-50 border-t border-slate-200">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 transition-colors"
             >
               {cancelText || 'No, cancel'}
             </button>
             <button
               onClick={onConfirm}
-              className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium text-white rounded-sm transition-colors ${
                 isDelete
                   ? 'bg-red-600 hover:bg-red-700'
                   : 'bg-blue-600 hover:bg-blue-700'

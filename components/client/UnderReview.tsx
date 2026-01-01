@@ -38,7 +38,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
     {type === 'textarea' ? (
       <textarea
         id={id}
-        className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -49,7 +49,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
       <input
         type={type}
         id={id}
-        className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -281,16 +281,16 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
         // Content for individual clients
         <>
           {!showForm ? (
-            <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-lg">
+            <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-sm">
               
               {formStatus.isFormFilled ? (
               <div className="w-full max-w-md">
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-sm">
                   <p className="text-green-700 font-medium">Client has filled the assessment form</p>
                 </div>
 
                 <button 
-                  className="w-full px-6 py-3 mb-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-6 py-3 mb-4 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <Link 
                     href={`/client-profile/${clientId}`} 
@@ -305,14 +305,14 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                 {/* Add approve/reject buttons directly on this screen */}
                 <div className="flex w-full gap-4">
                   <button 
-                    className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
+                    className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 disabled:bg-green-400"
                     onClick={handleApprove}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Processing...' : 'Approve & Assign'}
                   </button>
                   <button 
-                    className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
+                    className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-sm hover:bg-red-50"
                     onClick={() => setShowRejectModal(true)}
                     disabled={isSubmitting}
                   >
@@ -327,7 +327,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
                     <button 
                       onClick={() => setShowForm(true)}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 disabled:bg-blue-400"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 disabled:bg-blue-400"
                       disabled={isSendingForm || formStatus.isChecking}
                     >
                       Fill Form Manually
@@ -335,7 +335,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                     
                     <button 
                       onClick={handleSendFormToUser}
-                      className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex-1 disabled:bg-green-400"
+                      className="px-6 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex-1 disabled:bg-green-400"
                       disabled={isSendingForm || formStatus.isChecking}
                     >
                       {isSendingForm ? 'Sending...' : 'Send Form to User'}
@@ -345,7 +345,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   {/* New sharable link button */}
                   <button 
                     onClick={generateSharableLink}
-                    className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center"
+                    className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center"
                     disabled={isSendingForm || formStatus.isChecking}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -356,7 +356,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   
                   <button 
                     onClick={checkFormStatus}
-                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
+                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
                     disabled={formStatus.isChecking}
                   >
                     {formStatus.isChecking ? 'Checking whether form is filled...' : 'Not filled, check if form is filled'}
@@ -370,7 +370,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
               <div className="mb-4">
                 <button 
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
+                  className="px-4 py-2 text-gray-700 border border-slate-200 rounded-sm hover:bg-gray-100"
                 >
                   ← Back
                 </button>
@@ -395,14 +395,14 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
               
               <div className="flex w-full gap-4">
                 <button 
-                  className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
+                  className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 disabled:bg-green-400"
                   onClick={handleApprove}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Processing...' : 'Approve & Assign'}
                 </button>
                 <button 
-                  className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
+                  className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-sm hover:bg-red-50"
                   onClick={() => setShowRejectModal(true)}
                   disabled={isSubmitting}
                 >
@@ -414,18 +414,18 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
         </>
       ) : (
         // Content for non-individual clients
-        <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-lg">
+        <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-sm">
           
           <div className="flex w-full gap-4 max-w-md mx-auto">
             <button 
-              className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
+              className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 disabled:bg-green-400"
               onClick={handleApprove}
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Processing...' : 'Approve & Assign'}
             </button>
             <button 
-              className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
+              className="w-2/5 px-4 py-2 text-red-600 border border-red-200 rounded-sm hover:bg-red-50"
               onClick={() => setShowRejectModal(true)}
               disabled={isSubmitting}
             >
@@ -450,7 +450,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       {/* New sharable link modal */}
       {showLinkModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-sm p-6 w-full max-w-md">
             <h3 className="text-lg font-medium mb-4 text-gray-950">Sharable Assessment Form Link</h3>
             
             <div className="mb-4">
@@ -459,7 +459,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   type="text"
                   value={sharableLink}
                   readOnly
-                  className="w-full border border-gray-300 rounded-l-md py-2 px-3 text-gray-700 focus:outline-none"
+                  className="w-full border border-slate-200 rounded-l-md py-2 px-3 text-gray-700 focus:outline-none"
                 />
                 <button
                   onClick={copyToClipboard}
@@ -496,7 +496,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
             <div className="flex justify-end">
               <button
                 onClick={() => setShowLinkModal(false)}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
+                className="px-4 py-2 text-gray-700 border border-slate-200 rounded-sm hover:bg-gray-100"
               >
                 Close
               </button>

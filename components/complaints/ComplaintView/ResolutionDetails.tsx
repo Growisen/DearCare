@@ -11,7 +11,7 @@ export default function ResolutionDetails({ resolution }: ResolutionDetailsProps
   const isDetailedUser = typeof resolvedBy === 'object' && resolvedBy !== null;
   
   return (
-    <div className="bg-green-50 border border-green-200 p-4 rounded-md">
+    <div className="bg-green-50 border border-green-200 p-4 rounded-sm">
       <h3 className="font-medium mb-3 text-green-800">Resolution</h3>
       
       <div className="space-y-2">

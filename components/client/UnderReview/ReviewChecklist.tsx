@@ -21,7 +21,7 @@ export default function ReviewChecklist() {
   const allChecked = Object.values(checklist).every(item => item === true);
 
   return (
-    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+    <div className="bg-white border border-slate-200 p-4 rounded-sm">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Review Checklist</h3>
       <p className="mb-4 text-sm text-gray-600">Please confirm that you have reviewed all sections before approving:</p>
       
@@ -32,7 +32,7 @@ export default function ReviewChecklist() {
             id="reviewedPersonalInfo"
             checked={checklist.reviewedPersonalInfo}
             onChange={(e) => handleChecklistChange('reviewedPersonalInfo', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedPersonalInfo" className="ml-2 block text-sm text-gray-700">
             Personal Information
@@ -45,7 +45,7 @@ export default function ReviewChecklist() {
             id="reviewedMedicalStatus"
             checked={checklist.reviewedMedicalStatus}
             onChange={(e) => handleChecklistChange('reviewedMedicalStatus', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedMedicalStatus" className="ml-2 block text-sm text-gray-700">
             Medical Status
@@ -58,7 +58,7 @@ export default function ReviewChecklist() {
             id="reviewedPsychologicalAssessment"
             checked={checklist.reviewedPsychologicalAssessment}
             onChange={(e) => handleChecklistChange('reviewedPsychologicalAssessment', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedPsychologicalAssessment" className="ml-2 block text-sm text-gray-700">
             Psychological Assessment
@@ -71,7 +71,7 @@ export default function ReviewChecklist() {
             id="reviewedSocialHistory"
             checked={checklist.reviewedSocialHistory}
             onChange={(e) => handleChecklistChange('reviewedSocialHistory', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedSocialHistory" className="ml-2 block text-sm text-gray-700">
             Social History
@@ -84,7 +84,7 @@ export default function ReviewChecklist() {
             id="reviewedCurrentDetails"
             checked={checklist.reviewedCurrentDetails}
             onChange={(e) => handleChecklistChange('reviewedCurrentDetails', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedCurrentDetails" className="ml-2 block text-sm text-gray-700">
             Current Details
@@ -97,7 +97,7 @@ export default function ReviewChecklist() {
             id="reviewedDiagnosis"
             checked={checklist.reviewedDiagnosis}
             onChange={(e) => handleChecklistChange('reviewedDiagnosis', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedDiagnosis" className="ml-2 block text-sm text-gray-700">
             Diagnosis & Care Plan
@@ -110,7 +110,7 @@ export default function ReviewChecklist() {
             id="reviewedEnvironment"
             checked={checklist.reviewedEnvironment}
             onChange={(e) => handleChecklistChange('reviewedEnvironment', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
           />
           <label htmlFor="reviewedEnvironment" className="ml-2 block text-sm text-gray-700">
             Environment & Equipment

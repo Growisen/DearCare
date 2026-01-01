@@ -37,9 +37,9 @@ export const RequestorInfoForm = ({
   };
 
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200
   `;
   
@@ -48,7 +48,7 @@ export const RequestorInfoForm = ({
   const errorTextStyles = "mt-1 text-xs text-red-500";
 
   return (
-    <div className="mb-8 border-b border-gray-100 pb-8">
+    <div className="mb-8 border-b border-slate-200 pb-8">
       <h2 className="text-base font-semibold text-gray-800 mb-6">Requestor Information</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">
@@ -90,7 +90,7 @@ export const RequestorInfoForm = ({
             </label>
             <div
               id="requestorAgeDisplay"
-              className="w-full border border-gray-100 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
+              className="w-full border border-slate-200 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
             >
               {calculateAge(formData.requestorDOB) || '-'} <span className="text-xs">yrs</span>
             </div>

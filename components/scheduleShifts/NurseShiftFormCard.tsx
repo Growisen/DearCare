@@ -43,10 +43,10 @@ function NurseShiftFormCard({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+    <div className="border border-slate-200 rounded-sm p-6 bg-gray-50">
       <div className="flex items-center mb-5 justify-between">
         <div className="flex items-center">
-          <div className="h-14 w-14 rounded-full bg-gray-200 mr-4 overflow-hidden relative border border-gray-300">
+          <div className="h-14 w-14 rounded-full bg-gray-200 mr-4 overflow-hidden relative border border-slate-200">
             {nurse.profileImage ? (
               <Image
                 src={nurse.profileImage}
@@ -74,13 +74,13 @@ function NurseShiftFormCard({
           </div>
         </div>
         {estimatedSalary && (
-          <div className="text-gray-700 text-sm font-semibold ml-4 whitespace-nowrap bg-white px-4 py-2 rounded-md border border-gray-300">
+          <div className="text-gray-700 text-sm font-semibold ml-4 whitespace-nowrap bg-white px-4 py-2 rounded-sm border border-slate-200">
             {estimatedSalary}
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 bg-white p-5 rounded-lg border border-gray-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 bg-white p-5 rounded-sm border border-slate-200">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Start Date *
@@ -89,7 +89,7 @@ function NurseShiftFormCard({
             type="date"
             value={shift.startDate}
             onChange={(e) => handleInputChange('startDate', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-sm focus:border-slate-200 text-gray-800 bg-white focus:outline-none"
             required
             min={minDate}
           />
@@ -102,7 +102,7 @@ function NurseShiftFormCard({
             type="date"
             value={shift.endDate}
             onChange={(e) => handleInputChange('endDate', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-sm focus:border-slate-200 text-gray-800 bg-white focus:outline-none"
             required
             min={shift.startDate || minDate}
           />
@@ -115,7 +115,7 @@ function NurseShiftFormCard({
             type="time"
             value={shift.shiftStart.substring(0, 5)}
             onChange={(e) => handleInputChange('shiftStart', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-sm focus:border-slate-200 text-gray-800 bg-white focus:outline-none"
             required
           />
         </div>
@@ -127,7 +127,7 @@ function NurseShiftFormCard({
             type="time"
             value={shift.shiftEnd.substring(0, 5)}
             onChange={(e) => handleInputChange('shiftEnd', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-sm focus:border-slate-200 text-gray-800 bg-white focus:outline-none"
             required
           />
         </div>
@@ -141,7 +141,7 @@ function NurseShiftFormCard({
             step="0.01"
             value={shift.salaryPerDay}
             onChange={(e) => handleInputChange('salaryPerDay', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:border-gray-400 text-gray-800 bg-white focus:outline-none"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-sm focus:border-slate-200 text-gray-800 bg-white focus:outline-none"
             required
             placeholder="Enter salary amount"
           />

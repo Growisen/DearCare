@@ -94,7 +94,7 @@ const NurseProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-1">
       <div className="max-w-[100%]">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden mb-4">
           <ProfileHeader nurse={nurse} onDelete={handleDelete} />
 
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />

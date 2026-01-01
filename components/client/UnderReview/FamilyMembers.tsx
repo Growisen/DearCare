@@ -23,9 +23,9 @@ export default function FamilyMembers({
   onFamilyMemberChange 
 }: FamilyMembersProps) {
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
+    <div className="bg-white p-6 rounded-sm border border-slate-200">
       <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <span className="p-1.5 bg-amber-100 rounded-md">
+        <span className="p-1.5 bg-amber-100 rounded-sm">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
           </svg>
@@ -35,7 +35,7 @@ export default function FamilyMembers({
       
       <div className="space-y-6">
         {familyMembers.map((member) => (
-          <div key={member.id} className="p-4 border border-gray-200 rounded-md bg-gray-50">
+          <div key={member.id} className="p-4 border border-slate-200 rounded-sm bg-gray-50">
             <div className="flex justify-between mb-3">
               <h3 className="font-medium text-gray-800">Family Member Details</h3>
               <button
@@ -59,7 +59,7 @@ export default function FamilyMembers({
                   id={`name-${member.id}`}
                   value={member.name}
                   onChange={(e) => onFamilyMemberChange(member.id, 'name', e.target.value)}
-                  className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border text-gray-800 border-slate-200 rounded-sm focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
@@ -72,7 +72,7 @@ export default function FamilyMembers({
                   id={`age-${member.id}`}
                   value={member.age}
                   onChange={(e) => onFamilyMemberChange(member.id, 'age', e.target.value)}
-                  className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border text-gray-800 border-slate-200 rounded-sm focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
@@ -85,7 +85,7 @@ export default function FamilyMembers({
                   id={`job-${member.id}`}
                   value={member.job}
                   onChange={(e) => onFamilyMemberChange(member.id, 'job', e.target.value)}
-                  className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border text-gray-800 border-slate-200 rounded-sm focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
@@ -98,7 +98,7 @@ export default function FamilyMembers({
                   id={`relation-${member.id}`}
                   value={member.relation}
                   onChange={(e) => onFamilyMemberChange(member.id, 'relation', e.target.value)}
-                  className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border text-gray-800 border-slate-200 rounded-sm focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
@@ -111,7 +111,7 @@ export default function FamilyMembers({
                   value={member.medicalRecords}
                   onChange={(e) => onFamilyMemberChange(member.id, 'medicalRecords', e.target.value)}
                   rows={3}
-                  className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border text-gray-800 border-slate-200 rounded-sm focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function FamilyMembers({
         <button
           type="button"
           onClick={onAddFamilyMember}
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-dashed border-slate-200 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />

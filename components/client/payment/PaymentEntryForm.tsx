@@ -69,7 +69,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
   };
 
   return (
-    <details className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden open:pb-4">
+    <details className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden open:pb-4">
       <summary className="px-4 py-3 bg-gray-50 font-semibold text-gray-800 cursor-pointer hover:bg-gray-100
        transition-colors text-sm flex items-center justify-between select-none">
         <span>New Payment Entry</span>
@@ -89,7 +89,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g., Monthly Retainer - October"
-              className="w-full text-sm text-gray-800 px-3 py-2 border border-gray-300 rounded focus:outline-none 
+              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none 
               focus:ring-1 focus:ring-gray-400 focus:border-transparent"
             />
             <p className="text-[11px] text-gray-500 mt-1">
@@ -105,7 +105,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               value={modeOfPayment}
               onChange={(e) => setModeOfPayment(e.target.value)}
               placeholder="e.g., UPI, Bank Transfer"
-              className="w-full text-sm text-gray-800 px-3 py-2 border border-gray-300 rounded focus:outline-none 
+              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none 
               focus:ring-1 focus:ring-gray-400 focus:border-transparent"
             />
              <p className="text-[11px] text-gray-500 mt-1">
@@ -114,7 +114,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
           </div>
         </div>
 
-        <div className="p-4 bg-gray-50 rounded border border-gray-100">
+        <div className="p-4 bg-gray-50 rounded border border-slate-200">
           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
             Payment Context
           </h4>
@@ -128,7 +128,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
                 required
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-gray-300 rounded
+                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded
                  focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
               />
             </div>
@@ -141,7 +141,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
                 required
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-gray-300 rounded
+                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded
                  focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
               />
             </div>
@@ -152,7 +152,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               <select
                 value={groupShowToClient ? 'yes' : 'no'}
                 onChange={(e) => setGroupShowToClient(e.target.value === 'yes')}
-                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-gray-300 rounded
+                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded
                  bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
               >
                 <option value="yes">Visible to Client</option>
@@ -189,8 +189,8 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
           
           <button
             onClick={addLineItem}
-            className="w-full py-2 border-2 border-dashed border-gray-300 rounded text-gray-500 
-            text-sm hover:border-gray-400 hover:text-gray-700 transition-all hover:bg-gray-50"
+            className="w-full py-2 border-2 border-dashed border-slate-200 rounded text-gray-500 
+            text-sm hover:border-slate-200 hover:text-gray-700 transition-all hover:bg-gray-50"
           >
             + Add Another Item
           </button>
@@ -205,7 +205,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
             onChange={(e) => setGroupNotes(e.target.value)}
             placeholder="e.g. Client requested split payment..."
             rows={2}
-            className="w-full text-sm px-3 py-2 border border-gray-300 rounded focus:outline-none 
+            className="w-full text-sm px-3 py-2 border border-slate-200 rounded focus:outline-none 
             focus:ring-1 focus:ring-gray-400 focus:border-transparent"
           />
           <p className="text-[11px] text-gray-500 mt-1">
@@ -213,7 +213,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
           </p>
         </div>
 
-        <div className="flex justify-end items-center gap-3 pt-2 border-t border-gray-100">
+        <div className="flex justify-end items-center gap-3 pt-2 border-t border-slate-200">
           <button
             onClick={onCancel}
             className="text-sm text-gray-600 hover:text-gray-800 px-4 py-2 transition-colors"
@@ -224,7 +224,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
             onClick={onSave}
             disabled={loading}
             className="bg-gray-900 hover:bg-black text-white text-sm font-medium py-2 px-6
-             rounded shadow-sm transition-colors disabled:opacity-70"
+             rounded shadow-none transition-colors disabled:opacity-70"
           >
             {isSaving ? "Saving..." : "Save Entry"}
           </button>

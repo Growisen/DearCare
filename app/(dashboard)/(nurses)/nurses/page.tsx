@@ -160,7 +160,7 @@ export default function NursesPage() {
         handleResetFilters={handleResetFilters}
       />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
         <div className="hidden sm:block overflow-x-auto">
           <NurseTable 
             nurses={nurses} 

@@ -61,7 +61,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       case 'Tata HomeNursing':
         return 'border-green-400';
       default:
-        return 'border-gray-200';
+        return 'border-slate-200';
     }
   };
 
@@ -128,11 +128,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     : "N/A";
 
   return (
-    <div className={`bg-gray-50 border-b border-gray-200 px-4 sm:px-6 py-5 ${patient.clientCategory ? `border-l-4 ${borderColor}` : ''}`}>
+    <div className={`bg-gray-50 border-b border-slate-200 px-4 sm:px-6 py-5 ${patient.clientCategory ? `border-l-4 ${borderColor}` : ''}`}>
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="flex flex-col sm:flex-row items-start gap-5 w-full lg:w-auto">
           <div
-            className="relative h-24 w-24 rounded-xl overflow-hidden border-4 border-white shadow-sm flex-shrink-0 mx-auto sm:mx-0"
+            className="relative h-24 w-24 rounded-sm overflow-hidden border-4 border-white shadow-none flex-shrink-0 mx-auto sm:mx-0"
             onClick={() => displayProfileImage && setIsImageViewerOpen(true)}
             style={{ cursor: displayProfileImage ? 'pointer' : 'default' }}
           >
@@ -162,7 +162,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 {displayName}
               </h1>
               {isNewClient && (
-                <span className="px-2.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold border border-green-200 shadow-sm">
+                <span className="px-2.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold border border-green-200 shadow-none">
                   ✨ New Client
                 </span>
               )}
@@ -170,22 +170,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
               {patient.firstName && ( 
-                  <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-gray-200">
+                  <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-slate-200">
                     <span className="font-medium text-gray-400">Age:</span>
                     <span className="text-gray-900 font-medium">{displayAge}</span>
                   </div>
               )}
               {patient.gender && (
-                  <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-gray-200">
+                  <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-slate-200">
                     <span className="font-medium text-gray-400">Gender:</span>
                     <span className="text-gray-900 font-medium">{patient.gender || "N/A"}</span>
                   </div>
               )}
-              <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-gray-200">
+              <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-slate-200">
                 <span className="font-medium text-gray-400">Reg:</span>
                 <span className="text-gray-900 font-medium">{patient.registrationNumber || "N/A"}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-gray-200">
+              <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-slate-200">
                 <span className="font-medium text-gray-400">Prev. Reg:</span>
                 <span className="text-gray-900 font-medium">{patient.previousRegistrationNumber || "N/A"}</span>
               </div>
@@ -227,7 +227,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </div>
       </div>
       
-      <div className="w-full mt-8 border-t border-gray-200 bg-gray-50/50 pt-4 pb-2">
+      <div className="w-full mt-8 border-t border-slate-200 bg-gray-50/50 pt-4 pb-2">
         <div className="overflow-x-auto scrollbar-hide slim-scrollbar">
           <div className="flex flex-row items-center gap-6 min-w-max px-1">
 
@@ -235,7 +235,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <button
                 onClick={onEditProfile}
                 className="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white 
-                border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all group"
+                border border-slate-200 rounded-sm shadow-none hover:bg-gray-50 hover:border-slate-200 transition-all group"
               >
                 <FiEdit className="h-4 w-4 mr-2 text-gray-400 group-hover:text-gray-600" />
                 Edit Profile
@@ -244,8 +244,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
             <div className="h-8 w-px bg-gray-300" /> 
 
-            <div className="flex items-center gap-3 p-2 bg-blue-50 border border-blue-200 rounded-xl shadow-sm">
-              <div className="px-3 py-1 rounded-lg bg-blue-100 border border-blue-200">
+            <div className="flex items-center gap-3 p-2 bg-blue-50 border border-blue-200 rounded-sm shadow-none">
+              <div className="px-3 py-1 rounded-sm bg-blue-100 border border-blue-200">
                 <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
                   Assessment
                 </span>
@@ -259,7 +259,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     }
                   }}
                   className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600
-                   border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all shadow-sm"
+                   border border-transparent rounded-sm hover:bg-blue-700 focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all shadow-none"
                 >
                   <FiExternalLink className="h-4 w-4 mr-1.5" />
                   Open
@@ -267,7 +267,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 
                 <button
                   onClick={handleCopyLink}
-                  className={`flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg border transition-all shadow-sm ${
+                  className={`flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-sm border transition-all shadow-none ${
                     copiedAssessment 
                       ? 'bg-blue-100 text-blue-800 border-blue-300' 
                       : 'bg-white text-gray-700 border-blue-200 hover:bg-blue-50 hover:border-blue-300'
@@ -281,7 +281,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <button
                   onClick={handleEdit}
                   className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-blue-900 bg-white
-                   border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+                   border border-blue-200 rounded-sm hover:bg-blue-50 hover:border-blue-300 transition-all shadow-none"
                 >
                   <FiEdit2 className="h-4 w-4 mr-1.5" />
                   Edit
@@ -289,8 +289,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-2 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
-              <div className="px-3 py-1 rounded-lg bg-emerald-100 border border-emerald-200">
+            <div className="flex items-center gap-3 p-2 bg-emerald-50 border border-emerald-200 rounded-sm shadow-none">
+              <div className="px-3 py-1 rounded-sm bg-emerald-100 border border-emerald-200">
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
                   Reassessment
                 </span>
@@ -304,8 +304,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     }
                   }}
                   className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white
-                   bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:ring-2
-                    focus:ring-offset-1 focus:ring-emerald-500 transition-all shadow-sm"
+                   bg-emerald-600 border border-transparent rounded-sm hover:bg-emerald-700 focus:ring-2
+                    focus:ring-offset-1 focus:ring-emerald-500 transition-all shadow-none"
                 >
                   <FiExternalLink className="h-4 w-4 mr-1.5" />
                   Open
@@ -313,7 +313,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
                 <button
                   onClick={handleCopyReassessmentLink}
-                  className={`flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg border transition-all shadow-sm ${
+                  className={`flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-sm border transition-all shadow-none ${
                     copiedReassessment 
                       ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
                       : 'bg-white text-gray-700 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300'
@@ -326,11 +326,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center pl-6 border-l-2 border-gray-200">
+            <div className="flex items-center pl-6 border-l-2 border-slate-200">
               <button
                 onClick={onDelete}
                 className="flex items-center justify-center p-2.5 text-sm font-medium text-red-600 bg-white
-                 border border-gray-200 hover:border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm group"
+                 border border-slate-200 hover:border-red-200 hover:bg-red-50 rounded-sm transition-all shadow-none group"
                 title="Delete Patient"
               >
                 <FiTrash2 className="h-5 w-5 group-hover:scale-110 transition-transform" />

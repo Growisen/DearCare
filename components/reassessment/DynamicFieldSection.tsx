@@ -11,7 +11,7 @@ interface DynamicFieldSectionProps {
 }
 
 export default function DynamicFieldSection({ fields, sectionKey, onAdd, onRemove, onUpdate }: DynamicFieldSectionProps) {
-  const minimalInputClass = "w-full border-b border-gray-300 bg-transparent py-1 focus:outline-none focus:border-gray-500 transition-colors text-gray-700 placeholder-gray-400 text-sm";
+  const minimalInputClass = "w-full border-b border-slate-200 bg-transparent py-1 focus:outline-none focus:border-gray-500 transition-colors text-gray-700 placeholder-gray-400 text-sm";
 
   return (
     <div className="space-y-3 mt-4 pt-2">
@@ -23,7 +23,7 @@ export default function DynamicFieldSection({ fields, sectionKey, onAdd, onRemov
               placeholder="Label"
               value={field.label}
               onChange={(e) => onUpdate(sectionKey, index, 'label', e.target.value)}
-              className="w-full border-b border-gray-200 bg-gray-50/50 px-2 py-1 text-xs font-bold text-gray-600 focus:outline-none focus:border-gray-400 transition-colors placeholder-gray-300 uppercase tracking-wide"
+              className="w-full border-b border-slate-200 bg-gray-50/50 px-2 py-1 text-xs font-bold text-gray-600 focus:outline-none focus:border-slate-200 transition-colors placeholder-gray-300 uppercase tracking-wide"
             />
           </div>
           <div className="flex-1">

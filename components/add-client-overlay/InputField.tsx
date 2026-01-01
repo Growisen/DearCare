@@ -30,7 +30,7 @@ export const InputField = ({
     <input
       type={type}
       id={id}
-      className={`w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} py-2 px-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
+      className={`w-full rounded-sm border ${error ? 'border-red-500' : 'border-slate-200'} py-2 px-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
       placeholder={placeholder}
       aria-label={label}
       value={value}

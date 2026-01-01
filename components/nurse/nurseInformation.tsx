@@ -7,7 +7,7 @@ interface NurseInformationProps {
 
 export function NurseInformation({ nurse }: NurseInformationProps) {
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="p-6 bg-white rounded-sm shadow-none border border-slate-200">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
         {/* Profile Image Section */}
         <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">

@@ -66,7 +66,7 @@ export function PaginationControls({
   }, [currentPage, totalPages])
 
   return (
-    <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-4 bg-white border-t border-gray-200">
+    <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-4 bg-white border-t border-slate-200">
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="text-sm text-gray-700">
           Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> results
@@ -81,7 +81,7 @@ export function PaginationControls({
               id="page-size"
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
-              className="block w-16 pl-2 pr-6 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-16 pl-2 pr-6 py-1 text-sm text-gray-700 bg-white border border-slate-200 rounded-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="10">10</option>
               <option value="25">25</option>
@@ -95,7 +95,7 @@ export function PaginationControls({
         <button
           onClick={onPreviousPage}
           disabled={currentPage === 1}
-          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M15 18l-6-6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -117,10 +117,10 @@ export function PaginationControls({
               <button
                 key={index}
                 onClick={() => onPageChange(page as number)}
-                className={`min-w-[2rem] px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`min-w-[2rem] px-3 py-2 text-sm font-medium rounded-sm transition-colors ${
                   currentPage === page
                     ? "bg-blue-600 text-white border border-blue-600" 
-                    : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    : "text-gray-700 bg-white border border-slate-200 hover:bg-gray-50"
                 }`}
               >
                 {page}
@@ -136,7 +136,7 @@ export function PaginationControls({
         <button
           onClick={onNextPage}
           disabled={currentPage === totalPages}
-          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">

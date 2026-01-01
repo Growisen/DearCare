@@ -15,7 +15,7 @@ interface PersonalDetailsProps {
 
 export default function PersonalDetails({ formData, handleInputChange }: PersonalDetailsProps) {
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+    <div className="bg-white p-6 rounded-sm border border-slate-200 shadow-none">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Personal Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -26,7 +26,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
             id="guardianOccupation"
             value={formData.guardianOccupation}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Select occupation</option>
             <option value="GOVT">Government Service</option>
@@ -42,7 +42,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
           </label>
           <select
             id="maritalStatus"
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700"
             value={formData.maritalStatus}
             onChange={handleInputChange}
           >
@@ -61,7 +61,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
           <input
             type="text"
             id="height"
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700"
             value={formData.height}
             onChange={handleInputChange}
           />
@@ -73,7 +73,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
           <input
             type="text"
             id="weight"
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700"
             value={formData.weight}
             onChange={handleInputChange}
           />
@@ -85,7 +85,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
           <input
             type="text"
             id="pincode"
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700"
             value={formData.pincode}
             onChange={handleInputChange}
           />
@@ -97,7 +97,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
           <input
             type="text"
             id="district"
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700"
             value={formData.district}
             onChange={handleInputChange}
           />
@@ -109,7 +109,7 @@ export default function PersonalDetails({ formData, handleInputChange }: Persona
           <input
             type="text"
             id="cityTown"
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700"
             value={formData.cityTown}
             onChange={handleInputChange}
           />

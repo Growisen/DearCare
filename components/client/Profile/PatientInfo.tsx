@@ -162,7 +162,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"> 
       {isPersonalInfoAvailable && (
-        <InfoSection title="Personal Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <InfoSection title="Personal Information" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
           <div className="space-y-3">
             <InfoField 
               label="Email" 
@@ -195,7 +195,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
               </div>
             )}
             {(patient.emergencyContact?.name || patient.emergencyContact?.phone) && (
-              <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="p-3 rounded-sm bg-gray-50 border border-slate-200">
                 <p className="text-xs font-medium text-gray-500 mb-1 flex items-center">
                   <Users className="w-3 h-3 mr-1 text-blue-500" />
                   Emergency Contact
@@ -218,7 +218,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
 
       {isPatientAddressAvailable && (
-        <InfoSection title="Patient Address" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <InfoSection title="Patient Address" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
           <div className="space-y-3">
             <InfoField 
               label="Address" 
@@ -233,7 +233,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
             <InfoField label="Pincode" value={patient.address?.pincode} />
             
             {patient.address && (
-              <div className="mt-2 pt-3 border-t border-gray-100 flex items-center gap-3">
+              <div className="mt-2 pt-3 border-t border-slate-200 flex items-center gap-3">
                 <a 
                   href={patientMapLink || '#'} 
                   target="_blank" 
@@ -259,7 +259,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
 
       {isPhysicalAttributesAvailable && (
-        <InfoSection title="Physical Attributes" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <InfoSection title="Physical Attributes" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
           <div className='space-y-3'>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <InfoField 
@@ -283,11 +283,11 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
       
       {isRequestorInfoAvailable && (
-        <InfoSection title="Requestor Information" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <InfoSection title="Requestor Information" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div 
-                className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-slate-200 shadow-none hover:shadow-md transition-all duration-300"
                 onClick={() => patient.requestor.profileImage && setIsImageViewerOpen(true)}
                 style={{ cursor: patient.requestor.profileImage ? 'pointer' : 'default' }}
               >
@@ -358,7 +358,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
 
       {isRequestorAddressAvailable && (
-        <InfoSection title="Requestor Address" className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+        <InfoSection title="Requestor Address" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
           <div className="space-y-3">
             <InfoField 
               label="Address" 
@@ -373,7 +373,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
             <InfoField label="Pincode" value={patient.requestor.address?.pincode} />
             
             {patient.requestor.address && (
-              <div className="mt-2 pt-3 border-t border-gray-100 flex items-center gap-3">
+              <div className="mt-2 pt-3 border-t border-slate-200 flex items-center gap-3">
                 <a 
                   href={requestorMapLink || '#'} 
                   target="_blank" 

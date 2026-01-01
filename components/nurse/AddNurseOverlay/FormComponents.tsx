@@ -76,7 +76,7 @@ export const Fields = {
             ref={buttonRef}
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-left text-gray-800 bg-white
+            className="w-full rounded-sm border border-slate-200 py-2 px-3 text-sm text-left text-gray-800 bg-white
             hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent
               transition duration-200 flex items-center justify-between"
           >
@@ -85,7 +85,7 @@ export const Fields = {
           </button>
           
           {isOpen && (
-            <div className={`absolute z-50 w-full bg-white border border-gray-200 rounded-md max-h-60 overflow-auto ${
+            <div className={`absolute z-50 w-full bg-white border border-slate-200 rounded-sm max-h-60 overflow-auto ${
               dropdownPosition === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'
             }`}>
               <div className="p-2 space-y-1">
@@ -94,7 +94,7 @@ export const Fields = {
                     key={idx}
                     type="button"
                     onClick={() => toggleOption(option)}
-                    className="w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center
+                    className="w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-sm flex items-center
                     justify-between group transition-colors duration-200"
                   >
                     <span>{option}</span>
@@ -108,7 +108,7 @@ export const Fields = {
         
         <div className="mt-2 flex flex-wrap gap-2">
           {selectedOptions.map((option: string, idx: number) => (
-            <div key={idx} className="flex items-center bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1
+            <div key={idx} className="flex items-center bg-gray-100 border border-slate-200 text-gray-700 px-3 py-1
             rounded-full text-sm group hover:bg-gray-200 transition-colors duration-200">
               {option}
               <button 
@@ -179,7 +179,7 @@ export const Fields = {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="px-4 py-2 border border-slate-200 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               Choose File
             </button>
@@ -188,7 +188,7 @@ export const Fields = {
             </span>
           </div>
           {preview && (
-            <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+            <div className="relative w-32 h-32 border rounded-sm overflow-hidden">
               <Image
                 src={preview}
                 alt="File preview"

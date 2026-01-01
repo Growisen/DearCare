@@ -74,14 +74,14 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all ring-1 ring-black/5"
+          className="bg-white rounded-sm shadow-2xl w-full max-w-lg overflow-hidden transform transition-all ring-1 ring-black/5"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
             <h2 className="text-lg font-semibold text-slate-800">Edit Entry Group</h2>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-100
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-sm hover:bg-slate-100
                 focus:outline-none focus:ring-1 focus:ring-slate-300"
             >
               <svg
@@ -110,9 +110,9 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                 type="text"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 
+                className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 
                 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-gray-400
-                  transition-shadow sm:text-sm shadow-sm"
+                  transition-shadow sm:text-sm shadow-none"
                 placeholder="e.g. Monthly Subscriptions"
               />
             </div>
@@ -126,8 +126,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 focus:outline-none 
-                  focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-sm"
+                  className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 focus:outline-none 
+                  focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-none"
                 />
               </div>
               <div>
@@ -139,8 +139,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                   value={endDate}
                   min={startDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 focus:outline-none
-                   focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-sm"
+                  className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 focus:outline-none
+                   focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-none"
                 />
               </div>
             </div>
@@ -153,8 +153,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                 <select
                   value={showToClient ? 'yes' : 'no'}
                   onChange={(e) => setShowToClient(e.target.value === 'yes')}
-                  className="w-full appearance-none border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 
-                  bg-white focus:outline-none focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-sm cursor-pointer"
+                  className="w-full appearance-none border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 
+                  bg-white focus:outline-none focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-none cursor-pointer"
                 >
                   <option value="yes">Visible to Client</option>
                   <option value="no">Hidden (Internal Only)</option>
@@ -175,8 +175,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 placeholder:text-slate-400 
-                focus:outline-none focus:ring-1 focus:ring-gray-400 transition-shadow sm:text-sm shadow-sm resize-none"
+                className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 placeholder:text-slate-400 
+                focus:outline-none focus:ring-1 focus:ring-gray-400 transition-shadow sm:text-sm shadow-none resize-none"
                 placeholder="Add any additional details here..."
               />
             </div>
@@ -185,14 +185,14 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-sm
                 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-300 transition-all"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-sm hover:bg-blue-700 shadow-none
                 hover:shadow focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 transition-all"
             >
               Save Changes

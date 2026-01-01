@@ -11,17 +11,17 @@ interface DeliveryCareFormProps {
 
 
 const baseInputStyles = `
-  w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+  w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
   placeholder:text-gray-400
-  focus:border-gray-400 focus:outline-none focus:ring-0 
+  focus:border-slate-200 focus:outline-none focus:ring-0 
   transition-colors duration-200 appearance-none
 `;
 const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
 const sectionHeaderStyles = "text-base font-semibold text-gray-800 mb-6";
-const sectionContainerStyles = "mb-8 border-b border-gray-100 pb-8";
+const sectionContainerStyles = "mb-8 border-b border-slate-200 pb-8";
 const subHeaderStyles = "text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 border-b border-gray-50 pb-1";
 const checkboxLabelStyles = "flex items-start gap-2 cursor-pointer select-none text-sm text-gray-700 hover:text-gray-900 transition-colors";
-const checkboxInputStyles = "mt-0.5 h-4 w-4 rounded-sm border-gray-300 text-blue-600 focus:ring-0 focus:ring-offset-0 transition-all shrink-0";
+const checkboxInputStyles = "mt-0.5 h-4 w-4 rounded-sm border-slate-200 text-blue-600 focus:ring-0 focus:ring-offset-0 transition-all shrink-0";
 
 const DeliveryCareForm: React.FC<DeliveryCareFormProps> = ({
   formData,
@@ -50,7 +50,7 @@ const DeliveryCareForm: React.FC<DeliveryCareFormProps> = ({
                     value={type.id}
                     checked={formData.carePreferred === type.id}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-gray-700 border-gray-300 focus:ring-0"
+                    className="h-4 w-4 text-gray-700 border-slate-200 focus:ring-0"
                   />
                   <span className={`text-sm ${formData.carePreferred === type.id ? 'font-medium text-blue-700' : 'text-gray-700'}`}>
                     {type.label}
@@ -205,7 +205,7 @@ const DeliveryCareForm: React.FC<DeliveryCareFormProps> = ({
                 </div>
               </div>
 
-              <div className="md:col-span-6 bg-gray-50 p-4 border border-gray-100 rounded-sm">
+              <div className="md:col-span-6 bg-gray-50 p-4 border border-slate-200 rounded-sm">
                 <h3 className={subHeaderStyles}>Service & Duties</h3>
                 <div className="space-y-3">
                   <label className={checkboxLabelStyles}>

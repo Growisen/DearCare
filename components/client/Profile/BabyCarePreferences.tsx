@@ -67,7 +67,7 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
       href={`/child-care-preferences/${clientId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-slate-200"
       title="Open preferences in new tab"
     >
       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
   );
   
   if (error) return (
-    <div className="py-12 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">
+    <div className="py-12 text-center text-red-600 bg-red-50 rounded-sm border border-red-100">
       <div className="flex justify-end mb-4 space-x-2">
         {CopyLinkButton}
         {ExternalLinkButton}
@@ -154,7 +154,7 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
                 {careNeedsList.length > 0 ? (
                     <div className="flex flex-wrap gap-2 mb-3">
                     {careNeedsList.map((need, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
+                        <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-sm text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
                         {need}
                         </span>
                     ))}
@@ -180,12 +180,12 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
                 />
              </div>
              
-             <div className="border-t border-gray-100 pt-4">
+             <div className="border-t border-slate-200 pt-4">
                 <p className="text-xs text-gray-500 font-medium mb-3 uppercase tracking-wider">Housekeeping Tasks</p>
                 {homeTasksList.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                     {homeTasksList.map((task, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-sm text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                         {task}
                         </span>
                     ))}
@@ -206,7 +206,7 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
 
         <div className="lg:col-span-2">
             <SectionCard title="Additional Notes" icon={<ClipboardList className="w-4 h-4" />}>
-                <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+                <div className="bg-gray-50 p-4 rounded-sm border border-slate-200">
                     <InfoField 
                         label="Parent Notes" 
                         value={selectedRequest.notes} 
@@ -254,8 +254,8 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
 };
 
 const SectionCard = ({ title, icon, children }: { title: string, icon?: React.ReactNode, children: React.ReactNode }) => (
-  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden h-full">
-    <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center gap-2">
+  <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden h-full">
+    <div className="bg-gray-50 px-5 py-3 border-b border-slate-200 flex items-center gap-2">
       {icon && <span className="text-gray-500">{icon}</span>}
       <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
     </div>

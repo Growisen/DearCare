@@ -128,20 +128,20 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
   };
 
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200 appearance-none
   `;
   const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
 
   return (
-    <div className="mb-8 border-b border-gray-100 pb-8">
+    <div className="mb-8 border-b border-slate-200 pb-8">
       <h2 className="text-base font-semibold text-gray-800 mb-6">Staffing Requirements</h2>
       
       <div className="space-y-4">
         {formData.staffRequirements.map((requirement, index) => (
-          <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-end p-4 bg-gray-50 border border-gray-100 rounded-sm">
+          <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-end p-4 bg-gray-50 border border-slate-200 rounded-sm">
 
             <div className="w-full sm:flex-1">
               <label className={labelStyles}>Staff Type</label>
@@ -227,13 +227,13 @@ export const StaffRequirements = ({ clientType, formData, onChange }: StaffRequi
         <button
           type="button"
           onClick={handleAddStaffRequirement}
-          className="w-full py-2.5 border border-dashed border-gray-300 text-sm font-medium text-gray-600 rounded-sm hover:border-gray-400 hover:bg-gray-50 hover:text-gray-800 transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 border border-dashed border-slate-200 text-sm font-medium text-gray-600 rounded-sm hover:border-slate-200 hover:bg-gray-50 hover:text-gray-800 transition-all flex items-center justify-center gap-2"
         >
           <Plus size={16} />
           Add Another Staff Requirement
         </button>
 
-        <div className="mt-6 pt-4 border-t border-gray-100">
+        <div className="mt-6 pt-4 border-t border-slate-200">
           <div className="max-w-xs">
             <label className={labelStyles}>Expected Service Start Date</label>
             <input

@@ -174,7 +174,7 @@ const OrganizationClientProfile = () => {
   if (error || !client) {
     return (
       <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-6xl mx-auto bg-white p-8 rounded-md shadow">
+        <div className="max-w-6xl mx-auto bg-white p-8 rounded-sm shadow">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-red-700">Error Loading Profile</h1>
             <p className="mt-2 text-gray-600">{error || "Organization profile not found"}</p>
@@ -203,8 +203,8 @@ const OrganizationClientProfile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-[95%]">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-          <div className="bg-gray-100 border-b border-gray-200 px-6 py-6">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden mb-6">
+          <div className="bg-gray-100 border-b border-slate-200 px-6 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                 <div className="flex-shrink-0 order-1 md:order-none">
@@ -227,7 +227,7 @@ const OrganizationClientProfile = () => {
                   </p>
                   
                   <div className="flex flex-wrap items-center justify-center md:justify-start mt-4 gap-3">
-                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
+                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-slate-200">
                       <svg className="mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
@@ -236,7 +236,7 @@ const OrganizationClientProfile = () => {
                         ? client.details.organization_address.split(',').slice(-2).join(',')
                         : 'Address not specified'}
                     </span>
-                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-200">
+                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-slate-200">
                       Status: <span className={`ml-1 ${
                         client.status === 'approved' ? 'text-green-700' : 
                         client.status === 'rejected' ? 'text-red-700' : 'text-yellow-700'
@@ -255,13 +255,13 @@ const OrganizationClientProfile = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <button 
                   onClick={() => setShowEditModal(true)}
-                  className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                  className="px-4 py-2 text-white bg-blue-600 rounded-sm hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
                 >
                   Edit Organization
                 </button>
                 <button 
                   onClick={() => setShowDeleteConfirmation(true)}
-                  className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+                  className="px-4 py-2 text-white bg-red-600 rounded-sm hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
                 >
                   Delete Organization
                 </button>
@@ -269,14 +269,14 @@ const OrganizationClientProfile = () => {
             </div>
           </div>
 
-          <div className="border-b border-gray-200 px-4 sm:px-6">
+          <div className="border-b border-slate-200 px-4 sm:px-6">
             <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide whitespace-nowrap">
               <button
                 onClick={() => handleTabChange('profile')}
                 className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 ${
                   activeTab === 'profile'
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-slate-200'
                 }`}
               >
                 <span className="inline-block">Organization Details</span>
@@ -286,7 +286,7 @@ const OrganizationClientProfile = () => {
                 className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 ${
                   activeTab === 'requirements'
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-slate-200'
                 }`}
               >
                 <span className="inline-block">Staff Requirements</span>
@@ -297,7 +297,7 @@ const OrganizationClientProfile = () => {
                   className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 ${
                     activeTab === 'assignments'
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-slate-200'
                   }`}
                 >
                   <span className="inline-block">Staff Assignments</span>
@@ -311,8 +311,8 @@ const OrganizationClientProfile = () => {
           {activeTab === 'profile' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                  <h2 className="text-lg font-bold text-gray-900 pb-2 border-b border-gray-200 mb-3">
+                <div className="bg-white rounded-sm shadow-none p-6 border border-slate-200">
+                  <h2 className="text-lg font-bold text-gray-900 pb-2 border-b border-slate-200 mb-3">
                     Contact Information
                   </h2>
                   <div className="space-y-4">
@@ -329,8 +329,8 @@ const OrganizationClientProfile = () => {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                <div className="bg-white rounded-sm shadow-none p-6 border border-slate-200">
+                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-slate-200 mb-3">
                     Address
                   </h2>
                   <div className="space-y-4">
@@ -399,7 +399,7 @@ const OrganizationClientProfile = () => {
                       </div>
                     </div>
                     
-                    <div className="mt-2 pt-3 border-t border-gray-100">
+                    <div className="mt-2 pt-3 border-t border-slate-200">
                       <a href={organizationMapLink || '#'} 
                          target="_blank" 
                          rel="noopener noreferrer"
@@ -413,14 +413,14 @@ const OrganizationClientProfile = () => {
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-lg shadow-sm p-6 md:col-span-2 border border-gray-200">
-                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+                <div className="bg-white rounded-sm shadow-none p-6 md:col-span-2 border border-slate-200">
+                  <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-slate-200 mb-3">
                     Additional Information
                   </h2>
                   <div>
                     <p className="text-sm text-gray-900">{formatValue(client.general_notes, 'No additional notes available.')}</p>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-4 pt-4 border-t border-slate-200">
                     <p className="text-xs text-gray-500">
                       Created: {client.created_at ? new Date(client.created_at).toLocaleDateString() : 'Date not recorded'}
                     </p>
@@ -435,8 +435,8 @@ const OrganizationClientProfile = () => {
 
           {activeTab === 'requirements' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+              <div className="bg-white rounded-sm shadow-none p-6 border border-slate-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-slate-200 mb-3">
                   Staff Requirements
                 </h2>
                 {client.staffRequirements && client.staffRequirements.length > 0 ? (
@@ -459,7 +459,7 @@ const OrganizationClientProfile = () => {
                         ))}
                       </tbody>
                     </table>
-                    <div className="pt-2 border-t border-gray-100">
+                    <div className="pt-2 border-t border-slate-200">
                       <p className="text-xs text-gray-600">
                         Start Date: {client.details.start_date 
                           ? new Date(client.details.start_date).toLocaleDateString() 
@@ -472,16 +472,16 @@ const OrganizationClientProfile = () => {
                 )}
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-3">
+              <div className="bg-white rounded-sm shadow-none p-6 border border-slate-200">
+                <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-slate-200 mb-3">
                   Staff Statistics
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-center p-4 bg-gray-50 rounded-sm">
                     <p className="text-3xl font-bold text-blue-600">{staffSummary.total}</p>
                     <p className="text-xs text-gray-500">Required</p>
                   </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-center p-4 bg-gray-50 rounded-sm">
                     <p className="text-3xl font-bold text-green-600">{staffSummary.assigned}</p>
                     <p className="text-xs text-gray-500">Assigned</p>
                   </div>
@@ -496,7 +496,7 @@ const OrganizationClientProfile = () => {
                 <h2 className="text-lg font-semibold text-gray-800">Staff Assignments</h2>
                 <button
                   onClick={handleOpenNurseList}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-sm hover:bg-green-700"
                 >
                   Assign New Staff
                 </button>
@@ -506,7 +506,7 @@ const OrganizationClientProfile = () => {
                   <Loader />
                 </div>
               ) : (
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-sm border border-slate-200 overflow-hidden">
                   <NurseAssignmentsList
                     assignments={nurseAssignments}
                     nurses={nurses}

@@ -76,7 +76,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
   }
 
   return (
-    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg">
+    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-none rounded-sm">
       <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between
        mb-3 sm:mb-4 border-b border-slate-200 pb-2"
       >
@@ -98,7 +98,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
           </div>
           <button 
             className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium
-             bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-sm"
+             bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-none"
             onClick={handleExport}
           >
             <Download className="w-4 h-4" />
@@ -115,13 +115,13 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
           </div>
         ) : error ? (
           <div className="p-6 text-center">
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-sm mb-4">
               {error}
             </div>
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
+            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-sm">
               <p className="text-lg font-medium mb-1">No pending requests</p>
               <p className="text-sm">All client requests have been processed</p>
             </div>
@@ -172,7 +172,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
               {filteredClients.map((client) => {
                 const StatusIcon = statusIcons[client.status]
                 return (
-                  <div key={client.id} className="p-4 rounded-md border border-slate-200 bg-white shadow-sm">
+                  <div key={client.id} className="p-4 rounded-sm border border-slate-200 bg-white shadow-none">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-start justify-between">

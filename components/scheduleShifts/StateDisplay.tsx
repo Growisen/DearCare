@@ -23,7 +23,7 @@ function StateDisplay({
       <p className="text-gray-500">{message}</p>
       <button
         onClick={onButtonClick}
-        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700"
       >
         {buttonText}
       </button>

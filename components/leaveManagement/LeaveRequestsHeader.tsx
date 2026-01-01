@@ -45,8 +45,8 @@ export function LeaveRequestsHeader({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Leave Requests</h1>
           <p className="text-xs text-gray-500">Manage and review leave requests</p>
@@ -56,7 +56,7 @@ export function LeaveRequestsHeader({
           {onAddLeaveRequest && (
             <button
               onClick={onAddLeaveRequest}
-              className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-sm hover:bg-green-600 transition-colors flex items-center gap-1"
             >
               <Plus size={16} />
               Add Leave
@@ -67,7 +67,7 @@ export function LeaveRequestsHeader({
             <button 
               onClick={onExport}
               disabled={isExporting}
-              className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
             >
               {isExporting ? (
                 <span className="flex items-center">
@@ -93,7 +93,7 @@ export function LeaveRequestsHeader({
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Enter search term and press Enter"
-            className="pl-9 pr-16 py-1 h-9 bg-white text-sm text-gray-800 border-gray-200 focus-visible:ring-blue-400"
+            className="pl-9 pr-16 py-1 h-9 bg-white text-sm text-gray-800 border-slate-200 focus-visible:ring-blue-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -124,7 +124,7 @@ export function LeaveRequestsHeader({
               <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="date"
-                className="pl-9 pr-3 py-1 h-9 bg-white text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                className="pl-9 pr-3 py-1 h-9 bg-white text-sm border border-slate-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
                 value={dateRange.startDate || ''}
                 onChange={(e) => setDateRange({...dateRange, startDate: e.target.value || null})}
               />
@@ -132,7 +132,7 @@ export function LeaveRequestsHeader({
             <span className="text-gray-500">to</span>
             <input
               type="date"
-              className="pl-3 pr-3 py-1 h-9 bg-white text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+              className="pl-3 pr-3 py-1 h-9 bg-white text-sm border border-slate-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
               value={dateRange.endDate || ''}
               onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
             />
@@ -144,7 +144,7 @@ export function LeaveRequestsHeader({
                 <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="date"
-                  className="w-full pl-9 pr-3 py-1.5 bg-white text-sm border border-gray-200 rounded-md"
+                  className="w-full pl-9 pr-3 py-1.5 bg-white text-sm border border-slate-200 rounded-sm"
                   value={dateRange.startDate || ''}
                   onChange={(e) => setDateRange({...dateRange, startDate: e.target.value || null})}
                 />
@@ -152,7 +152,7 @@ export function LeaveRequestsHeader({
               <div className="flex-1">
                 <input
                   type="date"
-                  className="w-full pl-3 pr-3 py-1.5 bg-white text-sm border border-gray-200 rounded-md"
+                  className="w-full pl-3 pr-3 py-1.5 bg-white text-sm border border-slate-200 rounded-sm"
                   value={dateRange.endDate || ''}
                   onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
                 />
@@ -162,7 +162,7 @@ export function LeaveRequestsHeader({
               <select
                 value={statusFilter || 'All'}
                 onChange={(e) => setStatusFilter(e.target.value === 'All' ? null : e.target.value)}
-                className="flex-1 rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+                className="flex-1 rounded-sm border border-slate-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
                 style={{ 
                   backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                   backgroundPosition: `right 0.5rem center`,
@@ -182,7 +182,7 @@ export function LeaveRequestsHeader({
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
-                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1 whitespace-nowrap"
+                  className="px-3 py-1.5 rounded-sm text-xs font-medium bg-gray-100 text-gray-700 border border-slate-200 hover:bg-gray-200 transition-colors flex items-center gap-1 whitespace-nowrap"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Reset
@@ -199,7 +199,7 @@ export function LeaveRequestsHeader({
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
-            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
               {getAdmittedTypeDisplay()}
             </div>
           </div>
@@ -211,10 +211,10 @@ export function LeaveRequestsHeader({
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status === 'All' ? null : status)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors ${
                     (status === 'All' && statusFilter === null) || statusFilter === status
                       ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-slate-200"
                   }`}
                 >
                   {status}
@@ -226,7 +226,7 @@ export function LeaveRequestsHeader({
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
-              className="px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-sm text-xs font-medium bg-gray-100 text-gray-700 border border-slate-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
               title="Reset all filters"
             >
               <RefreshCw className="h-3 w-3" />
@@ -238,7 +238,7 @@ export function LeaveRequestsHeader({
         <div className="sm:hidden mt-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600">Organization:</span>
-            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
               {getAdmittedTypeDisplay()}
             </div>
           </div>

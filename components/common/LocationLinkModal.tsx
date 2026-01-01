@@ -21,11 +21,11 @@ const LocationLinkModal: React.FC<LocationLinkModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 text-gray-800">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+      <div className="bg-white rounded-sm shadow-lg p-6 w-full max-w-sm">
         <h2 className="text-lg font-semibold mb-4">{title}</h2>
         <input
           type="text"
-          className="w-full rounded px-3 py-2 mb-4 focus:outline-none border border-gray-300"
+          className="w-full rounded px-3 py-2 mb-4 focus:outline-none border border-slate-200"
           placeholder="Paste Google Maps link here"
           value={link}
           onChange={e => setLink(e.target.value)}

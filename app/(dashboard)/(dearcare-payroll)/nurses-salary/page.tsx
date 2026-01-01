@@ -81,8 +81,8 @@ export default function NursesSalaryPage() {
 
   return (
     <div className="container mx-auto py-1 space-y-6">
-        <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
+        <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
             <div>
               <h2 className="text-lg font-semibold text-gray-800">Salary Payments</h2>
               <p className="text-xs text-gray-500">Manage nurse salary payments and calculations</p>
@@ -91,7 +91,7 @@ export default function NursesSalaryPage() {
               <button 
                 onClick={handleExport}
                 disabled={isExporting || salaryRecords.length === 0}
-                className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 {isExporting ? (
                   <span className="flex items-center">
@@ -113,7 +113,7 @@ export default function NursesSalaryPage() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Enter search term"
-                className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800 w-full"
+                className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800 w-full"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
@@ -136,7 +136,7 @@ export default function NursesSalaryPage() {
           </div>
         </div>
 
-      <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden min-h-[500px]">
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden min-h-[500px]">
         <div className="overflow-x-auto">
           {loading ? (
             <div className="flex justify-center items-center p-8 min-h-[500px]">

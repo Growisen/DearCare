@@ -14,7 +14,7 @@ interface MedicalStatusProps {
 
 export default function MedicalStatus({ formData, handleInputChange }: MedicalStatusProps) {
   return (
-    <div className="bg-white border border-gray-200 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm">
+    <div className="bg-white border border-slate-200 p-3 sm:p-4 md:p-6 rounded-sm shadow-none">
       <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Current Medical Status</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div className="col-span-1">
@@ -25,7 +25,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
             id="currentStatus"
             value={formData.currentStatus}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            className="w-full border border-slate-200 rounded-sm py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Select status</option>
             <option value="HOSPITALIZED">Hospitalized</option>
@@ -41,7 +41,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
             id="chronicIllness"
             value={formData.chronicIllness}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            className="w-full border border-slate-200 rounded-sm py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Select option</option>
             <option value="YES">Yes</option>

@@ -32,14 +32,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
+      <div className="bg-white rounded-sm p-6 max-w-sm w-full shadow-xl">
         <h3 className="font-medium text-lg mb-3 text-gray-900">{title}</h3>
         <p className="text-gray-600 mb-6">{message}</p>
         <div className="flex justify-end space-x-3">
           {!isLoading && (
             <button
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-slate-200 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               {cancelButtonText}
             </button>
@@ -47,7 +47,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${buttonColorClasses[confirmButtonColor]} focus:outline-none focus:ring-2 focus:ring-offset-2 ${isLoading ? 'opacity-75 cursor-not-allowed w-full' : ''}`}
+            className={`px-4 py-2 border border-transparent rounded-sm shadow-none text-sm font-medium text-white ${buttonColorClasses[confirmButtonColor]} focus:outline-none focus:ring-2 focus:ring-offset-2 ${isLoading ? 'opacity-75 cursor-not-allowed w-full' : ''}`}
           >
             {isLoading ? (
               <span className="flex items-center justify-center">

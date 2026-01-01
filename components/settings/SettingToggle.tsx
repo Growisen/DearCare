@@ -21,7 +21,7 @@ export default function SettingToggle({
   onToggle 
 }: SettingToggleProps) {
   return (
-    <div className={`flex items-center justify-between py-4 border-b ${enabled ? 'bg-green-50' : ''} rounded-md transition-colors duration-300`}>
+    <div className={`flex items-center justify-between py-4 border-b ${enabled ? 'bg-green-50' : ''} rounded-sm transition-colors duration-300`}>
       <div className="flex items-start space-x-3">
         <div className="mt-1">
           {enabled ? icon.enabled : icon.disabled}
@@ -49,7 +49,7 @@ export default function SettingToggle({
           />
           <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer ${
             enabled ? 'bg-green-600' : ''
-          } after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
+          } after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-200 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
             enabled ? 'after:translate-x-full' : ''
           } ${isLoading ? 'opacity-50' : ''}`}></div>
         </label>

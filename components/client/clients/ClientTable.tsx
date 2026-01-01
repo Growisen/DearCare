@@ -29,7 +29,7 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
     : null;
 
   return (
-    <tr className="hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors">
+    <tr className="hover:bg-gray-50 border-b border-slate-200 last:border-0 transition-colors">
       <td className="py-3 px-6 text-gray-800 font-medium align-top min-w-[200px]">
         {formatName(client.name)}
         {isNewClient && (
@@ -81,7 +81,7 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
 
       <td className="py-3 px-6 align-top whitespace-nowrap sticky right-0 bg-white sm:static sm:bg-transparent shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] sm:shadow-none">
         <button 
-          className="px-2.5 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-md transition-colors text-xs font-semibold inline-flex items-center gap-1.5 border border-blue-100"
+          className="px-2.5 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-sm transition-colors text-xs font-semibold inline-flex items-center gap-1.5 border border-blue-100"
           onClick={() => onReviewDetails(client)}
           aria-label={`Review ${client.name}`}
         >
@@ -104,7 +104,7 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
   const StatusIcon = statusIcons[status];
   
   return (
-    <div className="p-4 space-y-3 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+    <div className="p-4 space-y-3 hover:bg-gray-50 transition-colors border-b border-slate-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-semibold text-gray-800 text-sm">{formatName(client.name)}</h3>
@@ -116,7 +116,7 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
         </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs bg-white border border-gray-100 p-3 rounded-lg shadow-sm">
+      <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs bg-white border border-slate-200 p-3 rounded-sm shadow-none">
         <div className="col-span-2 sm:col-span-1">
            <span className="text-gray-400 uppercase tracking-wide mr-2">Created:</span>
            <span className="text-gray-800 font-medium">{formatDate(client.createdAt ?? '')}</span>
@@ -145,7 +145,7 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
       </div>
       
       <button 
-        className="w-full px-3 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors text-xs font-semibold flex items-center justify-center gap-1.5 border border-blue-100"
+        className="w-full px-3 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors text-xs font-semibold flex items-center justify-center gap-1.5 border border-blue-100"
         onClick={() => onReviewDetails(client)}
       >
         <Eye className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
     approved: "bg-green-50 text-green-700 border-green-200",
     rejected: "bg-red-50 text-red-700 border-red-200",
     assigned: "bg-green-100 text-green-700 border-green-200",
-    all: "bg-gray-50 text-gray-600 border-gray-200"
+    all: "bg-gray-50 text-gray-600 border-slate-200"
   }
 
   const statusIcons: Record<ClientFilters, React.FC<{ className?: string }>> = {
@@ -178,10 +178,10 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
   const thClass = "py-3 px-6 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap";
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden">
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full min-w-[1000px]">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-50 border-b border-slate-200">
             <tr>
               <th className={`${thClass} min-w-[180px]`}>Client Name</th>
               <th className={`${thClass} min-w-[140px]`}>Reg No</th>

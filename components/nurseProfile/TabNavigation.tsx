@@ -7,7 +7,7 @@ interface TabNavigationProps {
 
 const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex border-b border-gray-200">
+    <div className="flex border-b border-slate-200">
       <button
         className={`px-6 py-3 text-sm font-medium ${
           activeTab === 'profile'
@@ -55,7 +55,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }
           className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
             activeTab === 'advancePayments'
               ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-slate-200'
           }`}
         >
           Advance Payments

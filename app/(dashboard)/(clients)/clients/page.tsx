@@ -97,7 +97,7 @@ export default function ClientsPage() {
           handleResetFilters={handleResetFilters}
         /> */}
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
           {isLoading ? (
             <LoadingState message="Loading clients..." />
           ) : error ? (

@@ -95,8 +95,8 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-md shadow-xl p-6 w-full max-w-md text-gray-800 border border-gray-200">
-        <h2 className="text-xl font-semibold mb-6 text-gray-900 border-b border-gray-200 pb-3">
+      <div className="bg-white rounded-sm shadow-xl p-6 w-full max-w-md text-gray-800 border border-slate-200">
+        <h2 className="text-xl font-semibold mb-6 text-gray-900 border-b border-slate-200 pb-3">
           Create Salary
         </h2>
 
@@ -104,7 +104,7 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
           <label className="block text-sm font-medium mb-2 text-gray-700">Pay Period Start</label>
           <input
             type="date"
-            className={`border border-gray-300 rounded-md px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors ${errors.startDate ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+            className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors ${errors.startDate ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             disabled={isCreating}
@@ -118,7 +118,7 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
           <label className="block text-sm font-medium mb-2 text-gray-700">Pay Period End</label>
           <input
             type="date"
-            className={`border border-gray-300 rounded-md px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors ${errors.endDate ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+            className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors ${errors.endDate ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             disabled={isCreating}
@@ -130,16 +130,16 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
           )}
         </div>
         
-        <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-200">
           <button
-            className="px-5 py-2.5 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-sm border border-slate-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onClose}
             disabled={isCreating}
           >
             Cancel
           </button>
           <button
-            className="px-5 py-2.5 rounded-md bg-slate-700 text-white font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-sm bg-slate-700 text-white font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSubmit}
             disabled={isCreating || !!errors.startDate || !!errors.endDate}
           >

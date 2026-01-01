@@ -12,7 +12,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
   handleRecorderInfoChange
 }) => {
   return (
-    <div className="bg-blue-50 p-5 rounded-lg border border-blue-200 mb-6 text-gray-700">
+    <div className="bg-blue-50 p-5 rounded-sm border border-blue-200 mb-6 text-gray-700">
       <h3 className="text-lg font-semibold text-blue-800 mb-3">Person Completing this Form</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -26,7 +26,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
             value={recorderInfo.recorderName}
             onChange={handleRecorderInfoChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-slate-200 rounded-sm"
             placeholder="Enter your full name"
           />
         </div>
@@ -40,7 +40,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
             value={recorderInfo.recorderRole}
             onChange={handleRecorderInfoChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md text-gray-700 font-medium"
+            className="w-full p-2 border border-slate-200 rounded-sm text-gray-700 font-medium"
           >
             <option value="" disabled className="text-gray-500">Select relationship...</option>
             <option value="Family Member" className="text-gray-800">Family Member</option>
@@ -63,7 +63,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
               value={recorderInfo.nurseRegistrationNumber || ""}
               onChange={handleRecorderInfoChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-slate-200 rounded-sm"
               placeholder="Enter your registration number"
             />
           </div>
@@ -90,7 +90,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
               }}
               defaultValue=""
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-slate-200 rounded-sm"
               placeholder="Please specify your relationship to the patient"
             />
           </div>
@@ -107,7 +107,7 @@ const RecorderInfoForm: React.FC<RecorderInfoFormProps> = ({
               value={recorderInfo.familyRelationship}
               onChange={handleRecorderInfoChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md text-gray-800"
+              className="w-full p-2 border border-slate-200 rounded-sm text-gray-800"
             >
               {relationOptions.map(option => (
                 <option key={option.value} value={option.value}>

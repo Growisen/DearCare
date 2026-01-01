@@ -18,7 +18,7 @@ export default function CommentEdit({
       <div>
         <textarea
           rows={4}
-          className="w-full border rounded-md p-2 text-gray-700"
+          className="w-full border rounded-sm p-2 text-gray-700"
           value={editedComment}
           onChange={(e) => setEditedComment(e.target.value)}
         ></textarea>
@@ -27,13 +27,13 @@ export default function CommentEdit({
         <button
           onClick={handleEditComment}
           disabled={!editedComment.trim()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition"
+          className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition"
         >
           Save Changes
         </button>
         <button
           onClick={cancelEdit}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-sm hover:bg-gray-300 transition"
         >
           Cancel
         </button>

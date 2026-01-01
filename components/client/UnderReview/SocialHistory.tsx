@@ -13,7 +13,7 @@ interface SocialHistoryProps {
 
 export default function SocialHistory({ formData, handleInputChange }: SocialHistoryProps) {
   return (
-    <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded-lg">
+    <div className="bg-white border border-slate-200 p-3 sm:p-4 rounded-sm">
       <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
         Social History
       </h3>
@@ -27,7 +27,7 @@ export default function SocialHistory({ formData, handleInputChange }: SocialHis
             id="drugsUse"
             value={formData.drugsUse}
             onChange={handleInputChange}
-            className="w-full min-h-[38px] border border-gray-300 rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full min-h-[38px] border border-slate-200 rounded-sm py-1.5 sm:py-2 px-2 sm:px-3 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           >
             <option value="">Select option</option>
             <option value="YES">Yes</option>
@@ -44,7 +44,7 @@ export default function SocialHistory({ formData, handleInputChange }: SocialHis
             id="alcoholUse"
             value={formData.alcoholUse}
             onChange={handleInputChange}
-            className="w-full min-h-[38px] border border-gray-300 rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full min-h-[38px] border border-slate-200 rounded-sm py-1.5 sm:py-2 px-2 sm:px-3 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           >
             <option value="">Select option</option>
             <option value="YES">Yes</option>
@@ -61,7 +61,7 @@ export default function SocialHistory({ formData, handleInputChange }: SocialHis
             id="tobaccoUse"
             value={formData.tobaccoUse}
             onChange={handleInputChange}
-            className="w-full min-h-[38px] border border-gray-300 rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full min-h-[38px] border border-slate-200 rounded-sm py-1.5 sm:py-2 px-2 sm:px-3 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           >
             <option value="">Select option</option>
             <option value="YES">Yes</option>

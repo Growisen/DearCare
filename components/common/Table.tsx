@@ -46,14 +46,14 @@ export function Table<T>({
 }: TableProps<T>) {
   if (!loading && data.length === 0) {
     return (
-      <div className="bg-white rounded border border-gray-300 p-8">
+      <div className="bg-white rounded border border-slate-200 p-8">
         <div className="text-center text-gray-500">{emptyMessage}</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded border border-gray-300 overflow-hidden">
+    <div className="bg-white rounded border border-slate-200 overflow-hidden">
       <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

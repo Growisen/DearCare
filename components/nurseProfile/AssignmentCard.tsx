@@ -110,8 +110,8 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
     : null;
 
   return (
-    <div className="group bg-white border border-gray-200 rounded-md transition-all hover:border-gray-300 hover:shadow-sm">
-      <div className="px-5 py-3 flex flex-wrap justify-between items-center gap-4 border-b border-gray-100 bg-white">
+    <div className="group bg-white border border-slate-200 rounded-sm transition-all hover:border-slate-200 hover:shadow-none">
+      <div className="px-5 py-3 flex flex-wrap justify-between items-center gap-4 border-b border-slate-200 bg-white">
         <div>
           <div className="flex items-center gap-3">
             <h3 className="text-base font-bold text-gray-900">
@@ -148,7 +148,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
         </div>
         <button
           onClick={() => setNotesModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded hover:bg-white hover:text-blue-600 hover:border-blue-200 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-slate-200 rounded hover:bg-white hover:text-blue-600 hover:border-blue-200 transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
           {notes ? 'Edit Note' : 'Add Note'}
@@ -156,7 +156,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
         <div className="p-5">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200">
             <Calendar className="w-3.5 h-3.5 text-blue-600" />
             <h4 className="text-[15px] font-bold text-gray-900">Details</h4>
           </div>
@@ -229,7 +229,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment }) => {
           </div>
         </div>
         <div className="p-5">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200">
             {isIndividual ? <User className="w-3.5 h-3.5 text-purple-600" /> : <Building2 className="w-3.5 h-3.5 text-purple-600" />}
             <h4 className="text-[15px] font-bold text-gray-900">About Client</h4>
           </div>

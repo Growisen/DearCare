@@ -74,7 +74,7 @@ const AttendanceMobileCard = memo(({ record }: {
   record: AttendanceRecord, 
 }) => {
   return (
-    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-slate-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-semibold text-gray-800">{formatName(record.nurseName)}</h3>
@@ -89,7 +89,7 @@ const AttendanceMobileCard = memo(({ record }: {
         </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
+      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-slate-200 p-3 rounded-sm">
         <p className="text-gray-500">Scheduled Time:</p>
         <p className="text-gray-800 font-medium">{record.scheduledStart || "N/A"} - {record.scheduledEnd || "N/A"}</p>
         <p className="text-gray-500">Actual Time:</p>
@@ -116,11 +116,11 @@ export const AttendanceTable = memo(function AttendanceTable({
   attendanceData, 
 }: AttendanceTableProps) {
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
       {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-100 border-b border-gray-200">
+          <thead className="bg-gray-100 border-b border-slate-200">
             <tr className="text-left">
               <th className="px-6 py-4 font-medium text-gray-700">Nurse Name</th>
               <th className="px-6 py-4 font-medium text-gray-700">Date</th>

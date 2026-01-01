@@ -55,7 +55,7 @@ const AddDeductionModal: React.FC<AddDeductionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md text-slate-800">
+      <div className="bg-white rounded-sm shadow-lg p-6 w-full max-w-md text-slate-800">
         <h2 className="text-lg font-semibold mb-4">Add Deduction</h2>
         <div className="mb-1">
           <div className="text-sm text-gray-600 mb-3">

@@ -63,7 +63,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChang
   }, [visibleTabs]);
 
   return (
-    <div className="w-full bg-white border-b border-gray-200">
+    <div className="w-full bg-white border-b border-slate-200">
       <div className="relative mx-auto max-w-full px-4 sm:px-6 lg:px-8">
 
         {showLeftArrow && (
@@ -71,7 +71,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChang
             <button
               type="button"
               className="
-                p-2 rounded-full bg-white border border-gray-200 shadow-md 
+                p-2 rounded-full bg-white border border-slate-200 shadow-md 
                 text-gray-700 transition-all duration-200
                 hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200 hover:scale-105
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
@@ -123,7 +123,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, status, onTabChang
             <button
               type="button"
               className="
-                p-2 rounded-full bg-white border border-gray-200 shadow-md 
+                p-2 rounded-full bg-white border border-slate-200 shadow-md 
                 text-gray-700 transition-all duration-200
                 hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200 hover:scale-105
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2

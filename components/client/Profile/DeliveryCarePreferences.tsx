@@ -56,7 +56,7 @@ const DeliveryCarePreferences: React.FC<DeliveryCarePreferencesProps> = ({ clien
       href={`/delivery-care-preferences/${clientId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-slate-200"
       title="Open preferences in new tab"
     >
       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ const DeliveryCarePreferences: React.FC<DeliveryCarePreferencesProps> = ({ clien
     </div>
   );
   if (error) return (
-    <div className="py-12 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">
+    <div className="py-12 text-center text-red-600 bg-red-50 rounded-sm border border-red-100">
       <div className="flex justify-end mb-4 space-x-2">
         {CopyLinkButton}
         {ExternalLinkButton}
@@ -207,8 +207,8 @@ const DeliveryCarePreferences: React.FC<DeliveryCarePreferencesProps> = ({ clien
 };
 
 const SectionCard = ({ title, icon, children }: { title: string, icon?: React.ReactNode, children: React.ReactNode }) => (
-  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden h-full">
-    <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center gap-2">
+  <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden h-full">
+    <div className="bg-gray-50 px-5 py-3 border-b border-slate-200 flex items-center gap-2">
       {icon && <span className="text-gray-500">{icon}</span>}
       <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
     </div>

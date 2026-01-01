@@ -23,7 +23,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
           type="text"
           value={formData.feedingMethod || ''}
           onChange={onFormChange}
-          className="h-9 w-full rounded-md border border-slate-300 px-3 py-1"
+          className="h-9 w-full rounded-sm border border-slate-300 px-3 py-1"
         />
       </div>
       <div className="space-y-2">
@@ -33,7 +33,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
           type="text"
           value={formData.sleepPattern || ''}
           onChange={onFormChange}
-          className="h-9 w-full rounded-md border border-slate-300 px-3 py-1"
+          className="h-9 w-full rounded-sm border border-slate-300 px-3 py-1"
         />
       </div>
       <div className="space-y-2">
@@ -58,7 +58,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
             placeholder="Others"
             value={formData.eliminationUrineOthers || ''}
             onChange={onFormChange}
-            className="ml-2 h-9 rounded-md border border-slate-300 px-3 py-1"
+            className="ml-2 h-9 rounded-sm border border-slate-300 px-3 py-1"
           />
         </div>
       </div>
@@ -84,7 +84,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
             placeholder="Others"
             value={formData.eliminationBowelOthers || ''}
             onChange={onFormChange}
-            className="ml-2 h-9 rounded-md border border-slate-300 px-3 py-1"
+            className="ml-2 h-9 rounded-sm border border-slate-300 px-3 py-1"
           />
         </div>
       </div>
@@ -129,7 +129,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
             placeholder="Shape"
             value={formData.bedSoreShape || ''}
             onChange={onFormChange}
-            className="ml-2 h-9 rounded-md border border-slate-300 px-3 py-1"
+            className="ml-2 h-9 rounded-sm border border-slate-300 px-3 py-1"
           />
           <input
             name="bedSoreSize"
@@ -137,7 +137,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
             placeholder="Size"
             value={formData.bedSoreSize || ''}
             onChange={onFormChange}
-            className="ml-2 h-9 rounded-md border border-slate-300 px-3 py-1"
+            className="ml-2 h-9 rounded-sm border border-slate-300 px-3 py-1"
           />
           <input
             name="bedSoreSite"
@@ -145,7 +145,7 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
             placeholder="Site"
             value={formData.bedSoreSite || ''}
             onChange={onFormChange}
-            className="ml-2 h-9 rounded-md border border-slate-300 px-3 py-1"
+            className="ml-2 h-9 rounded-sm border border-slate-300 px-3 py-1"
           />
         </div>
       </div>
@@ -188,13 +188,13 @@ export const DietaryHabitsStep: React.FC<DietaryHabitsStepProps> = ({
       <div className="flex items-center justify-between pt-6 border-t border-slate-200">
         <button
           onClick={onBack}
-          className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm border border-slate-300 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-none transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
         >
           Back
         </button>
         <button
           onClick={onNext}
-          className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-none transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
         >
           Next
         </button>

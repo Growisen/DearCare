@@ -156,7 +156,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2">
       <div className="bg-white w-full max-w-6xl max-h-[95vh] overflow-y-auto relative shadow-xl">
-        <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
+        <div className="sticky top-0 bg-white z-10 border-b border-slate-200">
           <div className="flex items-center justify-between p-4">
             <div>
               <h1 className="text-lg font-semibold text-gray-800">Nurse Assignment</h1>
@@ -169,7 +169,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                 )}
               </div>
               <button
-                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-sm hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
                 disabled={selectedNurses.length === 0}
                 onClick={handleAssignSelected}
               >
@@ -194,7 +194,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                     id="statusFilter"
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All</option>
                     <option value="assigned">Assigned</option>
@@ -209,7 +209,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                     id="admittedTypeFilter"
                     value={admittedTypeFilter} 
                     onChange={(e) => setAdmittedTypeFilter(e.target.value)}
-                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All</option>
                     <option value="Dearcare_Llp">Dearcare LLP</option>
@@ -223,7 +223,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                   </label>
                   <div
                     id="admittedTypeDisplay"
-                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 bg-gray-100"
+                    className="w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-gray-100"
                   >
                     {admittedTypeFilter === 'DearCare' && 'Dearcare LLP'}
                     {admittedTypeFilter === 'TataHomeNursing' && 'Tata HomeNursing'}
@@ -239,7 +239,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                     value={searchTerm} 
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Enter city, nurse name, etc." 
-                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-sm text-gray-800 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -248,8 +248,8 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                 <button 
                   onClick={clearFilters}
                   disabled={!statusFilter && !searchTerm /* && !admittedTypeFilter */}
-                  className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 
-                  transition-colors disabled:opacity-40 disabled:text-gray-400 disabled:border-gray-200
+                  className="px-3 py-2 border border-slate-200 text-gray-700 text-sm rounded-sm hover:bg-gray-50 
+                  transition-colors disabled:opacity-40 disabled:text-gray-400 disabled:border-slate-200
                   disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-gray-400 w-full sm:w-auto"
                 >
                   Clear
@@ -292,7 +292,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                       {nurse.assignments && nurse.assignments.length > 0 ? (
                         <div className="mt-2">
                           <div className="flex items-center mb-2">
-                            <span className="px-3 py-1 rounded border text-xs font-semibold bg-white text-black border-gray-300">
+                            <span className="px-3 py-1 rounded border text-xs font-semibold bg-white text-black border-slate-200">
                               ✓ Assigned
                             </span>
                             <span className="ml-2 text-xs text-gray-600 font-medium">
@@ -304,7 +304,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                             {nurse.assignments.map((assignment, index) => (
                               <div 
                                 key={`${nurse._id}-assignment-${index}`} 
-                                className="bg-gray-50 border border-gray-300 rounded p-2"
+                                className="bg-gray-50 border border-slate-200 rounded p-2"
                               >
                                 <div className="flex items-center mb-1">
                                   <span className="text-black mr-2 font-bold text-xs">•</span>
@@ -313,13 +313,13 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                                   </span>
                                   
                                   {assignment.clientType && (
-                                    <span className="ml-2 px-2 py-0.5 bg-white border border-gray-300 rounded text-xs font-medium text-black">
+                                    <span className="ml-2 px-2 py-0.5 bg-white border border-slate-200 rounded text-xs font-medium text-black">
                                       {assignment.clientType}
                                     </span>
                                   )}
                                   
                                   {assignment.shiftType && (
-                                    <span className="ml-1 px-2 py-0.5 bg-white border border-gray-300 rounded text-xs font-medium text-black">
+                                    <span className="ml-1 px-2 py-0.5 bg-white border border-slate-200 rounded text-xs font-medium text-black">
                                       {assignment.shiftType} shift
                                     </span>
                                   )}
@@ -357,7 +357,7 @@ const NurseListModal: React.FC<NurseListModalProps> = ({
                       ) : (
                         nurse.status !== 'leave' && (
                           <div className="mt-2">
-                            <div className="bg-gray-50 border border-gray-300 rounded p-2">
+                            <div className="bg-gray-50 border border-slate-200 rounded p-2">
                               <div className="flex items-center">
                                 <span className="text-gray-500 mr-2 font-bold text-xs">○</span>
                                 <span className="text-gray-600 text-xs font-medium">

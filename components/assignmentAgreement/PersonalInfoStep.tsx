@@ -67,14 +67,14 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
                 setSelectedClient(null);
               }}
               placeholder="Start typing to search..."
-              className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-transparent px-3 py-1 
-              text-base shadow-sm transition-all outline-none placeholder:text-slate-400 disabled:pointer-events-none 
+              className="h-9 w-full min-w-0 rounded-sm border border-slate-300 bg-transparent px-3 py-1 
+              text-base shadow-none transition-all outline-none placeholder:text-slate-400 disabled:pointer-events-none 
               disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] 
               focus-visible:ring-blue-500/20"
               disabled={!!selectedClient}
             />
             {searchName && !selectedClient && (
-              <div className="absolute z-10 bg-white border rounded-md mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
+              <div className="absolute z-10 bg-white border rounded-sm mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
                 {loading ? (
                   <div className="p-2 text-gray-500 text-sm">Loading...</div>
                 ) : clients.length === 0 ? (
@@ -158,7 +158,7 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
             name="type"
             value={formData.type || ""}
             onChange={onFormChange}
-            className="h-9 w-full rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm 
+            className="h-9 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none 
             outline-none md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           >
             <option value="">Select type</option>
@@ -180,7 +180,7 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
             value={formData.state || ""}
             onChange={onFormChange}
             placeholder="Enter state"
-            className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm 
+            className="h-9 w-full min-w-0 rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none 
             transition-all outline-none placeholder:text-slate-400 disabled:pointer-events-none disabled:cursor-not-allowed 
             disabled:opacity-50 md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
@@ -196,7 +196,7 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
             value={formData.district || ""}
             onChange={onFormChange}
             placeholder="Enter district"
-            className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm transition-all 
+            className="h-9 w-full min-w-0 rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none transition-all 
             outline-none placeholder:text-slate-400 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
              focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
@@ -215,7 +215,7 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
             value={formData.city || ""}
             onChange={onFormChange}
             placeholder="Enter city"
-            className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm
+            className="h-9 w-full min-w-0 rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none
             transition-all outline-none placeholder:text-slate-400 disabled:pointer-events-none disabled:cursor-not-allowed 
             disabled:opacity-50 md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
@@ -235,8 +235,8 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
             value={formData.clientRequirement || ""}
             onChange={onFormChange}
             placeholder="Describe client requirements"
-            className="w-full min-w-0 rounded-md border border-slate-300 bg-transparent px-3 py-2 text-base 
-            shadow-sm outline-none md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
+            className="w-full min-w-0 rounded-sm border border-slate-300 bg-transparent px-3 py-2 text-base 
+            shadow-none outline-none md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
       </div>
@@ -253,8 +253,8 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
             value={formData.patientDiagnosis || ""}
             onChange={onFormChange}
             placeholder="Describe patient diagnosis"
-            className="w-full min-w-0 rounded-md border border-slate-300 bg-transparent px-3 py-2 
-            text-base shadow-sm outline-none md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
+            className="w-full min-w-0 rounded-sm border border-slate-300 bg-transparent px-3 py-2 
+            text-base shadow-none outline-none md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
       </div>
@@ -262,8 +262,8 @@ export const ClientInfoStep: React.FC<FormStepProps> = ({
       <div className="flex items-center justify-end pt-6 border-t border-slate-200">
         <button
           onClick={onNext}
-          className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white
-          shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm bg-slate-900 px-4 py-2 text-sm font-medium text-white
+          shadow-none transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
         >
           Next
         </button>

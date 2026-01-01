@@ -91,7 +91,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-5xl max-h-[85vh] relative flex flex-col"
+        className="bg-white rounded-sm shadow-xl p-6 w-full max-w-5xl max-h-[85vh] relative flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 pb-2 border-b">
@@ -123,25 +123,25 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
         {/* Error message if any */}
         {error && (
           <div className="absolute bottom-16 left-0 right-0 px-4">
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-sm">
               {error}
             </div>
           </div>
         )}
         
         {/* Fixed buttons at bottom of modal */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 flex justify-end gap-3 shadow-md">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-end gap-3 shadow-md">
           <button 
             onClick={handleCancelWithState}
             disabled={isCanceling || isSaving}
-            className={`px-4 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium ${(isCanceling || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-4 py-2 text-gray-600 border border-slate-200 rounded-sm hover:bg-gray-50 transition-colors duration-200 text-sm font-medium ${(isCanceling || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isCanceling ? 'Canceling...' : 'Cancel'}
           </button>
           <button 
             onClick={triggerSave}
             disabled={isSaving || isCanceling}
-            className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium ${(isSaving || isCanceling) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors duration-200 text-sm font-medium ${(isSaving || isCanceling) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isSaving ? 'Saving...' : 'Save Changes'}
           </button>

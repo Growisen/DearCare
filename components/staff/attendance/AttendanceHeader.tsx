@@ -21,7 +21,6 @@ export function AttendanceHeader({
   selectedCategory
 }: AttendanceHeaderProps) {
 
-  // Get display name for category (database enum to display format)
   const getCategoryDisplay = (): string => {
     if (!selectedCategory || selectedCategory === "") return "All Organizations";
     if (selectedCategory === "Dearcare_Llp") return "DearCare LLP";
@@ -30,8 +29,8 @@ export function AttendanceHeader({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between p-4 border-b border-gray-200">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between p-4 border-b border-slate-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Staff Attendance</h1>
           <p className="text-xs text-gray-500 mt-0.5">Track and manage nursing staff attendance records</p>
@@ -40,7 +39,8 @@ export function AttendanceHeader({
           <button 
             onClick={onExport}
             disabled={isExporting}
-            className="px-3.5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 text-sm"
+            className="px-3.5 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600 transition-colors
+             disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 text-sm"
           >
             {isExporting ? (
               <span className="flex items-center justify-center">
@@ -68,7 +68,7 @@ export function AttendanceHeader({
               type="date"
               value={selectedDate}
               onChange={handleDateChange}
-              className="pl-10 pr-4 py-2 bg-white text-gray-800 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 w-full"
+              className="pl-10 pr-4 py-2 bg-white text-gray-800 border border-slate-200 rounded-sm focus:outline-none w-full"
             />
           </div>
           
@@ -81,7 +81,8 @@ export function AttendanceHeader({
               placeholder="start typing to search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full bg-white text-sm text-gray-800 placeholder:text-gray-400 border-gray-200 h-10 focus-visible:ring-blue-400 focus-visible:ring-offset-2 shadow-sm rounded-lg border px-4 py-2"
+              className="pl-10 w-full bg-white text-sm text-gray-800 placeholder:text-gray-400 border border-slate-200 h-10
+              shadow-none rounded-sm border px-4 py-2 focus:outline-none"
             />
           </div>
         </div>
@@ -90,7 +91,7 @@ export function AttendanceHeader({
         <div className="mt-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
-            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
               {getCategoryDisplay()}
             </div>
           </div>

@@ -43,7 +43,7 @@ export default function StaffAttendancePage() {
         selectedCategory={selectedCategory}
       />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
         {loading ? (
           <LoadingState message="Loading attendance data..." />
         ) : error ? (

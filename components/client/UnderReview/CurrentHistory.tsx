@@ -22,7 +22,7 @@ interface CurrentDetailsProps {
 
 export default function CurrentDetails({ formData, handleInputChange, handleCustomLabChange, handleAddCustomLab, handleRemoveCustomLab }: CurrentDetailsProps) {
   return (
-    <div className="bg-white border border-gray-200 p-2 sm:p-4 rounded-lg w-full max-w-7xl mx-auto">
+    <div className="bg-white border border-slate-200 p-2 sm:p-4 rounded-sm w-full max-w-7xl mx-auto">
       <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-4">Current Details & Lab Investigations</h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         <div className="col-span-1 lg:col-span-2">
@@ -104,7 +104,7 @@ export default function CurrentDetails({ formData, handleInputChange, handleCust
             <button
               type="button"
               onClick={handleAddCustomLab}
-              className="w-full sm:w-auto px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm flex items-center justify-center"
+              className="w-full sm:w-auto px-3 py-1 bg-blue-100 text-blue-700 rounded-sm hover:bg-blue-200 transition-colors text-sm flex items-center justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -116,7 +116,7 @@ export default function CurrentDetails({ formData, handleInputChange, handleCust
           {formData.customLabTests && formData.customLabTests.length > 0 ? (
             <div className="space-y-3 sm:space-y-4 mb-4">
               {formData.customLabTests.map((test) => (
-                <div key={test.id} className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 p-2 sm:p-4 border border-gray-200 rounded-md bg-gray-50">
+                <div key={test.id} className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 p-2 sm:p-4 border border-slate-200 rounded-sm bg-gray-50">
                   <div className="w-full sm:flex-1">
                     <label htmlFor={`test-name-${test.id}`} className="block text-xs font-medium text-gray-700 mb-1">
                       Test Name
@@ -125,7 +125,7 @@ export default function CurrentDetails({ formData, handleInputChange, handleCust
                       id={`test-name-${test.id}`}
                       type="text"
                       placeholder="Test name"
-                      className="w-full p-2 border border-gray-300 rounded-md text-sm text-gray-800"
+                      className="w-full p-2 border border-slate-200 rounded-sm text-sm text-gray-800"
                       value={test.name}
                       onChange={(e) => handleCustomLabChange && handleCustomLabChange(test.id, 'name', e.target.value)}
                     />
@@ -138,7 +138,7 @@ export default function CurrentDetails({ formData, handleInputChange, handleCust
                       id={`test-value-${test.id}`}
                       type="text"
                       placeholder="Test value"
-                      className="w-full p-2 border border-gray-300 rounded-md text-sm text-gray-800"
+                      className="w-full p-2 border border-slate-200 rounded-sm text-sm text-gray-800"
                       value={test.value}
                       onChange={(e) => handleCustomLabChange && handleCustomLabChange(test.id, 'value', e.target.value)}
                     />
@@ -146,7 +146,7 @@ export default function CurrentDetails({ formData, handleInputChange, handleCust
                   <button
                     type="button"
                     onClick={() => handleRemoveCustomLab && handleRemoveCustomLab(test.id)}
-                    className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50 mt-2 sm:mt-6"
+                    className="text-red-500 hover:text-red-700 p-1 rounded-sm hover:bg-red-50 mt-2 sm:mt-6"
                     aria-label="Remove test"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

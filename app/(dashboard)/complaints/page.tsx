@@ -63,7 +63,7 @@ export default function ComplaintsPage() {
         handleResetFilters={handleResetFilters}
       />
       
-      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
         {loading ? (
           <LoadingState message="Loading complaints..." description="Please wait while we fetch the complaints data" />
         ) : (

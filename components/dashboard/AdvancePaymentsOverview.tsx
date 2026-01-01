@@ -83,8 +83,10 @@ export default function AdvancePaymentsOverview({
   const displayTotalPages = loading ? cachedStats.current.totalPages : (totalPages || 1);
 
   return (
-    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg mt-6">
-      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
+    <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-sm">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center
+       sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2"
+      >
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <CreditCard className="w-5 h-5 text-slate-700 mr-2" />
           <h3 className="text-sm sm:text-md font-medium text-slate-800">
@@ -97,7 +99,7 @@ export default function AdvancePaymentsOverview({
               type="text"
               className="pl-8 pr-3 py-1.5 sm:py-2 text-xs text-gray-800 sm:text-sm border border-slate-300
                rounded-sm focus:outline-none"
-              placeholder="Search by nurse or info..."
+              placeholder="Search advance payments..."
               value={searchTerm ?? ""}
               onChange={e => setSearchTermAction && setSearchTermAction(e.target.value)}
             />
@@ -105,7 +107,7 @@ export default function AdvancePaymentsOverview({
           </div>
           <button
             className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm 
-            font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-sm"
+            font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-none"
             onClick={onExportAction}
             disabled={exporting}
           >
@@ -179,7 +181,7 @@ export default function AdvancePaymentsOverview({
             ) : payments.length === 0 ? (
               <tr>
                 <td colSpan={10} className="p-8 text-center">
-                  <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
+                  <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-sm">
                     <p className="text-lg font-medium mb-1">No payments found</p>
                     <p className="text-sm">
                       No advance payments match your search criteria.
@@ -232,7 +234,8 @@ export default function AdvancePaymentsOverview({
                       <div className="flex flex-col gap-1">
                         <span className="flex text-slate-500">{payment.info || "-"}</span>
                         <span
-                          className={`inline-flex max-w-fit items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${payment.approved
+                          className={`inline-flex max-w-fit items-center px-2.5 py-0.5 rounded-full text-[11px]
+                            font-medium ${payment.approved
                             ? "bg-green-100 text-green-800 border border-green-200"
                             : "bg-yellow-100 text-yellow-800 border border-yellow-200"
                           }`}

@@ -165,8 +165,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded-md">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-md">
+      <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded-sm">
+        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-sm">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Staff Details</h2>
           </div>
@@ -175,14 +175,14 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
               <>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-3 py-1 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                  className="px-3 py-1 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-sm transition-colors"
                 >
                   <Edit size={16} />
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={() => setIsDeleting(true)}
-                  className="px-3 py-1 flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                  className="px-3 py-1 flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-sm transition-colors"
                 >
                   <Trash2 size={16} />
                   <span>Delete</span>
@@ -193,7 +193,7 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                 <button
                   onClick={handleUpdateStaff}
                   disabled={isSubmitting}
-                  className="px-3 py-1 flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition-colors disabled:opacity-50"
+                  className="px-3 py-1 flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 rounded-sm transition-colors disabled:opacity-50"
                 >
                   <Save size={16} />
                   <span>{isSubmitting ? 'Saving...' : 'Save'}</span>
@@ -203,7 +203,7 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                     setIsEditing(false);
                     setUpdatedStaff(staff);
                   }}
-                  className="px-3 py-1 flex items-center gap-1 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg transition-colors"
+                  className="px-3 py-1 flex items-center gap-1 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-sm transition-colors"
                 >
                   <X size={16} />
                   <span>Cancel</span>
@@ -212,7 +212,7 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
             )}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-sm transition-colors"
             >
               <XIcon className="h-5 w-5 text-gray-500" />
             </button>
@@ -220,14 +220,14 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
         </div>
         
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 mx-6 mt-4 rounded-md">
+          <div className="bg-red-50 text-red-600 p-3 mx-6 mt-4 rounded-sm">
             {error}
           </div>
         )}
         
         <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 100px)' }}>
           <div className="space-y-6">
-            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 bg-white rounded-sm shadow-none border border-slate-200">
               <div className="mb-4">
                 {isEditing ? (
                   <div className="mb-4">
@@ -240,8 +240,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                       value={nameValidation.name}
                       onChange={handleInputChange}
                       className={`w-full p-2 border ${
-                        nameValidation.nameError ? "border-red-500" : "border-gray-300"
-                      } rounded-md text-gray-800 font-medium`}
+                        nameValidation.nameError ? "border-red-500" : "border-slate-200"
+                      } rounded-sm text-gray-800 font-medium`}
                     />
                     {nameValidation.nameError && (
                       <p className="mt-1 text-sm text-red-600">{nameValidation.nameError}</p>
@@ -267,8 +267,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                           value={role}
                           onChange={handleInputChange}
                           className={`w-full p-1 text-sm border ${
-                            roleError ? "border-red-500" : "border-gray-300"
-                          } rounded-md text-gray-800 font-medium`}
+                            roleError ? "border-red-500" : "border-slate-200"
+                          } rounded-sm text-gray-800 font-medium`}
                         />
                         {roleError && (
                           <p className="mt-1 text-sm text-red-600">{roleError}</p>
@@ -320,8 +320,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                           value={emailValidation.email}
                           onChange={handleInputChange}
                           className={`w-full p-1 text-sm border ${
-                            emailValidation.emailError ? "border-red-500" : "border-gray-300"
-                          } rounded-md text-gray-800 font-medium`}
+                            emailValidation.emailError ? "border-red-500" : "border-slate-200"
+                          } rounded-sm text-gray-800 font-medium`}
                         />
                         {emailValidation.emailError && (
                           <p className="mt-1 text-sm text-red-600">{emailValidation.emailError}</p>
@@ -347,8 +347,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                           value={phoneValidation.phone}
                           onChange={handleInputChange}
                           className={`w-full p-1 text-sm border ${
-                            phoneValidation.phoneError ? "border-red-500" : "border-gray-300"
-                          } rounded-md text-gray-800 font-medium`}
+                            phoneValidation.phoneError ? "border-red-500" : "border-slate-200"
+                          } rounded-sm text-gray-800 font-medium`}
                           maxLength={10}
                         />
                         {phoneValidation.phoneError && (
@@ -375,8 +375,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                           value={joinDate}
                           onChange={handleInputChange}
                           className={`w-full p-1 text-sm border ${
-                            joinDateError ? "border-red-500" : "border-gray-300"
-                          } rounded-md text-gray-800 font-medium`}
+                            joinDateError ? "border-red-500" : "border-slate-200"
+                          } rounded-sm text-gray-800 font-medium`}
                         />
                         {joinDateError && (
                           <p className="mt-1 text-sm text-red-600">{joinDateError}</p>
@@ -390,13 +390,13 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
               </div>
             </div>
             
-            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 bg-white rounded-sm shadow-none border border-slate-200">
               <h4 className="text-sm font-semibold text-gray-800 mb-4">Address Information</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {isEditing ? (
                   <>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-sm">
                       <label className="block text-xs font-medium text-gray-500 mb-1">Address Line 1</label>
                       <input
                         type="text"
@@ -404,24 +404,24 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                         value={addressValidation.line1}
                         onChange={handleInputChange}
                         className={`w-full p-1 text-sm border ${
-                          addressValidation.line1Error ? "border-red-500" : "border-gray-300"
-                        } rounded-md text-gray-800 font-medium`}
+                          addressValidation.line1Error ? "border-red-500" : "border-slate-200"
+                        } rounded-sm text-gray-800 font-medium`}
                       />
                       {addressValidation.line1Error && (
                         <p className="mt-1 text-sm text-red-600">{addressValidation.line1Error}</p>
                       )}
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-sm">
                       <label className="block text-xs font-medium text-gray-500 mb-1">Address Line 2</label>
                       <input
                         type="text"
                         name="address.line2"
                         value={addressValidation.line2}
                         onChange={handleInputChange}
-                        className="w-full p-1 text-sm border border-gray-300 rounded-md text-gray-800 font-medium"
+                        className="w-full p-1 text-sm border border-slate-200 rounded-sm text-gray-800 font-medium"
                       />
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-sm">
                       <label className="block text-xs font-medium text-gray-500 mb-1">City</label>
                       <input
                         type="text"
@@ -429,14 +429,14 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                         value={addressValidation.city}
                         onChange={handleInputChange}
                         className={`w-full p-1 text-sm border ${
-                          addressValidation.cityError ? "border-red-500" : "border-gray-300"
-                        } rounded-md text-gray-800 font-medium`}
+                          addressValidation.cityError ? "border-red-500" : "border-slate-200"
+                        } rounded-sm text-gray-800 font-medium`}
                       />
                       {addressValidation.cityError && (
                         <p className="mt-1 text-sm text-red-600">{addressValidation.cityError}</p>
                       )}
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-sm">
                       <label className="block text-xs font-medium text-gray-500 mb-1">District</label>
                       <input
                         type="text"
@@ -444,14 +444,14 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                         value={addressValidation.district}
                         onChange={handleInputChange}
                         className={`w-full p-1 text-sm border ${
-                          addressValidation.districtError ? "border-red-500" : "border-gray-300"
-                        } rounded-md text-gray-800 font-medium`}
+                          addressValidation.districtError ? "border-red-500" : "border-slate-200"
+                        } rounded-sm text-gray-800 font-medium`}
                       />
                       {addressValidation.districtError && (
                         <p className="mt-1 text-sm text-red-600">{addressValidation.districtError}</p>
                       )}
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-sm">
                       <label className="block text-xs font-medium text-gray-500 mb-1">State</label>
                       <input
                         type="text"
@@ -459,14 +459,14 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                         value={addressValidation.state}
                         onChange={handleInputChange}
                         className={`w-full p-1 text-sm border ${
-                          addressValidation.stateError ? "border-red-500" : "border-gray-300"
-                        } rounded-md text-gray-800 font-medium`}
+                          addressValidation.stateError ? "border-red-500" : "border-slate-200"
+                        } rounded-sm text-gray-800 font-medium`}
                       />
                       {addressValidation.stateError && (
                         <p className="mt-1 text-sm text-red-600">{addressValidation.stateError}</p>
                       )}
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-sm">
                       <label className="block text-xs font-medium text-gray-500 mb-1">PIN Code</label>
                       <input
                         type="text"
@@ -474,8 +474,8 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
                         value={addressValidation.pincode}
                         onChange={handleInputChange}
                         className={`w-full p-1 text-sm border ${
-                          addressValidation.pincodeError ? "border-red-500" : "border-gray-300"
-                        } rounded-md text-gray-800 font-medium`}
+                          addressValidation.pincodeError ? "border-red-500" : "border-slate-200"
+                        } rounded-sm text-gray-800 font-medium`}
                         maxLength={6}
                       />
                       {addressValidation.pincodeError && (
@@ -500,7 +500,7 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
 
       {isDeleting && (
         <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-sm p-6 max-w-md w-full">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Deletion</h3>
             <p className="text-gray-700 mb-4">
               Are you sure you want to delete {formatName(staff.name)}? This action cannot be undone.
@@ -508,14 +508,14 @@ export function StaffDetailsOverlay({ staff, onClose, onUpdate }: StaffDetailsOv
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsDeleting(false)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteStaff}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-sm transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Deleting...' : 'Delete Staff'}
               </button>
@@ -539,7 +539,7 @@ function DetailItem({
     : value.toString();
   
   return (
-    <div className="bg-gray-50 p-3 rounded-md h-full">
+    <div className="bg-gray-50 p-3 rounded-sm h-full">
       <p className="text-xs font-medium text-gray-500">{label}</p>
       <p className={`text-sm ${value === null || value === undefined || value === '' ? 'text-gray-500 italic' : 'text-gray-800'} break-words mt-1`}>
         {displayValue}

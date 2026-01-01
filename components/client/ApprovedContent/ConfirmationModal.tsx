@@ -37,14 +37,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex text-center items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md">
+      <div className="bg-white rounded-sm p-6 w-full max-w-md">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
         <div className="text-gray-600 mb-6">{message}</div>
         <div className="flex justify-end space-x-3">
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className={`px-4 py-2 text-gray-700 border border-gray-300 rounded-sm ${
+            className={`px-4 py-2 text-gray-700 border border-slate-200 rounded-sm ${
               isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
             }`}
           >
