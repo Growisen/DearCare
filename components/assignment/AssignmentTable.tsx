@@ -322,8 +322,6 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
     setSelectedAssignment(assignment);
   };
 
-  console.log('Rendering AssignmentTable with assignments:', assignments);
-
   return (
     <>
       <div className="bg-gray-200 rounded-sm border border-slate-200 overflow-hidden shadow-none">

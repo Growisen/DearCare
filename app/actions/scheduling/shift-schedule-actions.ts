@@ -547,7 +547,7 @@ export interface NurseAssignmentData {
 export async function getAllNurseAssignments(
   page: number = 1, 
   pageSize: number = 10,
-  filterStatus: 'all' | 'active' | 'upcoming' | 'completed' = 'all',
+  filterStatus: 'all' | 'active' | 'upcoming' | 'completed' | 'ending_today' | 'starting_today' = 'all',
   searchQuery: string = '',
   dateFilter: string = '',
   categoryFilter?: string,
@@ -578,6 +578,12 @@ export async function getAllNurseAssignments(
           break;
         case 'completed':
           query = query.lt('end_date', today);
+          break;
+        case 'ending_today':
+          query = query.eq('end_date', today);
+          break;
+        case 'starting_today':
+          query = query.eq('start_date', today);
           break;
       }
     }
@@ -661,7 +667,6 @@ export async function getAllNurseAssignments(
     };
   }
 }
-
 export async function updateNurseAssignment(
   assignmentId: number,
   updates: {

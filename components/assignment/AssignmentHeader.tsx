@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input"
 type AssignmentHeaderProps = {
   onExport: () => void
   isExporting: boolean
-  selectedStatus: 'all' | 'active' | 'completed' | 'upcoming'
+  selectedStatus: 'all' | 'active' | 'completed' | 'upcoming' | 'ending_today' | 'starting_today'
   searchInput: string
   setSearchInput: (value: string) => void
   dateFilter: string
-  handleStatusChange: (status: 'all' | 'active' | 'completed' | 'upcoming') => void
+  handleStatusChange: (status: 'all' | 'active' | 'completed' | 'upcoming' | 'ending_today' | 'starting_today') => void
   handleSearch: (e: React.FormEvent) => void
   handleDateFilterChange: (date: string) => void
   handleResetFilters: () => void
@@ -31,7 +31,7 @@ export function AssignmentHeader({
   selectedCategory
 }: AssignmentHeaderProps) {
   
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   const setTodayDate = () => {
     const today = new Date();
@@ -159,15 +159,18 @@ export function AssignmentHeader({
             <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-8">
               <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
               <div className="flex gap-1.5 items-center flex-wrap">
-                {['all', 'active', 'completed', 'upcoming'].map((status) => (
+                {['all', 'active', 'completed', 'upcoming', 'starting_today', 'ending_today'].map((status) => (
                   <button
                     key={status}
-                    onClick={() => handleStatusChange(status as 'all' | 'active' | 'completed' | 'upcoming')}
+                    onClick={() => handleStatusChange(status as 'all' | 'active' | 'completed' | 'upcoming' | 'ending_today' | 'starting_today')}
                     className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors ${
                       selectedStatus === status ? buttonStyles.selected : buttonStyles.unselected
                     }`}
                   >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, c => c.toUpperCase())
+                    }
                   </button>
                 ))}
                 <button
