@@ -118,7 +118,7 @@ export default function DashboardPage() {
       
       <AdvancePaymentsOverview 
         loading={advancePayments.isLoading}
-        exporting={isExporting}
+        isExporting={isExporting}
         payments={Array.isArray(advanceData) ? advanceData : []}
         totalRecords={advanceMeta?.total}
         page={pagination.page}
