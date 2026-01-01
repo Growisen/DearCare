@@ -38,7 +38,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
     {type === 'textarea' ? (
       <textarea
         id={id}
-        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -49,7 +49,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
       <input
         type={type}
         id={id}
-        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -290,7 +290,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                 </div>
 
                 <button 
-                  className="w-full px-6 py-3 mb-4 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-6 py-3 mb-4 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none"
                 >
                   <Link 
                     href={`/client-profile/${clientId}`} 
@@ -327,7 +327,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
                     <button 
                       onClick={() => setShowForm(true)}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 disabled:bg-blue-400"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-sm hover:bg-blue-700 focus:outline-none flex-1 disabled:bg-blue-400"
                       disabled={isSendingForm || formStatus.isChecking}
                     >
                       Fill Form Manually
@@ -335,7 +335,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                     
                     <button 
                       onClick={handleSendFormToUser}
-                      className="px-6 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex-1 disabled:bg-green-400"
+                      className="px-6 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none flex-1 disabled:bg-green-400"
                       disabled={isSendingForm || formStatus.isChecking}
                     >
                       {isSendingForm ? 'Sending...' : 'Send Form to User'}
@@ -345,7 +345,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   {/* New sharable link button */}
                   <button 
                     onClick={generateSharableLink}
-                    className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center"
+                    className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none flex items-center justify-center"
                     disabled={isSendingForm || formStatus.isChecking}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -356,7 +356,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   
                   <button 
                     onClick={checkFormStatus}
-                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
+                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300 focus:outline-none disabled:opacity-50"
                     disabled={formStatus.isChecking}
                   >
                     {formStatus.isChecking ? 'Checking whether form is filled...' : 'Not filled, check if form is filled'}

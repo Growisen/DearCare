@@ -25,7 +25,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
             id="currentStatus"
             value={formData.currentStatus}
             onChange={handleInputChange}
-            className="w-full border border-slate-200 rounded-sm py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            className="w-full border border-slate-200 rounded-sm py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none text-sm sm:text-base"
           >
             <option value="">Select status</option>
             <option value="HOSPITALIZED">Hospitalized</option>
@@ -41,7 +41,7 @@ export default function MedicalStatus({ formData, handleInputChange }: MedicalSt
             id="chronicIllness"
             value={formData.chronicIllness}
             onChange={handleInputChange}
-            className="w-full border border-slate-200 rounded-sm py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            className="w-full border border-slate-200 rounded-sm py-2.5 sm:py-2 px-3 text-gray-700 focus:outline-none text-sm sm:text-base"
           >
             <option value="">Select option</option>
             <option value="YES">Yes</option>

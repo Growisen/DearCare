@@ -18,7 +18,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
     {type === 'textarea' ? (
       <textarea
         id={id}
-        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -29,7 +29,7 @@ export const InputField = ({ label, type = 'text', placeholder, id, value, onCha
       <input
         type={type}
         id={id}
-        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
         placeholder={placeholder}
         value={value}
         onChange={onChange}

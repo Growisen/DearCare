@@ -16,24 +16,20 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
   handleCancel,
   selectedAssessment
 }) => {
-  // Create a ref for the form with type assertion
   const formRef = useRef<HTMLFormElement>(null) as React.RefObject<HTMLFormElement>;
   const [isSaving, setIsSaving] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-  
-  // Reset states when modal opens
+
   useEffect(() => {
     if (isEditing) {
-      // Reset states when the modal reopens
       setIsSaving(false);
       setIsCanceling(false);
       setError(null);
     }
   }, [isEditing]);
   
-  // Prevent body scrolling when modal is open
   useEffect(() => {
     if (isEditing) {
       document.body.style.overflow = 'hidden';
@@ -43,7 +39,6 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
     };
   }, [isEditing]);
 
-  // Handle ESC key press
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !isSaving) {
@@ -65,7 +60,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
   }, []);
   
   const handleCancelWithState = useCallback(() => {
-    if (isSaving) return; // Don't allow canceling while saving
+    if (isSaving) return;
     setIsCanceling(true);
     handleCancel();
   }, [handleCancel, isSaving]);
@@ -75,7 +70,6 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
     handleSave();
   }, [handleSave]);
   
-  // Handle outside click to close modal
   const handleOutsideClick = useCallback((e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node) && !isSaving) {
       handleCancelWithState();
@@ -107,8 +101,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
             </svg>
           </button>
         </div>
-        
-        {/* Scrollable content area with padding at bottom to prevent button overlap */}
+
         <div className="overflow-y-auto flex-grow pb-24 pr-2">
           <PatientAssessment 
             clientId={clientId} 
@@ -120,7 +113,6 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
           />
         </div>
         
-        {/* Error message if any */}
         {error && (
           <div className="absolute bottom-16 left-0 right-0 px-4">
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-sm">
@@ -129,7 +121,6 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
           </div>
         )}
         
-        {/* Fixed buttons at bottom of modal */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-end gap-3 shadow-md">
           <button 
             onClick={handleCancelWithState}

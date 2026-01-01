@@ -29,7 +29,7 @@ export default function PersonalInfo({ formData, handleInputChange }: PersonalIn
             id="guardianOccupation"
             value={formData.guardianOccupation}
             onChange={handleInputChange}
-            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
           >
             <option value="">Select occupation</option>
             <option value="GOVT">Government Service</option>
@@ -48,7 +48,7 @@ export default function PersonalInfo({ formData, handleInputChange }: PersonalIn
             id="maritalStatus"
             value={formData.maritalStatus}
             onChange={handleInputChange}
-            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
           >
             <option value="">Select status</option>
             <option value="SINGLE">Single</option>
