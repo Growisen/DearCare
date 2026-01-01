@@ -1,6 +1,7 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth'
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
+import { jsonToCSV } from '@/utils/jsonToCSV';
 
 type Deduction = {
   date: string;
@@ -14,7 +15,7 @@ type Deduction = {
 };
 
 export async function fetchAdvancePayments(nurseId: number) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase } = await getAuthenticatedClient()
   const { data, error } = await supabase
     .from('advance_payments')
     .select(`
@@ -94,7 +95,7 @@ export async function insertAdvancePayment(payment: {
   receipt_file?: File | null
   info?: string
 }) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase } = await getAuthenticatedClient()
 
   const uploadReceipt = async (id: number, file: File) => {
     const timestamp = new Date().getTime()
@@ -239,7 +240,7 @@ export async function insertAdvancePayment(payment: {
 }
 
 export async function deleteAdvancePayment(paymentId: string) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase } = await getAuthenticatedClient()
 
   const { data: payment, error: fetchError } = await supabase
     .from('advance_payments')
@@ -281,7 +282,7 @@ export async function updateAdvancePayment(paymentId: number, updates: {
   remaining_amount?: number
   deductions?: object[]
 }) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase } = await getAuthenticatedClient()
   const { data, error } = await supabase
     .from('advance_payments')
     .update(updates)
@@ -293,7 +294,7 @@ export async function updateAdvancePayment(paymentId: number, updates: {
 }
 
 export async function addManualInstallment(paymentId: string, installmentAmount: number, installmentDate: string, note: string) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase } = await getAuthenticatedClient()
 
   const { data: paymentData, error: fetchError } = await supabase
     .from('advance_payments')
@@ -336,7 +337,7 @@ export async function addManualInstallment(paymentId: string, installmentAmount:
 
 
 export async function approveAdvancePayment(paymentId: string) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase } = await getAuthenticatedClient()
   const { data, error } = await supabase
     .from('advance_payments')
     .update({ approved: true })
@@ -361,7 +362,7 @@ export async function deleteDeductionFromPayment(input: {
     info?: string | null;
   }
 }) {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient()
 
   try {
     const { data: payment, error: fetchError } = await supabase
@@ -432,4 +433,96 @@ export async function deleteDeductionFromPayment(input: {
   } catch {
     return { success: false, data: null };
   }
+}
+
+export async function fetchAdvancePaymentRecords({
+  startDate,
+  page = 1,
+  pageSize = 5,
+  searchTerm = '',
+  exportMode = false,
+}: {
+  startDate?: string | Date | null;
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  exportMode?: boolean;
+}) {
+  const { supabase, nursesOrg } = await getAuthenticatedClient();
+
+  const dateFilter = startDate ? new Date(startDate).toISOString().split('T')[0] : null;
+
+  const applyFilters = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryBuilder: any
+  ) => {
+    let q = queryBuilder.eq('nurse_admitted_type', nursesOrg);
+
+    if (dateFilter) {
+      q = q.eq('date', dateFilter);
+    }
+
+    if (searchTerm) {
+      q = q.or(`info.ilike.%${searchTerm}%,nurse_name.ilike.%${searchTerm}%`);
+    }
+
+    return q;
+  };
+
+  let from: number, to: number;
+  if (exportMode) {
+    from = 0;
+    to = 999;
+  } else {
+    from = (page - 1) * pageSize;
+    to = from + pageSize - 1;
+  }
+
+  const listQuery = applyFilters(
+    supabase
+      .from('advance_payments_view')
+      .select('*', { count: 'exact' })
+      .order('date', { ascending: false })
+      .range(from, to)
+  );
+
+  const totalsRpc = supabase.rpc('get_advance_payment_totals', {
+    p_org: nursesOrg,
+    p_date: dateFilter,
+    p_search: searchTerm || null,
+  });
+
+  const [listResult, totalsResult] = await Promise.all([listQuery, totalsRpc]);
+
+  if (listResult.error || totalsResult.error) {
+    return {
+      status: 'error',
+      data: [],
+      meta: {
+        total: 0,
+        page,
+        pageSize,
+        totalPages: 0,
+        totalAmountGiven: 0,
+        totalAmountReturned: 0,
+        error: listResult.error?.message || totalsResult.error?.message,
+      },
+    };
+  }
+
+  const total = listResult.count || 0;
+  const stats = totalsResult.data?.[0] || { total_given: 0, total_returned: 0 };
+
+  return {
+    status: 'success',
+    data: exportMode ? jsonToCSV(listResult.data || []) : listResult.data || [],
+    meta: {
+      total,
+      page,
+      pageSize,
+      totalPages: exportMode ? 1 : Math.ceil(total / pageSize),
+      totalAmountGiven: Number(stats.total_given),
+      totalAmountReturned: Number(stats.total_returned),
+    },
+  };
 }
