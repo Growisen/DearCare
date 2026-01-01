@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useDashboardData } from "@/hooks/useDashboardData"
+import { usePaymentsData } from "@/hooks/useClientPaymentsData"
+import { useAdvancePaymentsData } from "@/hooks/useAdvancePaymentsData"
 import Loader from '@/components/Loader'
 import DashboardHeader from "@/components/dashboard/DashboardHeader"
 import Stats from "@/components/dashboard/Stats"
@@ -35,14 +37,14 @@ export default function DashboardPage() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  const { 
-    dashboard, 
-    paymentOverview, 
-    advancePayments, 
-    exportAdvancePaymentsCSV 
-  } = useDashboardData({ 
-    selectedDate, 
-    page: pagination.page, 
+  const { dashboard } = useDashboardData(selectedDate)
+  const { paymentOverview } = usePaymentsData(selectedDate)
+  const {
+    advancePayments,
+    exportAdvancePaymentsCSV,
+  } = useAdvancePaymentsData({
+    selectedDate,
+    page: pagination.page,
     pageSize: pagination.pageSize,
     advancePaymentsSearchTerm: debouncedSearch,
   })
