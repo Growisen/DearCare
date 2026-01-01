@@ -58,10 +58,51 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
 
   if (loading) {
     return (
-      <Card className="p-6 bg-white border border-slate-200 rounded-sm
-       mt-6 flex items-center justify-center min-h-[300px]"
-      >
-        <Loader message="Loading payments..." size="large" color="primary" centered />
+      <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-sm">
+        <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center 
+          sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2"
+        >
+          <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
+            <CreditCard className="w-5 h-5 text-slate-700 mr-2" />
+            <h3 className="text-sm sm:text-md font-medium text-slate-800">Clients Payments Overview</h3>
+          </div>
+        </div>
+        <div className="mb-4 flex gap-6">
+          <div className="text-sm text-slate-700">
+            <span className="font-semibold">Total Payments:</span> <span className="inline-block h-4 w-10 bg-slate-200 rounded animate-pulse" />
+          </div>
+          <div className="text-sm text-slate-700">
+            <span className="font-semibold">Total Amount:</span> <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse" />
+          </div>
+          <div className="text-sm text-slate-700">
+            <span className="font-semibold">Total Commission:</span> <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="hidden sm:table w-full">
+            <thead>
+              <tr className="text-left border-b border-slate-200">
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Client Name</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Group</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Amount</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Mode</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Total Commission</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <tr key={idx} className="border-b border-slate-100">
+                  {Array.from({ length: 6 }).map((_, colIdx) => (
+                    <td key={colIdx} className="py-3 px-4">
+                      <div className="h-4 bg-slate-200 rounded animate-pulse w-full"></div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
     )
   }

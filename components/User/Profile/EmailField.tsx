@@ -30,7 +30,9 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
   };
 
   return (
-    <div className="p-3 border border-slate-200 hover:border-slate-200 rounded-sm bg-white shadow-none transition-all duration-200">
+    <div className="p-3 border border-slate-200 hover:border-slate-200 rounded-sm bg-white
+     shadow-none transition-all duration-200"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="bg-gray-100 p-2 rounded-sm">
@@ -57,7 +59,7 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border border-slate-200 rounded-sm px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 text-gray-800"
+            className="border border-slate-200 rounded-sm px-3 py-2 w-full focus:outline-none text-gray-800"
             autoFocus
             disabled={isDisabled}
           />
@@ -67,7 +69,8 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={handleSave}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-sm shadow-none transition-colors flex items-center gap-1 text-sm"
+              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-sm shadow-none
+               transition-colors flex items-center gap-1 text-sm"
               aria-label="Save email"
               disabled={isDisabled || !!emailError}
             >
@@ -76,7 +79,8 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
             </button>
             <button
               onClick={handleCancel}
-              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm transition-colors flex items-center gap-1 text-sm"
+              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm 
+              transition-colors flex items-center gap-1 text-sm"
               aria-label="Cancel edit"
               disabled={isDisabled}
             >

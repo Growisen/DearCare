@@ -13,7 +13,6 @@ function SalaryReportContent() {
   const startDate = searchParams.get('payPeriodStart') || '';
   const endDate = searchParams.get('payPeriodEnd') || '';
 
-  // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -66,7 +65,6 @@ function SalaryReportContent() {
     setAttendanceError(null);
   };
 
-  // Mark attendance handler
   const handleMarkAttendance = async () => {
     if (!selectedRecord) return;
     setAttendanceLoading(true);
@@ -118,7 +116,7 @@ function SalaryReportContent() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container max-w-7xl">
         <div className="bg-white shadow-none border border-slate-200 rounded-sm p-8 text-center">
           <div className="animate-pulse">
             <div className="h-6 bg-slate-200 rounded w-1/4 mb-4 mx-auto"></div>
@@ -134,7 +132,7 @@ function SalaryReportContent() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container max-w-7xl">
         <div className="bg-white shadow-none border border-slate-200 rounded-sm p-8 text-center">
           <div className="text-red-500 text-xl mb-4">Error Loading Attendance</div>
           <p className="text-slate-700">{error || 'Attendance records not found'}</p>
@@ -144,7 +142,7 @@ function SalaryReportContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="container max-w-7xl">
       <div className="bg-white shadow-none border border-slate-200 rounded-sm overflow-hidden">
         <div className="p-5 border-b border-slate-200">
           <h1 className="text-xl font-bold text-slate-900">Salary Report</h1>

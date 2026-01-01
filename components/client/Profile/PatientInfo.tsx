@@ -162,7 +162,10 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"> 
       {isPersonalInfoAvailable && (
-        <InfoSection title="Personal Information" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
+        <InfoSection 
+          title="Personal Information" 
+          className="bg-white rounded-sm shadow-none transition-shadow border border-slate-200"
+        >
           <div className="space-y-3">
             <InfoField 
               label="Email" 
@@ -218,7 +221,10 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
 
       {isPatientAddressAvailable && (
-        <InfoSection title="Patient Address" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
+        <InfoSection 
+          title="Patient Address" 
+          className="bg-white rounded-sm shadow-none transition-shadow border border-slate-200"
+        >
           <div className="space-y-3">
             <InfoField 
               label="Address" 
@@ -283,11 +289,11 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
       
       {isRequestorInfoAvailable && (
-        <InfoSection title="Requestor Information" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
+        <InfoSection title="Requestor Information" className="bg-white rounded-sm shadow-none transition-shadow border border-slate-200">
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div 
-                className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-slate-200 shadow-none hover:shadow-md transition-all duration-300"
+                className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-slate-200 shadow-none transition-all duration-300"
                 onClick={() => patient.requestor.profileImage && setIsImageViewerOpen(true)}
                 style={{ cursor: patient.requestor.profileImage ? 'pointer' : 'default' }}
               >
@@ -358,7 +364,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ patient, refetchClientData })
       )}
 
       {isRequestorAddressAvailable && (
-        <InfoSection title="Requestor Address" className="bg-white rounded-sm shadow-none hover:shadow-md transition-shadow border border-slate-200">
+        <InfoSection title="Requestor Address" className="bg-white rounded-sm shadow-none transition-shadow border border-slate-200">
           <div className="space-y-3">
             <InfoField 
               label="Address" 

@@ -115,9 +115,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex items-start justify-center p-4 md:p-6 h-full">
+    <div className="flex items-start justify-center h-full">
       <div className="w-full max-w-7xl shadow-none border border-slate-200 rounded-sm bg-white">
-        {/* Header Section */}
         <div className="p-4 md:p-5 pb-0">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <div className="space-y-1">
@@ -131,13 +130,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Separator */}
         <hr className="h-px my-3 bg-gray-200 border-0" />
-
-        {/* Main Content */}
+        
         <div className="px-4 md:px-5 pb-5">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Profile Photo Section */}
             <div className="lg:w-1/5 flex flex-col items-center">
               <ProfilePhoto
                 photo={userData.photo}
