@@ -104,7 +104,7 @@ export default function Navbar({
   }, [])
 
   return (
-    <div className="h-14 border-b border-slate-200 fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-20 shadow-none lg:pl-56 transition-all duration-300">
+    <div className="h-16 border-b border-slate-200 fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-20 shadow-none lg:pl-56 transition-all duration-300">
       <div className="flex items-center justify-between h-full px-4 max-w-[1920px] mx-auto">
         
         <div className="flex items-center gap-3">

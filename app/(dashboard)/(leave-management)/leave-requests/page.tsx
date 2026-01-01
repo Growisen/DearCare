@@ -55,7 +55,7 @@ export default function LeaveRequestsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-3">
       <LeaveRequestsHeader 
         onExport={handleExport}
         isExporting={isExporting}
@@ -87,7 +87,7 @@ export default function LeaveRequestsPage() {
         />
         
         {!isLoading && leaveRequests.length > 0 && (
-          <div className="p-4 bg-gray-50 border-t border-slate-200">
+          <div className="bg-gray-50 border-t border-slate-200">
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}

@@ -131,7 +131,7 @@ export default function ClientPaymentsListPage() {
         onExportAction={handleExport}
         isExporting={isExporting}
       />
-      <div className="mt-6">
+      <div className="mt-3">
         {loading ? (
           <LoadingState message="Loading payments..." className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200"/>
         ) : (

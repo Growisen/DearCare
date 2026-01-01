@@ -83,7 +83,7 @@ export default function AdvancePaymentsOverview({
   const displayTotalPages = loading ? cachedStats.current.totalPages : (totalPages || 1);
 
   return (
-    <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-sm">
+    <Card className="px-3 sm:px-4 pt-3 sm:pt-4 bg-white border border-slate-200 rounded-sm">
       <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center
        sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2"
       >

@@ -66,7 +66,9 @@ export function PaginationControls({
   }, [currentPage, totalPages])
 
   return (
-    <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-4 bg-white border-t border-slate-200">
+    <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 
+      px-6 py-4 bg-white border-t border-slate-200"
+    >
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="text-sm text-gray-700">
           Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> results
@@ -81,7 +83,8 @@ export function PaginationControls({
               id="page-size"
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
-              className="block w-16 pl-2 pr-6 py-1 text-sm text-gray-700 bg-white border border-slate-200 rounded-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-16 pl-2 pr-3 py-1 text-sm text-gray-700 bg-white border 
+              border-slate-200 rounded-sm focus:outline-none"
             >
               <option value="10">10</option>
               <option value="25">25</option>

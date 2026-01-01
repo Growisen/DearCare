@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
   return (
     <div 
       id="sidebar" 
-      className={`fixed left-0 top-0 h-screen shadow-lg z-50 rounded-r-xl flex flex-col justify-between transition-all duration-300 
+      className={`fixed left-0 top-0 h-screen shadow-lg z-50 rounded-r-sm flex flex-col justify-between transition-all duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 
         ${isCollapsed ? 'w-20' : 'w-56'}`}

@@ -72,7 +72,7 @@ export default function ClientsPage() {
 
   return (
     <div className="w-full">
-      <div className="space-y-5 sm:space-y-7">
+      <div className="space-y-3">
         <ClientHeader 
           onAddClient={() => setShowAddClient(true)}
           onExport={handleExport}

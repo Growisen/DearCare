@@ -49,7 +49,7 @@ export default function ComplaintsPage() {
   }
   
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <ComplaintHeader 
         onExport={handleExport}
         isExporting={isExporting}

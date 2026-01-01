@@ -32,7 +32,7 @@ export default function StaffAttendancePage() {
   } = useStaffAttendance();
 
   return (
-    <div className="space-y-5 sm:space-y-7">
+    <div className="space-y-3">
       <AttendanceHeader
         selectedDate={selectedDate}
         handleDateChange={handleDateChange}

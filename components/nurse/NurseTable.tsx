@@ -1,6 +1,6 @@
 import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Eye, MapPin } from "lucide-react"
 import { NurseBasicDetails } from "@/types/staff.types"
-import Loader from '@/components/Loader'
+import { LoadingState } from '@/components/Loader'
 import { formatName } from "@/utils/formatters"
 
 const statusColors = {
@@ -32,7 +32,7 @@ const NurseTable = ({
 }: NurseTableProps) => {
 
   if (isLoading) {
-    return <Loader />;
+    return <LoadingState message="Loading Nurses..." />;
   }
 
   const thClass = "py-3 px-6 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap";

@@ -63,7 +63,7 @@ export default function StaffPage() {
 
   return (
     <div>
-      <div className="space-y-5 sm:space-y-7">
+      <div className="space-y-3">
         <StaffHeader 
           onAddStaff={() => setShowAddStaff(true)}
           onExport={handleExport}

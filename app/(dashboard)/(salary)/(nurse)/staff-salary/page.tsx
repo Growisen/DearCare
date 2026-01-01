@@ -49,7 +49,7 @@ export default function StaffSalaryPage() {
 
   return (
     <div>
-      <div className="space-y-5 sm:space-y-7">
+      <div className="space-y-3">
         <SalaryHeader 
           title="Staff Salary" 
           subtitle="Calculate and review staff salary details"

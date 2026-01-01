@@ -5,6 +5,7 @@ import { Search, X, Download, Loader2, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
 import { fetchSalaryPaymentDebts, SalaryPaymentDebtRecord } from "@/app/actions/payroll/calculate-nurse-salary";
+import { LoadingState } from '@/components/Loader';
 
 export default function NursesSalaryPage() {
   const [salaryRecords, setSalaryRecords] = useState<SalaryPaymentDebtRecord[]>([]);
@@ -80,68 +81,67 @@ export default function NursesSalaryPage() {
   };
 
   return (
-    <div className="container mx-auto py-1 space-y-6">
-        <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Salary Payments</h2>
-              <p className="text-xs text-gray-500">Manage nurse salary payments and calculations</p>
-            </div>
-            <div className="hidden gap-2 self-start sm:self-auto">
-              <button 
-                onClick={handleExport}
-                disabled={isExporting || salaryRecords.length === 0}
-                className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
-              >
-                {isExporting ? (
-                  <span className="flex items-center">
-                    <Loader2 className="animate-spin mr-1 h-3 w-3" />
-                    Exporting...
-                  </span>
-                ) : (
-                  <>
-                    <Download size={16} />
-                    Export
-                  </>
-                )}
-              </button>
-            </div>
+    <div className="container mx-auto py-1 space-y-3">
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Salary Payments</h2>
+            <p className="text-xs text-gray-500">Manage nurse salary payments and calculations</p>
           </div>
-
-          <div className="p-4 bg-gray-50 space-y-3 mb-6">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Enter search term"
-                className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800 w-full"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-              {searchInput && (
-                <button 
-                  onClick={handleResetFilters}
-                  className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
-                  aria-label="Clear search"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+          <div className="hidden gap-2 self-start sm:self-auto">
+            <button 
+              onClick={handleExport}
+              disabled={isExporting || salaryRecords.length === 0}
+              className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              {isExporting ? (
+                <span className="flex items-center">
+                  <Loader2 className="animate-spin mr-1 h-3 w-3" />
+                  Exporting...
+                </span>
+              ) : (
+                <>
+                  <Download size={16} />
+                  Export
+                </>
               )}
-              <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded text-xs transition-colors"
-                disabled
-              >
-                Search
-              </button>
-            </div>
+            </button>
           </div>
         </div>
 
-      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden min-h-[500px]">
-        <div className="overflow-x-auto">
+        <div className="p-4 bg-gray-50 space-y-3 mb-6">
+          <div className="relative w-full">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Enter search term"
+              className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800 w-full"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            {searchInput && (
+              <button 
+                onClick={handleResetFilters}
+                className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded text-xs transition-colors"
+              disabled
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden min-h-[700px] flex flex-col">
+        <div className="overflow-x-auto flex-1">
           {loading ? (
-            <div className="flex justify-center items-center p-8 min-h-[500px]">
-              <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-              <span className="ml-2 text-gray-600">Loading salary data...</span>
+            <div className="flex justify-center items-center p-8 min-h-[700px]">
+              <LoadingState message="Loading salary data..." />
             </div>
           ) : salaryRecords.length > 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
@@ -249,10 +249,10 @@ export default function NursesSalaryPage() {
             </div>
           )}
         </div>
-        {salaryRecords.length > 0 && (
+        <div className="border-t border-slate-200 bg-gray-50">
           <PaginationControls
             currentPage={currentPage}
-            totalPages={Math.ceil(totalCount / pageSize)}
+            totalPages={Math.max(1, Math.ceil(totalCount / pageSize))}
             totalCount={totalCount}
             pageSize={pageSize}
             itemsLength={salaryRecords.length}
@@ -261,7 +261,7 @@ export default function NursesSalaryPage() {
             onNextPage={handleNextPage}
             setPageSize={setPageSize}
           />
-        )}
+        </div>
       </div>
     </div>
   );

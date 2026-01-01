@@ -6,12 +6,12 @@ import NurseTable from "@/components/nurse/NurseTable"
 import NurseCard from "@/components/nurse/NurseCard"
 import { NurseBasicInfo, NurseBasicDetails } from "@/types/staff.types"
 import { fetchBasicDetails, exportNurseData } from "@/app/actions/staff-management/add-nurse"
-import Loader from "@/components/Loader"
+import { LoadingState } from "@/components/Loader"
 import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"
 import { EmptyState } from "@/components/client/clients/EmptyState"
-import { PaginationControls } from "@/components/client/clients/PaginationControls" // <-- Use shared component
+import { PaginationControls } from "@/components/client/clients/PaginationControls"
 
 export default function NursesPage() {
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
@@ -146,7 +146,7 @@ export default function NursesPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 relative">
+    <div className="space-y-3 relative">
       <NurseHeader 
         onAddNurse={() => setShowAddNurse(true)}
         onExport={handleExportExcel}
@@ -191,7 +191,7 @@ export default function NursesPage() {
         
         <div className="sm:hidden divide-y divide-gray-200">
           {isLoading ? (
-            <Loader />
+            <LoadingState message="Loading Nurses..." />
           ) : (
             <>
               {nurses.map((nurse) => (
