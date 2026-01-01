@@ -7,11 +7,11 @@ import NurseCard from "@/components/nurse/NurseCard"
 import { NurseBasicInfo, NurseBasicDetails } from "@/types/staff.types"
 import { fetchBasicDetails, exportNurseData } from "@/app/actions/staff-management/add-nurse"
 import { LoadingState } from "@/components/Loader"
-import { generateNurseExcel } from '@/lib/generatexlsx';
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"
 import { EmptyState } from "@/components/client/clients/EmptyState"
 import { PaginationControls } from "@/components/client/clients/PaginationControls"
+import { jsonToCSV } from '@/utils/jsonToCSV'
 
 export default function NursesPage() {
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
@@ -91,8 +91,8 @@ export default function NursesPage() {
       console.error(error);
     }
   };
-
-  const handleExportExcel = async () => {
+  
+  const handleExportCSV = async () => {
     try {
       setIsExporting(true);
       const result = await exportNurseData();
@@ -101,13 +101,13 @@ export default function NursesPage() {
         toast.error(result.error || 'Failed to export data');
         return;
       }
-  
-      const blob = generateNurseExcel(result.data);
-      
+
+      const csvString = jsonToCSV(result.data);
+      const blob = new Blob([csvString], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `nurse_data_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.download = `nurse_data_${new Date().toISOString().split('T')[0]}.csv`;
       
       document.body.appendChild(link);
       link.click();
@@ -115,9 +115,9 @@ export default function NursesPage() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('Excel file downloaded successfully!');
+      toast.success('CSV file downloaded successfully!');
     } catch (error) {
-      toast.error('Failed to generate Excel file');
+      toast.error('Failed to generate CSV file');
       console.error('Export error:', error);
     } finally {
       setIsExporting(false);
@@ -149,7 +149,7 @@ export default function NursesPage() {
     <div className="space-y-3 relative">
       <NurseHeader 
         onAddNurse={() => setShowAddNurse(true)}
-        onExport={handleExportExcel}
+        onExport={handleExportCSV}
         isExporting={isExporting}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
