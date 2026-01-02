@@ -25,27 +25,6 @@ interface SavePaymentGroupInput {
   endDate?: string;  
 }
 
-// interface ClientPaymentRecord {
-//   id: string;
-//   client_id: string;
-//   payment_group_name: string;
-//   total_amount: number;
-//   date_added: string;
-//   notes?: string | null;
-//   show_to_client: boolean;
-//   approved: boolean;
-//   mode_of_payment?: string | null;
-//   // start_date?: string;
-//   // end_date?: string;  
-// }
-
-// interface ClientPaymentLineItem {
-//   id: string;
-//   payment_record_id: string;
-//   field_name: string;
-//   amount: number;
-// }
-
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
     const { supabase } = await getAuthenticatedClient();
@@ -208,6 +187,7 @@ export interface AssignedNurse {
 
 export interface RecentPayment {
   id: string;
+  clientId: string;
   clientName: string;
   groupName: string;
   amount: number;
@@ -369,6 +349,7 @@ export async function fetchPaymentOverview({
 
       return {
         id: p.id,
+        clientId: p.client_id,
         clientName: p.client_display_name,
         groupName: p.payment_group_name,
         amount: p.total_amount,

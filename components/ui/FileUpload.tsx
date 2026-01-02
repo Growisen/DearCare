@@ -48,7 +48,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
           type="file"
           accept={accept}
           onChange={handleFileChange}
-          className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-sm file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 border rounded-sm cursor-pointer ${error ? 'border-red-400' : 'border-slate-200'}`}
+          className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-sm 
+            file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 focus:outline-none focus:border-slate-300
+            hover:file:bg-slate-100 border rounded-sm cursor-pointer ${error ? 'border-red-400' : 'border-slate-200'}`}
         />
       ) : (
         <div className={`flex items-center justify-between p-3 border rounded-sm bg-gray-50 ${error ? 'border-red-400' : 'border-slate-200'}`}>

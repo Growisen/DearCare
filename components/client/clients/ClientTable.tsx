@@ -1,9 +1,10 @@
 import React, { memo } from "react"
-import { Eye, CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { Eye, CheckCircle, Clock, AlertCircle, ArrowUpRight } from "lucide-react"
 import { formatDate, formatName, getServiceLabel } from "@/utils/formatters"
 import { serviceOptions } from "@/utils/constants"
 import { Client, ClientFilters } from "@/types/client.types"
 import { getExperienceFromJoiningDate, formatDateToDDMMYYYY } from "@/utils/dateUtils";
+import Link from "next/link";
 
 type ClientTableProps = {
   clients: Client[]
@@ -28,10 +29,20 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
     ? getExperienceFromJoiningDate(formatDateToDDMMYYYY(createdAt))
     : null;
 
+  const clientProfileUrl = `/client-profile/${client.id}`;
+
   return (
     <tr className="hover:bg-gray-50 border-b border-slate-200 last:border-0 transition-colors">
       <td className="py-3 px-6 text-gray-800 font-medium align-top min-w-[200px]">
-        {formatName(client.name)}
+        <Link
+          href={clientProfileUrl}
+          className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {formatName(client.name)}
+          <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+        </Link>
         {isNewClient && (
           <span className="block mt-1 px-1.5 py-0.5 max-w-fit bg-green-100 text-green-700 text-[10px] rounded-full font-semibold border border-green-300">
             ✨ New
@@ -103,11 +114,22 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
   const status = client.status as ClientFilters;
   const StatusIcon = statusIcons[status];
   
+  const clientProfileUrl = `/client-profile/${client.id}`;
+
   return (
     <div className="p-4 space-y-3 hover:bg-gray-50 transition-colors border-b border-slate-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800 text-sm">{formatName(client.name)}</h3>
+          <h3 className="font-semibold text-gray-800 text-sm">
+            <Link
+              href={clientProfileUrl}
+              className="hover:underline inline-flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatName(client.name)}
+            </Link>
+          </h3>
           <p className="text-xs text-gray-500 mt-0.5">{getServiceLabel(serviceOptions, client.service || '')}</p>
         </div>
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusColors[status]}`}>

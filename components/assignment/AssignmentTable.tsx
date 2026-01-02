@@ -1,6 +1,6 @@
 import React, { memo, useState, useMemo } from "react"
 import { CalendarIcon, ClockIcon, UserIcon } from "@heroicons/react/24/outline"
-import { Building, Eye, Info } from "lucide-react"
+import { Building, Eye, Info, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { NurseAssignmentData } from "@/app/actions/scheduling/shift-schedule-actions";
@@ -82,7 +82,15 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <span className="font-medium">{formatName(fullName)}</span>
+            <Link
+              href={`/nurses/${assignment.nurse_id}`}
+              className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatName(fullName)}
+              <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+            </Link>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
           </div>
         </div>
@@ -133,7 +141,15 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
 
       <td className="py-4 px-6">
         <div className="space-y-1">
-          <div className="font-medium text-gray-800">{formatName(clientName)}</div>
+          <Link
+            href={clientProfileUrl}
+            className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {formatName(clientName)}
+            <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+          </Link>
           {clientType && (
             <div className="text-xs text-gray-500">{clientType}</div>
           )}
@@ -157,14 +173,6 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
                 , {serviceStats.totalDays} total
             </div>
           )}
-          <Link 
-            href={clientProfileUrl} 
-            className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Profile
-          </Link>
         </div>
       </td>
       
@@ -213,7 +221,15 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <span className="font-medium text-gray-800">{formatName(fullName)}</span>
+            <Link
+              href={`/nurses/${assignment.nurse_id}`}
+              className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatName(fullName)}
+              <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+            </Link>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
           </div>
         </div>
@@ -225,7 +241,6 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
           Details
         </button>
       </div>
-      
       <div className="space-y-3 text-sm bg-white/50 border border-slate-200/50 p-3 rounded-sm backdrop-blur-sm">
         <div>
           <p className="text-gray-500">Salary:</p>
@@ -248,7 +263,15 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
             <Building className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
             <div>
               <p className="text-gray-500">Client:</p>
-              <div className="font-medium text-gray-800">{formatName(clientName)}</div>
+              <Link
+                href={clientProfileUrl}
+                className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {formatName(clientName)}
+                <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+              </Link>
               {clientType && (
                 <div className="text-xs text-gray-500">{clientType}</div>
               )}
@@ -274,14 +297,6 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
                   )
                 </div>
               )}
-              <Link 
-                href={clientProfileUrl} 
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Profile
-              </Link>
             </div>
           </div>
         </div>

@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Search, X, Download, Loader2, Info } from "lucide-react";
+import { Search, X, Download, Loader2, Info, ArrowUpRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
 import { fetchSalaryPaymentDebts, SalaryPaymentDebtRecord } from "@/app/actions/payroll/calculate-nurse-salary";
 import { LoadingState } from '@/components/Loader';
+import Link from "next/link";
 
 export default function NursesSalaryPage() {
   const [salaryRecords, setSalaryRecords] = useState<SalaryPaymentDebtRecord[]>([]);
@@ -81,7 +82,7 @@ export default function NursesSalaryPage() {
   };
 
   return (
-    <div className="container mx-auto py-1 space-y-3">
+    <div className="space-y-3">
       <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
           <div>
@@ -163,8 +164,16 @@ export default function NursesSalaryPage() {
                 {salaryRecords.map((record) => (
                   <tr key={record.salary_payment_id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-wrap">
-                      <div className="flex flex-col  w-[100px]">
-                        <span className="text-sm font-semibold text-gray-900">{record.full_name}</span>
+                      <div className="flex flex-col w-[150px]">
+                        <Link
+                          href={`/nurses/${record.nurse_id}`}
+                          className="font-semibold text-sm text-gray-700 hover:underline inline-flex items-center gap-1"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {record.full_name}
+                          <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                        </Link>
                         <span className="text-xs text-gray-500">Reg: {record.nurse_reg_no}</span>
                       </div>
                     </td>

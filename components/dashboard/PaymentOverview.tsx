@@ -1,9 +1,8 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { CreditCard, Download, Search } from "lucide-react"
+import { CreditCard, Download, Search, ArrowUpRight } from "lucide-react"
 import { useState, useEffect } from "react"
-import Loader from "@/components/Loader"
 import Link from "next/link"
 import { formatDate, formatName } from "@/utils/formatters"
 
@@ -14,6 +13,7 @@ interface PaymentOverviewProps {
     recentPayments: Array<{
       id: string;
       clientName: string;
+      clientId?: string;
       groupName: string;
       amount: number;
       date: string;
@@ -185,7 +185,21 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
             <tbody>
               {filteredPayments.map((p) => (
                 <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 text-sm font-medium text-slate-800">{formatName(p.clientName)}</td>
+                  <td className="py-3 px-4 text-sm font-medium text-slate-800">
+                    {p.clientId ? (
+                      <Link
+                        href={`/client-profile/${p.clientId}`}
+                        className="text-gray-700 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {formatName(p.clientName)}
+                        <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                      </Link>
+                    ) : (
+                      formatName(p.clientName)
+                    )}
+                  </td>
                   <td className="py-3 px-4 text-sm text-slate-600">{p.groupName}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">₹{p.amount.toLocaleString()}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{formatDate(p.date)}</td>

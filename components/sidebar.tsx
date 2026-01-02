@@ -62,7 +62,9 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
       style={{ backgroundColor: branding?.color || '#1e40af' }}
     >
       <div className="flex flex-col h-full overflow-hidden">
-        <div className={`h-16 border-b border-white/15 flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+        <div className={`h-16 border-b border-white/15 flex items-center gap-2 transition-all duration-300
+          ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}
+        >
           <div className={`${isCollapsed ? 'hidden' : 'flex-1 min-w-0'}`}>
             <Image 
               src={branding?.logo || "/logo.png"} 

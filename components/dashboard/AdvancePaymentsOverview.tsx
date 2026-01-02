@@ -2,9 +2,10 @@
 
 import React, { useRef } from "react";
 import { Card } from "@/components/ui/card";
-import { CreditCard, Download, Search } from "lucide-react";
+import { CreditCard, Download, Search, ArrowUpRight } from "lucide-react";
 import { formatDate } from "@/utils/formatters";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
+import Link from "next/link";
 
 type AdvancePayment = {
   id: number;
@@ -212,7 +213,15 @@ export default function AdvancePaymentsOverview({
                       {formatDate(payment.date)}
                     </td>
                     <td className="py-3 px-4 text-sm font-medium text-slate-800 whitespace-nowrap">
-                      {payment.nurse_name || "-"}
+                      <Link
+                        href={`/nurses/${payment.nurse_id}`}
+                        className="text-gray-700 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {payment.nurse_name || "-"}
+                        <ArrowUpRight className="inline-block ml-1 w-4 h-4 text-blue-700" />
+                      </Link>
                     </td>
                     <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
                       <div>

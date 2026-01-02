@@ -200,7 +200,8 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             <label className="block text-sm font-medium mb-2 text-gray-700">Date</label>
             <input
               type="date"
-              className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors ${errors.date ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+              className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300
+               transition-colors ${errors.date ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
               value={date}
               onChange={(e) => setDate(e.target.value)}
               max={today}
@@ -216,7 +217,8 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
               type="number"
               step="0.01"
               min="0"
-              className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors ${errors.amount ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+              className={`border no-spinner border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none
+              focus:border-slate-300 transition-colors ${errors.amount ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
@@ -229,7 +231,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
           <div className="col-span-1">
             <label className="block text-sm font-medium mb-2 text-gray-700">Repayment Type</label>
             <Select value={repaymentType} onValueChange={setRepaymentType}>
-              <SelectTrigger className="w-full py-6 border border-slate-200 rounded-sm focus:outline-none transition-colors bg-white">
+              <SelectTrigger className="w-full py-6 border border-slate-200 rounded-sm focus:outline-none focus:border-slate-300 transition-colors bg-white">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent className="bg-white text-gray-800">
@@ -249,7 +251,8 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
                 type="number"
                 step="0.01"
                 min="0"
-                className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors ${errors.installmentAmount ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+                className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300
+                transition-colors ${errors.installmentAmount ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
                 value={installmentAmount}
                 onChange={(e) => setInstallmentAmount(e.target.value)}
                 placeholder="0.00"
@@ -264,7 +267,8 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             <label className="block text-sm font-medium mb-2 text-gray-700">Payment Method</label>
             <input
               type="text"
-              className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors ${errors.paymentMethod ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+              className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300
+               transition-colors ${errors.paymentMethod ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
               placeholder="Method"
@@ -283,11 +287,10 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
               helperText="Optional: Upload a transaction receipt."
             />
           </div>
-          {/* Add this textarea field */}
           <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium mb-2 text-gray-700">Additional Info</label>
             <textarea
-              className="border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-slate-200 transition-colors"
+              className="border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300 transition-colors"
               value={info}
               onChange={(e) => setInfo(e.target.value)}
               rows={3}
@@ -298,14 +301,16 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
 
         <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-200">
           <button
-            className="px-5 py-2.5 rounded-sm border border-slate-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-sm border border-slate-200 text-gray-700 font-medium hover:bg-gray-50 
+            transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onClose}
             disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
-            className="px-5 py-2.5 rounded-sm bg-slate-700 text-white font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="px-5 py-2.5 rounded-sm bg-slate-700 text-white font-medium hover:bg-slate-800 transition-colors
+             disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             onClick={handleSubmit}
             disabled={!!errors.date || !!errors.amount || !!errors.installmentAmount || !!errors.paymentMethod || isSubmitting}
           >

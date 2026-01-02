@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { formatDate, formatName } from "@/utils/formatters";
 
 type AssignedNurse = {
@@ -11,6 +13,7 @@ type AssignedNurse = {
 
 type Payment = {
   id: string;
+  clientId: string;
   clientName: string;
   groupName: string;
   amount: number;
@@ -86,7 +89,15 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                 payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-6 text-gray-800 font-medium">
-                      {formatName(payment.clientName) || "N/A"}
+                      <Link
+                        href={`/client-profile/${payment.clientId}`}
+                        className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {formatName(payment.clientName) || "N/A"}
+                        <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                      </Link>
                     </td>
                     <td className="py-4 px-6 text-gray-600">
                       {payment.groupName || "N/A"}
@@ -131,7 +142,15 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-gray-900 font-semibold text-lg">
-                    {payment.clientName || "N/A"}
+                    <Link
+                      href={`/client-profile/${payment.clientId}`}
+                      className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {payment.clientName || "N/A"}
+                      <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                    </Link>
                   </h3>
                   <p className="text-gray-500 text-sm">
                     {payment.groupName || "N/A"}

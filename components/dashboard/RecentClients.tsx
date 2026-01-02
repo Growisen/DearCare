@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Users, Search, Download, Mail, Phone, Eye, Clock } from "lucide-react"
+import { Users, Search, Download, Mail, Phone, Eye, Clock, ArrowUpRight } from "lucide-react"
 import { Client } from "../../types/client.types"
 import Link from "next/link"
 import { serviceOptions } from "@/utils/constants"
@@ -157,11 +157,20 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
               <tbody>
                 {filteredClients.map((client) => {
                   const StatusIcon = statusIcons[client.status]
+                  const clientProfileUrl = `/client-profile/${client.id}`;
                   return (
                     <tr key={client.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-slate-800">{formatName(client.name)}</span>
+                          <Link
+                            href={clientProfileUrl}
+                            className="text-sm font-medium text-gray-700 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {formatName(client.name)}
+                            <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                          </Link>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-slate-600">{formatDate(client.requestDate)}</td>
@@ -187,12 +196,21 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
             <div className="sm:hidden space-y-4">
               {filteredClients.map((client) => {
                 const StatusIcon = statusIcons[client.status]
+                const clientProfileUrl = `/client-profile/${client.id}`;
                 return (
                   <div key={client.id} className="p-4 rounded-sm border border-slate-200 bg-white shadow-none">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
-                          <h4 className="text-sm font-medium text-slate-800">{client.name}</h4>
+                          <Link
+                            href={clientProfileUrl}
+                            className="text-sm font-medium text-gray-700 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {client.name}
+                            <ArrowUpRight className="inline w-3.5 h-3.5 ml-1  text-blue-700" />
+                          </Link>
                           <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusStyles(client.status)}`}>
                             <StatusIcon className="inline w-3.5 h-3.5 mr-1" />
                             {formatStatus(client.status)}

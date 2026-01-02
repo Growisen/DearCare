@@ -349,6 +349,7 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
       return {
         id: p.id,
         clientName: p.client_display_name,
+        clientId: p.client_id,
         groupName: p.payment_group_name,
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',

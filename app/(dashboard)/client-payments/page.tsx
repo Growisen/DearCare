@@ -9,6 +9,7 @@ import { fetchPaymentOverview } from "@/app/actions/clients/client-payment-recor
 
 type Payment = {
 	id: string;
+  clientId: string;
 	clientName: string;
 	groupName: string;
 	amount: number;
@@ -116,11 +117,8 @@ export default function ClientPaymentsListPage() {
 		}
 	};
 
-
-  console.log("Rendering ClientPaymentsListPage with payments:", payments);
-
   return (
-    <div className="mx-auto pt-2 pb-4">
+    <div>
       <PaymentHeader
         searchInput={searchInput}
         setSearchInputAction={setSearchInput}

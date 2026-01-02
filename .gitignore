@@ -43,3 +43,8 @@ next-env.d.ts
 
 .vscode/
 .idea/
+
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+supabase/config.toml
