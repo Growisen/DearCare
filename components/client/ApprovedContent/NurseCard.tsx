@@ -22,7 +22,7 @@ const NurseCard: React.FC<NurseCardProps> = ({
 }) => {
 
   return (
-    <div className="border border-gray-200 rounded-lg p-2 sm:p-3 hover:shadow-sm transition-shadow duration-300 bg-white h-full">
+    <div className="border border-slate-200 rounded-sm p-2 sm:p-3 hover:shadow-none transition-shadow duration-300 bg-white h-full">
       <div className="flex flex-row items-start justify-between gap-2">
         {/* Checkbox for selection */}
         {selectable && (
@@ -32,7 +32,7 @@ const NurseCard: React.FC<NurseCardProps> = ({
               id={`nurse-${nurse._id}`}
               checked={isSelected}
               onChange={(e) => onSelectChange?.(nurse._id, e.target.checked)}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="h-4 w-4 text-blue-600 border-slate-200 rounded focus:ring-blue-500"
             />
           </div>
         )}
@@ -108,7 +108,7 @@ const NurseCard: React.FC<NurseCardProps> = ({
       
       {/* Additional content (assignment info, leave info) */}
       {children && (
-        <div className="mt-2 pt-2 border-t border-gray-100">
+        <div className="mt-2 pt-2 border-t border-slate-200">
           {children}
         </div>
       )}

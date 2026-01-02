@@ -37,7 +37,7 @@ export default function ComplaintHeader({ complaint }: ComplaintHeaderProps) {
         </div>
         <button 
           onClick={() => window.close()} 
-          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border rounded-md cursor-pointer"
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border rounded-sm cursor-pointer"
         >
           Close Window
         </button>

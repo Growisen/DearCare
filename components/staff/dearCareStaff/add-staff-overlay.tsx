@@ -110,8 +110,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white shadow-lg w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-md">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 rounded-md">
+      <div className="bg-white shadow-lg w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-sm">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 rounded-sm">
           <h2 className="text-xl font-semibold text-gray-800">Add New Staff Member</h2>
           <button 
             onClick={onClose}
@@ -146,8 +146,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                       name="name"
                       value={nameValidation.name}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                        nameValidation.nameError ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                        nameValidation.nameError ? "border-red-500" : "border-slate-200"
                       } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                       placeholder="Enter full name"
                     />
@@ -166,8 +166,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                       name="email"
                       value={emailValidation.email}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                        emailValidation.emailError ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                        emailValidation.emailError ? "border-red-500" : "border-slate-200"
                       } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                       placeholder="Enter email address"
                     />
@@ -186,8 +186,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                       name="phone"
                       value={phoneValidation.phone}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                        phoneValidation.phoneError ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                        phoneValidation.phoneError ? "border-red-500" : "border-slate-200"
                       } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                       placeholder="Enter 10-digit phone number"
                       maxLength={10}
@@ -212,8 +212,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                       name="role"
                       value={role}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                        roleError ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                        roleError ? "border-red-500" : "border-slate-200"
                       } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                       placeholder="Enter role"
                     />
@@ -237,8 +237,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                       name="address.line1"
                       value={addressValidation.line1}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                        addressValidation.line1Error ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                        addressValidation.line1Error ? "border-red-500" : "border-slate-200"
                       } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                       placeholder="Enter street address"
                     />
@@ -257,7 +257,7 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                       name="address.line2"
                       value={addressValidation.line2}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       placeholder="Enter apartment, suite, etc."
                     />
                   </div>
@@ -273,8 +273,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                         name="address.city"
                         value={addressValidation.city}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                          addressValidation.cityError ? "border-red-500" : "border-gray-300"
+                        className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                          addressValidation.cityError ? "border-red-500" : "border-slate-200"
                         } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                         placeholder="Enter city"
                       />
@@ -293,8 +293,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                         name="address.district"
                         value={addressValidation.district}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                          addressValidation.districtError ? "border-red-500" : "border-gray-300"
+                        className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                          addressValidation.districtError ? "border-red-500" : "border-slate-200"
                         } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                         placeholder="Enter district"
                       />
@@ -313,8 +313,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                         name="address.state"
                         value={addressValidation.state}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                          addressValidation.stateError ? "border-red-500" : "border-gray-300"
+                        className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                          addressValidation.stateError ? "border-red-500" : "border-slate-200"
                         } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                         placeholder="Enter state"
                       />
@@ -333,8 +333,8 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
                         name="address.pincode"
                         value={addressValidation.pincode}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
-                          addressValidation.pincodeError ? "border-red-500" : "border-gray-300"
+                        className={`w-full px-3 py-2 border rounded-sm text-gray-900 ${
+                          addressValidation.pincodeError ? "border-red-500" : "border-slate-200"
                         } focus:outline-none focus:ring-1 focus:ring-blue-500`}
                         placeholder="Enter 6-digit PIN code"
                         maxLength={6}
@@ -352,14 +352,14 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="px-4 py-2 border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                className={`px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                   isSubmitting ? "opacity-75 cursor-not-allowed" : ""
                 }`}
               >

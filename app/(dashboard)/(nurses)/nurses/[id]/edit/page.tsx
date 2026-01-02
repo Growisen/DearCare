@@ -224,7 +224,7 @@ const EditNurseProfilePage: React.FC = () => {
   if (error || !nurse) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-sm p-6">
+        <div className="max-w-md w-full bg-white rounded-sm shadow-none p-6">
           <h1 className="text-xl font-semibold text-red-600 mb-2">Error Loading Profile</h1>
           <p className="text-gray-600 mb-4">{error || "Nurse profile not found"}</p>
           <Link href="/nurses" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
@@ -238,8 +238,8 @@ const EditNurseProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <form onSubmit={handleSubmit} className="max-w-full">
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b border-gray-100">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-800 tracking-tight">
                 Edit Nurse Profile
@@ -247,7 +247,7 @@ const EditNurseProfilePage: React.FC = () => {
               <div className="flex gap-3">
                 <Link
                   href={`/nurses/${nurse.basic.nurse_id}`}
-                  className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-lg transition-all duration-200 text-sm font-medium ${
+                  className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-sm transition-all duration-200 text-sm font-medium ${
                     saving ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-gray-200"
                   }`}
                   tabIndex={saving ? -1 : 0}
@@ -258,7 +258,7 @@ const EditNurseProfilePage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg transition-all duration-200 text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-sm transition-all duration-200 text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <span>

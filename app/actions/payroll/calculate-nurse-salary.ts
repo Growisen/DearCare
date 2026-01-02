@@ -1,9 +1,8 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/app/actions/authentication/auth";
-import { getOrgMappings } from "@/app/utils/org-utils";
 import { SupabaseClient } from '@supabase/supabase-js';
 import { differenceInCalendarDays, max, min } from "date-fns";
+import { getAuthenticatedClient } from "@/app/actions/helpers/auth.helper";
 
 function calculateShiftHours(startTime: string, endTime: string): number {
   try {
@@ -196,7 +195,7 @@ export async function calculateNurseSalary({
   endDate: string;
   id?: number;
 }): Promise<CalculationResult> {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
 
   const dateError = validateDateRange(startDate, endDate);
   if (dateError) {
@@ -495,7 +494,7 @@ export async function addNurseBonus({
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
 
   const { data: paymentRecord, error: fetchError } = await supabase
     .from("salary_payments")
@@ -576,7 +575,7 @@ export async function addNurseSalaryDeduction({
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
 
   const { data: paymentRecord, error: fetchError } = await supabase
     .from("salary_payments")
@@ -683,11 +682,7 @@ export async function fetchSalaryPaymentsWithNurseInfo({
   pageSize?: number;
   search?: string;
 }) {
-  const supabase = await createSupabaseServerClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  const organization = user?.user_metadata?.organization;
-  const { nursesOrg } = getOrgMappings(organization);
+  const { supabase, nursesOrg } = await getAuthenticatedClient();
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -793,11 +788,7 @@ export async function fetchSalaryPaymentDebts({
   pageSize?: number;
   search?: string;
 }) {
-  const supabase = await createSupabaseServerClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  const organization = user?.user_metadata?.organization;
-  const { nursesOrg } = getOrgMappings(organization);
+  const { supabase, nursesOrg } = await getAuthenticatedClient();
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -878,7 +869,7 @@ export async function createAdvanceSalaryPayment({
   startDate: string;
   endDate: string;
 }) {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
 
   const dateError = validateDateRange(startDate, endDate);
   if (dateError) {
@@ -999,7 +990,7 @@ export async function updateSalaryPaymentStatus({
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
 
   const { error } = await supabase
     .from("salary_payments")

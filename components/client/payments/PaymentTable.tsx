@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { formatDate, formatName } from "@/utils/formatters";
 
 type AssignedNurse = {
@@ -11,6 +13,7 @@ type AssignedNurse = {
 
 type Payment = {
   id: string;
+  clientId: string;
   clientName: string;
   groupName: string;
   amount: number;
@@ -67,10 +70,10 @@ function renderNurses(nurses?: AssignedNurse[]) {
 export default function PaymentTable({ payments }: PaymentTableProps) {
   return (
     <div className="w-full mx-auto">
-      <div className="hidden md:block bg-gray-50 rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      <div className="hidden md:block bg-gray-50 rounded-sm border border-slate-200 overflow-hidden shadow-none">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-100 border-b border-gray-200">
+            <thead className="bg-gray-100 border-b border-slate-200">
               <tr className="text-left text-sm uppercase tracking-wider">
                 <th className="py-4 px-6 font-semibold text-gray-600">Client</th>
                 <th className="py-4 px-6 font-semibold text-gray-600">Group</th>
@@ -86,7 +89,15 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                 payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-6 text-gray-800 font-medium">
-                      {formatName(payment.clientName) || "N/A"}
+                      <Link
+                        href={`/client-profile/${payment.clientId}`}
+                        className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {formatName(payment.clientName) || "N/A"}
+                        <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                      </Link>
                     </td>
                     <td className="py-4 px-6 text-gray-600">
                       {payment.groupName || "N/A"}
@@ -126,12 +137,20 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
           payments.map((payment) => (
             <div
               key={payment.id}
-              className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+              className="bg-white rounded-sm border border-slate-200 p-4 shadow-none"
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-gray-900 font-semibold text-lg">
-                    {payment.clientName || "N/A"}
+                    <Link
+                      href={`/client-profile/${payment.clientId}`}
+                      className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {payment.clientName || "N/A"}
+                      <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                    </Link>
                   </h3>
                   <p className="text-gray-500 text-sm">
                     {payment.groupName || "N/A"}
@@ -146,7 +165,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                   </p>
                 </div>
               </div>
-              <div className="border-t border-gray-100 my-3"></div>
+              <div className="border-t border-slate-200 my-3"></div>
               <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
                 <div className="col-span-2">
                   <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
@@ -174,7 +193,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
             </div>
           ))
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <div className="bg-white rounded-sm border border-slate-200 p-8 text-center">
             <p className="text-gray-500">No payments found</p>
           </div>
         )}

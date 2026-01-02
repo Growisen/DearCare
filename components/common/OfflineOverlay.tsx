@@ -59,7 +59,7 @@ export default function OfflineOverlay({
   return (
     <ModalPortal>
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <Card className="max-w-md w-full p-6 bg-white border border-slate-200 shadow-md rounded-lg relative">
+        <Card className="max-w-md w-full p-6 bg-white border border-slate-200 shadow-md rounded-sm relative">
           <button 
             onClick={handleDismiss}
             className="absolute top-2 right-2 text-slate-500 hover:text-slate-800"
@@ -109,7 +109,7 @@ export default function OfflineOverlay({
             {isOnline && !autoRedirect && (
               <button 
                 onClick={handleDismiss}
-                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors"
+                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-sm hover:bg-emerald-700 transition-colors"
               >
                 Continue
               </button>
@@ -118,7 +118,7 @@ export default function OfflineOverlay({
             {!isOnline && (
               <button 
                 onClick={handleDismiss}
-                className="mt-4 px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 transition-colors"
+                className="mt-4 px-4 py-2 bg-slate-200 text-slate-800 rounded-sm hover:bg-slate-300 transition-colors"
               >
                 Dismiss
               </button>

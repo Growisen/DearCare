@@ -1,45 +1,20 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/utils/logger';
-import { ClientCategory } from '@/types/client.types';
 import { getStorageUrl } from './files';
 import { Database } from '@/lib/database.types';
-import { getOrgMappings } from '@/app/utils/org-utils';
 
-async function getAuthenticatedClient() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const userId = user?.id;
-  
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const web_user_id = user.user_metadata.user_id
-
-  const organization = user?.user_metadata?.organization;
-
-  const { nursesOrg, clientsOrg } = getOrgMappings(organization);
-
-  return { supabase, userId: web_user_id, nursesOrg, clientsOrg };
-}
 
 export async function getClients(
   status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
   searchQuery?: string,
   page: number = 1,
   pageSize: number = 10,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  category?: ClientCategory | 'all'
 ) {
   try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user } } = await supabase.auth.getUser();
-    const organization = user?.user_metadata?.organization;
-
-    const { clientsOrg } = getOrgMappings(organization);
+    const { supabase, clientsOrg } = await getAuthenticatedClient();
     
     const selectFields = `
       id,
@@ -86,14 +61,6 @@ export async function getClients(
         'search_clients', 
         { search_term: `%${searchTerm}%` }
       )
-      
-      // If DB doesn't have an RPC function:
-      /*
-      const { data: matchingIds, error: searchError } = await supabase
-        .from('client_search_view')  // Consider creating a optimized view for searching
-        .select('client_id')
-        .ilike('search_text', `%${searchTerm}%`)
-      */
       
       if (searchError) {
         logger.error("Error in search query:", searchError)
@@ -222,10 +189,7 @@ export async function getUnifiedClients(
   createdAt?: Date | null,
 ) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    const organization = user?.user_metadata?.organization;
-    const { clientsOrg } = getOrgMappings(organization);
+    const { supabase, clientsOrg } = await getAuthenticatedClient();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const applyFilters = (baseQuery: any) => {
@@ -257,8 +221,6 @@ export async function getUnifiedClients(
 
       return q;
     };
-
-    console.log('Filters - Status:', status, 'Search Query:', searchQuery, 'Created At:', createdAt);
 
     let query = supabase
       .from('clients_view_unified')
@@ -355,13 +317,9 @@ export async function getUnifiedClients(
 }
 
 
-/**
- * Fetches detailed information for a specific client by ID
- * OPTIMIZED: Uses relational joins to reduce DB round trips and Promise.all for parallel storage calls.
- */
 export async function getClientDetails(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const { supabase } = await getAuthenticatedClient();
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .select(`
@@ -444,7 +402,7 @@ export async function getClientDetails(clientId: string) {
 
 export async function getClientStatus(clientId: string) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const { supabase } = await getAuthenticatedClient();
       
       const { data, error } = await supabase
         .from('clients')
@@ -484,7 +442,7 @@ export async function getClientStatus(clientId: string) {
 
 export async function deleteClient(clientId: string) {
     try {
-        const supabase = await createSupabaseServerClient();
+        const { supabase } = await getAuthenticatedClient();
         
         const { data: nurseAssignments, error: nurseError } = await supabase
             .from('nurse_client')
@@ -576,16 +534,13 @@ export async function deleteClient(clientId: string) {
 }
 
 
-/**
- * Exports all clients without pagination - for data export purposes
- */
 export async function exportClients(
-  status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all', 
+  status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned' | 'all',
   searchQuery?: string
 ) {
   try {
-    const { supabase, clientsOrg } = await getAuthenticatedClient();
-    
+    const { supabase, clientsOrg } = await getAuthenticatedClient()
+
     let query = supabase
       .from('clients')
       .select(`
@@ -597,7 +552,7 @@ export async function exportClients(
         general_notes,
         individual_clients:individual_clients(
           requestor_name,
-          requestor_phone, 
+          requestor_phone,
           requestor_email,
           patient_name,
           patient_age,
@@ -628,63 +583,55 @@ export async function exportClients(
       `)
 
     if (clientsOrg) {
-      query = query.eq('client_category', clientsOrg);
+      query = query.eq('client_category', clientsOrg)
     }
-    
-    if (status && status !== "all") {
-      //query = query.eq('status', status)
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status)
     }
-    
+
     if (searchQuery && searchQuery.trim() !== '') {
-      // const searchTerm = searchQuery.toLowerCase().trim();
-      
-      // const individualClientsQuery = supabase
-      //   .from('individual_clients')
-      //   .select('client_id')
-      //   .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,complete_address.ilike.%${searchTerm}%`);
-      
-      // const organizationClientsQuery = supabase
-      //   .from('organization_clients')
-      //   .select('client_id')
-      //   .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`);
-        
-      // const [individualResults, organizationResults] = await Promise.all([
-      //   individualClientsQuery,
-      //   organizationClientsQuery
-      // ]);
-      
-      // const individualClientIds = (individualResults.data || []).map(item => item.client_id);
-      // const organizationClientIds = (organizationResults.data || []).map(item => item.client_id);
-      
-      // const matchingClientIds = [...individualClientIds, ...organizationClientIds];
-      
-      // if (matchingClientIds.length > 0) {
-      //   query = query.in('id', matchingClientIds);
-      // } else {
-      //   return { 
-      //     success: true, 
-      //     clients: [],
-      //     clientsData: []
-      //   };
-      // }
+      const searchTerm = searchQuery.toLowerCase().trim()
+
+      const [indResults, orgResults] = await Promise.all([
+        supabase
+          .from('individual_clients')
+          .select('client_id')
+          .or(`patient_name.ilike.%${searchTerm}%,requestor_phone.ilike.%${searchTerm}%,requestor_name.ilike.%${searchTerm}%,requestor_address.ilike.%${searchTerm}%`),
+        supabase
+          .from('organization_clients')
+          .select('client_id')
+          .or(`organization_name.ilike.%${searchTerm}%,contact_phone.ilike.%${searchTerm}%,contact_person_name.ilike.%${searchTerm}%,organization_address.ilike.%${searchTerm}%`)
+      ])
+
+      const ids = [
+        ...(indResults.data || []).map(i => i.client_id),
+        ...(orgResults.data || []).map(i => i.client_id)
+      ]
+
+      if (ids.length > 0) {
+        query = query.in('id', ids)
+      } else {
+        return { success: true, clients: [], clientsData: [] }
+      }
     }
-    
-    const { data, error } = await query
-      .order('created_at', { ascending: false })
-    
+
+    const { data, error } = await query.order('created_at', { ascending: false })
+
     if (error) {
-      logger.error("Error fetching clients for export:", error)
-      return { success: false, error: error.message }
+      logger.error('Error fetching clients for export:', error)
+      return { success: false, error: error.message, clients: [], clientsData: [] }
     }
-    
-    // Create detailed data for export
+
     const clientsData = data.map(record => {
-      const isIndividual = record.client_type === 'individual';
-      const individualData = isIndividual ? 
-        (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients) : null;
-      const organizationData = !isIndividual ? 
-        (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients) : null;
-        
+      const isIndividual = record.client_type === 'individual'
+      const individualData = isIndividual
+        ? (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients)
+        : null
+      const organizationData = !isIndividual
+        ? (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients)
+        : null
+
       return {
         client_type: record.client_type,
         status: record.status,
@@ -692,27 +639,26 @@ export async function exportClients(
         general_notes: record.general_notes,
         ...individualData,
         ...organizationData
-      };
-    });
-    
-    // Also keep the regular client objects for backward compatibility
+      }
+    })
+
     const clients = data.map(record => {
       const isIndividual = record.client_type === 'individual'
-      const individualData = isIndividual ? (Array.isArray(record.individual_clients) 
-        ? record.individual_clients[0] 
-        : record.individual_clients) : null
-      const organizationData = !isIndividual ? (Array.isArray(record.organization_clients) 
-        ? record.organization_clients[0] 
-        : record.organization_clients) : null
-      
+      const individualData = isIndividual
+        ? (Array.isArray(record.individual_clients) ? record.individual_clients[0] : record.individual_clients)
+        : null
+      const organizationData = !isIndividual
+        ? (Array.isArray(record.organization_clients) ? record.organization_clients[0] : record.organization_clients)
+        : null
+
       return {
-        name: isIndividual 
-          ? individualData?.patient_name || "Unknown" 
-          : organizationData?.organization_name || "Unknown",
+        name: isIndividual
+          ? individualData?.patient_name || 'Unknown'
+          : organizationData?.organization_name || 'Unknown',
         requestDate: isIndividual
           ? new Date(individualData?.start_date || record.created_at || new Date()).toISOString().split('T')[0]
           : new Date(record.created_at || new Date()).toISOString().split('T')[0],
-        service: isIndividual ? individualData?.service_required : "Organization Care",
+        service: isIndividual ? individualData?.service_required : 'Organization Care',
         status: record.status,
         email: isIndividual ? individualData?.requestor_email : organizationData?.contact_email,
         phone: isIndividual ? individualData?.requestor_phone : organizationData?.contact_phone,
@@ -723,18 +669,18 @@ export async function exportClients(
         description: record.general_notes || undefined
       }
     })
-      
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       clients,
       clientsData
     }
-    
+
   } catch (error: unknown) {
     logger.error('Error exporting clients:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'An unknown error occurred', 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
       clients: [],
       clientsData: []
     }
@@ -747,7 +693,7 @@ export async function updateClientCategory(
     newCategory: Database["public"]["Enums"]["client_category"]
   ) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const { supabase } = await getAuthenticatedClient();
       
       const { data, error } = await supabase
         .from('clients')
@@ -760,7 +706,6 @@ export async function updateClientCategory(
         return { success: false, error: error.message };
       }
       
-      // Revalidate the clients page to reflect the changes
       revalidatePath('/clients');
       
       return { success: true, client: data };
@@ -779,11 +724,7 @@ export async function fetchApprovedClientNames(searchTerm?: string): Promise<{
   error: string | null;
 }> {
   try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user } } = await supabase.auth.getUser();
-    const organization = user?.user_metadata?.organization;
-
-    const { clientsOrg } = getOrgMappings(organization);
+    const { supabase, clientsOrg } = await getAuthenticatedClient();
 
     let query = supabase
       .from('approved_clients_view')
@@ -830,7 +771,7 @@ export async function updateIndividualClientLocationLink(
     return { success: false, error: 'Invalid field name' };
   }
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const { error } = await supabase
       .from('individual_clients')
       .update({ [field]: value })
@@ -857,7 +798,7 @@ export async function updateIndividualClientLocationLink(
  */
 export async function updateClientCreatedAt(clientId: string, newCreatedAt: string | Date) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const { error } = await supabase
       .from('clients')
       .update({ created_at: typeof newCreatedAt === 'string' ? newCreatedAt : newCreatedAt.toISOString() })
@@ -888,7 +829,7 @@ export async function updateClientServicePeriod(
   endDate: string | Date
 ) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
     const formatDate = (d: string | Date) =>
       typeof d === 'string'
         ? d
@@ -935,7 +876,7 @@ export async function addServiceHistoryItem(
   serviceItem: { start_date: string; end_date: string; note?: string; service_required?: string }
 ) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data, error } = await supabase
       .from('client_service_history')
@@ -974,7 +915,7 @@ export async function updateServiceHistoryItem(
   updates: Partial<{ start_date: string; end_date: string; note: string; service_required: string }>
 ) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { error } = await supabase
       .from('client_service_history')
@@ -1000,13 +941,13 @@ export async function updateServiceHistoryItem(
  */
 export async function getServiceHistory(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data, error } = await supabase
       .from('client_service_history')
       .select('*')
       .eq('client_id', clientId)
-      .order('start_date', { ascending: false }); // Database handles the sorting now
+      .order('start_date', { ascending: false });
 
     if (error) {
       return { success: false, error: error.message };
@@ -1027,7 +968,7 @@ export async function getServiceHistory(clientId: string) {
  */
 export async function deleteServiceHistoryItem(itemId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { error } = await supabase
       .from('client_service_history')

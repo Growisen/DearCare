@@ -35,7 +35,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ src, alt, isOpen, onClose }) 
           </svg>
         </button>
         
-        <div className="relative w-full h-auto overflow-hidden rounded-lg">
+        <div className="relative w-full h-auto overflow-hidden rounded-sm">
           <Image
             src={src}
             alt={alt}

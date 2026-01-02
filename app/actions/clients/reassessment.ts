@@ -1,8 +1,9 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { logger } from '@/utils/logger';
 import { FormData } from '@/types/reassessment.types';
+import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 
 /**
  * Inserts a new reassessment record for a client.
@@ -11,7 +12,7 @@ import { FormData } from '@/types/reassessment.types';
  */
 export async function insertReassessment(clientId: string, formData: FormData) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
     const { error } = await supabase
       .from('reassessment')
@@ -59,7 +60,7 @@ export async function insertReassessment(clientId: string, formData: FormData) {
  */
 export async function fetchReassessments(clientId: string, reassessmentId?: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     let query = supabase
       .from('reassessment')

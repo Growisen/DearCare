@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getUnifiedClients } from "@/app/actions/clients/client-actions"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Client, ClientFilters, ClientStatus, ClientCategory } from '@/types/client.types'
+import { ClientFilters, ClientStatus, ClientCategory } from '@/types/client.types'
 import useOrgStore from '@/app/stores/UseOrgStore'
 
 export function useClientData() {

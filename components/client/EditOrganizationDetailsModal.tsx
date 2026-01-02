@@ -219,9 +219,9 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50">
       <div className="flex items-center justify-center min-h-screen px-4 py-6 sm:p-0">
-        <div ref={modalRef} className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto max-h-[90vh] overflow-hidden flex flex-col">
+        <div ref={modalRef} className="relative bg-white rounded-sm shadow-xl w-full max-w-4xl mx-auto max-h-[90vh] overflow-hidden flex flex-col">
           {/* Modal Header */}
-          <div className="sticky top-0 z-10 flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white">
+          <div className="sticky top-0 z-10 flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white">
             <h2 className="text-xl font-semibold text-gray-800">Edit Organization Details</h2>
             <button 
               onClick={onClose}
@@ -250,7 +250,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                     value={organizationName}
                     onChange={(e) => setOrganizationName(e.target.value)}
                     onBlur={checkOrganizationNameValidity}
-                    className={`w-full border ${organizationNameError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    className={`w-full border ${organizationNameError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   />
                   {organizationNameError && (
                     <p className="mt-1 text-sm text-red-600">{organizationNameError}</p>
@@ -272,7 +272,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={contactPersonName}
                       onChange={(e) => setContactPersonName(e.target.value)}
                       onBlur={checkContactPersonNameValidity}
-                      className={`w-full border ${contactPersonNameError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${contactPersonNameError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {contactPersonNameError && (
                       <p className="mt-1 text-sm text-red-600">{contactPersonNameError}</p>
@@ -288,7 +288,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       id="contact_person_role"
                       value={contactPersonRole}
                       onChange={(e) => setContactPersonRole(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                   
@@ -302,7 +302,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onBlur={checkEmailValidity}
-                      className={`w-full border ${emailError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${emailError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {emailError && (
                       <p className="mt-1 text-sm text-red-600">{emailError}</p>
@@ -319,7 +319,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       onBlur={checkPhoneValidity}
-                      className={`w-full border ${phoneError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${phoneError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {phoneError && (
                       <p className="mt-1 text-sm text-red-600">{phoneError}</p>
@@ -341,7 +341,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     onBlur={checkAddressValidity}
-                    className={`w-full border ${addressError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    className={`w-full border ${addressError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   />
                   {addressError && (
                     <p className="mt-1 text-sm text-red-600">{addressError}</p>
@@ -359,7 +359,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       onBlur={checkCityValidity}
-                      className={`w-full border ${cityError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${cityError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {cityError && (
                       <p className="mt-1 text-sm text-red-600">{cityError}</p>
@@ -376,7 +376,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={district}
                       onChange={(e) => setDistrict(e.target.value)}
                       onBlur={checkDistrictValidity}
-                      className={`w-full border ${districtError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${districtError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {districtError && (
                       <p className="mt-1 text-sm text-red-600">{districtError}</p>
@@ -393,7 +393,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                       onBlur={checkStateValidity}
-                      className={`w-full border ${stateError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${stateError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {stateError && (
                       <p className="mt-1 text-sm text-red-600">{stateError}</p>
@@ -410,7 +410,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                       value={pincode}
                       onChange={(e) => setPincode(e.target.value)}
                       onBlur={checkPincodeValidity}
-                      className={`w-full border ${pincodeError ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full border ${pincodeError ? 'border-red-500' : 'border-slate-200'} rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                     {pincodeError && (
                       <p className="mt-1 text-sm text-red-600">{pincodeError}</p>
@@ -431,7 +431,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
                     rows={3}
                     value={generalNotes}
                     onChange={(e) => setGeneralNotes(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Any additional notes or information about this organization..."
                   />
                 </div>
@@ -440,11 +440,11 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
           </div>
 
           {/* Modal Footer - Sticky at bottom */}
-          <div className="sticky bottom-0 flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 bg-white">
+          <div className="sticky bottom-0 flex justify-end space-x-3 px-6 py-4 border-t border-slate-200 bg-white">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-sm hover:bg-gray-300 transition-colors"
             >
               Cancel
             </button>
@@ -452,7 +452,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-sm hover:bg-blue-700 transition-colors disabled:bg-blue-400"
             >
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>

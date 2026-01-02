@@ -1,8 +1,9 @@
 import React, { memo } from "react"
-import { Clock, MapPin } from "lucide-react"
+import { Clock, MapPin, ArrowUpRight } from "lucide-react"
 import { AttendanceRecord } from "@/app/actions/attendance/attendance-actions"
 import LocationMap from "@/components/staff/attendance/LocationMap"
 import { formatDate, formatName } from "@/utils/formatters"
+import Link from "next/link"
 
 type AttendanceTableProps = {
   attendanceData: AttendanceRecord[]
@@ -13,7 +14,17 @@ const AttendanceTableRow = memo(({ record }: {
 }) => {
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatName(record.nurseName)}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        <Link
+          href={`/nurses/${record.nurseId}`}
+          className="text-gray-800 hover:underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {formatName(record.nurseName)}
+          <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+        </Link>
+      </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatDate(record.date)}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
         <div className="space-y-1">
@@ -74,10 +85,20 @@ const AttendanceMobileCard = memo(({ record }: {
   record: AttendanceRecord, 
 }) => {
   return (
-    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-slate-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-800">{formatName(record.nurseName)}</h3>
+          <h3 className="font-semibold text-gray-800">
+            <Link
+              href={`/nurses/${record.nurseId}`}
+              className="text-gray-800 hover:underline inline-flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatName(record.nurseName)}
+               <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+            </Link>
+          </h3>
           <p className="text-sm text-gray-500 mt-1">{record.date}</p>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
@@ -89,7 +110,7 @@ const AttendanceMobileCard = memo(({ record }: {
         </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
+      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-slate-200 p-3 rounded-sm">
         <p className="text-gray-500">Scheduled Time:</p>
         <p className="text-gray-800 font-medium">{record.scheduledStart || "N/A"} - {record.scheduledEnd || "N/A"}</p>
         <p className="text-gray-500">Actual Time:</p>
@@ -116,11 +137,11 @@ export const AttendanceTable = memo(function AttendanceTable({
   attendanceData, 
 }: AttendanceTableProps) {
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
       {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-100 border-b border-gray-200">
+          <thead className="bg-gray-100 border-b border-slate-200">
             <tr className="text-left">
               <th className="px-6 py-4 font-medium text-gray-700">Nurse Name</th>
               <th className="px-6 py-4 font-medium text-gray-700">Date</th>

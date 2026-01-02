@@ -19,7 +19,7 @@ export const DocumentUploader = React.memo(({
 
   // File item renderer - reused for both current and temp files
   const renderFileItem = (fileName: string, onClickRemove: () => void, key?: string | number) => (
-    <div key={key} className="flex items-center justify-between p-2.5 bg-blue-50 rounded-lg border border-blue-100">
+    <div key={key} className="flex items-center justify-between p-2.5 bg-blue-50 rounded-sm border border-blue-100">
       <div className="flex items-center space-x-2 overflow-hidden">
         <FileTypeIcon fileName={fileName} />
         <span className="text-xs text-blue-700 truncate max-w-[180px]">
@@ -38,7 +38,7 @@ export const DocumentUploader = React.memo(({
   );
 
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-shadow duration-200">
+    <div className="p-4 bg-white rounded-sm border border-slate-200 hover:shadow-none transition-shadow duration-200">
       <div className="flex items-center gap-2 mb-3">
         <DocumentIcon type={document.fieldName} />
         <h4 className="font-medium text-gray-700">{document.label}</h4>
@@ -48,7 +48,7 @@ export const DocumentUploader = React.memo(({
       <div className="relative mb-3">
         <label 
           htmlFor={`file-${document.fieldName}`} 
-          className="flex items-center justify-center w-full p-3 bg-gray-50 border border-gray-200 border-dashed rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+          className="flex items-center justify-center w-full p-3 bg-gray-50 border border-slate-200 border-dashed rounded-sm cursor-pointer hover:bg-gray-100 transition-colors"
         >
           <div className="flex flex-col items-center">
             {IconCollection.upload}

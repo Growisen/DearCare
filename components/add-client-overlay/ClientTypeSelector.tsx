@@ -16,10 +16,10 @@ export const ClientTypeSelector = ({ selectedType, onTypeChange }: ClientTypeSel
           <button
             key={type.id}
             onClick={() => onTypeChange(type.id)}
-            className={`p-3 rounded-lg border ${
+            className={`p-3 rounded-sm border ${
               selectedType === type.id
                 ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300 text-gray-900 font-medium'
+                : 'border-slate-200 hover:border-slate-200 text-gray-900 font-medium'
             } transition-colors duration-200`}
           >
             {type.label}

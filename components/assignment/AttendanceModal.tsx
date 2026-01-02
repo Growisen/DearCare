@@ -139,7 +139,7 @@ export function AttendanceModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <div className="bg-white rounded-sm shadow-lg p-6 w-full max-w-md relative">
         <button
           className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
           onClick={closeModal}

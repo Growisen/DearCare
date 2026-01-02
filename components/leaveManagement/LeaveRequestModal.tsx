@@ -22,7 +22,7 @@ const StatusBadge = ({ status }: { status: LeaveRequestStatus | string }) => {
       case 'pending':
         return 'bg-amber-100 text-amber-800 border-amber-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-slate-200'
     }
   }
 
@@ -105,7 +105,7 @@ export default function LeaveRequestModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="relative bg-white rounded-sm shadow-xl w-full max-w-md mx-4">
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">
             {isRejecting ? "Reject Leave Request" : isApproving ? "Approve Leave Request" : "Leave Request Details"}
@@ -127,21 +127,21 @@ export default function LeaveRequestModal({
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                className="w-full h-32 px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-32 px-3 py-2 text-gray-700 border rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter rejection reason..."
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <button 
                 onClick={() => setIsRejecting(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
+                className="px-4 py-2 border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleReject}
                 disabled={!rejectionReason.trim()}
-                className={`px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium transition ${
+                className={`px-4 py-2 bg-red-600 text-white rounded-sm text-sm font-medium transition ${
                   !rejectionReason.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'
                 }`}
               >
@@ -161,7 +161,7 @@ export default function LeaveRequestModal({
               <p className="text-sm text-gray-600 mb-2">
                 Are you sure you want to approve this leave request for <span className="font-medium">{formatName(leaveRequest.nurseName)}</span>?
               </p>
-              <div className="bg-yellow-50 border border-yellow-100 rounded-md px-4 py-3 mt-2 flex items-start gap-2 text-left w-full">
+              <div className="bg-yellow-50 border border-yellow-100 rounded-sm px-4 py-3 mt-2 flex items-start gap-2 text-left w-full">
                 <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-yellow-700">
                   This action cannot be undone. The employee will be notified upon approval.
@@ -171,13 +171,13 @@ export default function LeaveRequestModal({
             <div className="flex justify-end gap-3 pt-2">
               <button 
                 onClick={() => setIsApproving(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
+                className="px-4 py-2 border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleApprove}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium transition"
+                className="px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 text-sm font-medium transition"
               >
                 Confirm Approval
               </button>
@@ -220,15 +220,15 @@ export default function LeaveRequestModal({
               </div>
 
               {/* Reason */}
-              <div className="pt-2 border-t border-gray-100">
+              <div className="pt-2 border-t border-slate-200">
                 <h3 className="text-sm font-medium text-gray-500 mb-1">Reason</h3>
-                <div className="text-base text-gray-900 max-h-28 overflow-y-auto px-3 py-2 border border-gray-100 rounded-md bg-gray-50">
+                <div className="text-base text-gray-900 max-h-28 overflow-y-auto px-3 py-2 border border-slate-200 rounded-sm bg-gray-50">
                   {leaveRequest.reason}
                 </div>
               </div>
 
               {/* Status & Applied Date */}
-              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
                   <StatusBadge status={leaveRequest.status} />
@@ -244,19 +244,19 @@ export default function LeaveRequestModal({
               
               {/* Display rejection reason if status is rejected */}
               {leaveRequest.status === 'rejected' && leaveRequest.rejectionReason && (
-                <div className="pt-2 border-t border-gray-100">
+                <div className="pt-2 border-t border-slate-200">
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Rejection Reason</h3>
-                  <div className="text-base text-gray-900 px-3 py-2 border border-gray-100 rounded-md bg-gray-50">
+                  <div className="text-base text-gray-900 px-3 py-2 border border-slate-200 rounded-sm bg-gray-50">
                     {leaveRequest.rejectionReason}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
               <button 
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
+                className="px-4 py-2 border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-50 text-sm font-medium transition"
               >
                 Close
               </button>
@@ -264,19 +264,19 @@ export default function LeaveRequestModal({
                 <>
                   <button 
                     onClick={() => setIsApproving(true)}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium transition"
+                    className="px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 text-sm font-medium transition"
                   >
                     Approve
                   </button>
                   <button 
                     onClick={() => setIsRejecting(true)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium transition"
+                    className="px-4 py-2 bg-red-600 text-white rounded-sm hover:bg-red-700 text-sm font-medium transition"
                   >
                     Reject
                   </button>
                 </>
               ) : isPending && isLeaveExpired ? (
-                <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-md border border-amber-100">
+                <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-sm border border-amber-100">
                   <AlertTriangle className="w-4 h-4 mr-2" />
                   <span className="text-sm font-medium">Leave period has ended</span>
                 </div>

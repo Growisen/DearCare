@@ -13,7 +13,7 @@ interface OrganizationInfoFormProps {
 
 export const OrganizationInfoForm = ({ formData, handleInputChange, formErrors, handleBlur }: OrganizationInfoFormProps) => {
   return (
-    <div className="mb-8 border-b border-gray-200 pb-6">
+    <div className="mb-8 border-b border-slate-200 pb-6">
       <h2 className="text-lg font-medium text-gray-900 mb-4">Organization Details</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField 

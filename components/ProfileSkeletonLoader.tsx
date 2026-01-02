@@ -4,7 +4,7 @@ const ProfileSkeletonLoader: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-1 animate-pulse">
       <div className="max-w-[100%]">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden mb-4">
           <div className="p-6 border-b">
             <div className="flex items-center space-x-4">
               <div className="w-20 h-20 bg-gray-200 rounded-full"></div>

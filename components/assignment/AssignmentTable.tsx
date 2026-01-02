@@ -1,6 +1,6 @@
 import React, { memo, useState, useMemo } from "react"
 import { CalendarIcon, ClockIcon, UserIcon } from "@heroicons/react/24/outline"
-import { Building, Eye, Info } from "lucide-react"
+import { Building, Eye, Info, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { NurseAssignmentData } from "@/app/actions/scheduling/shift-schedule-actions";
@@ -77,12 +77,20 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
     : null;
 
   return (
-    <tr className={`transition-colors border-b border-gray-100 last:border-0 ${rowBgClass}`}>
+    <tr className={`transition-colors border-b border-slate-200 last:border-0 ${rowBgClass}`}>
       <td className="py-4 px-6 text-gray-800 font-medium">
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <span className="font-medium">{formatName(fullName)}</span>
+            <Link
+              href={`/nurses/${assignment.nurse_id}`}
+              className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatName(fullName)}
+              <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+            </Link>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
           </div>
         </div>
@@ -95,7 +103,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
             Est. Period Salary:
             <span className="relative group inline-flex">
               <Info className="w-3.5 h-3.5 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
-              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 p-2 text-center text-xs text-white bg-gray-900 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 p-2 text-center text-xs text-white bg-gray-900 rounded-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                 Estimated total salary for this assignment period, assuming full attendance.
                 <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></span>
               </span>
@@ -133,7 +141,15 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
 
       <td className="py-4 px-6">
         <div className="space-y-1">
-          <div className="font-medium text-gray-800">{formatName(clientName)}</div>
+          <Link
+            href={clientProfileUrl}
+            className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {formatName(clientName)}
+            <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+          </Link>
           {clientType && (
             <div className="text-xs text-gray-500">{clientType}</div>
           )}
@@ -157,21 +173,13 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
                 , {serviceStats.totalDays} total
             </div>
           )}
-          <Link 
-            href={clientProfileUrl} 
-            className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Profile
-          </Link>
         </div>
       </td>
       
       <td className="py-4 px-6">
         <button
           onClick={() => onViewDetails(assignment)}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-sm transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 shadow-none transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
           View
@@ -200,7 +208,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
   const { daysCompleted, daysRemaining, totalDays } = getAssignmentPeriodStatus(assignment.start_date, assignment.end_date);
 
   const cardBgClass = daysRemaining > 0 
-    ? "bg-gray-50 border-gray-100" 
+    ? "bg-gray-50 border-slate-200" 
     : "bg-red-50 border-red-100";
 
   const serviceStats = assignment.current_service_start && assignment.current_service_end
@@ -213,20 +221,27 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
         <div className="flex items-center">
           <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
           <div>
-            <span className="font-medium text-gray-800">{formatName(fullName)}</span>
+            <Link
+              href={`/nurses/${assignment.nurse_id}`}
+              className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatName(fullName)}
+              <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+            </Link>
             <p className="text-xs text-gray-500">ID: {assignment.nurse_reg_no}</p>
           </div>
         </div>
         <button
           onClick={() => onViewDetails(assignment)}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-white text-blue-700 hover:bg-gray-50 border border-blue-200 shadow-sm transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium bg-white text-blue-700 hover:bg-gray-50 border border-blue-200 shadow-none transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
           Details
         </button>
       </div>
-      
-      <div className="space-y-3 text-sm bg-white/50 border border-gray-200/50 p-3 rounded-lg backdrop-blur-sm">
+      <div className="space-y-3 text-sm bg-white/50 border border-slate-200/50 p-3 rounded-sm backdrop-blur-sm">
         <div>
           <p className="text-gray-500">Salary:</p>
           <p className="text-gray-800">Per Day: ₹{assignment.salary_per_day ?? "N/A"}</p>
@@ -235,7 +250,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
             Est. Period Salary :
             <span className="relative group inline-flex">
               <Info className="w-3.5 h-3.5 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
-              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 p-2 text-center text-xs text-white bg-gray-900 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 p-2 text-center text-xs text-white bg-gray-900 rounded-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                 Estimated total salary for this assignment period, assuming full attendance.
                 <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></span>
               </span>
@@ -248,7 +263,15 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
             <Building className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
             <div>
               <p className="text-gray-500">Client:</p>
-              <div className="font-medium text-gray-800">{formatName(clientName)}</div>
+              <Link
+                href={clientProfileUrl}
+                className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {formatName(clientName)}
+                <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+              </Link>
               {clientType && (
                 <div className="text-xs text-gray-500">{clientType}</div>
               )}
@@ -274,14 +297,6 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
                   )
                 </div>
               )}
-              <Link 
-                href={clientProfileUrl} 
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Profile
-              </Link>
             </div>
           </div>
         </div>
@@ -322,14 +337,12 @@ export const AssignmentTable = memo(function AssignmentTable({ assignments }: As
     setSelectedAssignment(assignment);
   };
 
-  console.log('Rendering AssignmentTable with assignments:', assignments);
-
   return (
     <>
-      <div className="bg-gray-200 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+      <div className="bg-gray-200 rounded-sm border border-slate-200 overflow-hidden shadow-none">
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full table-fixed border-collapse">
-            <thead className="bg-gray-100 border-b border-gray-200">
+            <thead className="bg-gray-100 border-b border-slate-200">
               <tr className="text-left">
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/5">Nurse</th>
                 <th className="py-4 px-6 font-medium text-gray-700 w-1/4">Salary</th>

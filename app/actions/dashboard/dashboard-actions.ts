@@ -81,10 +81,10 @@ export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date
       .eq('admitted_type', nursesOrg);
 
     let assignmentsQuery = supabase
-      .from('nurse_client')
-      .select('*, nurse_id!inner(*)')
-      .eq('nurse_id.admitted_type', nursesOrg);
-
+      .from('nurse_assignments_view_with_service_history')
+      .select('count', { count: 'exact' })
+      .eq('admitted_type', nursesOrg);
+    
     let pendingClientsQuery = supabase
       .from('clients')
       .select('count')
@@ -236,7 +236,7 @@ export async function fetchDashboardData({ selectedDate }: { selectedDate?: Date
             trendUp: true 
           },
           currentAssignments: { 
-            count: parseInt(String(assignmentsResult.data?.length)) || 0, 
+            count: parseInt(String(assignmentsResult.data?.[0]?.count)) || 0, 
             trend: '+2%', 
             trendUp: true 
           },
@@ -349,6 +349,7 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
       return {
         id: p.id,
         clientName: p.client_display_name,
+        clientId: p.client_id,
         groupName: p.payment_group_name,
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',

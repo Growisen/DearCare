@@ -162,12 +162,12 @@ export default function HomeMaidPreferencesPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {nameLoading ? (
           <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="w-8 h-8 border-2 border-gray-200 border-t-slate-800 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
             <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">Verifying user</span>
           </div>
         ) : (
-          <div className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-white px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-white rounded-sm shadow-none border border-slate-200 overflow-hidden">
+            <div className="bg-white px-8 py-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-5">
                 <div className="relative w-32 h-12 md:w-80 md:h-20 shrink-0">
                   <Image
@@ -178,7 +178,7 @@ export default function HomeMaidPreferencesPage() {
                     priority
                   />
                 </div>
-                <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-gray-100
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-medium bg-gray-50 border border-slate-200
                   ${clientNames?.clientCategory === 'DearCare LLP' ? "text-dCblue" : "text-amber-600"}`}>
                   {clientNames?.clientCategory === 'DearCare LLP' ? 'DearCare' : 'Tata Home Nursing'}
                 </div>
@@ -188,7 +188,7 @@ export default function HomeMaidPreferencesPage() {
               </div>
             </div>
 
-            <div className="bg-slate-50/50 border-b border-gray-100 p-6 md:p-8">
+            <div className="bg-slate-50/50 border-b border-slate-200 p-6 md:p-8">
               {clientNames ? (
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="mt-1 hidden md:block">
@@ -200,12 +200,12 @@ export default function HomeMaidPreferencesPage() {
                     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Verification Required</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
                       {clientNames.patientName && (
-                        <div className="bg-white border border-gray-200 p-3 rounded-md shadow-sm">
+                        <div className="bg-white border border-slate-200 p-3 rounded-sm shadow-none">
                           <span className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Patient Name</span>
                           <span className="font-medium text-slate-700 text-base">{clientNames.patientName || 'N/A'}</span>
                         </div>
                       )}
-                      <div className="bg-white border border-gray-200 p-3 rounded-md shadow-sm">
+                      <div className="bg-white border border-slate-200 p-3 rounded-sm shadow-none">
                         <span className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Requestor Name</span>
                         <span className="font-medium text-slate-700 text-base">{clientNames.requestorName || 'N/A'}</span>
                       </div>
@@ -231,10 +231,10 @@ export default function HomeMaidPreferencesPage() {
                   handleDutyChange={handleDutyChange}
                   formErrors={formErrors}
                 />
-                <div className="flex items-center justify-end gap-4 pt-8 border-t border-gray-100 mt-12">
+                <div className="flex items-center justify-end gap-4 pt-8 border-t border-slate-200 mt-12">
                   <button
                     type="button"
-                    className="px-6 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50 rounded-md transition-colors"
+                    className="px-6 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50 rounded-sm transition-colors"
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
@@ -242,7 +242,7 @@ export default function HomeMaidPreferencesPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-8 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                    className="px-8 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-sm hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (

@@ -62,7 +62,7 @@ export default function EditHomeMaidForm({ initialData, onSubmit }: EditHomeMaid
       <div className="flex justify-end mt-6">
         <button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors"
         >
           Save Changes
         </button>

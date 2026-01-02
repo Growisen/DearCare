@@ -181,9 +181,9 @@ const [referenceData, setReferenceData] = useState<NurseReferenceData>({
 
 return (
   <div className="fixed inset-0 bg-gray-900/40 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden shadow-xl">
+    <div className="bg-white rounded-sm w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden shadow-xl">
 
-      <div className="shrink-0 border-b border-gray-200 px-6 py-5 flex items-center justify-between bg-gray-50">
+      <div className="shrink-0 border-b border-slate-200 px-6 py-5 flex items-center justify-between bg-gray-50">
         <h2 className="text-lg font-semibold text-gray-900">Add New Nurse</h2>
         <button 
           onClick={onClose} 
@@ -194,7 +194,7 @@ return (
         </button>
       </div>
 
-      <div className="shrink-0 px-4 sm:px-6 py-4 sm:py-5 bg-white border-b border-gray-100">
+      <div className="shrink-0 px-4 sm:px-6 py-4 sm:py-5 bg-white border-b border-slate-200">
         <div className="flex items-center justify-between relative">
           <div className="absolute top-3 sm:top-4 left-0 right-0 h-0.5 bg-gray-200 hidden sm:block">
             <div 
@@ -210,7 +210,7 @@ return (
                   ? 'bg-gray-600 text-white' 
                   : index === currentStep
                   ? 'bg-gray-700 text-white ring-2 sm:ring-4 ring-gray-200'
-                  : 'bg-white text-gray-400 border-2 border-gray-300'
+                  : 'bg-white text-gray-400 border-2 border-slate-200'
               }`}>
                 {index < currentStep ? '✓' : index + 1}
               </div>
@@ -235,11 +235,11 @@ return (
         {renderStep()}
       </div>
       
-      <div className="shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between items-center gap-4">
+      <div className="shrink-0 border-t border-slate-200 px-6 py-4 bg-gray-50 flex justify-between items-center gap-4">
         <button
           onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
-          className="px-5 py-2.5 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-2.5 text-sm font-medium border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Previous
         </button>
@@ -251,7 +251,7 @@ return (
         <button
           onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
           disabled={!canProceed()}
-          className="px-5 py-2.5 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-2.5 text-sm font-medium bg-gray-700 text-white rounded-sm hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
         </button>

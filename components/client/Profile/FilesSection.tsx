@@ -38,7 +38,6 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
       setShowErrors(true);
       const timer = setTimeout(() => {
         setShowErrors(false);
-        // Clear error messages after display timeout
         setFileErrors({});
       }, ERROR_DISPLAY_DURATION);
       
@@ -193,7 +192,7 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-sm border border-slate-200 overflow-hidden">
         <div className="p-4">
           <h3 className="font-medium text-lg mb-4 text-gray-900">Patient Files / Documents</h3>
           {files.length === 0 ? (
@@ -252,7 +251,7 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-sm border border-slate-200 overflow-hidden">
         <button 
           onClick={() => setUploadSectionExpanded(!uploadSectionExpanded)}
           className="w-full flex justify-between items-center p-4 text-left focus:outline-none"
@@ -265,10 +264,10 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
         </button>
         
         {uploadSectionExpanded && (
-          <div className="p-4 pt-0 border-t border-gray-100">
+          <div className="p-4 pt-3 border-t border-slate-200">
             <div 
-              className={`border-2 border-dashed rounded-lg text-center ${
-                dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+              className={`border-2 border-dashed rounded-sm text-center ${
+                dragActive ? 'border-blue-400 bg-blue-50' : 'border-slate-200'
               } ${selectedFiles.length > 0 ? 'p-2' : 'p-4'}`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -332,7 +331,7 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
                         <input
                           type="text"
                           placeholder="Add tag"
-                          className="w-full px-2 py-1 border rounded text-xs"
+                          className="w-full px-3 py-3 border border-slate-300 focus:outline-none rounded-sm text-gray-800 text-sm"
                           value={fileTags[file.name] || ''}
                           onChange={(e) => handleTagChange(file.name, e.target.value)}
                         />
@@ -350,7 +349,8 @@ const FileSection: React.FC<FilesSectionProps> = ({ files, onUpload, onDelete })
                   <button
                     onClick={handleUpload}
                     disabled={uploading || selectedFiles.length === 0}
-                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-sm shadow-none
+                     text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:opacity-50"
                   >
                     <FiUpload className="mr-1" size={14} />
                     {uploading ? 'Uploading...' : 'Upload Files'}

@@ -24,19 +24,19 @@ export function LeaveRequestsCards({
   const renderSkeleton = () => (
     <div className="space-y-5 py-3">
       {Array(5).fill(0).map((_, idx) => (
-        <div key={idx} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <div key={idx} className="bg-white rounded-sm p-5 border border-slate-200 shadow-none">
           <div className="flex flex-col space-y-4">
-            <div className="h-5 bg-gray-100 rounded-md w-1/4 animate-pulse"></div>
+            <div className="h-5 bg-gray-100 rounded-sm w-1/4 animate-pulse"></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="h-4 bg-gray-100 rounded-md w-3/4 animate-pulse"></div>
-              <div className="h-4 bg-gray-100 rounded-md w-1/2 animate-pulse"></div>
+              <div className="h-4 bg-gray-100 rounded-sm w-3/4 animate-pulse"></div>
+              <div className="h-4 bg-gray-100 rounded-sm w-1/2 animate-pulse"></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="h-4 bg-gray-100 rounded-md w-1/2 animate-pulse"></div>
-              <div className="h-4 bg-gray-100 rounded-md w-3/4 animate-pulse"></div>
+              <div className="h-4 bg-gray-100 rounded-sm w-1/2 animate-pulse"></div>
+              <div className="h-4 bg-gray-100 rounded-sm w-3/4 animate-pulse"></div>
             </div>
             <div className="flex justify-end">
-              <div className="h-9 bg-gray-100 rounded-lg w-28 animate-pulse"></div>
+              <div className="h-9 bg-gray-100 rounded-sm w-28 animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -112,7 +112,7 @@ export function LeaveRequestsCards({
             
             <div className="flex justify-end gap-2 pt-2">
               <button 
-                className="px-3.5 py-1.5 bg-indigo-50 text-indigo-600 rounded-md text-sm font-medium hover:bg-indigo-100 transition-colors"
+                className="px-3.5 py-1.5 bg-indigo-50 text-indigo-600 rounded-sm text-sm font-medium hover:bg-indigo-100 transition-colors"
                 onClick={() => onView(request)}
               >
                 View
@@ -120,14 +120,14 @@ export function LeaveRequestsCards({
               {request.status === 'pending' && (
                 <>
                   <button 
-                    className={`px-3.5 py-1.5 bg-green-50 text-green-600 rounded-md text-sm font-medium hover:bg-green-100 transition-colors ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-3.5 py-1.5 bg-green-50 text-green-600 rounded-sm text-sm font-medium hover:bg-green-100 transition-colors ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={() => onApprove(request.id)}
                     disabled={isProcessing}
                   >
                     {isProcessing ? '...' : 'Approve'}
                   </button>
                   <button 
-                    className={`px-3.5 py-1.5 bg-red-50 text-red-600 rounded-md text-sm font-medium hover:bg-red-100 transition-colors ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-3.5 py-1.5 bg-red-50 text-red-600 rounded-sm text-sm font-medium hover:bg-red-100 transition-colors ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={() => onReject(request.id)}
                     disabled={isProcessing}
                   >

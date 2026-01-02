@@ -31,7 +31,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           toast: `
             group toast group-[.toaster]:bg-white group-[.toaster]:text-zinc-950 group-[.toaster]:border-zinc-200 group-[.toaster]:shadow-lg
             dark:group-[.toaster]:bg-zinc-950 dark:group-[.toaster]:text-zinc-50 dark:group-[.toaster]:border-zinc-800
-            border-l-4 border rounded-md
+            border-l-4 border rounded-sm
           `,
           
           description: "group-[.toast]:text-zinc-500 dark:group-[.toast]:text-zinc-400",

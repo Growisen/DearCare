@@ -64,7 +64,7 @@ const AnalyticsContent: React.FC<{ nurseId: number }> = ({ nurseId }) => {
       {items.map((item, idx) => (
         <div
           key={idx}
-          className="bg-white rounded border border-gray-300 p-5 flex flex-col justify-between"
+          className="bg-white rounded border border-slate-200 p-5 flex flex-col justify-between"
         >
           <div>
             <h3 className="text-base font-semibold text-gray-900">{item.label}</h3>

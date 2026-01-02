@@ -1,6 +1,7 @@
 "use server"
 
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 import { revalidatePath } from 'next/cache';
 import { ClientFile } from "@/types/client.types";
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +12,7 @@ export async function getStorageUrl(path: string | null): Promise<string | null>
     if (!path) return null;
 
     try {
-        const supabase = await createSupabaseServerClient();
+        const { supabase } = await getAuthenticatedClient();
         const { data, error } = await supabase
             .storage
             .from('DearCare')
@@ -161,7 +162,7 @@ export async function deleteClientFile(clientId: string, fileId: string): Promis
   
 export async function getClientFiles(clientId: string): Promise<{success: boolean, data?: (ClientFile & { url: string | null })[], error?: string}> {
     try {
-        const supabase = await createSupabaseServerClient();
+        const { supabase } = await getAuthenticatedClient();
 
         const { data, error } = await supabase
             .from('client_files')

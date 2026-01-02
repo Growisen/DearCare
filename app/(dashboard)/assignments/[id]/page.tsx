@@ -51,8 +51,8 @@ export default function AssignmentDetailsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="bg-white shadow-sm border border-slate-200 rounded-lg p-8 text-center">
+      <div className="container max-w-7xl">
+        <div className="bg-white shadow-none border border-slate-200 rounded-sm p-8 text-center">
           <div className="animate-pulse">
             <div className="h-6 bg-slate-200 rounded w-1/4 mb-4 mx-auto"></div>
             <div className="h-4 bg-slate-200 rounded w-1/2 mb-2 mx-auto"></div>
@@ -67,13 +67,13 @@ export default function AssignmentDetailsPage() {
 
   if (error || !assignmentDetails) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="bg-white shadow-sm border border-slate-200 rounded-lg p-8 text-center">
+      <div className="container max-w-7xl">
+        <div className="bg-white shadow-none border border-slate-200 rounded-sm p-8 text-center">
           <div className="text-red-500 text-xl mb-4">Error Loading Assignment</div>
           <p className="text-slate-700">{error || 'Assignment not found'}</p>
           <button
             onClick={() => window.history.back()}
-            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-sm transition-colors"
+            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-none transition-colors"
           >
             Go Back
           </button>
@@ -83,8 +83,8 @@ export default function AssignmentDetailsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <div className="bg-white shadow-sm border border-slate-200 rounded-lg overflow-hidden">
+    <div className="container max-w-7xl">
+      <div className="bg-white shadow-none border border-slate-200 rounded-sm overflow-hidden">
         <div className="p-5 border-b border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-xl font-bold text-slate-900">Assignment #{assignmentDetails.id}</h1>

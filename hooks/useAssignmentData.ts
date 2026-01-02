@@ -74,7 +74,7 @@ function downloadCSV(csvContent: string, fileName: string): void {
 export function useAssignmentData() {
   const queryClient = useQueryClient();
   const { organization } = useOrgStore();
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'upcoming'>('all')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'upcoming' | 'ending_today' | 'starting_today'>('all')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFilter, setDateFilter] = useState('')
@@ -96,7 +96,7 @@ export function useAssignmentData() {
 
   useEffect(() => {
     const savedStatus = localStorage.getItem('assignmentsPageStatus');
-    if (savedStatus && ['all', 'active', 'completed', 'upcoming'].includes(savedStatus)) {
+    if (savedStatus && ['all', 'active', 'completed', 'upcoming', 'ending_today', 'starting_today'].includes(savedStatus)) {
       setFilterStatus(savedStatus as typeof filterStatus);
     }
     setIsFiltersLoaded(true);
@@ -140,7 +140,7 @@ export function useAssignmentData() {
     setCurrentPage(1)
   }
 
-  const handleStatusChange = (status: 'all' | 'active' | 'completed' | 'upcoming') => {
+  const handleStatusChange = (status: 'all' | 'active' | 'completed' | 'upcoming' | 'ending_today' | 'starting_today') => {
     setFilterStatus(status)
     setCurrentPage(1)
   }

@@ -28,9 +28,9 @@ export const SalaryHeader: React.FC<SalaryHeaderProps> = ({
   onResetFilters,
 }) => {
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
           <p className="text-xs text-gray-500">{subtitle}</p>
@@ -47,10 +47,10 @@ export const SalaryHeader: React.FC<SalaryHeaderProps> = ({
                 <button
                   key={category}
                   onClick={() => onCategoryChange(category)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors ${
                     selectedCategory === category
                       ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-slate-200"
                   }`}
                 >
                   {category === "all" ? "All Categories" : category}
@@ -68,7 +68,7 @@ export const SalaryHeader: React.FC<SalaryHeaderProps> = ({
                 value={dateFrom}
                 onChange={onDateFromChange}
                 max={new Date().toISOString().split('T')[0]} // Set max to current date
-                className="rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-400 flex-1 min-w-0"
+                className="rounded-sm border border-slate-200 bg-white py-1.5 px-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-400 flex-1 min-w-0"
               />
             </div>
             <div className="flex items-center gap-1">
@@ -78,7 +78,7 @@ export const SalaryHeader: React.FC<SalaryHeaderProps> = ({
                 value={dateTo}
                 onChange={onDateToChange}
                 max={new Date().toISOString().split('T')[0]} // Set max to current date
-                className="rounded-md border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-400 flex-1 min-w-0"
+                className="rounded-sm border border-slate-200 bg-white py-1.5 px-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-400 flex-1 min-w-0"
               />
             </div>
           </div>
@@ -86,13 +86,13 @@ export const SalaryHeader: React.FC<SalaryHeaderProps> = ({
           {/* Action buttons - better spacing on mobile */}          <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
             <button
               onClick={onCalculate}
-              className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors flex items-center gap-1 flex-1 sm:flex-none justify-center"
+              className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors flex items-center gap-1 flex-1 sm:flex-none justify-center"
             >
               Calculate Working Hours
             </button>
             <button
               onClick={onResetFilters}
-              className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200 flex-1 sm:flex-none justify-center"
+              className="px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200 flex-1 sm:flex-none justify-center"
             >
               Reset All
             </button>

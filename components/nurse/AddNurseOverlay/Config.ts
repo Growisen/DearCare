@@ -28,9 +28,9 @@ export const FORM_CONFIG = {
   },
   steps: ["Personal Details", "Contact Information", "References", "Work Details", "Health & Additional Info", "Document Upload"],
   styles: {
-    input: "w-full rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent transition duration-200",
+    input: "w-full rounded-sm border border-slate-200 py-2 px-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent transition duration-200",
     label: "block text-sm font-medium text-gray-700 mb-1",
-    button: "px-4 py-2 text-sm rounded-lg transition-colors duration-200",
+    button: "px-4 py-2 text-sm rounded-sm transition-colors duration-200",
     layout: "grid grid-cols-1 sm:grid-cols-2 gap-4"
   }
 } as const;

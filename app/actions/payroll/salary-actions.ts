@@ -1,8 +1,8 @@
 "use server";
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { StaffSalary } from '@/types/staffSalary.types';
 import { logger } from '@/utils/logger';
+import { getAuthenticatedClient } from "@/app/actions/helpers/auth.helper";
 
 interface Nurse {
   nurse_id: number;
@@ -44,7 +44,7 @@ export async function fetchNurseHoursWorked(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     let normalizedOrganization = "all";
     if (organization) {
@@ -269,7 +269,7 @@ export async function fetchNurseHoursWorked(
 }
 
 export async function fetchSalaryConfig(nurseId: number) {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
   const { data, error } = await supabase
     .from('salary_configurations')
     .select('id, hourly_rate')
@@ -301,7 +301,7 @@ export async function upsertSalaryConfig({
   hourlyRate: number;
   configId?: number | null;
 }) {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
   const user = await supabase.auth.getUser();
   
   if (configId) {
@@ -376,7 +376,7 @@ export async function saveSalaryPayment({
   notes?: string;
   createdBy?: string;
 }) {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
   const user = await supabase.auth.getUser();
   
   const { data, error } = await supabase
@@ -486,7 +486,7 @@ export async function saveSalaryPaymentWithConfig({
 
 
 export async function fetchNurseSalaryPayments(nurseId: number) {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await getAuthenticatedClient();
 
   const { data, error } = await supabase
     .from('salary_payments')
@@ -517,8 +517,6 @@ export async function fetchNurseSalaryPayments(nurseId: number) {
   if (error) {
     throw new Error(`Failed to fetch salary payments: ${error.message}`);
   }
-
-  console.log(data);
 
   return data ?? [];
 }

@@ -116,7 +116,7 @@ const SalarySettings: React.FC = () => {
       {loading ? (
         <Loader message="Loading scheduled info.." />
        ): (
-       <div className="bg-white rounded border border-gray-300 p-5 space-y-6"> 
+       <div className="bg-white rounded border border-slate-200 p-5 space-y-6"> 
         <h2 className="text-gray-700">Salary Configuration</h2>
         <div className="flex items-center space-x-3">
           <label className="text-sm font-medium text-gray-700">
@@ -154,7 +154,7 @@ const SalarySettings: React.FC = () => {
             value={initialDate}
             onChange={(e) => setInitialDate(e.target.value)}
             disabled={!isActive || isSaving}
-            className={`w-full border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-slate-200 ${
+            className={`w-full border border-slate-200 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-slate-200 ${
               !isActive || isSaving ? "bg-gray-100 cursor-not-allowed" : ""
             }`}
           />
@@ -171,7 +171,7 @@ const SalarySettings: React.FC = () => {
             value={salaryIntervalDays}
             onChange={(e) => setSalaryIntervalDays(Number(e.target.value))}
             disabled={!isActive || isSaving}
-            className={`w-full border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-slate-200 ${
+            className={`w-full border border-slate-200 rounded px-3 py-2 text-gray-700 text-sm focus:ring focus:ring-slate-200 ${
               !isActive || isSaving ? "bg-gray-100 cursor-not-allowed" : ""
             }`}
           />
@@ -183,19 +183,19 @@ const SalarySettings: React.FC = () => {
             Notification Preferences
           </label>
           <div className={!isActive || isSaving ? "opacity-50" : ""}>
-            <table className="min-w-full text-sm text-gray-700 border border-gray-300">
+            <table className="min-w-full text-sm text-gray-700 border border-slate-200">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-3 py-2 text-left text-gray-700">
+                  <th className="border border-slate-200 px-3 py-2 text-left text-gray-700">
                     Days Before
                   </th>
-                  <th className="border border-gray-300 px-3 py-2"></th>
+                  <th className="border border-slate-200 px-3 py-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {notifications.map((day, index) => (
                   <tr key={index}>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-slate-200 px-3 py-2">
                       <input
                         type="number"
                         min={0}
@@ -204,14 +204,14 @@ const SalarySettings: React.FC = () => {
                           updateNotificationDay(index, Number(e.target.value))
                         }
                         disabled={!isActive || isSaving}
-                        className={`w-full border border-gray-300 rounded px-2 py-1 text-gray-700 text-sm ${
+                        className={`w-full border border-slate-200 rounded px-2 py-1 text-gray-700 text-sm ${
                           !isActive || isSaving
                             ? "bg-gray-100 cursor-not-allowed"
                             : ""
                         }`}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2 text-gray-700 text-center">
+                    <td className="border border-slate-200 px-3 py-2 text-gray-700 text-center">
                       <button
                         onClick={() => removeNotificationDay(index)}
                         disabled={!isActive || isSaving}

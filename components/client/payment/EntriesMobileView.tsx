@@ -70,7 +70,7 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
               })}
             </div>
             
-            <div className="space-y-2 mb-4 bg-gray-50 p-4 rounded-lg">
+            <div className="space-y-2 mb-4 bg-gray-50 p-4 rounded-sm">
               {group.lineItems.map((item) => {
                 const { amount, gst, totalWithGst } = calculateItemTotal(item);
 
@@ -118,7 +118,7 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
             </div>
             
             {group.notes && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="mt-3 pt-3 border-t border-slate-200">
                 <span className="font-medium text-gray-700 text-sm">Notes:</span>
                 <p className="text-sm text-gray-600 mt-1">{group.notes}</p>
               </div>

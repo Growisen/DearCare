@@ -83,7 +83,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {Object.entries(bedSore).map(([key, value]) => (
-          <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100 overflow-hidden break-words">
+          <div key={key} className="bg-gray-50 p-3 rounded-sm border border-slate-200 overflow-hidden break-words">
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
               {key.replace(/_/g, ' ')}
             </p>
@@ -140,7 +140,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
         <div className="space-y-4">
           {assessment?.familyMembers && assessment.familyMembers.length > 0 ? (
             assessment.familyMembers.map((member) => (
-              <div key={member.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div key={member.id} className="p-4 bg-gray-50 rounded-sm border border-slate-200">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-3">
                   <h3 className="font-medium text-gray-900">
                     {member.name}
@@ -164,7 +164,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                   {member.medicalRecords && (
                     <div className="md:col-span-2">
                       <span className="text-xs text-gray-500 font-medium">Medical Records</span>
-                      <p className="text-sm text-gray-800 p-2 bg-white rounded border border-gray-200 mt-1">
+                      <p className="text-sm text-gray-800 p-2 bg-white rounded border border-slate-200 mt-1">
                         {member.medicalRecords}
                       </p>
                     </div>
@@ -194,7 +194,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                 if (key === 'custom_tests') return null;
                 
                 return (
-                  <div key={key} className="bg-gray-50 p-3 rounded-md">
+                  <div key={key} className="bg-gray-50 p-3 rounded-sm">
                     <p className="text-xs text-gray-500 font-medium">{key.toUpperCase()}</p>
                     <p className="text-sm text-gray-700">{value || "Not recorded"}</p>
                   </div>
@@ -212,7 +212,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
               <h4 className="text-sm font-medium mb-3 text-gray-700">Custom Tests</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {assessment.lab_investigations.custom_tests.map((test, index) => (
-                  <div key={index} className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                  <div key={index} className="bg-gray-50 p-3 rounded-sm border border-slate-200">
                     <p className="text-xs text-gray-500 font-medium">{test.name.toUpperCase()}</p>
                     <p className="text-sm text-gray-700">{test.value || "Not recorded"}</p>
                   </div>
@@ -270,7 +270,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
             {Object.keys(assessment?.environment || {}).length > 0 ? (
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Environment Features</h4>
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-slate-200">Environment Features</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
                     {Object.entries(assessment?.environment || {}).map(([key, value]) => (
                       <div key={key} className="flex items-center">
@@ -278,7 +278,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                           type="checkbox"
                           checked={Boolean(value)}
                           readOnly
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                          className="h-4 w-4 text-blue-600 border-slate-200 rounded flex-shrink-0"
                         />
                         <label className={`ml-2 text-sm truncate ${Boolean(value) ? 'text-gray-700' : 'text-gray-400'}`}>
                           {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -297,7 +297,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
             {Object.keys(assessment?.equipment || {}).length > 0 ? (
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Bed-related Equipment</h4>
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-slate-200">Bed-related Equipment</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
                     {equipmentCategories.bedriddenEquipment.map(item => {
                       const equipment = assessment?.equipment as Record<string, boolean> || {};
@@ -308,7 +308,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                             type="checkbox"
                             checked={isChecked}
                             readOnly
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                            className="h-4 w-4 text-blue-600 border-slate-200 rounded flex-shrink-0"
                           />
                           <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
                             {item.label}
@@ -320,7 +320,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Mobility Equipment</h4>
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-slate-200">Mobility Equipment</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
                     {equipmentCategories.mobilityEquipment.map(item => {
                       const equipment = assessment?.equipment as Record<string, boolean> || {};
@@ -331,7 +331,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                             type="checkbox"
                             checked={isChecked}
                             readOnly
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                            className="h-4 w-4 text-blue-600 border-slate-200 rounded flex-shrink-0"
                           />
                           <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
                             {item.label}
@@ -343,7 +343,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-gray-100">Medical Equipment</h4>
+                  <h4 className="text-xs font-medium text-gray-600 pb-1 border-b border-slate-200">Medical Equipment</h4>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
                     {equipmentCategories.medicalEquipment.map(item => {
                       const equipment = assessment?.equipment as Record<string, boolean> || {};
@@ -354,7 +354,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
                             type="checkbox"
                             checked={isChecked}
                             readOnly
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0"
+                            className="h-4 w-4 text-blue-600 border-slate-200 rounded flex-shrink-0"
                           />
                           <label className={`ml-2 text-sm truncate ${isChecked ? 'text-gray-700' : 'text-gray-400'}`}>
                             {item.label}
@@ -376,7 +376,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
       id: 'recorder-info',
       title: 'Recorded By',
       content: (
-        <div className="p-3 bg-gray-50 rounded-md border border-gray-100">
+        <div className="p-3 bg-gray-50 rounded-sm border border-slate-200">
           {assessment?.recorderInfo ? (
             <div className="flex flex-col space-y-2">
               <div className="flex items-center">
@@ -406,7 +406,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
  return (
     <div className="space-y-4">
       {totalAssessments && totalAssessments.length > 0 && (
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-sm border border-slate-200">
           <div>
             <h3 className="text-sm font-medium text-gray-900">Assessment History</h3>
             <p className="text-xs text-gray-500 mt-1">Select a date to view past reports</p>
@@ -416,7 +416,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
               value={selectedAssessmentId ?? totalAssessments[0]?.id}
               onValueChange={onSelectAssessment}
             >
-              <SelectTrigger className="w-full bg-white border-gray-300 text-gray-800">
+              <SelectTrigger className="w-full bg-white border-slate-200 text-gray-800">
                 <SelectValue placeholder="Select date..." />
               </SelectTrigger>
               <SelectContent className="text-gray-800 bg-white">
@@ -434,7 +434,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
         const isExpanded = expandedSections.includes(section.id);
 
         return (
-          <div key={section.id} className="bg-white p-4 rounded border border-gray-200">
+          <div key={section.id} className="bg-white p-4 rounded border border-slate-200">
             <button 
               className="w-full flex justify-between items-center focus:outline-none"
               onClick={() => toggleSection(section.id)}
@@ -454,7 +454,7 @@ const MedicalInfo: React.FC<MedicalInfoProps> = ({ assessment, totalAssessments,
             </button>
             
             {isExpanded && (
-              <div className="pt-4 mt-2 border-t border-gray-200">
+              <div className="pt-4 mt-2 border-t border-slate-200">
                 {section.content}
               </div>
             )}

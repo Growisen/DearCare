@@ -74,10 +74,10 @@ export default function EditServicePeriodModal({
         onClick={handleClose}
       >
         <div
-          className="relative w-full max-w-md rounded-lg bg-white shadow-xl border border-gray-200"
+          className="relative w-full max-w-md rounded-sm bg-white shadow-xl border border-slate-200"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between p-6 border-b border-slate-200">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
                 <svg 
@@ -133,10 +133,10 @@ export default function EditServicePeriodModal({
                     setStartDate(e.target.value)
                     if (error) setError('')
                   }}
-                  className={`w-full px-3 py-2 border rounded-md text-gray-800 transition-colors focus:outline-none ${
+                  className={`w-full px-3 py-2 border rounded-sm text-gray-800 transition-colors focus:outline-none ${
                     error
                       ? 'border-red-300 focus:border-red-500'
-                      : 'border-gray-300 focus:border-blue-500'
+                      : 'border-slate-200 focus:border-blue-500'
                   }`}
                 />
               </div>
@@ -156,10 +156,10 @@ export default function EditServicePeriodModal({
                     setEndDate(e.target.value)
                     if (error) setError('')
                   }}
-                  className={`w-full px-3 py-2 border rounded-md text-gray-800 transition-colors focus:outline-none ${
+                  className={`w-full px-3 py-2 border rounded-sm text-gray-800 transition-colors focus:outline-none ${
                     error
                       ? 'border-red-300 focus:border-red-500'
-                      : 'border-gray-300 focus:border-blue-500'
+                      : 'border-slate-200 focus:border-blue-500'
                   }`}
                 />
               </div>
@@ -170,18 +170,18 @@ export default function EditServicePeriodModal({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 p-6 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-3 p-6 bg-gray-50 border-t border-slate-200">
             <button
               onClick={handleClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-sm hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {isLoading ? 'Saving...' : 'Save Changes'}
             </button>

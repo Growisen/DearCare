@@ -25,8 +25,8 @@ export default function PaymentHeader({
   setDateFilterAction
 }: PaymentHeaderProps) {
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden mb-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Client Payments</h1>
           <p className="text-xs text-gray-500">View and manage payments made by clients</p>
@@ -34,7 +34,8 @@ export default function PaymentHeader({
         <button
           onClick={onExportAction}
           disabled={isExporting}
-          className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
+          className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors
+           disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
         >
           {isExporting ? (
             <span className="flex items-center">
@@ -57,7 +58,8 @@ export default function PaymentHeader({
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             placeholder="Search by client"
-            className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-300 text-gray-800 w-full rounded"
+            className="pl-9 pr-20 py-1 h-9 bg-white text-sm border border-slate-200 focus:outline-none 
+            text-gray-800 w-full rounded"
             value={searchInput}
             onChange={(e) => setSearchInputAction(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearchAction()}
@@ -86,7 +88,7 @@ export default function PaymentHeader({
           <input
             id="dateFilter"
             type="date"
-            className="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none text-gray-700"
+            className="border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none text-gray-700"
             value={dateFilter || ""}
             onChange={e => setDateFilterAction && setDateFilterAction(e.target.value)}
           />

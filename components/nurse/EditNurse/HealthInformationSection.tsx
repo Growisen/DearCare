@@ -12,7 +12,7 @@ export const HealthInformationSection: React.FC<Props> = ({
   formData, handleInputChange
 }) => {
   return (
-    <section className="bg-gray-50 rounded-lg p-5">
+    <section className="bg-gray-50 rounded-sm p-5">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Health Information</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <FormTextArea

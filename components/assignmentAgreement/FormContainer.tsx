@@ -16,7 +16,7 @@ export const FormContainer: React.FC<FormContainerProps> = ({
   children
 }) => {
   return (
-    <div className="bg-white text-slate-900 flex flex-col gap-6 rounded-xl border border-slate-200 py-6 shadow-sm">
+    <div className="bg-white text-slate-900 flex flex-col gap-6 rounded-sm border border-slate-200 py-6 shadow-none">
       <div className="grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 pb-6 border-b border-slate-200">
         <div className="leading-none font-semibold text-xl">
           {title}

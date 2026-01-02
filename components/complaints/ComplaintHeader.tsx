@@ -29,8 +29,8 @@ export function ComplaintHeader({
   handleResetFilters
 }: ComplaintHeaderProps) {
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Complaints Management</h1>
           <p className="text-xs sm:text-sm text-gray-500">Track and resolve complaints</p>
@@ -38,7 +38,7 @@ export function ComplaintHeader({
         <button 
           onClick={onExport}
           disabled={isExporting}
-          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1.5 text-sm"
+          className="px-3 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1.5 text-sm"
         >
           {isExporting ? (
             <span className="flex items-center">
@@ -64,7 +64,7 @@ export function ComplaintHeader({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search complaints..."
-              className="pl-9 w-full bg-white text-sm text-gray-800 placeholder:text-gray-400 border-gray-200 h-10 focus-visible:ring-blue-400"
+              className="pl-9 w-full bg-white text-sm text-gray-800 placeholder:text-gray-400 border-slate-200 h-10 focus-visible:ring-blue-400"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -84,7 +84,7 @@ export function ComplaintHeader({
             
             <button
               onClick={handleSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded-md text-xs transition-colors font-medium"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded-sm text-xs transition-colors font-medium"
             >
               Search
             </button>
@@ -102,7 +102,7 @@ export function ComplaintHeader({
                     className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
                       selectedStatus === status
                         ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                        : "bg-white text-gray-600 hover:bg-gray-100 border border-slate-200"
                     }`}
                   >
                     {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
@@ -121,7 +121,7 @@ export function ComplaintHeader({
                     className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
                       selectedSource === source
                         ? "bg-purple-50 text-purple-700 border border-purple-200"
-                        : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                        : "bg-white text-gray-600 hover:bg-gray-100 border border-slate-200"
                     }`}
                   >
                     {source === "all" ? "All" : source.charAt(0).toUpperCase() + source.slice(1)}
@@ -136,8 +136,8 @@ export function ComplaintHeader({
               disabled={selectedStatus === "all" && selectedSource === "all" && !searchInput}
               className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors border flex items-center gap-1 ${
                 selectedStatus === "all" && selectedSource === "all" && !searchInput
-                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                  ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
               }`}
             >
               <X className="h-3 w-3" />
@@ -153,7 +153,7 @@ export function ComplaintHeader({
             <select
               value={selectedStatus}
               onChange={(e) => handleStatusChange(e.target.value as ComplaintStatus | "all")}
-              className="flex-1 rounded border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+              className="flex-1 rounded border border-slate-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
               style={{ 
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                 backgroundPosition: `right 0.5rem center`,
@@ -176,7 +176,7 @@ export function ComplaintHeader({
             <select
               value={selectedSource}
               onChange={(e) => handleSourceChange(e.target.value as ComplaintSource | "all")}
-              className="flex-1 rounded border border-gray-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+              className="flex-1 rounded border border-slate-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
               style={{ 
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                 backgroundPosition: `right 0.5rem center`,
@@ -197,8 +197,8 @@ export function ComplaintHeader({
             disabled={selectedStatus === "all" && selectedSource === "all" && !searchInput}
             className={`mt-1 py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
               selectedStatus === "all" && selectedSource === "all" && !searchInput
-                ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
             }`}
           >
             <X className="h-3 w-3" />

@@ -13,7 +13,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   setSelectedDate,
   todayFormatted
 }) => (
-  <header className="bg-white border border-gray-200 rounded-md shadow-sm px-6 py-5">
+  <header className="bg-white border border-slate-200 rounded-sm px-6 py-5">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div className="flex-1">
         <div className="flex items-center gap-2 text-gray-500 text-sm font-medium mb-1">
@@ -59,10 +59,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               value={selectedDate ? selectedDate.toISOString().split('T')[0] : ""}
               max={new Date().toISOString().split('T')[0]}
               onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
-              className={`block w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer
+              className={`block w-full pl-10 pr-4 py-2.5 border rounded-sm text-sm focus:outline-none transition-all cursor-pointer
                 ${selectedDate 
                   ? 'border-blue-200 bg-blue-50 text-blue-900 font-medium' 
-                  : 'border-gray-300 text-gray-600 bg-white hover:bg-gray-50'
+                  : 'border-slate-200 text-gray-600 bg-white hover:bg-gray-50'
                 }`}
             />
           </div>
@@ -70,7 +70,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {selectedDate && (
           <button
             onClick={() => setSelectedDate(null)}
-            className="h-[42px] px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="h-[42px] px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-sm transition-colors flex items-center gap-2"
             title="Clear filter and show general overview"
           >
             <span>Reset</span>

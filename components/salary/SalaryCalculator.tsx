@@ -198,7 +198,7 @@ export const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({
                       shouldUpdateConfig: newRate !== hourlyRate
                     });
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-slate-200 rounded text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   min="0"
                   step="0.01"
                   disabled={loading || isUpdating}
@@ -247,7 +247,7 @@ export const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({
         {/* Update Loading Overlay */}
         {isUpdating && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded">
-            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="bg-white p-6 rounded-sm shadow-lg flex flex-col items-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
               <p className="text-gray-700 font-medium">Saving salary payment...</p>
               <p className="text-gray-500 text-sm mt-1">Please wait</p>

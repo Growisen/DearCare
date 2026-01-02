@@ -46,10 +46,10 @@ export default function Stats({ statsData }: StatsProps) {
       {stats.map((stat) => (
         <Card 
           key={stat.title} 
-          className="p-3 bg-white border border-slate-200 shadow-sm rounded-md h-full flex flex-col justify-center"
+          className="p-3 bg-white border border-slate-200 shadow-none rounded-sm h-full flex flex-col justify-center"
         >
           <div className="flex items-center gap-2.5 w-full">
-            <div className={`min-w-8 w-8 h-8 rounded-md ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
+            <div className={`min-w-8 w-8 h-8 rounded-sm ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
               <stat.icon className={`w-4 h-4 ${stat.iconColor}`} />
             </div>
             <div className="min-w-0 flex-1">

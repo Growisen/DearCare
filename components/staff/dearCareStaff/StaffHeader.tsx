@@ -25,8 +25,8 @@ export function StaffHeader({
   handleResetFilters
 }: StaffHeaderProps) {
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Staff Management</h1>
           <p className="text-xs text-gray-500">Manage and review staff members</p>
@@ -34,7 +34,7 @@ export function StaffHeader({
         <div className="flex gap-2">
           <button 
             onClick={onAddStaff}
-            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
+            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-sm hover:bg-green-600 transition-colors flex items-center gap-1"
           >
             <Plus size={16} />
             Add Staff
@@ -42,7 +42,7 @@ export function StaffHeader({
           <button 
             onClick={onExport}
             disabled={isExporting}
-            className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
+            className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
           >
             {isExporting ? (
               <span className="flex items-center">
@@ -67,7 +67,7 @@ export function StaffHeader({
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Enter search term and press Enter..."
-            className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-gray-200 focus-visible:ring-blue-400 text-gray-800"
+            className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -96,17 +96,17 @@ export function StaffHeader({
           {/* Organization badge - read only for desktop */}
           <span className="text-xs font-medium text-gray-600 whitespace-nowrap hidden sm:inline">Organization:</span>
           <div className="hidden sm:flex gap-1.5 items-center">
-            <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
               {selectedCategory === "all" ? "All Organizations" : selectedCategory}
             </div>
             
             <button
               onClick={handleResetFilters}
               disabled={!searchInput}
-              className={`ml-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors border flex items-center gap-1 ${
+              className={`ml-1 px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border flex items-center gap-1 ${
                 !searchInput
-                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                  ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
               }`}
             >
               <X className="h-3 w-3" />
@@ -119,7 +119,7 @@ export function StaffHeader({
             {/* Organization badge - read only for mobile */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-gray-600">Organization:</span>
-              <div className="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                 {selectedCategory === "all" ? "All Organizations" : selectedCategory}
               </div>
             </div>
@@ -130,8 +130,8 @@ export function StaffHeader({
               disabled={!searchInput}
               className={`py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
                 !searchInput
-                  ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                  ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
               }`}
             >
               <X className="h-3 w-3" />

@@ -79,7 +79,7 @@ export function LoadingState({
   description?: string | null;
 }) {
   return (
-    <div className={`bg-gray-50 rounded-xl border border-gray-200 overflow-hidden p-8 ${className}`}>
+    <div className={`overflow-hidden p-8 ${className}`}>
       <div className="flex flex-col items-center justify-center text-center">
       <Loader 
         message={ null } 

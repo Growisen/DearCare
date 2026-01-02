@@ -21,7 +21,7 @@ export function PaginationControls({
   onPageSizeChange
 }: PaginationControlsProps) {
   return (
-    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="px-6 py-4 border-t border-slate-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
       <div className="text-sm text-gray-600 w-full sm:w-auto text-center sm:text-left">
         Showing <span className="font-medium text-gray-900">{itemsLength}</span> of{" "}
         <span className="font-medium text-gray-900">{totalCount}</span> results
@@ -29,7 +29,7 @@ export function PaginationControls({
       
       <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
         <select
-          className="w-full sm:w-auto pl-3 pr-8 py-1.5 border border-gray-200 bg-white rounded-md text-sm text-gray-700 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
+          className="w-full sm:w-auto pl-3 pr-8 py-1.5 border border-slate-200 bg-white rounded-sm text-sm text-gray-700 shadow-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
         >
@@ -40,14 +40,14 @@ export function PaginationControls({
           ))}
         </select>
         
-        <nav className="relative z-0 inline-flex rounded-md shadow-sm" aria-label="Pagination">
+        <nav className="relative z-0 inline-flex rounded-sm shadow-none" aria-label="Pagination">
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className={`relative inline-flex items-center px-3 py-2 rounded-l-md border text-sm font-medium ${
               currentPage === 1 
-                ? 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed' 
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150'
+                ? 'border-slate-200 bg-gray-50 text-gray-300 cursor-not-allowed' 
+                : 'border-slate-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150'
             }`}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -73,7 +73,7 @@ export function PaginationControls({
                   className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                     currentPage === pageNum
                       ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors duration-150'
+                      : 'bg-white border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors duration-150'
                   }`}
                 >
                   {pageNum}
@@ -82,7 +82,7 @@ export function PaginationControls({
             })}
           </div>
           
-          <div className="sm:hidden border border-gray-200 bg-white px-4 py-2">
+          <div className="sm:hidden border border-slate-200 bg-white px-4 py-2">
             <span className="text-sm font-medium text-gray-700">
               {currentPage} / {totalPages || 1}
             </span>
@@ -93,8 +93,8 @@ export function PaginationControls({
             disabled={currentPage === totalPages || totalPages === 0}
             className={`relative inline-flex items-center px-3 py-2 rounded-r-md border text-sm font-medium ${
               currentPage === totalPages || totalPages === 0
-                ? 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150'
+                ? 'border-slate-200 bg-gray-50 text-gray-300 cursor-not-allowed'
+                : 'border-slate-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150'
             }`}
           >
             <span className="hidden sm:inline mr-1">Next</span>

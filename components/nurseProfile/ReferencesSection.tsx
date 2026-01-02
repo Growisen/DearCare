@@ -33,14 +33,14 @@ const ReferencesSection: React.FC<ReferencesSectionProps> = ({ referencesInfo })
     value && value.trim() !== '' ? value : 'N/A';
 
   return (
-    <div className="bg-white p-4 rounded border border-gray-200">
-      <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-4">
+    <div className="bg-white p-4 rounded border border-slate-200">
+      <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-slate-200 mb-4">
         References
       </h2>
 
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full flex flex-col">
+          <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full flex flex-col">
             <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -81,7 +81,7 @@ const ReferencesSection: React.FC<ReferencesSectionProps> = ({ referencesInfo })
           </div>
 
           {referencesInfo.staff_reference && (
-            <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full flex flex-col">
+            <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full flex flex-col">
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -124,7 +124,7 @@ const ReferencesSection: React.FC<ReferencesSectionProps> = ({ referencesInfo })
         </div>
 
         {referencesInfo.family_references && referencesInfo.family_references.length > 0 && (
-          <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full flex flex-col">
+          <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full flex flex-col">
             <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -138,7 +138,7 @@ const ReferencesSection: React.FC<ReferencesSectionProps> = ({ referencesInfo })
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {referencesInfo.family_references.map((ref, index) => (
-                <div key={index} className="bg-white p-3 rounded border border-gray-200">
+                <div key={index} className="bg-white p-3 rounded border border-slate-200">
                   <div className="grid grid-cols-1 gap-2">
                     <div>
                       <p className="text-xs text-gray-500 font-medium">Name</p>

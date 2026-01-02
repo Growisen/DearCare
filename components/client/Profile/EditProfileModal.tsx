@@ -329,13 +329,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200 appearance-none
   `;
   const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
-  const sectionStyles = "p-5 bg-white rounded-sm border border-gray-100 mb-4";
+  const sectionStyles = "p-5 bg-white rounded-sm border border-slate-200 mb-4";
   const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
   const errorStyles = "mt-1 text-xs text-red-500";
 
@@ -417,8 +417,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded-sm shadow-xl border border-gray-200">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between rounded-t-sm shrink-0">
+      <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded-sm shadow-xl border border-slate-200">
+        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between rounded-t-sm shrink-0">
           <h2 className="text-base font-semibold text-gray-800">Edit Profile Details</h2>
           <button 
             onClick={onClose}
@@ -467,7 +467,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     </label>
                     <div
                       id="requestorAgeDisplay"
-                      className="w-full border border-gray-100 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
+                      className="w-full border border-slate-200 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
                     >
                       {calculateAge(formData.requestorDOB) || '-'} <span className="text-xs">yrs</span>
                     </div>
@@ -611,7 +611,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     </label>
                     <div
                       id="patientAgeDisplay"
-                      className="w-full border border-gray-100 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
+                      className="w-full border border-slate-200 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
                     >
                       {calculateAge(formData.patientDOB) || '-'} <span className="text-xs">yrs</span>
                     </div>
@@ -712,17 +712,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
         </div>
 
-        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-5 py-3 flex justify-end items-center space-x-3 z-10 rounded-b-sm shrink-0">
+        <div className="sticky bottom-0 bg-white border-t border-slate-200 px-5 py-3 flex justify-end items-center space-x-3 z-10 rounded-b-sm shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-200 rounded-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
+            className="px-4 py-2 border border-slate-200 rounded-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 border border-transparent rounded-sm text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-0 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 border border-transparent rounded-sm text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-0 transition-colors shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>

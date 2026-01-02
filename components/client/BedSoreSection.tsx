@@ -18,14 +18,14 @@ const BedSoreSection: React.FC<BedSoreSectionProps> = ({
   handleBedSoreStageChange,
 }) => {
   const minimalInputClass =
-    "w-full border-b border-gray-300 bg-transparent py-1 focus:outline-none focus:border-gray-500 transition-colors text-gray-700 placeholder-gray-400 text-sm";
+    "w-full border-b border-slate-200 bg-transparent py-1 focus:outline-none focus:border-gray-500 transition-colors text-gray-700 placeholder-gray-400 text-sm";
 
   return (
     <section className="space-y-6">
-      <h2 className="text-sm font-bold uppercase text-gray-800 border-b border-gray-100 pb-2">
+      <h2 className="text-sm font-bold uppercase text-gray-800 border-b border-slate-200 pb-2">
         Bed Sore Assessment
       </h2>
-      <div className="bg-gray-50/50 p-6 rounded-sm border border-gray-100">
+      <div className="bg-gray-50/50 p-6 rounded-sm border border-slate-200">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <div className="space-y-3">
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Stage</label>
@@ -39,8 +39,8 @@ const BedSoreSection: React.FC<BedSoreSectionProps> = ({
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all border-2
                     ${bedSore.stage === s 
-                      ? 'bg-gray-800 border-gray-800 text-white shadow-sm' 
-                      : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400'}
+                      ? 'bg-gray-800 border-gray-800 text-white shadow-none' 
+                      : 'bg-white border-slate-200 text-gray-500 hover:border-slate-200'}
                     ${!isEditable ? 'opacity-50 pointer-events-none' : ''}
                   `}
                 >

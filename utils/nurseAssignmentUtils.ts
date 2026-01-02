@@ -35,20 +35,28 @@ export const calculatePeriodSalary = (startDate: string, endDate?: string, salar
 
 export function getAssignmentPeriodStatus(startDate: string, endDate: string) {
   const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+
   const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+
   const today = new Date();
-
-  const effectiveToday = today < start ? start : (today > end ? end : today);
-
-  const daysCompleted = Math.max(
-    0,
-    Math.floor((effectiveToday.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  );
+  today.setHours(0, 0, 0, 0);
 
   const totalDays = Math.max(
     0,
     Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
   );
+
+  let daysCompleted = 0;
+
+  if (today < start) {
+    daysCompleted = 0;
+  } else if (today > end) {
+    daysCompleted = totalDays;
+  } else {
+    daysCompleted = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  }
 
   const daysRemaining = Math.max(0, totalDays - daysCompleted);
 

@@ -33,7 +33,7 @@ export default function DashboardLayout({
       <div className={`relative transition-all duration-300 ${sidebarWidth} ${isSidebarOpen ? 'lg:filter-none filter blur-sm' : ''}`}>
         <Navbar onMenuClick={() => setSidebarOpen(!isSidebarOpen)} />
         <main className="pt-8 md:pt-12 p-0">
-          <div className="pt-6 px-0 m-0 md:px-2">
+          <div className="pt-6 pb-3 px-0 m-0 md:px-2">
             {children}
           </div>
         </main>

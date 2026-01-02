@@ -53,13 +53,13 @@ export const AgreementsStep: React.FC<FormStepProps> = ({
       <div className="flex items-center justify-between pt-6 border-t border-slate-200">
         <button
           onClick={onBack}
-          className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm border border-slate-300 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-none transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
         >
           Back
         </button>
         <button
           onClick={onSubmit}
-          className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-none transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
         >
           Submit
         </button>
