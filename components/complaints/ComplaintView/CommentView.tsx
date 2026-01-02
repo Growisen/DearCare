@@ -16,7 +16,7 @@ export default function CommentView({
   isDeletingComment
 }: CommentViewProps) {
   return (
-    <div className="bg-blue-50 border border-blue-100 p-4 rounded-md">
+    <div className="bg-blue-50 border border-blue-100 p-4 rounded-sm">
       <div className="flex justify-between items-start">
         <p className="text-gray-700">{comment}</p>
         <div className="flex gap-2 ml-4">

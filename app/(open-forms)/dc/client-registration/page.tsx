@@ -49,7 +49,7 @@ export default function ClientFormPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-6 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
 
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
@@ -60,7 +60,7 @@ export default function ClientFormPage() {
             </p>
           </div>
           <div className="flex items-center gap-3 opacity-90">
-            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded border border-gray-100">
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded border border-slate-200">
               <div className="relative w-20 h-10">
                 <Image
                   src="/DearCare.png"
@@ -80,7 +80,7 @@ export default function ClientFormPage() {
             <SuccessMessage />
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-md">
+          <div className="bg-white border border-slate-200 rounded-sm">
             <div className="p-6 sm:p-10">
               <ClientFormComponent
                 formData={formData}
@@ -111,7 +111,7 @@ export default function ClientFormPage() {
               />
             </div>
 
-            <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 rounded-b-md flex justify-between items-center text-xs text-gray-500">
+            <div className="bg-gray-50 border-t border-slate-200 px-6 py-4 rounded-b-md flex justify-between items-center text-xs text-gray-500">
                 <p>Fields marked with <span className="text-red-500">*</span> are mandatory.</p>
                 <p>Need help? Call <span className="font-medium text-gray-900">+91 9645400035</span></p>
             </div>

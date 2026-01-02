@@ -28,13 +28,13 @@ export function LeaveRequestsFilters({
     <>
       <button
         onClick={() => setShowFiltersOnMobile(!showFiltersOnMobile)}
-        className="md:hidden px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-all duration-150"
+        className="md:hidden px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-none transition-all duration-150"
       >
         {showFiltersOnMobile ? 'Hide Filters' : 'Show Filters'}
       </button>
 
-      <div className="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
-        <div className={`p-5 border-b border-gray-100 space-y-5 ${showFiltersOnMobile || 'hidden md:block'}`}>
+      <div className="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+        <div className={`p-5 border-b border-slate-200 space-y-5 ${showFiltersOnMobile || 'hidden md:block'}`}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
             <div className="relative w-full md:max-w-xs">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -43,7 +43,7 @@ export function LeaveRequestsFilters({
               <input
                 type="text"
                 placeholder="start typing to search..."
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
+                className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-sm text-sm text-gray-700 shadow-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -55,7 +55,7 @@ export function LeaveRequestsFilters({
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-2">
                   <input
                     type="date"
-                    className="w-full sm:w-auto appearance-none pl-10 pr-3 py-2.5 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
+                    className="w-full sm:w-auto appearance-none pl-10 pr-3 py-2.5 border border-slate-200 bg-white rounded-sm text-sm text-gray-700 shadow-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
                     value={dateRange.startDate || ''}
                     onChange={(e) => setDateRange({...dateRange, startDate: e.target.value || null})}
                     placeholder="Start Date"
@@ -63,7 +63,7 @@ export function LeaveRequestsFilters({
                   <span className="text-gray-400 hidden sm:inline">to</span>
                   <input
                     type="date"
-                    className="w-full sm:w-auto appearance-none pl-3 pr-3 py-2.5 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
+                    className="w-full sm:w-auto appearance-none pl-3 pr-3 py-2.5 border border-slate-200 bg-white rounded-sm text-sm text-gray-700 shadow-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
                     value={dateRange.endDate || ''}
                     onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
                     placeholder="End Date"
@@ -74,7 +74,7 @@ export function LeaveRequestsFilters({
               <div className="relative w-full sm:w-auto">
                 <Filter className="absolute w-4 h-4 left-3.5 top-3 text-gray-500" />
                 <select
-                  className="w-full sm:w-auto appearance-none pl-10 pr-10 py-2.5 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
+                  className="w-full sm:w-auto appearance-none pl-10 pr-10 py-2.5 border border-slate-200 bg-white rounded-sm text-sm text-gray-700 shadow-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-150"
                   value={statusFilter || 'All'}
                   onChange={(e) => setStatusFilter(e.target.value === 'All' ? null : e.target.value)}
                 >
@@ -95,10 +95,10 @@ export function LeaveRequestsFilters({
             <div className="flex items-center justify-between pt-2 text-sm">
               <div className="text-gray-500">
                 <span>Active filters: </span>
-                {searchTerm && <span className="mx-1 px-2.5 py-1 bg-gray-50 border border-gray-100 rounded-full text-gray-700">{searchTerm}</span>}
-                {statusFilter && <span className="mx-1 px-2.5 py-1 bg-gray-50 border border-gray-100 rounded-full text-gray-700">{statusFilter}</span>}
+                {searchTerm && <span className="mx-1 px-2.5 py-1 bg-gray-50 border border-slate-200 rounded-full text-gray-700">{searchTerm}</span>}
+                {statusFilter && <span className="mx-1 px-2.5 py-1 bg-gray-50 border border-slate-200 rounded-full text-gray-700">{statusFilter}</span>}
                 {(dateRange.startDate || dateRange.endDate) && (
-                  <span className="mx-1 px-2.5 py-1 bg-gray-50 border border-gray-100 rounded-full text-gray-700">
+                  <span className="mx-1 px-2.5 py-1 bg-gray-50 border border-slate-200 rounded-full text-gray-700">
                     Date range
                   </span>
                 )}

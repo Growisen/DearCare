@@ -21,9 +21,9 @@ export function DutyPeriodSelector({
   const showReasonField = dutyPeriod === 'above_3_months';
 
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200
   `;
   

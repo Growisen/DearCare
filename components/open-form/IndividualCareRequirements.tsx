@@ -15,16 +15,16 @@ interface IndividualCareRequirementsProps {
 
 export const IndividualCareRequirements = ({ formData, handleInputChange, formErrors, handleBlur }: IndividualCareRequirementsProps) => {
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200
   `;
   
   const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
 
   return (
-    <div className="mb-8 border-b border-gray-100 pb-8">
+    <div className="mb-8 border-b border-slate-200 pb-8">
       <h2 className="text-base font-semibold text-gray-800 mb-6">Care Requirements</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">

@@ -25,7 +25,7 @@ export default function StaffAttendance({ currentTime, attendanceData }:
   }
   
   return (
-    <Card className="p-4 bg-white border border-slate-200 shadow-sm rounded-lg col-span-full sm:col-span-2">
+    <Card className="p-4 bg-white border border-slate-200 shadow-none rounded-sm col-span-full sm:col-span-2">
       <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-2">
         <div className="flex items-center">
           <Users className="w-5 h-5 text-slate-700 mr-2" />
@@ -79,10 +79,10 @@ export default function StaffAttendance({ currentTime, attendanceData }:
         </div>
 
         <div className="col-span-1 sm:col-span-3 space-y-3 flex flex-col justify-center">
-          <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
+          <div className="border border-slate-200 rounded-sm p-3 shadow-none">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-emerald-50 rounded-md">
+                <div className="p-1.5 bg-emerald-50 rounded-sm">
                   <UserCheck className="w-5 h-5 text-emerald-600" />
                 </div>
                 <span className="text-sm font-medium text-slate-800">Present</span>
@@ -91,10 +91,10 @@ export default function StaffAttendance({ currentTime, attendanceData }:
             </div>
           </div>
 
-          <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
+          <div className="border border-slate-200 rounded-sm p-3 shadow-none">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-rose-50 rounded-md">
+                <div className="p-1.5 bg-rose-50 rounded-sm">
                   <UserX className="w-5 h-5 text-rose-600" />
                 </div>
                 <span className="text-sm font-medium text-slate-800">Absent</span>
@@ -103,10 +103,10 @@ export default function StaffAttendance({ currentTime, attendanceData }:
             </div>
           </div>
 
-          <div className="border border-slate-200 rounded-lg p-3 shadow-sm">
+          <div className="border border-slate-200 rounded-sm p-3 shadow-none">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-indigo-50 rounded-md">
+                <div className="p-1.5 bg-indigo-50 rounded-sm">
                   <Calendar className="w-5 h-5 text-indigo-600" />
                 </div>
                 <span className="text-sm font-medium text-slate-800">On Leave</span>

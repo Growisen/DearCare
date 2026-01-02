@@ -34,7 +34,7 @@ function ProfileImage({ src, alt, size = "md" }: { src: string | null | undefine
   return (
     <div className="flex flex-col items-center">
       <div 
-        className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-50 border border-gray-100 cursor-pointer hover:opacity-90 transition-opacity`}
+        className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-50 border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity`}
         onClick={() => setIsImageViewerOpen(true)}
       >
         <Image 
@@ -77,7 +77,7 @@ function DetailItem({
   };
   console.log(`DetailItem - ${label}:`, displayValue);
   return (
-    <div className={`border-b border-gray-100 pb-2 h-full ${colSpanClasses[columns]}`}>
+    <div className={`border-b border-slate-200 pb-2 h-full ${colSpanClasses[columns]}`}>
       <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
       <p className={`text-sm font-medium ${value === null || value === undefined || value === '' ? 'text-gray-300 italic' : 'text-gray-800'} break-words leading-tight`}>
         {displayValue}
@@ -196,7 +196,7 @@ export function ClientDetailsOverlay({
     }
   };
 
-  const sectionStyles = "p-5 bg-white rounded-sm border border-gray-100 mb-4";
+  const sectionStyles = "p-5 bg-white rounded-sm border border-slate-200 mb-4";
   const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
 
   const renderIndividualDetails = (client: DetailedClientIndividual) => (
@@ -359,7 +359,7 @@ export function ClientDetailsOverlay({
       {client.staffRequirements && client.staffRequirements.length > 0 && (
         <div>
           <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Staff Requirements</h5>
-          <div className="overflow-x-auto border border-gray-100 rounded-sm">
+          <div className="overflow-x-auto border border-slate-200 rounded-sm">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr>
@@ -388,7 +388,7 @@ export function ClientDetailsOverlay({
     if (loading || isUpdating) {
       return (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-gray-200 border-t-blue-600"></div>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-blue-600"></div>
           <p className="text-xs text-gray-500 mt-3 font-medium uppercase tracking-wide">
             {isUpdating ? 'Updating info...' : 'Loading details...'}
           </p>
@@ -439,7 +439,7 @@ export function ClientDetailsOverlay({
         
         <div className={sectionStyles}>
           <h4 className={sectionHeaderStyles}>Notes</h4>
-          <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-sm border border-gray-100">
+          <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-sm border border-slate-200">
             {detailedClient.general_notes || "No notes provided"}
           </p>
         </div>
@@ -449,8 +449,8 @@ export function ClientDetailsOverlay({
 
   return (
     <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-5xl max-h-[90vh] flex flex-col rounded-sm shadow-xl border border-gray-200">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between rounded-t-sm shrink-0">
+      <div className="bg-white w-full max-w-5xl max-h-[90vh] flex flex-col rounded-sm shadow-xl border border-slate-200">
+        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between rounded-t-sm shrink-0">
           {isEditMode ? (
             <>
               <div className="flex-1">
@@ -483,7 +483,7 @@ export function ClientDetailsOverlay({
                     target='_blank'
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-transparent 
                               rounded-sm text-xs font-medium text-white bg-blue-600 
-                              hover:bg-blue-700 transition-colors shadow-sm"
+                              hover:bg-blue-700 transition-colors shadow-none"
                   >
                     View Profile
                   </Link>
@@ -492,7 +492,7 @@ export function ClientDetailsOverlay({
                   <>
                     <button
                       onClick={toggleEditMode}
-                      className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-200 
+                      className="inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 
                                 rounded-sm text-xs font-medium text-gray-700 bg-white 
                                 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                       title="Edit client details"
@@ -523,7 +523,7 @@ export function ClientDetailsOverlay({
         <div className="px-6 py-6 overflow-y-auto bg-gray-50/50 flex-1">
           {renderDetailedInformation()}
           {!loading && detailedClient && !isEditMode && (
-            <div className="mt-6 border-t border-gray-100 pt-6">
+            <div className="mt-6 border-t border-slate-200 pt-6">
               {renderStatusSpecificContent()}
             </div>
           )}

@@ -39,7 +39,7 @@ export function ApprovedContent({ nurse }: NurseDetailsProps) {
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Rating Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-white rounded-sm shadow-none p-6 border border-slate-200 hover:shadow-md transition-shadow duration-200">
           <div className="flex items-center gap-2 mb-3">
             <Star className="w-4 h-4 text-yellow-400" />
             <h3 className="text-base font-semibold text-gray-800">Overall Rating</h3>
@@ -59,7 +59,7 @@ export function ApprovedContent({ nurse }: NurseDetailsProps) {
         </div>
 
         {/* Hiring Date Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-white rounded-sm shadow-none p-6 border border-slate-200 hover:shadow-md transition-shadow duration-200">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-4 h-4 text-blue-500" />
             <h3 className="text-base font-semibold text-gray-800">Hired on</h3>
@@ -75,7 +75,7 @@ export function ApprovedContent({ nurse }: NurseDetailsProps) {
       </div>
 
       {/* Reviews Section */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
+      <div className="bg-white rounded-sm p-6 border border-slate-200 shadow-md hover:shadow-lg transition-shadow duration-200">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-4 h-4 text-green-500" />
@@ -91,7 +91,7 @@ export function ApprovedContent({ nurse }: NurseDetailsProps) {
             {nurse.reviews.map((review) => (
               <div 
                 key={review.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors duration-200"
+                className="p-5 bg-gray-50 rounded-sm border border-slate-200 hover:border-slate-200 transition-colors duration-200"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">

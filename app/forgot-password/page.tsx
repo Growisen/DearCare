@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
                   {email}
                 </p>
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-sm p-4">
                 <p className="text-dCblue/80 text-sm">
                   If you don&apos;t see the email in your inbox, please check your spam folder. 
                   The link will expire in 24 hours for security reasons.
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg flex items-start space-x-3 text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-sm flex items-start space-x-3 text-sm">
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                   <p>{error}</p>
                 </div>
@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     autoComplete="email"
                     required
-                    className="w-full pl-12 pr-3 py-2 rounded-lg border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
+                    className="w-full pl-12 pr-3 py-2 rounded-sm border border-dCblue/30 focus:border-dCorange focus:ring-2 focus:ring-dCorange/30 transition duration-300 text-dCblack text-sm"
                     placeholder="Email Address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={isLoading || !email.trim()}
-                className="w-full py-2 bg-dCblue text-white rounded-lg hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
+                className="w-full py-2 bg-dCblue text-white rounded-sm hover:bg-dCorange group transition duration-300 flex items-center justify-center text-sm"
               >
                 {isLoading ? (
                   <>

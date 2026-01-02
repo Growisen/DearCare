@@ -24,14 +24,14 @@ const SummaryStats: React.FC<SummaryStatsProps> = ({ entries }) => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <div className="bg-white rounded-sm shadow-none border border-slate-200 p-6 text-center">
         <div className="text-2xl font-bold text-gray-900 mb-1">
           {entries.length}
         </div>
         <div className="text-sm text-gray-600">Total Groups</div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <div className="bg-white rounded-sm shadow-none border border-slate-200 p-6 text-center">
         <div className="text-2xl font-bold text-gray-900 mb-1">
           ₹{totalAmount.toLocaleString('en-IN', { 
             minimumFractionDigits: 2, 
@@ -41,7 +41,7 @@ const SummaryStats: React.FC<SummaryStatsProps> = ({ entries }) => {
         <div className="text-sm text-gray-600">Total Amount</div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <div className="bg-white rounded-sm shadow-none border border-slate-200 p-6 text-center">
         <div className="text-2xl font-bold text-gray-900 mb-1">
           ₹{avgPerGroup.toLocaleString('en-IN', { 
             minimumFractionDigits: 2, 
@@ -51,14 +51,14 @@ const SummaryStats: React.FC<SummaryStatsProps> = ({ entries }) => {
         <div className="text-sm text-gray-600">Avg. / Group</div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <div className="bg-white rounded-sm shadow-none border border-slate-200 p-6 text-center">
         <div className="text-2xl font-bold text-gray-900 mb-1">
           {clientVisibleCount}
         </div>
         <div className="text-sm text-gray-600">Client Visible</div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <div className="bg-white rounded-sm shadow-none border border-slate-200 p-6 text-center">
         <div className="text-2xl font-bold text-gray-900 mb-1">
           ₹{totalCommission.toLocaleString('en-IN', {
             minimumFractionDigits: 2,

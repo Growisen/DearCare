@@ -6,89 +6,12 @@ import NurseTable from "@/components/nurse/NurseTable"
 import NurseCard from "@/components/nurse/NurseCard"
 import { NurseBasicInfo, NurseBasicDetails } from "@/types/staff.types"
 import { fetchBasicDetails, exportNurseData } from "@/app/actions/staff-management/add-nurse"
-import Loader from "@/components/Loader"
-import { generateNurseExcel } from '@/lib/generatexlsx';
+import { LoadingState } from "@/components/Loader"
 import { toast } from 'react-hot-toast';
 import { NurseHeader } from "@/components/nurse/NurseHeader"
 import { EmptyState } from "@/components/client/clients/EmptyState"
-
-const PaginationControls = ({ 
-  currentPage, 
-  totalPages, 
-  totalCount, 
-  itemsPerPage, 
-  onPageChange, 
-  isMobile = false 
-}: {
-  currentPage: number
-  totalPages: number
-  totalCount: number
-  itemsPerPage: number
-  onPageChange: (page: number) => void
-  isMobile?: boolean
-}) => {
-  const indexOfFirstItem = (currentPage - 1) * itemsPerPage + 1;
-  const indexOfLastItem = Math.min(currentPage * itemsPerPage, totalCount);
-  
-  return (
-    <div className={`${isMobile ? "flex flex-col" : "flex items-center justify-between"} px-6 py-4 bg-white border-t border-gray-200`}>
-      <div className="text-sm text-gray-700 mb-2">
-        Showing {indexOfFirstItem} to {indexOfLastItem} of {totalCount} nurses
-      </div>
-      <div className="flex gap-2 justify-center">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-        >
-          Previous
-        </button>
-        
-        {!isMobile && Array.from({ length: totalPages }, (_, i) => i + 1)
-          .filter(pageNum => 
-            pageNum === 1 || 
-            pageNum === totalPages || 
-            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-          )
-          .map((pageNum, index, array) => {
-            // Add ellipsis
-            if (index > 0 && pageNum - array[index - 1] > 1) {
-              return (
-                <span key={`ellipsis-${pageNum}`} className="px-3 py-1">...</span>
-              );
-            }
-            return (
-              <button
-                key={pageNum}
-                onClick={() => onPageChange(pageNum)}
-                className={`px-3 py-1 text-sm font-medium rounded-md ${
-                  currentPage === pageNum
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-          
-        {isMobile && (
-          <span className="px-3 py-1 text-sm font-medium bg-blue-600 text-white rounded-md">
-            {currentPage}
-          </span>
-        )}
-        
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
-};
+import { PaginationControls } from "@/components/client/clients/PaginationControls"
+import { jsonToCSV } from '@/utils/jsonToCSV'
 
 export default function NursesPage() {
   const [nurses, setNurses] = useState<NurseBasicDetails[]>([])
@@ -150,6 +73,9 @@ export default function NursesPage() {
     setCurrentPage(pageNumber)
   }
 
+  const handlePreviousPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
+  const handleNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+
   const totalPages = Math.ceil(totalCount / limit)
   
   const handleReviewDetails = (nurse: NurseBasicInfo) => {
@@ -165,8 +91,8 @@ export default function NursesPage() {
       console.error(error);
     }
   };
-
-  const handleExportExcel = async () => {
+  
+  const handleExportCSV = async () => {
     try {
       setIsExporting(true);
       const result = await exportNurseData();
@@ -175,13 +101,13 @@ export default function NursesPage() {
         toast.error(result.error || 'Failed to export data');
         return;
       }
-  
-      const blob = generateNurseExcel(result.data);
-      
+
+      const csvString = jsonToCSV(result.data);
+      const blob = new Blob([csvString], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `nurse_data_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.download = `nurse_data_${new Date().toISOString().split('T')[0]}.csv`;
       
       document.body.appendChild(link);
       link.click();
@@ -189,9 +115,9 @@ export default function NursesPage() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('Excel file downloaded successfully!');
+      toast.success('CSV file downloaded successfully!');
     } catch (error) {
-      toast.error('Failed to generate Excel file');
+      toast.error('Failed to generate CSV file');
       console.error('Export error:', error);
     } finally {
       setIsExporting(false);
@@ -220,10 +146,10 @@ export default function NursesPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 relative">
+    <div className="space-y-3 relative">
       <NurseHeader 
         onAddNurse={() => setShowAddNurse(true)}
-        onExport={handleExportExcel}
+        onExport={handleExportCSV}
         isExporting={isExporting}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -234,7 +160,7 @@ export default function NursesPage() {
         handleResetFilters={handleResetFilters}
       />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
         <div className="hidden sm:block overflow-x-auto">
           <NurseTable 
             nurses={nurses} 
@@ -246,8 +172,11 @@ export default function NursesPage() {
               currentPage={currentPage}
               totalPages={totalPages}
               totalCount={totalCount}
-              itemsPerPage={limit}
+              pageSize={limit}
+              itemsLength={nurses.length}
               onPageChange={handlePageChange}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
             />
           )}
 
@@ -262,7 +191,7 @@ export default function NursesPage() {
         
         <div className="sm:hidden divide-y divide-gray-200">
           {isLoading ? (
-            <Loader />
+            <LoadingState message="Loading Nurses..." />
           ) : (
             <>
               {nurses.map((nurse) => (
@@ -278,9 +207,11 @@ export default function NursesPage() {
                   currentPage={currentPage}
                   totalPages={totalPages}
                   totalCount={totalCount}
-                  itemsPerPage={limit}
+                  pageSize={limit}
+                  itemsLength={nurses.length}
                   onPageChange={handlePageChange}
-                  isMobile={true}
+                  onPreviousPage={handlePreviousPage}
+                  onNextPage={handleNextPage}
                 />
               )}
 

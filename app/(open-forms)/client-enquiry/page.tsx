@@ -185,7 +185,7 @@ const ContactForm: React.FC = () => {
 
           <Card className="p-6 sm:p-8 backdrop-blur-sm">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-md bg-emerald-100 mb-6">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-sm bg-emerald-100 mb-6">
                 <CheckCircle className="h-8 w-8 text-emerald-600" />
               </div>
               
@@ -215,7 +215,7 @@ const ContactForm: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={handleStartOver}
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-sm sm:text-base"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-sm shadow-none hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-sm sm:text-base"
                 >
                   Submit Another Request
                 </button>
@@ -294,7 +294,7 @@ const ContactForm: React.FC = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className={`w-full border rounded-md py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
+                  className={`w-full border rounded-sm py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
                     formErrors.name ? 'border-red-400 bg-red-50/70' : 'border-slate-300/50 hover:border-slate-400/50'
                   }`}
                   placeholder="Enter your full name"
@@ -322,7 +322,7 @@ const ContactForm: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full border rounded-md py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
+                  className={`w-full border rounded-sm py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
                     formErrors.email ? 'border-red-400 bg-red-50/70' : 'border-slate-300/50 hover:border-slate-400/50'
                   }`}
                   placeholder="Enter your email address"
@@ -350,7 +350,7 @@ const ContactForm: React.FC = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full border rounded-md py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
+                  className={`w-full border rounded-sm py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
                     formErrors.phone ? 'border-red-400 bg-red-50/70' : 'border-slate-300/50 hover:border-slate-400/50'
                   }`}
                   placeholder="Enter your contact number"
@@ -378,7 +378,7 @@ const ContactForm: React.FC = () => {
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className={`w-full border rounded-md py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
+                  className={`w-full border rounded-sm py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
                     formErrors.location ? 'border-red-400 bg-red-50/70' : 'border-slate-300/50 hover:border-slate-400/50'
                   }`}
                   placeholder="Enter service location (city, area)"
@@ -406,7 +406,7 @@ const ContactForm: React.FC = () => {
                 name="service"
                 value={formData.service}
                 onChange={handleInputChange}
-                className={`w-full border rounded-md py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
+                className={`w-full border rounded-sm py-2.5 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white/70 backdrop-blur-sm ${
                   formErrors.service ? 'border-red-400 bg-red-50/70' : 'border-slate-300/50 hover:border-slate-400/50'
                 }`}
               >
@@ -432,7 +432,7 @@ const ContactForm: React.FC = () => {
                 type="button"
                 onClick={() => handleSubmit()}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-sm shadow-none hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">

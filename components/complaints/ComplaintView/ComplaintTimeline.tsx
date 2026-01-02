@@ -9,7 +9,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
   const statusHistory = complaint.statusHistory || [];
   
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-sm p-4">
       <h3 className="font-medium mb-3 text-gray-900">Complaint Timeline</h3>
       <div className="space-y-3">
         <div className="flex items-start">

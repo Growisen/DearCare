@@ -24,7 +24,7 @@ function getStatusBadgeClasses(status: string) {
     case 'early-departure':
       return 'bg-amber-100 text-amber-800 border-amber-200';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-gray-100 text-gray-800 border-slate-200';
   }
 }
 
@@ -109,7 +109,7 @@ export function AttendanceTable({
   if (attendanceRecords.length === 0) {
     return (
       <div className="py-12 text-center">
-        <div className="bg-slate-50 border border-slate-200 rounded-lg px-6 py-8 max-w-md mx-auto">
+        <div className="bg-slate-50 border border-slate-200 rounded-sm px-6 py-8 max-w-md mx-auto">
           <CalendarIcon className="h-12 w-12 mx-auto text-slate-400" />
           <h3 className="mt-4 text-lg font-medium text-slate-700">No attendance records</h3>
           <p className="mt-2 text-sm text-slate-500">

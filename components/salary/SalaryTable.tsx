@@ -71,7 +71,7 @@ export const SalaryTable: React.FC<SalaryTableProps> = ({ data, onSalaryUpdate, 
   return (
     <div className="hidden sm:block overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-gray-100 border-b border-gray-200">
+        <thead className="bg-gray-100 border-b border-slate-200">
           <tr className="text-left">
             <th className="py-4 px-6 font-medium text-gray-700">Name</th>
             <th className="py-4 px-6 font-medium text-gray-700">Reg No</th>
@@ -194,10 +194,10 @@ export const SalaryTable: React.FC<SalaryTableProps> = ({ data, onSalaryUpdate, 
           onClick={closeSalaryStatus}
         >
           <div
-            className="bg-white rounded-lg shadow-2xl p-5 w-[380px] max-h-[75vh] overflow-y-auto relative border border-gray-200"
+            className="bg-white rounded-sm shadow-2xl p-5 w-[380px] max-h-[75vh] overflow-y-auto relative border border-slate-200"
             onClick={e => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold mb-4 text-black border-b border-gray-300 pb-2">
+            <h2 className="text-lg font-bold mb-4 text-black border-b border-slate-200 pb-2">
               Payment Details
             </h2>
             
@@ -220,12 +220,12 @@ export const SalaryTable: React.FC<SalaryTableProps> = ({ data, onSalaryUpdate, 
 
               {salaryStatusRow.paidPeriods && salaryStatusRow.paidPeriods.length > 0 && (
                 <div className="mb-4">
-                  <h4 className="font-semibold text-black mb-2 border-b border-gray-200 pb-1 text-sm">
+                  <h4 className="font-semibold text-black mb-2 border-b border-slate-200 pb-1 text-sm">
                     Paid Periods:
                   </h4>
                   <div className="space-y-2">
                     {salaryStatusRow.paidPeriods.map((period, idx) => (
-                      <div key={idx} className="bg-gray-50 border border-gray-300 rounded p-2">
+                      <div key={idx} className="bg-gray-50 border border-slate-200 rounded p-2">
                         <div className="flex items-center text-xs">
                           <span className="text-black mr-2 font-bold">✓</span>
                           <span className="font-medium text-black">
@@ -247,7 +247,7 @@ export const SalaryTable: React.FC<SalaryTableProps> = ({ data, onSalaryUpdate, 
               )}
             </div>
             
-            <div className="border-t border-gray-300 pt-3 flex justify-end">
+            <div className="border-t border-slate-200 pt-3 flex justify-end">
               <button
                 className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors font-semibold text-sm"
                 onClick={closeSalaryStatus}

@@ -54,7 +54,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
       href={`/home-maid-preferences/${clientId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-slate-200"
       title="Open preferences in new tab"
     >
       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
     </div>
   );
   if (error) return (
-    <div className="py-12 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">
+    <div className="py-12 text-center text-red-600 bg-red-50 rounded-sm border border-red-100">
       <div className="flex justify-end mb-4 space-x-2">
         {CopyLinkButton}
         {ExternalLinkButton}
@@ -155,7 +155,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
             <InfoField label="Home Type" value={selectedRequest.home_type} />
             <InfoField label="Household Size" value={selectedRequest.household_size?.toString()} />
-            <div className="col-span-2 grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="col-span-2 grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-sm border border-slate-200">
                <InfoField label="Bedrooms" value={selectedRequest.bedrooms?.toString()} />
                <InfoField label="Bathrooms" value={selectedRequest.bathrooms?.toString()} />
             </div>
@@ -164,7 +164,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
         </SectionCard>
         <SectionCard title="Household & Care Requirements" icon={<Users className="w-4 h-4" />}>
           <div className="space-y-4">
-             <div className="border-b border-gray-100 pb-4 mb-4">
+             <div className="border-b border-slate-200 pb-4 mb-4">
                 <div className="grid grid-cols-2 gap-4">
                     <InfoField label="Has Pets" value={selectedRequest.has_pets ? "Yes" : "No"} />
                     {selectedRequest.has_pets && (
@@ -186,7 +186,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
               {dutiesList.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {dutiesList.map((duty: string, idx: number) => (
-                    <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                    <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                       {duty}
                     </span>
                   ))}
@@ -195,7 +195,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
                 <p className="text-sm text-gray-400 italic">No specific duties selected.</p>
               )}
             </div>
-            <div className="bg-amber-50 p-4 rounded-md border border-amber-100">
+            <div className="bg-amber-50 p-4 rounded-sm border border-amber-100">
                <InfoField 
                  label="Special Instructions" 
                  value={selectedRequest.special_instructions} 
@@ -233,8 +233,8 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
 };
 
 const SectionCard = ({ title, icon, children }: { title: string, icon?: React.ReactNode, children: React.ReactNode }) => (
-  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden h-full">
-    <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center gap-2">
+  <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden h-full">
+    <div className="bg-gray-50 px-5 py-3 border-b border-slate-200 flex items-center gap-2">
       {icon && <span className="text-gray-500">{icon}</span>}
       <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
     </div>

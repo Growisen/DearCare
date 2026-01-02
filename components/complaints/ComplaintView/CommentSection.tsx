@@ -87,7 +87,7 @@ export default function CommentSection({ complaint, updateComplaint }: CommentSe
   };
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-sm p-4">
       <h3 className="font-semibold text-lg mb-3 text-gray-900">Any Comment</h3>
       
       {complaint.comments && !isEditingComment ? (

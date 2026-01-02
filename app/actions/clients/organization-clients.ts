@@ -1,18 +1,15 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 import { revalidatePath } from 'next/cache';
 import { OrganizationFormData } from '@/types/client.types';
 import { logger } from '@/utils/logger';
 
-/**
- * Adds a new organization client to the database with staff requirements
- */
 export async function addOrganizationClient(formData: OrganizationFormData) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseAdminClient()
     
-    // First create the base client record
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .insert({
@@ -31,7 +28,6 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
       throw new Error(`Failed to create client: ${clientError.message}`);
     }
     
-    // Create the organization client record
     const { error: organizationError } = await supabase
       .from('organization_clients')
       .insert({
@@ -51,12 +47,10 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
       });
     
     if (organizationError) {
-      // Clean up the base client if organization details failed
       await supabase.from('clients').delete().eq('id', clientData.id);
       throw new Error(`Failed to create organization details: ${organizationError.message}`);
     }
-    
-    // Add staff requirements
+
     if (formData.staffRequirements && formData.staffRequirements.length > 0) {
       const staffRequirementsData = formData.staffRequirements.map(requirement => ({
         client_id: clientData.id,
@@ -72,8 +66,6 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
       
       if (staffError) {
         logger.error('Error adding staff requirements:', staffError);
-        // We don't throw here to avoid rolling back the whole transaction,
-        // but we log the error for investigation
       }
     }
     
@@ -86,14 +78,10 @@ export async function addOrganizationClient(formData: OrganizationFormData) {
   }
 }
 
-/**
- * Fetches detailed information for a specific organization client by ID
- */
+
 export async function getOrganizationClientDetails(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient()
-    
-    // Get the base client record first to verify it's an organization client
+    const { supabase } = await getAuthenticatedClient()
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('*')
@@ -107,13 +95,11 @@ export async function getOrganizationClientDetails(clientId: string) {
     if (!client) {
       return { success: false, error: 'Client not found' }
     }
-    
-    // Verify the client type is organization (or related types)
+
     if (client.client_type !== 'organization' && client.client_type !== 'hospital' && client.client_type !== 'carehome') {
       return { success: false, error: 'Not an organization client' }
     }
     
-    // Fetch organization details
     const { data: organizationDetails, error: organizationError } = await supabase
       .from('organization_clients')
       .select('*')
@@ -124,7 +110,6 @@ export async function getOrganizationClientDetails(clientId: string) {
       return { success: false, error: organizationError.message }
     }
     
-    // Fetch staff requirements if any
     const { data: staffRequirements, error: staffError } = await supabase
       .from('staff_requirements')
       .select('*')
@@ -132,7 +117,6 @@ export async function getOrganizationClientDetails(clientId: string) {
       
     if (staffError) {
       logger.error('Error fetching staff requirements:', staffError)
-      // Continue without staff requirements rather than failing completely
     }
     
     return { 
@@ -152,9 +136,6 @@ export async function getOrganizationClientDetails(clientId: string) {
   }
 }
 
-/**
- * Updates organization client details
- */
 export async function updateOrganizationDetails(
     clientId: string,
     updatedData: {
@@ -174,7 +155,7 @@ export async function updateOrganizationDetails(
     }
   ) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const { supabase } = await getAuthenticatedClient()
       
       if (updatedData.general_notes !== undefined) {
         const { error: clientUpdateError } = await supabase

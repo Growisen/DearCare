@@ -37,10 +37,8 @@ export default function AssignmentsPage() {
     handleExport
   } = useAssignmentData()
 
-  console.log('AssignmentsPage render', error, assignments)
-
   return (
-    <div className="space-y-5 sm:space-y-7">
+    <div className="space-y-3">
       <AssignmentHeader
         onExport={handleExport}
         isExporting={isExporting}
@@ -56,7 +54,7 @@ export default function AssignmentsPage() {
       />
 
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
         {loading ? (
           <LoadingState message="Loading assignments..." />
         ) : error ? (

@@ -91,18 +91,18 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4">
       <div className="bg-white w-full max-w-7xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Nurse Profile</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={handleDelete}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-red-600 hover:bg-red-50 rounded-sm transition-colors"
             >
               <Trash2 className="h-5 w-5" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-sm transition-colors"
             >
               <X className="h-5 w-5 text-gray-500" />
             </button>
@@ -111,13 +111,13 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
         
         <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-4 sm:space-y-6">
           {/* Personal Details Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-6">
+          <div className="bg-white rounded-sm border border-slate-200 p-3 sm:p-6">
             <div className="flex flex-wrap justify-between items-start mb-4">
               <h3 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Personal Details</h3>
               <Link 
                 href={`/nurses/${nurse.nurse_id}?fromNurseList=true`}
                 target='_blank'
-                className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-600 text-white text-sm rounded-sm hover:bg-blue-700 transition-colors"
               >
                 View Full Profile
               </Link>
@@ -126,7 +126,7 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
             <div className="flex flex-col md:flex-row md:gap-8 lg:gap-20">
               {/* Profile Image Column */}
               <div className="flex flex-col items-center space-y-3 mb-4 md:mb-0">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-gray-200">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-slate-200">
                   {nurse.photo ? (
                     <img src={nurse.photo} alt="Nurse" className="w-full h-full object-cover" />
                   ) : (
@@ -163,11 +163,11 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
           </div>
 
           {/* Assigned Clients Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-6">
+          <div className="bg-white rounded-sm border border-slate-200 p-3 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Assigned Clients</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {dummyClients.map((client) => (
-                <div key={client.id} className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                <div key={client.id} className="bg-gray-50 rounded-sm p-3 sm:p-4">
                   <div className="flex flex-wrap justify-between items-start gap-2">
                     <div className="max-w-[70%]">
                       <h4 className="text-base font-medium text-gray-900 break-words">{client.name}</h4>
@@ -176,27 +176,27 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
                     <Link 
                       href={`/client-profile/${client.id}`}
                       target='_blank'
-                      className="px-2 py-1 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-md whitespace-nowrap"
+                      className="px-2 py-1 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-sm whitespace-nowrap"
                     >
                       View Profile
                     </Link>
                   </div>
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div className="bg-white p-2 rounded-md">
+                    <div className="bg-white p-2 rounded-sm">
                       <span className="text-xs text-gray-500 block">Schedule Type</span>
                       <span className="text-sm font-medium break-words">{client.schedule.type}</span>
                     </div>
-                    <div className="bg-white p-2 rounded-md">
+                    <div className="bg-white p-2 rounded-sm">
                       <span className="text-xs text-gray-500 block">Working Days</span>
                       <span className="text-sm font-medium break-words">{client.schedule.days}</span>
                     </div>
-                    <div className="bg-white p-2 rounded-md">
+                    <div className="bg-white p-2 rounded-sm">
                       <span className="text-xs text-gray-500 block">Timing</span>
                       <span className="text-sm font-medium break-words">
                         {client.schedule.startTime} - {client.schedule.endTime}
                       </span>
                     </div>
-                    <div className="bg-white p-2 rounded-md">
+                    <div className="bg-white p-2 rounded-sm">
                       <span className="text-xs text-gray-500 block">Status</span>
                       <span className={`text-sm font-medium ${
                         client.status === 'active' ? 'text-green-600' : 'text-gray-600'
@@ -211,7 +211,7 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
           </div>
 
           {/* Ratings and Reviews Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-6">
+          <div className="bg-white rounded-sm border border-slate-200 p-3 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Ratings & Reviews</h3>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
@@ -221,7 +221,7 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
               
               <div className="space-y-4">
                 {displayReviews.map((review) => (
-                  <div key={review.id} className="border-t border-gray-100 pt-4">
+                  <div key={review.id} className="border-t border-slate-200 pt-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-sm font-medium text-gray-900 break-words">{review.reviewer}</span>
                       <span className="text-xs text-gray-500">{review.date}</span>
@@ -239,19 +239,19 @@ export function NurseDetailsOverlay({ nurse, onClose, onDelete }: NurseDetailsPr
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 z-60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm w-full mx-4">
+          <div className="bg-white rounded-sm p-4 sm:p-6 max-w-sm w-full mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Delete</h3>
             <p className="text-gray-600 mb-6">Are you sure you want to delete this nurse? This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-3 py-1 sm:px-4 sm:py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="px-3 py-1 sm:px-4 sm:py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-3 py-1 sm:px-4 sm:py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg"
+                className="px-3 py-1 sm:px-4 sm:py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-sm"
               >
                 Delete
               </button>

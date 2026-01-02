@@ -68,7 +68,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
 
       <div className="mb-3 relative cursor-pointer" onClick={handlePhotoClick}>
         {isEditing && newPhoto ? (
-          <div className="rounded-full p-1 border-2 border-gray-200 shadow-md">
+          <div className="rounded-full p-1 border-2 border-slate-200 shadow-md">
             <Image
               src={newPhoto}
               alt="New profile photo"
@@ -81,7 +81,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
             </div>
           </div>
         ) : photo ? (
-          <div className="rounded-full p-1 border-2 border-gray-200 shadow-md">
+          <div className="rounded-full p-1 border-2 border-slate-200 shadow-md">
             <Image
               src={photo}
               alt={name}
@@ -96,7 +96,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
             )}
           </div>
         ) : (
-          <div className="w-28 h-28 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center shadow-sm">
+          <div className="w-28 h-28 rounded-full bg-gray-100 border-2 border-slate-200 flex items-center justify-center shadow-none">
             <User className="w-12 h-12 text-gray-500" />
             {!isDisabled && (
               <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -107,7 +107,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
         )}
 
         {!isEditing && !isDisabled && (
-          <div className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow border border-gray-200 cursor-pointer hover:bg-gray-50 transition-all duration-200">
+          <div className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow border border-slate-200 cursor-pointer hover:bg-gray-50 transition-all duration-200">
             <Edit2 className="w-3.5 h-3.5 text-gray-700" />
           </div>
         )}
@@ -117,7 +117,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
         <div className="flex flex-wrap justify-center gap-2 mt-3 w-full">
           <button
             onClick={handleSavePhoto}
-            className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-md shadow-sm transition-colors flex items-center gap-1 text-xs"
+            className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-sm shadow-none transition-colors flex items-center gap-1 text-xs"
             aria-label="Save photo"
             disabled={isDisabled}
           >
@@ -126,7 +126,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
           </button>
           <button
             onClick={handleCancel}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-1 text-xs"
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm transition-colors flex items-center gap-1 text-xs"
             aria-label="Cancel photo edit"
             disabled={isDisabled}
           >
@@ -136,7 +136,7 @@ export default function ProfilePhoto({ photo, name, onPhotoChange, isDisabled = 
           {(photo || newPhoto) && (
             <button
               onClick={handleRemovePhoto}
-              className="mt-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-md transition-colors flex items-center gap-1 text-xs w-full"
+              className="mt-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-sm transition-colors flex items-center gap-1 text-xs w-full"
               aria-label="Remove photo"
               disabled={isDisabled}
             >

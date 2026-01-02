@@ -16,7 +16,7 @@ export default function SettingsSection({
 }: SettingsSectionProps) {
   return (
     <div 
-      className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 cursor-pointer group hover:shadow-sm"
+      className="bg-white rounded-sm border border-slate-200 hover:border-slate-200 transition-all duration-200 cursor-pointer group hover:shadow-none"
       onClick={onClick}
     >
       <div className="p-6">

@@ -6,7 +6,7 @@ const statusColors = {
   assigned: "bg-green-100 text-green-700 border border-green-200",
   leave: "bg-yellow-100 text-yellow-700 border border-yellow-200",
   unassigned: "bg-red-100 text-red-700 border border-red-200",
-  pending: "bg-gray-100 text-gray-700 border border-gray-200",
+  pending: "bg-gray-100 text-gray-700 border border-slate-200",
   under_review: "bg-blue-100 text-blue-700 border border-blue-200",
   rejected: "bg-purple-100 text-purple-700 border border-purple-200"
 }
@@ -70,7 +70,7 @@ const NurseCard = ({ nurse }: NurseCardProps) => {
       
       <div className="pt-2">
         <button 
-          className="w-full px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium border border-blue-200"
+          className="w-full px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-sm transition-colors text-sm font-medium border border-blue-200"
           onClick={handleReviewDetails}
         >
           Review Details

@@ -62,7 +62,7 @@ const Checkbox = ({
       id={id}
       checked={checked}
       onChange={(e) => onChange(id, e.target.checked)}
-      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-200 rounded"
     />
     <label htmlFor={id} className="ml-2 block text-sm text-gray-700">
       {label}
@@ -123,7 +123,7 @@ export default function EnvironmentAndEquipment({
   };
 
   return (
-    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+    <div className="bg-white border border-slate-200 p-4 rounded-sm">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Environment & Equipment</h3>
       
       <div className="mb-6">

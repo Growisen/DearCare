@@ -48,7 +48,9 @@ export default function EditableField({
       <label className="text-sm font-medium text-gray-600 mb-1.5">{label}</label>
       
       {!isEditing ? (
-        <div className="flex justify-between items-center p-3 bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors">
+        <div className="flex justify-between items-center p-3 bg-white rounded border border-slate-200
+         hover:border-slate-200 transition-colors"
+        >
           <div className="text-gray-700">
             {value || <span className="text-gray-400 italic">{placeholder}</span>}
           </div>
@@ -64,19 +66,20 @@ export default function EditableField({
           )}
         </div>
       ) : (
-        <div className="flex flex-col space-y-3 border border-gray-200 p-3 rounded bg-gray-50">
+        <div className="flex flex-col space-y-3 border border-slate-200 p-3 rounded bg-gray-50">
           <input
             type={fieldType}
             value={fieldValue}
             onChange={(e) => setFieldValue(e.target.value)}
-            className="border border-gray-300 rounded p-2.5 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 text-gray-800"
+            className="border border-slate-200 rounded p-2.5 focus:outline-none text-gray-800"
             disabled={isSaving}
             autoFocus
           />
           <div className="flex space-x-2 justify-end">
             <button
               onClick={handleCancel}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-100 text-gray-800 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 text-sm border border-slate-200 rounded hover:bg-gray-100 
+              text-gray-800 flex items-center gap-1.5 transition-colors"
               disabled={isSaving}
             >
               <X className="w-4 h-4" />
@@ -84,7 +87,8 @@ export default function EditableField({
             </button>
             <button
               onClick={handleSave}
-              className="px-3 py-1.5 text-sm bg-gray-700 text-white rounded hover:bg-gray-800 disabled:bg-gray-400 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 text-sm bg-gray-700 text-white rounded hover:bg-gray-800
+               disabled:bg-gray-400 flex items-center gap-1.5 transition-colors"
               disabled={isSaving || fieldValue === value || fieldValue === ''}
             >
               <Check className="w-4 h-4" />

@@ -25,30 +25,9 @@ interface SavePaymentGroupInput {
   endDate?: string;  
 }
 
-// interface ClientPaymentRecord {
-//   id: string;
-//   client_id: string;
-//   payment_group_name: string;
-//   total_amount: number;
-//   date_added: string;
-//   notes?: string | null;
-//   show_to_client: boolean;
-//   approved: boolean;
-//   mode_of_payment?: string | null;
-//   // start_date?: string;
-//   // end_date?: string;  
-// }
-
-// interface ClientPaymentLineItem {
-//   id: string;
-//   payment_record_id: string;
-//   field_name: string;
-//   amount: number;
-// }
-
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate } = input;
 
@@ -119,7 +98,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
 
 export async function getClientPaymentGroups(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+     const { supabase } = await getAuthenticatedClient();
 
     const { data: records, error } = await supabase
       .from('client_payment_records')
@@ -146,22 +125,9 @@ export async function getClientPaymentGroups(clientId: string) {
   }
 }
 
-export async function requireAuthenticatedUser(supabase: ReturnType<typeof createSupabaseServerClient>) {
-  const { data: { user }, error } = await (await supabase).auth.getUser();
-  if (error || !user) {
-    return { user: null, error: error?.message || "Not authenticated" };
-  }
-  return { user, error: null };
-}
-
 export async function deleteClientPaymentGroup(paymentRecordId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
-
-    const { user, error: authError } = await requireAuthenticatedUser(Promise.resolve(supabase));
-    if (authError || !user) {
-      return { success: false, error: authError };
-    }
+    const { supabase } = await getAuthenticatedClient();
 
     const { error: lineItemsError } = await supabase
       .from('client_payment_line_items')
@@ -221,6 +187,7 @@ export interface AssignedNurse {
 
 export interface RecentPayment {
   id: string;
+  clientId: string;
   clientName: string;
   groupName: string;
   amount: number;
@@ -382,6 +349,7 @@ export async function fetchPaymentOverview({
 
       return {
         id: p.id,
+        clientId: p.client_id,
         clientName: p.client_display_name,
         groupName: p.payment_group_name,
         amount: p.total_amount,

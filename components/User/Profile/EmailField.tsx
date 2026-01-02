@@ -30,10 +30,12 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
   };
 
   return (
-    <div className="p-3 border border-gray-200 hover:border-gray-300 rounded-lg bg-white shadow-sm transition-all duration-200">
+    <div className="p-3 border border-slate-200 hover:border-slate-200 rounded-sm bg-white
+     shadow-none transition-all duration-200"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="bg-gray-100 p-2 rounded-md">
+          <div className="bg-gray-100 p-2 rounded-sm">
             <Mail className="w-4 h-4 text-gray-600" />
           </div>
           <span className="text-gray-700 font-medium text-sm">Email</span>
@@ -42,7 +44,7 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-sm transition-colors"
             aria-label="Edit email"
             disabled={isDisabled}
           >
@@ -57,7 +59,7 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 text-gray-800"
+            className="border border-slate-200 rounded-sm px-3 py-2 w-full focus:outline-none text-gray-800"
             autoFocus
             disabled={isDisabled}
           />
@@ -67,7 +69,8 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={handleSave}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-md shadow-sm transition-colors flex items-center gap-1 text-sm"
+              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-sm shadow-none
+               transition-colors flex items-center gap-1 text-sm"
               aria-label="Save email"
               disabled={isDisabled || !!emailError}
             >
@@ -76,7 +79,8 @@ export default function EmailField({ initialEmail, onEmailChange, isDisabled = f
             </button>
             <button
               onClick={handleCancel}
-              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-1 text-sm"
+              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm 
+              transition-colors flex items-center gap-1 text-sm"
               aria-label="Cancel edit"
               disabled={isDisabled}
             >

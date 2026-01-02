@@ -14,8 +14,8 @@ export const PersonalInformationSection: React.FC<Props> = ({
   formData, handleInputChange, onAddLanguage, onRemoveLanguage
 }) => {
   return (
-    <section className="bg-gray-50 rounded-lg p-5">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+    <section className="bg-gray-50 rounded-sm p-5">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-slate-200 pb-2">
         Personal Information
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

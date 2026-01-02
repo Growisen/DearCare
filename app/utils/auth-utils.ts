@@ -1,3 +1,5 @@
+"use server";
+
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 
 /**
@@ -14,6 +16,10 @@ export async function getAuthenticatedClient() {
 
   if (!userId) {
     throw new Error("User not authenticated");
+  }
+
+  if (!user.user_metadata?.role || user.user_metadata.role !== 'admin') {
+    throw new Error("Access denied: Admin privileges required");
   }
 
   return { supabase, userId };

@@ -55,14 +55,16 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
   return (
     <div 
       id="sidebar" 
-      className={`fixed left-0 top-0 h-screen shadow-lg z-50 rounded-r-xl flex flex-col justify-between transition-all duration-300 
+      className={`fixed left-0 top-0 h-screen shadow-lg z-50 rounded-r-sm flex flex-col justify-between transition-all duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 
         ${isCollapsed ? 'w-20' : 'w-56'}`}
       style={{ backgroundColor: branding?.color || '#1e40af' }}
     >
       <div className="flex flex-col h-full overflow-hidden">
-        <div className={`h-16 border-b border-white/15 flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+        <div className={`h-16 border-b border-white/15 flex items-center gap-2 transition-all duration-300
+          ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}
+        >
           <div className={`${isCollapsed ? 'hidden' : 'flex-1 min-w-0'}`}>
             <Image 
               src={branding?.logo || "/logo.png"} 
@@ -86,7 +88,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
 
           <button 
             onClick={onClose}
-            className="w-8 h-8 shrink-0 flex items-center justify-center hover:bg-white/15 rounded-md transition-all duration-200 lg:hidden"
+            className="w-8 h-8 shrink-0 flex items-center justify-center hover:bg-white/15 rounded-sm transition-all duration-200 lg:hidden"
             aria-label="Close sidebar"
           >
             <ArrowLeftCircle className="w-5 h-5 text-white/90 hover:text-white" />
@@ -94,7 +96,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
 
           <button 
             onClick={() => setCollapsed(!isCollapsed)}
-            className="hidden lg:flex w-6 h-6 shrink-0 items-center justify-center hover:bg-white/15 rounded-md transition-all duration-200"
+            className="hidden lg:flex w-6 h-6 shrink-0 items-center justify-center hover:bg-white/15 rounded-sm transition-all duration-200"
           >
             {isCollapsed ? <ChevronRight className="w-4 h-4 text-white" /> : <ChevronLeft className="w-4 h-4 text-white" />}
           </button>
@@ -121,16 +123,16 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
                   key={item.href}
                   href={item.href}
                   title={isCollapsed ? item.label : ""}
-                  className={`flex items-center gap-3 py-2.5 rounded-lg transition-all duration-200 group relative
+                  className={`flex items-center gap-3 py-2.5 rounded-sm transition-all duration-200 group relative
                     ${isCollapsed ? 'justify-center px-0' : 'px-3'}
                     ${isActive 
                       ? 'bg-white/15 text-white' 
                       : 'text-white/70 hover:bg-white/10 hover:text-white'
                     }`}
                 >
-                  <div className={`transition-all duration-200 p-1.5 rounded-md
+                  <div className={`transition-all duration-200 p-1.5 rounded-sm
                     ${isActive 
-                      ? 'bg-white/20 text-white shadow-sm' 
+                      ? 'bg-white/20 text-white shadow-none' 
                       : 'group-hover:bg-white/10 group-hover:text-white'
                     }`}>
                     <item.icon className="w-[18px] h-[18px]" strokeWidth={2.25} />
@@ -157,7 +159,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
         </div>
         
         <div className={`mt-auto p-4 border-t border-white/15 ${isCollapsed ? 'hidden' : 'block'}`}>
-          <div className="bg-white/10 rounded-lg p-3 shadow-sm">
+          <div className="bg-white/10 rounded-sm p-3 shadow-none">
             <div className="text-xs font-medium text-white/80 mb-1 truncate">{orgLabel} Admin</div>
             <div className="text-[11px] text-white/60 truncate">Care Management System</div>
           </div>

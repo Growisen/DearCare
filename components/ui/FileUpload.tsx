@@ -48,10 +48,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
           type="file"
           accept={accept}
           onChange={handleFileChange}
-          className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 border rounded-md cursor-pointer ${error ? 'border-red-400' : 'border-gray-300'}`}
+          className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-sm 
+            file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 focus:outline-none focus:border-slate-300
+            hover:file:bg-slate-100 border rounded-sm cursor-pointer ${error ? 'border-red-400' : 'border-slate-200'}`}
         />
       ) : (
-        <div className={`flex items-center justify-between p-3 border rounded-md bg-gray-50 ${error ? 'border-red-400' : 'border-gray-300'}`}>
+        <div className={`flex items-center justify-between p-3 border rounded-sm bg-gray-50 ${error ? 'border-red-400' : 'border-slate-200'}`}>
           <div className="flex items-center overflow-hidden">
             <svg className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

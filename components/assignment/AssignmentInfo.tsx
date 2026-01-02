@@ -24,12 +24,12 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
       <button
         onClick={handleDownloadPDF}
         className="mt-4 mb-1 px-4 py-2 bg-gray-50 border border-slate-300 text-slate-700 
-        text-sm rounded-sm shadow-sm hover:bg-slate-100"
+        text-sm rounded-sm shadow-none hover:bg-slate-100"
       >
         Download PDF
       </button>
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-        <div className="border border-slate-200 rounded-lg p-4 shadow-sm">
+        <div className="border border-slate-200 rounded-sm p-4 shadow-none">
           <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center">
             <UserIcon className="h-5 w-5 mr-2 text-blue-600" />
             Nurse Information
@@ -59,7 +59,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
             </div>
           </div>
         </div>
-        <div className="border border-slate-200 rounded-lg p-4 shadow-sm">
+        <div className="border border-slate-200 rounded-sm p-4 shadow-none">
           <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center">
             <BuildingOffice2Icon className="h-5 w-5 mr-2 text-blue-600" />
             Client Information
@@ -81,7 +81,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
             </div>
           </div>
         </div>
-        <div className="border border-slate-200 rounded-lg p-4 shadow-sm">
+        <div className="border border-slate-200 rounded-sm p-4 shadow-none">
           <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center">
             <CalendarIcon className="h-5 w-5 mr-2 text-blue-600" />
             Assignment Period
@@ -110,7 +110,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
             </div>
           </div>
         </div>
-        <div className="border border-slate-200 rounded-lg p-4 shadow-sm">
+        <div className="border border-slate-200 rounded-sm p-4 shadow-none">
           <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center">
             <ClockIcon className="h-5 w-5 mr-2 text-blue-600" />
             Shift Details

@@ -49,7 +49,7 @@ export default function StaffSalaryPage() {
 
   return (
     <div>
-      <div className="space-y-5 sm:space-y-7">
+      <div className="space-y-3">
         <SalaryHeader 
           title="Staff Salary" 
           subtitle="Calculate and review staff salary details"
@@ -63,7 +63,7 @@ export default function StaffSalaryPage() {
           onCalculate={calculateHours}
           onResetFilters={resetFilters}
         />
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
           {loading ? (
             <Loader message="Loading hours data..." />
           ) : error ? (

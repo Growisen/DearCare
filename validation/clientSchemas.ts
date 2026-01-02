@@ -57,7 +57,15 @@ const individualSchema = baseCommon.extend({
   requestorDistrict: z.string().min(1, 'Your district is required'),
   requestorCity: z.string().min(1, 'Your city is required'),
   requestorDOB: dateStr,
-  patientName: z.string().min(1, 'Patient name is required').regex(nameRegex, 'Patient name can contain only letters, spaces, dots, hyphens, and apostrophes'),
+  patientName: z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || nameRegex.test(val),
+    {
+      message: 'Patient name can contain only letters, spaces, dots, hyphens, and apostrophes',
+    }
+  ),
   patientDOB: dateStrOptional.optional(),
   patientGender: z.string().optional(),
   patientPhone: patientPhoneStr.optional(),

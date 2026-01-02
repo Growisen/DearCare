@@ -83,7 +83,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             type="date"
             value={formData.startDate}
             onChange={onFormChange}
-            className="h-9 w-full rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm outline-none md:text-sm
+            className="h-9 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none outline-none md:text-sm
             focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -97,7 +97,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             type="date"
             value={formData.endDate}
             onChange={onFormChange}
-            className="h-9 w-full rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm outline-none 
+            className="h-9 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none outline-none 
             md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -116,7 +116,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             type="time"
             value={formData.startTime}
             onChange={onFormChange}
-            className="h-9 w-full rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm outline-none
+            className="h-9 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none outline-none
              md:text-sm focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -130,7 +130,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             type="time"
             value={formData.endTime}
             onChange={onFormChange}
-            className="h-9 w-full rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm outline-none md:text-sm
+            className="h-9 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none outline-none md:text-sm
              focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -145,7 +145,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             type="text"
             value={shiftPattern}
             readOnly
-            className="h-9 w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-1 text-base shadow-sm outline-none md:text-sm
+            className="h-9 w-full rounded-sm border border-slate-300 bg-slate-100 px-3 py-1 text-base shadow-none outline-none md:text-sm
               focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -165,7 +165,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             value={formData.salaryPerMonth || ''}
             onChange={onFormChange}
             placeholder="Enter monthly salary"
-            className="h-9 w-full rounded-md border border-slate-300 bg-transparent px-3 py-1 text-base shadow-sm outline-none md:text-sm
+            className="h-9 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-1 text-base shadow-none outline-none md:text-sm
               focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -179,7 +179,7 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
             type="text"
             value={salaryPerDay}
             readOnly
-            className="h-9 w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-1 text-base shadow-sm outline-none md:text-sm
+            className="h-9 w-full rounded-sm border border-slate-300 bg-slate-100 px-3 py-1 text-base shadow-none outline-none md:text-sm
               focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20"
           />
         </div>
@@ -228,14 +228,14 @@ const isNightTime = (h: number): boolean => h >= 18 || h < 6;
       <div className="flex items-center justify-between pt-6 border-t border-slate-200">
 				<button
           onClick={onBack}
-          className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm border border-slate-300 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-none transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
         >
           Back
         </button>
         <button
           onClick={onNext}
-          className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white
-          shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
+          className="inline-flex items-center justify-center rounded-sm bg-slate-900 px-4 py-2 text-sm font-medium text-white
+          shadow-none transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950"
           disabled={!!dateError}
         >
           Next

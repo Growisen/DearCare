@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Users, Search, Download, Mail, Phone, Eye, Clock } from "lucide-react"
+import { Users, Search, Download, Mail, Phone, Eye, Clock, ArrowUpRight } from "lucide-react"
 import { Client } from "../../types/client.types"
 import Link from "next/link"
 import { serviceOptions } from "@/utils/constants"
@@ -36,6 +36,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null)
 
@@ -60,6 +61,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
   ).slice(0, 5)
 
   const handleExport = () => {
+    setIsExporting(true)
     const csvContent = "data:text/csv;charset=utf-8," + 
       ["Name,Request Date,Service,Status,Email,Phone"]
       .concat(filteredClients.map(client => 
@@ -73,32 +75,50 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    setIsExporting(false)
   }
 
   return (
-    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg">
-      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
+    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-none rounded-sm">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between
+       mb-3 sm:mb-4 border-b border-slate-200 pb-2"
+      >
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <Users className="w-5 h-5 text-slate-700 mr-2" />
           <h3 className="text-sm sm:text-md font-medium text-slate-800">Recent Clients</h3>
         </div>
         <div className="flex flex-col w-full sm:flex-row sm:w-auto items-stretch sm:items-center gap-3">
-          <div className="relative flex-1 sm:flex-none sm:w-48 md:w-64">
+          <div className="relative flex-1">
             <Search className="w-3 h-3 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search clients..." 
-              className="pl-10 pr-4 py-2 rounded-md border text-slate-800 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full shadow-sm" 
+              className="pl-8 pr-3 py-1.5 sm:py-2 text-xs text-gray-800 sm:text-sm border border-slate-300
+               rounded-sm focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button 
-            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium
+             bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-none"
             onClick={handleExport}
+            disabled={isExporting}
           >
-            <Download className="w-4 h-4" />
-            <span>Export</span>
+            {isExporting ? (
+              <span className="flex items-center">
+                <svg className="animate-spin mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Exporting...
+              </span>
+            ) : (
+              <>
+                <Download size={16} />
+                Export
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -111,13 +131,13 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
           </div>
         ) : error ? (
           <div className="p-6 text-center">
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-sm mb-4">
               {error}
             </div>
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-md">
+            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-sm">
               <p className="text-lg font-medium mb-1">No pending requests</p>
               <p className="text-sm">All client requests have been processed</p>
             </div>
@@ -137,11 +157,20 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
               <tbody>
                 {filteredClients.map((client) => {
                   const StatusIcon = statusIcons[client.status]
+                  const clientProfileUrl = `/client-profile/${client.id}`;
                   return (
                     <tr key={client.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-slate-800">{formatName(client.name)}</span>
+                          <Link
+                            href={clientProfileUrl}
+                            className="text-sm font-medium text-gray-700 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {formatName(client.name)}
+                            <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
+                          </Link>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-slate-600">{formatDate(client.requestDate)}</td>
@@ -167,12 +196,21 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
             <div className="sm:hidden space-y-4">
               {filteredClients.map((client) => {
                 const StatusIcon = statusIcons[client.status]
+                const clientProfileUrl = `/client-profile/${client.id}`;
                 return (
-                  <div key={client.id} className="p-4 rounded-md border border-slate-200 bg-white shadow-sm">
+                  <div key={client.id} className="p-4 rounded-sm border border-slate-200 bg-white shadow-none">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
-                          <h4 className="text-sm font-medium text-slate-800">{client.name}</h4>
+                          <Link
+                            href={clientProfileUrl}
+                            className="text-sm font-medium text-gray-700 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {client.name}
+                            <ArrowUpRight className="inline w-3.5 h-3.5 ml-1  text-blue-700" />
+                          </Link>
                           <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusStyles(client.status)}`}>
                             <StatusIcon className="inline w-3.5 h-3.5 mr-1" />
                             {formatStatus(client.status)}

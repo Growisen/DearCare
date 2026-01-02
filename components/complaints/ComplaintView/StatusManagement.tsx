@@ -84,7 +84,7 @@ export default function StatusManagement({ complaint, updateComplaint }: StatusM
   };
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-sm p-4">
       <h3 className="font-medium mb-3 text-gray-900">Update Status</h3>
       <select
         className="w-full p-2 border rounded mb-3 text-gray-700"
@@ -107,7 +107,7 @@ export default function StatusManagement({ complaint, updateComplaint }: StatusM
           <textarea
             id="resolution"
             rows={3}
-            className="w-full border rounded-md p-2 text-gray-700 mb-2"
+            className="w-full border rounded-sm p-2 text-gray-700 mb-2"
             value={resolution}
             onChange={(e) => setResolution(e.target.value)}
             placeholder="Describe how this complaint was resolved..."
@@ -120,7 +120,7 @@ export default function StatusManagement({ complaint, updateComplaint }: StatusM
         onClick={handleUpdateStatus}
         disabled={isUpdatingStatus || status === complaint.status || 
           (status === "resolved" && complaint.status !== "resolved" && !resolution.trim())}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300"
+        className="w-full px-4 py-2 bg-blue-600 text-white rounded-sm disabled:bg-blue-300"
       >
         {isUpdatingStatus ? "Updating..." : "Update Status"}
       </button>

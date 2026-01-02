@@ -116,14 +116,14 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
         const displayStatus = getDisplayStatus(assignment);
         const statusColors = {
           active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          completed: 'bg-gray-50 text-gray-600 border-gray-200',
+          completed: 'bg-gray-50 text-gray-600 border-slate-200',
           cancelled: 'bg-red-50 text-red-700 border-red-200',
         };
 
         return (
           <div
             key={assignment.id ?? `${assignment.nurseId}-${assignment.startDate}`}
-            className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+            className="bg-white rounded-sm border border-slate-200 hover:border-slate-200 transition-colors"
           >
             <div className="px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -156,12 +156,12 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   Assignment Details
                   <ExternalLink className="w-3 h-3 text-indigo-400 ml-1" aria-label="External link" />
                 </Link>
-                <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${statusColors[displayStatus]}`}>
+                <span className={`px-2.5 py-1 text-xs font-medium rounded-sm border ${statusColors[displayStatus]}`}>
                   {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
                 </span>
                 <button
                   onClick={() => onAddNotes ? onAddNotes(assignment) : handleAddNotes(assignment)}
-                  className="ml-2 px-2 py-1 text-xs font-medium rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+                  className="ml-2 px-2 py-1 text-xs font-medium rounded-sm border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
                   title="Add Notes"
                 >
                   <Plus className="w-3.5 h-3.5 inline-block mr-1" />
@@ -170,7 +170,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
               </div>
             </div>
 
-            <div className="px-4 pb-3 border-t border-gray-100">
+            <div className="px-4 pb-3 border-t border-slate-200">
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 pt-3 text-sm">
                 <div>
                   <span className="text-gray-500">Duration:</span>
@@ -258,7 +258,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-200">
                 {displayStatus === 'active' && (
                   <>
                     <button

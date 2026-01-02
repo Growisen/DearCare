@@ -31,7 +31,7 @@ const EditCreatedAtModal: React.FC<EditCreatedAtModalProps> = ({
   return (
     <ModalPortal>
       <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center text-gray-800 z-50">
-        <div className="bg-white rounded-lg p-6 shadow-lg min-w-[300px]">
+        <div className="bg-white rounded-sm p-6 shadow-lg min-w-[300px]">
           <h2 className="text-lg font-semibold mb-4">Edit Joined Date</h2>
           <input
             type="date"

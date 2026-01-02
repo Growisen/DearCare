@@ -8,12 +8,12 @@ interface ComplaintDescriptionProps {
 
 export default function ComplaintDescription({ description, reportedId, profileUrl }: ComplaintDescriptionProps) {
   return (
-    <div className="bg-gray-50 p-4 rounded-md">
+    <div className="bg-gray-50 p-4 rounded-sm">
       <h2 className="font-semibold text-lg mb-2 text-gray-900">Complaint Description</h2>
       <p className="text-gray-700">{description}</p>
       
       {reportedId && (
-        <div className="mt-4 pt-3 border-t border-gray-200">
+        <div className="mt-4 pt-3 border-t border-slate-200">
           <p className="text-gray-700 flex items-center">
             <span className="font-medium">Reported User:</span>
             <Link 

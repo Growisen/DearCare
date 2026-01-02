@@ -9,7 +9,7 @@ export const SalaryMobileCards: React.FC<SalaryMobileCardsProps> = ({ data }) =>
   return (
     <div className="sm:hidden bg-white">
       {data.map((row) => (
-        <div key={row.id} className="p-5 space-y-2 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+        <div key={row.id} className="p-5 space-y-2 hover:bg-gray-50 transition-colors border-b border-slate-200 last:border-0">
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-semibold text-gray-800">{row.name}</h3>
@@ -19,7 +19,7 @@ export const SalaryMobileCards: React.FC<SalaryMobileCardsProps> = ({ data }) =>
               ₹{row.salary.toLocaleString()}
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
+          <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-slate-200 p-3 rounded-sm">
             <p className="text-gray-500">Hours Worked:</p>
             <p className="text-gray-800 font-medium">{row.hours}</p>
           </div>

@@ -2,7 +2,7 @@ import React from 'react';
 
 export const SuccessMessage = () => {
   return (
-    <div className="bg-white border border-gray-200 rounded-md animate-in fade-in zoom-in-95 duration-300">
+    <div className="bg-white border border-slate-200 rounded-sm animate-in fade-in zoom-in-95 duration-300">
       <div className="p-10 sm:p-12 text-center flex flex-col items-center">
         <div className="flex items-center justify-center h-14 w-14 rounded-full bg-green-50 border border-green-100 mb-6">
           <svg 

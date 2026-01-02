@@ -65,8 +65,10 @@ export default function ComplaintsStats({ complaintsData }: ComplaintsStatsProps
   ]
 
   return (
-    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-sm rounded-lg col-span-full sm:col-span-2">
-      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2">
+    <Card className="p-3 sm:p-4 bg-white border border-slate-200 shadow-none rounded-sm col-span-full sm:col-span-2">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center justify-between 
+        mb-3 sm:mb-4 border-b border-slate-200 pb-2"
+      >
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <MdOutlineReportProblem className="w-5 h-5 text-slate-700 mr-2" />
           <h3 className="text-sm sm:text-md font-medium text-slate-800">Complaints Overview</h3>
@@ -78,7 +80,7 @@ export default function ComplaintsStats({ complaintsData }: ComplaintsStatsProps
       
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3">
         {complaintItems.map((item, i) => (
-          <div key={i} className="border border-slate-200 rounded-md p-2 sm:p-3 shadow-sm">
+          <div key={i} className="border border-slate-200 rounded-sm p-2 sm:p-3 shadow-none">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
               {item.icon}
               <span className="text-xs sm:text-sm font-medium text-slate-800">{item.label}</span>

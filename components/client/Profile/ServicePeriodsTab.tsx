@@ -133,7 +133,7 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
         <h2 className="text-lg font-semibold text-gray-800">Service Periods</h2>
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 shadow-sm"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-sm hover:bg-blue-700 shadow-none"
         >
           + Add Period
         </button>
@@ -141,7 +141,7 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
 
       <div className="space-y-3 w-full">
         {loading ? (
-          <div className="text-center py-12 text-gray-500 border border-dashed border-gray-200 rounded-lg w-full">
+          <div className="text-center py-12 text-gray-500 border border-dashed border-slate-200 rounded-sm w-full">
             Loading service periods...
           </div>
         ) : (
@@ -150,7 +150,7 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
 
             const statusColors = {
               active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-              completed: 'bg-gray-50 text-gray-600 border-gray-200',
+              completed: 'bg-gray-50 text-gray-600 border-slate-200',
               cancelled: 'bg-red-50 text-red-700 border-red-200',
             };
 
@@ -163,7 +163,7 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
             return (
               <div
                 key={assignment.id}
-                className="w-full bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                className="w-full bg-white rounded-sm border border-slate-200 hover:border-slate-200 transition-colors"
               >
                 <div className="px-4 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -173,12 +173,12 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
                       </h3>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-1 text-xs font-medium rounded-md border capitalize ${statusColors[displayStatus]}`}>
+                  <span className={`px-2.5 py-1 text-xs font-medium rounded-sm border capitalize ${statusColors[displayStatus]}`}>
                     {displayStatus}
                   </span>
                 </div>
 
-                <div className="px-4 pb-3 border-t border-gray-100">
+                <div className="px-4 pb-3 border-t border-slate-200">
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2 pt-3 text-sm">
                     <div className="col-span-2 sm:col-span-1">
                       <span className="text-gray-500">Progress:</span>
@@ -215,7 +215,7 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-200">
                     {displayStatus === 'active' && (
                       <>
                         <button
@@ -246,7 +246,7 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
         )}
 
         {!loading && servicePeriods.length === 0 && (
-          <div className="text-center py-12 text-gray-500 border border-dashed border-gray-200 rounded-lg w-full">
+          <div className="text-center py-12 text-gray-500 border border-dashed border-slate-200 rounded-sm w-full">
             No service periods found
           </div>
         )}

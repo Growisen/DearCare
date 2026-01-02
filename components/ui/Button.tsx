@@ -11,7 +11,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const isDisabled = !!props.disabled;
   const baseClasses =
-    'px-4 py-2 rounded-md focus:outline-none focus:ring-0 transition-colors';
+    'px-4 py-2 rounded-sm focus:outline-none focus:ring-0 transition-colors';
   const stateClasses = isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
 
   return (

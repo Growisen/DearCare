@@ -107,9 +107,9 @@ export const PatientInfoForm = ({
 
 
   const baseInputStyles = `
-    w-full border border-gray-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-gray-400 focus:outline-none focus:ring-0 
+    focus:border-slate-200 focus:outline-none focus:ring-0 
     transition-colors duration-200
   `;
   
@@ -118,7 +118,7 @@ export const PatientInfoForm = ({
   const errorTextStyles = "mt-1 text-xs text-red-500";
 
   return (
-    <div className="mb-8 border-b border-gray-100 pb-8">
+    <div className="mb-8 border-b border-slate-200 pb-8">
       <h2 className="text-base font-semibold text-gray-800 mb-6">Patient Information</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">
@@ -158,7 +158,7 @@ export const PatientInfoForm = ({
             </label>
             <div
               id="patientAgeDisplay"
-              className="w-full border border-gray-100 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
+              className="w-full border border-slate-200 bg-gray-50 rounded-sm py-2 px-2 text-sm text-gray-600 text-center select-none truncate"
             >
               {calculateAge(formData.patientDOB) || '-'} <span className="text-xs">yrs</span>
             </div>
@@ -188,7 +188,7 @@ export const PatientInfoForm = ({
         </div>
 
         {isBabyCare && (
-          <div className="md:col-span-12 bg-gray-50 p-4 rounded-sm border border-gray-100">
+          <div className="md:col-span-12 bg-gray-50 p-4 rounded-sm border border-slate-200">
             <label className={labelStyles}>
               Baby&apos;s Age Group
             </label>
@@ -199,7 +199,7 @@ export const PatientInfoForm = ({
                   name="ageGroup"
                   checked={isLessThanOneYear}
                   onChange={handleLessThanOneYear}
-                  className="h-4 w-4 text-gray-700 border-gray-300 focus:ring-0 focus:ring-offset-0"
+                  className="h-4 w-4 text-gray-700 border-slate-200 focus:ring-0 focus:ring-offset-0"
                 />
                 <span className="ml-2 text-sm text-gray-700">Less than 1 year</span>
               </label>
@@ -209,7 +209,7 @@ export const PatientInfoForm = ({
                   name="ageGroup"
                   checked={!isLessThanOneYear}
                   onChange={handleOneYearOrOlder}
-                  className="h-4 w-4 text-gray-700 border-gray-300 focus:ring-0 focus:ring-offset-0"
+                  className="h-4 w-4 text-gray-700 border-slate-200 focus:ring-0 focus:ring-offset-0"
                 />
                 <span className="ml-2 text-sm text-gray-700">1 year or older</span>
               </label>
@@ -276,7 +276,7 @@ export const PatientInfoForm = ({
               id="sameAsRequestor"
               checked={isSameAddress}
               onChange={(e) => handleSameAddressToggle(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-gray-300 text-gray-700 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+              className="h-3.5 w-3.5 rounded border-slate-200 text-gray-700 focus:ring-0 focus:ring-offset-0 cursor-pointer"
             />
             <label htmlFor="sameAsRequestor" className="ml-2 block text-sm text-gray-600 cursor-pointer select-none">
               Patient address is same as requestor&apos;s address

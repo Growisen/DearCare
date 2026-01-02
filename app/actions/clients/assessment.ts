@@ -1,6 +1,7 @@
 "use server"
 
-import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
+import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 import { revalidatePath } from 'next/cache';
 import { SavePatientAssessmentParams, SavePatientAssessmentResult } from '@/types/client.types';
 import { sendClientFormLink } from '@/lib/email';
@@ -11,7 +12,7 @@ import { logger } from '@/utils/logger';
  */
 export async function savePatientAssessment(data: SavePatientAssessmentParams): Promise<SavePatientAssessmentResult> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
     const environmentData = {
       is_clean: data.assessmentData.isClean,
@@ -124,7 +125,7 @@ export async function getPatientAssessment(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data: allAssessments, error: allError } = await supabase
       .from('patient_assessments')
@@ -184,7 +185,7 @@ export async function getPatientAssessment(
 
 export async function getClientAssessmentFormStatus(clientId: string) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data, error } = await supabase
       .from('patient_assessments')
@@ -219,7 +220,7 @@ export async function getClientAssessmentFormStatus(clientId: string) {
  */
 export async function sendClientAssessmentFormLink(clientId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { data: client, error: clientError } = await supabase
       .from('clients')
@@ -298,7 +299,7 @@ export async function getClientNames(
   error?: string;
 }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient();
 
     const { data, error } = await supabase
       .from('individual_clients')
@@ -347,7 +348,7 @@ export async function updateNurseClientNotes(
   notes: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase } = await getAuthenticatedClient();
 
     const { error } = await supabase
       .from('nurse_client')

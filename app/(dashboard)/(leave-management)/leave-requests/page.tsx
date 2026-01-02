@@ -55,7 +55,7 @@ export default function LeaveRequestsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-3">
       <LeaveRequestsHeader 
         onExport={handleExport}
         isExporting={isExporting}
@@ -78,7 +78,7 @@ export default function LeaveRequestsPage() {
         onAddLeave={handleOnAddLeave}
       />
 
-      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
         <LeaveRequestsTable
           leaveRequests={leaveRequests}
           isLoading={isLoading}
@@ -87,7 +87,7 @@ export default function LeaveRequestsPage() {
         />
         
         {!isLoading && leaveRequests.length > 0 && (
-          <div className="p-4 bg-gray-50 border-t border-gray-200">
+          <div className="bg-gray-50 border-t border-slate-200">
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
@@ -115,7 +115,7 @@ export default function LeaveRequestsPage() {
 
       {confirmationModal.isOpen && confirmationModal.action === 'approve' && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full m-4 border border-gray-100">
+          <div className="bg-white p-6 rounded-sm shadow-xl max-w-md w-full m-4 border border-slate-200">
             <div className="flex items-center justify-center w-16 h-16 mx-auto bg-green-50 border border-green-100 rounded-full mb-6">
               <Check className="h-7 w-7 text-green-600" />
             </div>
@@ -127,13 +127,13 @@ export default function LeaveRequestsPage() {
             </p>
             <div className="flex justify-end gap-3">
               <button
-                className="px-5 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-all duration-150"
+                className="px-5 py-2 border border-slate-200 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-none transition-all duration-150"
                 onClick={() => setConfirmationModal({isOpen: false, requestId: null, action: null})}
               >
                 Cancel
               </button>
               <button
-                className="px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 shadow-sm transition-all duration-150"
+                className="px-5 py-2 bg-green-600 text-white rounded-sm text-sm font-medium hover:bg-green-700 shadow-none transition-all duration-150"
                 onClick={() => {
                   if (confirmationModal.requestId) {
                     handleApproveLeaveRequest(confirmationModal.requestId)

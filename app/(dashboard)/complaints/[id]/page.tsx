@@ -82,7 +82,7 @@ export default function ComplaintDetailPage() {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white rounded-sm shadow">
       <ComplaintHeader complaint={complaint} />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">

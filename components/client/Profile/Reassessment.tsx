@@ -74,7 +74,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
       if (value.length === 0) return "-";
       if (typeof value[0] === 'object') {
          return value.map((v, i) => (
-             <div key={i} className="text-xs border-b border-gray-200 last:border-0 py-1">
+             <div key={i} className="text-xs border-b border-slate-200 last:border-0 py-1">
                {formatDynamicValue(v)}
              </div>
          ));
@@ -114,7 +114,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {entries.map(([key, value]) => (
-          <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100 overflow-hidden break-words">
+          <div key={key} className="bg-gray-50 p-3 rounded-sm border border-slate-200 overflow-hidden break-words">
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
               {key.replace(/_/g, ' ')}
             </p>
@@ -132,7 +132,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
 
   if (!activeAssessment) {
     return (
-      <div className="p-8 text-center bg-gray-50 rounded-lg border border-gray-200 border-dashed">
+      <div className="p-8 text-center bg-gray-50 rounded-sm border border-slate-200 border-dashed">
         <p className="text-gray-500">No reassessment records found for this client.</p>
       </div>
     );
@@ -207,7 +207,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
           <InfoField label="Follow-up Evaluation" value={activeAssessment.followUpEvaluation} />
           
           {activeAssessment.dynamicFields && Object.keys(activeAssessment.dynamicFields).length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="mt-4 pt-4 border-t border-slate-200">
               <h4 className="text-sm font-medium text-gray-800 mb-3">Additional Observations</h4>
               {renderJsonFields(activeAssessment.dynamicFields)}
             </div>
@@ -220,7 +220,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
   return (
     <div className="space-y-4">
       {reassessments.length > 0 && (
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-sm border border-slate-200">
           <div>
             <h3 className="text-sm font-medium text-gray-900">Reassessment History</h3>
             <p className="text-xs text-gray-500 mt-1">Select a date to view past reports</p>
@@ -231,7 +231,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
             value={activeAssessment.id}
             onValueChange={setSelectedReassessmentId}
           >
-            <SelectTrigger className="w-full bg-white border-gray-300 text-gray-800">
+            <SelectTrigger className="w-full bg-white border-slate-200 text-gray-800">
               <SelectValue placeholder="Select date..." />
             </SelectTrigger>
             <SelectContent className='text-gray-800 bg-white'>
@@ -249,7 +249,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
       {sections.map((section) => {
         const isExpanded = expandedSections.includes(section.id);
         return (
-          <div key={section.id} className="bg-white p-4 rounded border border-gray-200 shadow-sm">
+          <div key={section.id} className="bg-white p-4 rounded border border-slate-200 shadow-none">
             <button 
               className="w-full flex justify-between items-center focus:outline-none group"
               onClick={() => toggleSection(section.id)}
@@ -259,7 +259,7 @@ const ReassessmentInfo: React.FC<ReassessmentInfoProps> = ({
                   {section.title}
                 </h2>
                 {!isExpanded && (
-                  <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                  <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-slate-200">
                     Collapsed
                   </span>
                 )}

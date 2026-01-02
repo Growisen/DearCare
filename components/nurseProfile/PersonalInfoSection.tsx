@@ -28,14 +28,14 @@ interface PersonalInfoSectionProps {
 
 const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, calculateAge }) => {
   return (
-    <div className="bg-white p-4 rounded border border-gray-200">
-      <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200 mb-4">
+    <div className="bg-white p-4 rounded border border-slate-200">
+      <h2 className="text-base font-semibold text-gray-800 pb-2 border-b border-slate-200 mb-4">
         Personal Information
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 auto-rows-fr">
 
-        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full h-full flex flex-col">
+        <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full h-full flex flex-col">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Basic Identity</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -71,7 +71,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           </div>
         </div>
 
-        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-fit min-w-full h-full flex flex-col">
+        <div className="bg-gray-50 p-3 rounded border border-slate-200 w-fit min-w-full h-full flex flex-col">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Contact Information</h3>
           <div className="grid gap-3">
             <div>
@@ -89,7 +89,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           </div>
         </div>
 
-        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full h-full flex flex-col">
+        <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full h-full flex flex-col">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Location Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
@@ -107,7 +107,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           </div>
         </div>
 
-        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full h-full flex flex-col">
+        <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full h-full flex flex-col">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Cultural Background</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -131,7 +131,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ basicInfo, ca
           </div>
         </div>
 
-        <div className="bg-gray-50 p-3 rounded border border-gray-200 w-full h-full flex flex-col">
+        <div className="bg-gray-50 p-3 rounded border border-slate-200 w-full h-full flex flex-col">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Professional Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>

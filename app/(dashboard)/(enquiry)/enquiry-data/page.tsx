@@ -99,7 +99,7 @@ export default function EnquiryDataPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-none border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -123,7 +123,7 @@ export default function EnquiryDataPage() {
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 placeholder-gray-500"
+                    className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-sm transition-colors text-gray-900 placeholder-gray-500"
                     disabled={loading}
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -136,7 +136,9 @@ export default function EnquiryDataPage() {
                 <button
                   onClick={handleSearch}
                   disabled={loading || isSearching}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-sm shadow-none bg-blue-600 
+                  text-sm font-medium text-white hover:bg-blue-700 focus:outline-none disabled:opacity-50
+                  disabled:cursor-not-allowed transition-colors"
                 >
                   {isSearching ? (
                     <>
@@ -157,7 +159,8 @@ export default function EnquiryDataPage() {
                   <button
                     onClick={handleClearSearch}
                     disabled={loading}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-sm shadow-none bg-white text-sm font-medium
+                     text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 transition-colors"
                     title="Clear search"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +173,9 @@ export default function EnquiryDataPage() {
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm shadow-none
+                 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none
+                  disabled:opacity-50 transition-colors"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -184,7 +189,7 @@ export default function EnquiryDataPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-sm flex items-center">
             <svg className="h-5 w-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
@@ -193,13 +198,13 @@ export default function EnquiryDataPage() {
         )}
 
         {(loading || isSearching) && pagination.currentPage > 1 && (
-          <div className="mb-6 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-lg flex items-center justify-center">
+          <div className="mb-6 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-sm flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
             <p>{isSearching ? 'Searching...' : 'Loading data...'}</p>
           </div>
         )}
 
-        <div className="hidden lg:block bg-white rounded-lg shadow-sm border">
+        <div className="hidden lg:block bg-white rounded-sm shadow-none border">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -261,7 +266,7 @@ export default function EnquiryDataPage() {
           </div>
 
           {pagination.totalPages > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-gray-300 flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 Showing page {pagination.currentPage} of {pagination.totalPages}
               </div>
@@ -322,7 +327,7 @@ export default function EnquiryDataPage() {
 
         <div className="lg:hidden space-y-4">
           {enquiries.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="bg-white rounded-sm shadow-none border p-8 text-center">
               <svg className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -341,7 +346,7 @@ export default function EnquiryDataPage() {
           ) : (
             <>
               {enquiries.map((enquiry, idx) => (
-                <div key={idx} className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
+                <div key={idx} className="bg-white rounded-sm shadow-none border p-4 hover:shadow-md transition-shadow">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <h3 className="text-lg font-semibold text-gray-900">{enquiry.name}</h3>
@@ -382,7 +387,7 @@ export default function EnquiryDataPage() {
               ))}
 
               {pagination.totalPages > 0 && (
-                <div className="bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between">
+                <div className="bg-white rounded-sm shadow-none border p-4 flex items-center justify-between">
                   <button 
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                     disabled={pagination.currentPage === 1 || loading}

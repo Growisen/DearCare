@@ -49,7 +49,7 @@ export default function ComplaintsPage() {
   }
   
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <ComplaintHeader 
         onExport={handleExport}
         isExporting={isExporting}
@@ -63,7 +63,7 @@ export default function ComplaintsPage() {
         handleResetFilters={handleResetFilters}
       />
       
-      <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
         {loading ? (
           <LoadingState message="Loading complaints..." description="Please wait while we fetch the complaints data" />
         ) : (

@@ -40,7 +40,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
     theme?: "emerald" | "violet" | "rose" | "blue" | "gray" | "amber" | "cyan"
   }) => {
     const themeStyles = {
-      gray: "bg-gray-50 border-gray-100 text-gray-900 icon-gray-400",
+      gray: "bg-gray-50 border-slate-200 text-gray-900 icon-gray-400",
       emerald: "bg-emerald-50 border-emerald-100 text-emerald-800 icon-emerald-500",
       violet: "bg-violet-50 border-violet-100 text-violet-800 icon-violet-500",
       rose: "bg-rose-50 border-rose-100 text-rose-800 icon-rose-500",
@@ -52,7 +52,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
     const currentTheme = themeStyles[theme];
 
     return (
-      <div className={`flex flex-col p-3 rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md ${currentTheme.split(' ').slice(0, 2).join(' ')}`}>
+      <div className={`flex flex-col p-3 rounded-sm border shadow-none transition-all duration-200 hover:shadow-md ${currentTheme.split(' ').slice(0, 2).join(' ')}`}>
         <span className="text-[10px] uppercase tracking-wider font-bold text-gray-500 mb-1 flex items-center gap-1.5 opacity-80">
           <Icon className={`w-3.5 h-3.5 ${theme === 'gray' ? 'text-gray-400' : currentTheme.match(/icon-(\w+-\d+)/)?.[0]}`} />
           {label}
@@ -63,8 +63,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
   };
 
   return (
-    <div className="bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-white to-white border border-gray-200 shadow-sm rounded-t-lg overflow-hidden font-sans">
-      <div className="px-6 py-3 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50/80 to-white backdrop-blur-sm">
+    <div className="bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-white to-white border border-slate-200 shadow-none rounded-t-lg overflow-hidden font-sans">
+      <div className="px-6 py-3 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-gray-50/80 to-white backdrop-blur-sm">
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
           <User className="w-4 h-4 text-gray-400" />
           Profile
@@ -72,14 +72,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
         <div className="flex gap-2">
           <Link 
             href={`/nurses/${basicInfo.nurse_id}/edit`}
-            className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 hover:border-indigo-300 text-gray-600 hover:text-indigo-600 text-xs font-semibold rounded-md transition-all shadow-sm hover:shadow"
+            className="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 hover:border-indigo-300 text-gray-600 hover:text-indigo-600 text-xs font-semibold rounded-sm transition-all shadow-none hover:shadow"
           >
             <Pencil className="w-3.5 h-3.5 mr-1.5" />
             Edit
           </Link>
           <button
             onClick={onDelete}
-            className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 text-gray-600 hover:text-red-600 text-xs font-semibold rounded-md transition-all shadow-sm hover:shadow"
+            className="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 hover:border-red-300 text-gray-600 hover:text-red-600 text-xs font-semibold rounded-sm transition-all shadow-none hover:shadow"
             type="button"
           >
             <Trash2 className="w-3.5 h-3.5 mr-1.5" />
@@ -91,7 +91,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
       <div className="px-6 py-6">
         <div className="flex flex-col md:flex-row gap-8 items-start">
           <div className="flex-shrink-0">
-            <div className="relative h-36 w-36 rounded-xl overflow-hidden border-[4px] border-white shadow-sm ring-1 ring-gray-200/60">
+            <div className="relative h-36 w-36 rounded-sm overflow-hidden border-[4px] border-white shadow-none ring-1 ring-gray-200/60">
               {documentsInfo.profile_image ? (
                 <Image 
                   src={documentsInfo.profile_image}
@@ -141,23 +141,23 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-5 pb-5 border-b border-dashed border-gray-200">
+            <div className="flex flex-wrap gap-3 mb-5 pb-5 border-b border-dashed border-slate-200">
               {basicInfo.nurse_reg_no && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-orange-50 border border-orange-100 text-orange-800 text-xs font-medium">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-orange-50 border border-orange-100 text-orange-800 text-xs font-medium">
                   <Hash className="w-3.5 h-3.5 text-orange-500" />
                   Reg No: <span className="font-bold">{basicInfo.nurse_reg_no}</span>
                 </div>
               )}
               
               {basicInfo.nurse_prev_reg_no && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-50 border border-slate-100 text-slate-600 text-xs font-medium">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-slate-50 border border-slate-100 text-slate-600 text-xs font-medium">
                   <History className="w-3.5 h-3.5 text-slate-400" />
                   Prev Reg No: <span className="font-semibold">{basicInfo.nurse_prev_reg_no}</span>
                 </div>
               )}
 
               {basicInfo.created_at && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-cyan-50 border border-cyan-100 text-cyan-700 text-xs font-medium ml-auto">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-cyan-50 border border-cyan-100 text-cyan-700 text-xs font-medium ml-auto">
                   <FileClock className="w-3.5 h-3.5 text-cyan-500" />
                   Created: {isValid(new Date(basicInfo.created_at)) ? format(new Date(basicInfo.created_at), 'MMM dd, yyyy') : 'N/A'}
                 </div>

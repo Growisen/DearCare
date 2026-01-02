@@ -9,7 +9,7 @@ export default function SupportingMediaContainer({ media }: SupportingMediaConta
   if (!media || media.length === 0) return null;
   
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-sm p-4">
       <h3 className="font-semibold text-lg mb-3 text-gray-900">Supporting Evidence</h3>
       
       <div className="space-y-4">

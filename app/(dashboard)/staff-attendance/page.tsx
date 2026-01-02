@@ -32,7 +32,7 @@ export default function StaffAttendancePage() {
   } = useStaffAttendance();
 
   return (
-    <div className="space-y-5 sm:space-y-7">
+    <div className="space-y-3">
       <AttendanceHeader
         selectedDate={selectedDate}
         handleDateChange={handleDateChange}
@@ -43,7 +43,7 @@ export default function StaffAttendancePage() {
         selectedCategory={selectedCategory}
       />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
         {loading ? (
           <LoadingState message="Loading attendance data..." />
         ) : error ? (

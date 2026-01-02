@@ -15,7 +15,7 @@ export const AgreementSection: React.FC<AgreementSectionProps> = ({
     .filter(line => line.length > 0);
 
   return (
-    <div className="space-y-3 p-4 rounded-lg bg-slate-50 border border-slate-200">
+    <div className="space-y-3 p-4 rounded-sm bg-slate-50 border border-slate-200">
       <h3 className="font-semibold text-sm">{title}</h3>
       <ul className="text-sm text-slate-600 leading-relaxed list-disc pl-5">
         {bulletPoints.map((point, idx) => (

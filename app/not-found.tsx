@@ -14,7 +14,7 @@ const NotFoundPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="max-w-4xl w-full">
         {/* Main Container */}
-        <div className="bg-white rounded border border-gray-300 p-8 md:p-12 text-center">
+        <div className="bg-white rounded border border-slate-200 p-8 md:p-12 text-center">
           {/* Error Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center">
@@ -40,12 +40,12 @@ const NotFoundPage: React.FC = () => {
 
         {/* Error Details Section (for development) */}
         {mounted && (
-          <div className="mt-6 bg-white rounded border border-gray-300 p-4">
+          <div className="mt-6 bg-white rounded border border-slate-200 p-4">
             <details className="text-sm">
               <summary className="font-medium text-gray-800 cursor-pointer hover:text-gray-600 transition-colors">
                 Technical Details
               </summary>
-              <div className="mt-3 pt-3 border-t border-gray-200 text-gray-600">
+              <div className="mt-3 pt-3 border-t border-slate-200 text-gray-600">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <span className="font-medium">Error Code:</span> 404 - Not Found

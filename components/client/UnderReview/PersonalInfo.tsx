@@ -18,7 +18,7 @@ interface PersonalInfoProps {
 
 export default function PersonalInfo({ formData, handleInputChange }: PersonalInfoProps) {
   return (
-    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+    <div className="bg-white border border-slate-200 p-4 rounded-sm">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Assessment</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -29,7 +29,7 @@ export default function PersonalInfo({ formData, handleInputChange }: PersonalIn
             id="guardianOccupation"
             value={formData.guardianOccupation}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
           >
             <option value="">Select occupation</option>
             <option value="GOVT">Government Service</option>
@@ -48,7 +48,7 @@ export default function PersonalInfo({ formData, handleInputChange }: PersonalIn
             id="maritalStatus"
             value={formData.maritalStatus}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-slate-200 rounded-sm py-2 px-3 text-gray-700 focus:outline-none"
           >
             <option value="">Select status</option>
             <option value="SINGLE">Single</option>

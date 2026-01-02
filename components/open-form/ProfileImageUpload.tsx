@@ -62,7 +62,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   };
 
   const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2";
-  const buttonBaseStyles = "inline-flex items-center px-3 py-1.5 border border-gray-200 rounded-sm text-xs font-medium bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer select-none";
+  const buttonBaseStyles = "inline-flex items-center px-3 py-1.5 border border-slate-200 rounded-sm text-xs font-medium bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer select-none";
   const removeButtonStyles = "inline-flex items-center px-3 py-1.5 border border-transparent rounded-sm text-xs font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer ml-2";
 
   return (
@@ -72,7 +72,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       </label>
       
       <div className="flex items-center gap-4">
-        <div className="relative w-14 h-14 shrink-0 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+        <div className="relative w-14 h-14 shrink-0 rounded-full overflow-hidden bg-gray-100 border border-slate-200">
           {preview ? (
             <Image 
               src={preview} 

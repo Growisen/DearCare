@@ -72,7 +72,7 @@ export default function ClientsPage() {
 
   return (
     <div className="w-full">
-      <div className="space-y-5 sm:space-y-7">
+      <div className="space-y-3">
         <ClientHeader 
           onAddClient={() => setShowAddClient(true)}
           onExport={handleExport}
@@ -97,7 +97,7 @@ export default function ClientsPage() {
           handleResetFilters={handleResetFilters}
         /> */}
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+        <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
           {isLoading ? (
             <LoadingState message="Loading clients..." />
           ) : error ? (

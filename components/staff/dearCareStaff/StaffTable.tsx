@@ -35,7 +35,7 @@ const StaffTableRow = memo(({ staff, onReviewDetails, roleColors, roleIcons }: {
       </td>
       <td className="py-4 px-6">
         <button 
-          className="px-3.5 py-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium inline-flex items-center gap-1.5"
+          className="px-3.5 py-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-sm transition-colors text-sm font-medium inline-flex items-center gap-1.5"
           onClick={() => onReviewDetails(staff)}
           aria-label={`Review details for ${formatName(staff.name)}`}
         >
@@ -58,7 +58,7 @@ const StaffMobileCard = memo(({ staff, onReviewDetails, roleColors, roleIcons }:
   const RoleIcon = roleIcons[role] || User;
   
   return (
-    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0">
+    <div className="p-5 space-y-4 hover:bg-gray-50 transition-colors border-b border-slate-200 last:border-0">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-semibold text-gray-800">{formatName(staff.name)}</h3>
@@ -69,7 +69,7 @@ const StaffMobileCard = memo(({ staff, onReviewDetails, roleColors, roleIcons }:
         </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-gray-200 p-3 rounded-lg">
+      <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-slate-200 p-3 rounded-sm">
         <p className="text-gray-500">Organization:</p>
         <p className="text-gray-800 font-medium">{staff.organization}</p>
         <p className="text-gray-500">Email:</p>
@@ -79,7 +79,7 @@ const StaffMobileCard = memo(({ staff, onReviewDetails, roleColors, roleIcons }:
       </div>
       
       <button 
-        className="w-full px-4 py-2.5 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+        className="w-full px-4 py-2.5 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors text-sm font-medium flex items-center justify-center gap-2"
         onClick={() => onReviewDetails(staff)}
         aria-label={`Review details for ${formatName(staff.name)}`}
       >
@@ -97,8 +97,8 @@ export const StaffTable = memo(function StaffTable({ staff, onReviewDetails }: S
     manager: "bg-blue-50 text-blue-700 border border-blue-200",
     caregiver: "bg-green-50 text-green-700 border border-green-200",
     nurse: "bg-teal-50 text-teal-700 border border-teal-200",
-    all: "bg-gray-50 text-gray-600 border border-gray-200",
-    default: "bg-gray-50 text-gray-800 border border-gray-300"
+    all: "bg-gray-50 text-gray-600 border border-slate-200",
+    default: "bg-gray-50 text-gray-800 border border-slate-200"
   }
 
   const roleIcons: Record<string, React.FC<{ className?: string }>> = {
@@ -111,11 +111,11 @@ export const StaffTable = memo(function StaffTable({ staff, onReviewDetails }: S
   }
 
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
       {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-100 border-b border-gray-200">
+          <thead className="bg-gray-100 border-b border-slate-200">
             <tr className="text-left">
               <th className="py-4 px-6 font-medium text-gray-700">Staff Name</th>
               <th className="py-4 px-6 font-medium text-gray-700">Organization</th>

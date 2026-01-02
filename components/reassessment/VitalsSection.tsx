@@ -16,15 +16,15 @@ interface Props {
 }
 
 export default function VitalsSection({ formData, onChange, dynamicProps }: Props) {
-  const minimalInputClass = "w-full border-b border-gray-300 bg-transparent py-1 focus:outline-none focus:border-gray-500 transition-colors text-gray-700 placeholder-gray-400 text-sm";
+  const minimalInputClass = "w-full border-b border-slate-200 bg-transparent py-1 focus:outline-none focus:border-gray-500 transition-colors text-gray-700 placeholder-gray-400 text-sm";
 
   return (
     <section className="space-y-6">
-      <h2 className="text-sm font-bold uppercase text-gray-800 border-b border-gray-100 pb-2 flex items-center gap-2">
+      <h2 className="text-sm font-bold uppercase text-gray-800 border-b border-slate-200 pb-2 flex items-center gap-2">
         <Clock className="w-4 h-4 text-gray-500" />
         Vital Signs
       </h2>
-      <div className="bg-gray-50/50 p-6 rounded-sm border border-gray-100">
+      <div className="bg-gray-50/50 p-6 rounded-sm border border-slate-200">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
           <div className="space-y-1">
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Time</label>
@@ -60,7 +60,7 @@ export default function VitalsSection({ formData, onChange, dynamicProps }: Prop
             <input type="text" name="respiratoryRate" placeholder="/min" value={formData.vitals.respiratoryRate} onChange={onChange} className={minimalInputClass} />
           </div>
         </div>
-        <div className="border-t border-gray-200 mt-4 pt-2">
+        <div className="border-t border-slate-200 mt-4 pt-2">
           <DynamicFieldSection fields={formData.dynamicFields.vitals} sectionKey="vitals" {...dynamicProps} />
         </div>
       </div>
