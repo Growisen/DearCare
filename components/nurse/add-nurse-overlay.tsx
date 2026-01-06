@@ -180,7 +180,7 @@ const [referenceData, setReferenceData] = useState<NurseReferenceData>({
   };
 
 return (
-  <div className="fixed inset-0 bg-gray-900/40 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200">
     <div className="bg-white rounded-sm w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden shadow-xl">
 
       <div className="shrink-0 border-b border-slate-200 px-6 py-5 flex items-center justify-between bg-gray-50">

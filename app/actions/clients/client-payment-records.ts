@@ -381,6 +381,48 @@ export async function fetchPaymentOverview({
   }
 }
 
+export async function fetchClientPaymentAggregates({
+  startDate,
+  endDate = startDate,
+  searchText,
+}: {
+  startDate?: string;
+  endDate?: string;
+  searchText?: string;
+} = {}) {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const { data, error } = await supabase
+      .rpc('get_client_payment_aggregates', {
+        filter_start_date: startDate ?? null,
+        filter_end_date: endDate ?? null,
+        search_text: searchText ?? null,
+      });
+
+    if (error) {
+      logger.error('Error fetching client payment aggregates:', error);
+      return { success: false, error: error.message };
+    }
+
+    const result = Array.isArray(data) && data.length > 0 ? data[0] : { total_amount_received: 0, total_commission_generated: 0 };
+
+    return {
+      success: true,
+      data: {
+        totalAmountReceived: Number(result.total_amount_received),
+        totalCommissionGenerated: Number(result.total_commission_generated),
+      },
+    };
+  } catch (error: unknown) {
+    logger.error('Error fetching client payment aggregates:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
 export interface UpdatePaymentGroupInput {
   paymentRecordId: number | string;
   groupName?: string;

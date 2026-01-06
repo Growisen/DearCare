@@ -416,7 +416,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded-sm shadow-xl border border-slate-200">
         <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between rounded-t-sm shrink-0">
           <h2 className="text-base font-semibold text-gray-800">Edit Profile Details</h2>

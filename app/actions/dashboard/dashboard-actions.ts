@@ -339,8 +339,6 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
 
     const { data: rawPayments, error: paymentsError } = await paymentsQuery.returns<UnifiedPaymentViewRecord[]>();
 
-    console.log('Fetched raw payments:', rawPayments);
-
     if (paymentsError) throw new Error(paymentsError.message);
 
     const payments = rawPayments || [];

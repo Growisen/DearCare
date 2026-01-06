@@ -25,7 +25,7 @@ export default function PaymentHeader({
   setDateFilterAction
 }: PaymentHeaderProps) {
   return (
-    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden mb-4">
+    <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-200 gap-3">
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Client Payments</h1>

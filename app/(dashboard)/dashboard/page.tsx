@@ -41,6 +41,7 @@ export default function DashboardPage() {
   const { paymentOverview } = usePaymentsData(selectedDate)
   const {
     advancePayments,
+    advancePaymentsTotals,
     exportAdvancePaymentsCSV,
   } = useAdvancePaymentsData({
     selectedDate,
@@ -49,12 +50,14 @@ export default function DashboardPage() {
     advancePaymentsSearchTerm: debouncedSearch,
   })
 
+  const advanceData = advancePayments.data?.data || []
+  const advanceMeta = advancePayments.data?.meta
+  const advanceTotals = advancePaymentsTotals.data ?? { totalAmountGiven: 0, totalAmountReturned: 0 }
+
   const isLoading = dashboard.isLoading
   const error = dashboard.error || advancePayments.error
   const dashboardData = dashboard.data?.success ? dashboard.data.data : null
   const paymentData = paymentOverview.data?.success ? paymentOverview.data.data : undefined
-  const advanceData = advancePayments.data?.data || []
-  const advanceMeta = advancePayments.data?.meta
 
   const handleExport = async () => {
     setIsExporting(true)
@@ -124,8 +127,8 @@ export default function DashboardPage() {
         page={pagination.page}
         pageSize={pagination.pageSize}
         totalPages={advanceMeta?.totalPages}
-        totalGiven={advanceMeta?.totalAmountGiven}
-        totalReturned={advanceMeta?.totalAmountReturned}
+        totalGiven={advanceTotals?. totalAmountGiven}
+        totalReturned={advanceTotals?.totalAmountReturned}
         searchTerm={searchTerm} 
         setSearchTermAction={setSearchTerm} 
         onExportAction={handleExport}
