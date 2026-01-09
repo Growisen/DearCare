@@ -1,50 +1,51 @@
-import { Wallet, CheckCircle2 } from "lucide-react";
+import { PlayCircle, PauseCircle, Activity, AlertCircle } from "lucide-react";
 
 interface StatsSummaryProps {
-  stats: { total_salary_amount: number; total_approved_amount: number };
-  advanceTotals: { totalAmountGiven: number; totalAmountReturned: number };
-  aggregatesLoading: boolean;
-  advanceTotalsLoading: boolean;
+  stats: {
+    starting_today_count: number;
+    ending_today_count: number;
+    active_count: number;
+    expiring_soon_count: number;
+  };
+  loading: boolean;
 }
 
 export function StatsSummary({
   stats,
-  advanceTotals,
-  aggregatesLoading,
-  advanceTotalsLoading,
+  loading,
 }: StatsSummaryProps) {
   const statItems = [
     {
-      label: "Salary Generated",
-      value: stats.total_salary_amount,
-      isLoading: aggregatesLoading,
-      icon: Wallet,
-      iconColor: "text-green-600",
+      label: "Starting Today",
+      value: stats.starting_today_count,
+      isLoading: loading,
+      icon: PlayCircle,
+      iconColor: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
-      label: "Salary Approved",
-      value: stats.total_approved_amount,
-      isLoading: aggregatesLoading,
-      icon: CheckCircle2,
+      label: "Ending Today",
+      value: stats.ending_today_count,
+      isLoading: loading,
+      icon: PauseCircle,
+      iconColor: "text-red-600",
+      bgColor: "bg-red-50",
+    },
+    {
+      label: "Active Assignments",
+      value: stats.active_count,
+      isLoading: loading,
+      icon: Activity,
       iconColor: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
-      label: "Advance Paid",
-      value: advanceTotals.totalAmountGiven ?? 0,
-      isLoading: advanceTotalsLoading,
-      icon: Wallet,
-      iconColor: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-    },
-    {
-      label: "Advance Returned",
-      value: advanceTotals.totalAmountReturned ?? 0,
-      isLoading: advanceTotalsLoading,
-      icon: CheckCircle2,
-      iconColor: "text-yellow-600",
-      bgColor: "bg-yellow-50",
+      label: "Expiring Soon (In 7 Days)",
+      value: stats.expiring_soon_count,
+      isLoading: loading,
+      icon: AlertCircle,
+      iconColor: "text-orange-600",
+      bgColor: "bg-orange-50",
     },
   ];
 
@@ -64,7 +65,7 @@ export function StatsSummary({
                 <div className="h-5 w-20 bg-gray-200 animate-pulse rounded" />
               ) : (
                 <span className="text-base font-bold text-gray-900 leading-none">
-                  ₹{item.value.toLocaleString("en-IN")}
+                  {item.value}
                 </span>
               )}
             </div>

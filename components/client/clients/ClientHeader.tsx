@@ -74,7 +74,7 @@ export function ClientHeader({
         <div className="relative w-full">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Enter search term and press Enter"
+            placeholder="Enter search term"
             className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800 w-full"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

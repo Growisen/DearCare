@@ -14,6 +14,7 @@ export function useNursesSalary() {
   const [salaryRecords, setSalaryRecords] = useState<SalaryPaymentDebtRecord[]>([]);
   const [stats, setStats] = useState<SalaryStats>({ total_approved_amount: 0, total_salary_amount: 0 });
   const [loading, setLoading] = useState(true);
+  const [aggregatesLoading, setAggregatesLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -22,7 +23,6 @@ export function useNursesSalary() {
   const [isExporting, setIsExporting] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounce search input
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
@@ -60,6 +60,7 @@ export function useNursesSalary() {
 
   useEffect(() => {
     const fetchAggregates = async () => {
+      setAggregatesLoading(true);
       try {
         const statsData = await fetchSalaryDataAggregates({
           search: searchQuery,
@@ -71,7 +72,10 @@ export function useNursesSalary() {
             total_salary_amount: Number(statsData.aggregates.total_salary_amount || 0)
           });
         }
-      } catch {}
+      } catch {} 
+      finally {
+        setAggregatesLoading(false);
+      }
     };
     fetchAggregates();
   }, [searchQuery]);
@@ -126,6 +130,7 @@ export function useNursesSalary() {
     salaryRecords,
     stats,
     loading,
+    aggregatesLoading,
     currentPage,
     pageSize,
     totalCount,

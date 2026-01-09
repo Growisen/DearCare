@@ -29,6 +29,9 @@ export default function StaffAttendancePage() {
     handleNextPage,
     handleResetFilters,
     handleExport,
+    attendanceStatus,
+    setAttendanceStatus,
+    handleSearch,
   } = useStaffAttendance();
 
   return (
@@ -41,6 +44,10 @@ export default function StaffAttendancePage() {
         onExport={handleExport}
         isExporting={isExporting}
         selectedCategory={selectedCategory}
+        attendanceStatus={attendanceStatus}
+        setAttendanceStatus={setAttendanceStatus}
+        handleSearch={handleSearch}
+        handleResetFilters={handleResetFilters}
       />
 
       <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">

@@ -17,6 +17,7 @@ export default function NursesSalaryPage() {
     salaryRecords,
     stats,
     loading,
+    aggregatesLoading,
     currentPage,
     pageSize,
     totalCount,
@@ -105,7 +106,7 @@ export default function NursesSalaryPage() {
       <StatsSummary
         stats={stats}
         advanceTotals={advanceTotals}
-        loading={loading}
+        aggregatesLoading={aggregatesLoading}
         advanceTotalsLoading={advanceTotalsQuery.isLoading}
       />
 

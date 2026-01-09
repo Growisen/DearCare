@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/client/clients/EmptyState"
 import { LoadingState } from '@/components/Loader'
 import { PaginationControls } from '@/components/client/clients/PaginationControls'
 import { ErrorState } from '@/components/client/clients/ErrorState'
+import { StatsSummary } from '@/components/assignment/AssignmentStats'
 
 export default function AssignmentsPage() {
   
@@ -34,11 +35,13 @@ export default function AssignmentsPage() {
     handleNextPage,
     handleResetFilters,
     refreshData,
-    handleExport
+    handleExport,
+    stats,
+    statsLoading,
   } = useAssignmentData()
 
   return (
-    <div className="space-y-3">
+    <div className="">
       <AssignmentHeader
         onExport={handleExport}
         isExporting={isExporting}
@@ -53,8 +56,19 @@ export default function AssignmentsPage() {
         selectedCategory={categoryFilter}
       />
 
+      <StatsSummary
+        stats={
+          stats ?? {
+            starting_today_count: 0,
+            ending_today_count: 0,
+            active_count: 0,
+            expiring_soon_count: 0,
+          }
+        }
+        loading={statsLoading}
+      />
 
-      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
+      <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200 mt-3">
         {loading ? (
           <LoadingState message="Loading assignments..." />
         ) : error ? (
