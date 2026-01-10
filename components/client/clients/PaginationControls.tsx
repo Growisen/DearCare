@@ -12,6 +12,7 @@ type PaginationControlsProps = {
   onNextPage: () => void
   setPageSize?: (size: number) => void
   loading?: boolean
+  disabled?: boolean
 }
 
 export function PaginationControls({
@@ -24,7 +25,8 @@ export function PaginationControls({
   onPageChange,
   onPreviousPage,
   onNextPage,
-  loading = false
+  loading = false,
+  disabled = false,
 }: PaginationControlsProps) {
   
   const paginationRange = useMemo(() => {
@@ -108,7 +110,7 @@ export function PaginationControls({
       <div className="flex items-center gap-2">
         <button
           onClick={onPreviousPage}
-          disabled={loading || currentPage === 1}
+          disabled={loading || currentPage === 1 || disabled}
           className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft size={16} />
@@ -137,7 +139,7 @@ export function PaginationControls({
                       ? "bg-blue-600 text-white border border-blue-600" 
                       : "text-gray-700 bg-white border border-slate-200 hover:bg-gray-50"
                   }`}
-                  disabled={loading}
+                  disabled={loading || disabled}
                 >
                   {page}
                 </button>
@@ -152,7 +154,7 @@ export function PaginationControls({
         
         <button
           onClick={onNextPage}
-          disabled={loading || currentPage === totalPages}
+          disabled={loading || currentPage === totalPages || disabled}
           className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next

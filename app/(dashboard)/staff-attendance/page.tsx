@@ -52,7 +52,11 @@ export default function StaffAttendancePage() {
 
       <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
         {loading ? (
-          <LoadingState message="Loading attendance data..." />
+          <LoadingState 
+            message="Loading attendance data..." 
+            description="Please wait while we fetch the attendance records data"
+            className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+          />
         ) : error ? (
           <ErrorState 
             error={error} 
@@ -68,24 +72,22 @@ export default function StaffAttendancePage() {
             handleResetFilters={handleResetFilters}
           />
         ) : (
-          <>
-            <AttendanceTable
-              attendanceData={filteredData}
-            />
-            
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              setPageSize={handlePageSizeChange}
-              itemsLength={filteredData.length}
-              onPageChange={handlePageChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-            />
-          </>
+          <AttendanceTable
+            attendanceData={filteredData}
+          />
         )}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          setPageSize={handlePageSizeChange}
+          itemsLength={filteredData.length}
+          onPageChange={handlePageChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          disabled={loading}
+        />
       </div>
     </div>
   )

@@ -38,7 +38,7 @@ interface NurseListModalProps {
   isLoading: boolean;
 }
 
-const INPUT_BASE_CLASS = "w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-slate-400 transition-colors";
+const INPUT_BASE_CLASS = "w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-slate-300 transition-colors";
 
 export default function NurseListModal({
   isOpen,

@@ -17,14 +17,12 @@ export default function Loader({
   color = "primary",
   skeleton = false
 }: LoaderProps) {
-  // Size mappings
   const sizeClasses = {
     small: "h-5 w-5",
     medium: "h-8 w-8",
     large: "h-14 w-14",
   };
   
-  // Color mappings for border colors
   const colorClasses = {
     primary: "border-blue-500",
     secondary: "border-gray-500",
@@ -34,7 +32,6 @@ export default function Loader({
   const containerClasses = centered ? "flex flex-col items-center justify-center py-8" : "";
 
   if (skeleton) {
-    // Skeleton loader for client profile page
     return (
       <div className={`${containerClasses} ${className} w-full max-w-2xl mx-auto`}>
         <div className="animate-pulse space-y-6 w-full">
@@ -68,7 +65,6 @@ export default function Loader({
   )
 }
 
-// Enhanced loading state component with matte look
 export function LoadingState({ 
   message = "Loading...", 
   className = "",
@@ -79,24 +75,21 @@ export function LoadingState({
   description?: string | null;
 }) {
   return (
-    <div className={`overflow-hidden p-8 ${className}`}>
-      <div className="flex flex-col items-center justify-center text-center">
+    <div className={`overflow-hidden p-8 flex flex-col items-center justify-center text-center ${className}`}>
       <Loader 
         message={ null } 
         size="medium" 
         color="primary" 
         centered={true} 
       />
-        <h3 className="mt-4 text-gray-800 font-semibold text-lg">{message}</h3>
-        {description && (
-          <p className="mt-2 text-gray-500 text-sm max-w-md">{description}</p>
-        )}
-      </div>
+      <h3 className="mt-4 text-gray-800 font-semibold text-lg">{message}</h3>
+      {description && (
+        <p className="mt-2 text-gray-500 text-sm max-w-md">{description}</p>
+      )}
     </div>
   );
 }
 
-// For inline usage within buttons or small spaces
 export function InlineLoader({ color = "primary", className = "" }: { color?: "primary" | "secondary" | "success", className?: string }) {
   return (
     <Loader size="small" color={color} centered={false} className={className} />

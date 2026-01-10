@@ -8,6 +8,7 @@ import { LeaveRequestsTable } from '@/components/leaveManagement/LeaveRequestsTa
 import { PaginationControls } from '@/components/client/clients/PaginationControls'
 import LeaveRequestModal from '@/components/leaveManagement/LeaveRequestModal'
 import AddLeaveModal from '@/components/leaveManagement/AddLeaveModal'
+import { LoadingState } from '@/components/Loader'
 
 
 export default function LeaveRequestsPage() {
@@ -79,28 +80,31 @@ export default function LeaveRequestsPage() {
       />
 
       <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
-        <LeaveRequestsTable
-          leaveRequests={leaveRequests}
-          isLoading={isLoading}
-          processingRequestIds={processingRequestIds}
-          onView={handleViewLeaveRequest}
-        />
-        
-        {!isLoading && leaveRequests.length > 0 && (
-          <div className="bg-gray-50 border-t border-slate-200">
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              itemsLength={leaveRequests.length}
-              onPageChange={handlePageChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-              setPageSize={handlePageSizeChange}
-            />
-          </div>
+        {isLoading ? (
+          <LoadingState 
+            message="Loading leave requests..." 
+            description="Please wait while we fetch the leave requests data"
+            className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+          />
+        ) : (
+          <LeaveRequestsTable
+            leaveRequests={leaveRequests}
+            processingRequestIds={processingRequestIds}
+            onView={handleViewLeaveRequest}
+          />
         )}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          itemsLength={leaveRequests.length}
+          onPageChange={handlePageChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          setPageSize={handlePageSizeChange}
+          disabled={isLoading}
+        />
       </div>
 
       {selectedLeaveRequest && (

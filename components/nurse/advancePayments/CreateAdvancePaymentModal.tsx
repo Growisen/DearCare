@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
+import { Loader } from "lucide-react";
 
 interface CreateAdvancePaymentModalProps {
   isOpen: boolean;
@@ -189,18 +190,22 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-sm shadow-xl p-6 w-full max-w-lg text-gray-800 border border-slate-200 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center
+     animate-in fade-in duration-200 p-1 sm:p-2"
+    >
+      <div className="bg-white rounded-sm p-6 w-full max-w-2xl text-gray-800 border border-slate-200
+       max-h-[90vh] overflow-y-auto"
+      >
         <h2 className="text-xl font-semibold mb-6 text-gray-900 border-b border-slate-200 pb-3">
           Create Advance Payment
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="col-span-1">
             <label className="block text-sm font-medium mb-2 text-gray-700">Date</label>
             <input
               type="date"
-              className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300
+              className={`border border-slate-200 rounded-sm px-3 py-[9px] w-full focus:outline-none focus:border-slate-300
                transition-colors ${errors.date ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -231,7 +236,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
           <div className="col-span-1">
             <label className="block text-sm font-medium mb-2 text-gray-700">Repayment Type</label>
             <Select value={repaymentType} onValueChange={setRepaymentType}>
-              <SelectTrigger className="w-full py-6 border border-slate-200 rounded-sm focus:outline-none focus:border-slate-300 transition-colors bg-white">
+              <SelectTrigger className="w-full py-[22.5px] border border-slate-200 rounded-sm focus:outline-none focus:border-slate-300 transition-colors bg-white">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent className="bg-white text-gray-800">
@@ -299,9 +304,9 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-200">
+        <div className="flex justify-end gap-3 pt-4">
           <button
-            className="px-5 py-2.5 rounded-sm border border-slate-200 text-gray-700 font-medium hover:bg-gray-50 
+            className="px-5 py-1.5 rounded-sm border border-slate-200 text-gray-700 font-medium hover:bg-gray-50 
             transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onClose}
             disabled={isSubmitting}
@@ -309,16 +314,13 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             Cancel
           </button>
           <button
-            className="px-5 py-2.5 rounded-sm bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors
-             disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="px-5 py-1.5 rounded-sm bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors
+            disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             onClick={handleSubmit}
             disabled={!!errors.date || !!errors.amount || !!errors.installmentAmount || !!errors.paymentMethod || isSubmitting}
           >
             {isSubmitting ? (
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-              </svg>
+              <Loader className="w-5 h-5 mr-2 animate-spin" />
             ) : null}
             Submit
           </button>

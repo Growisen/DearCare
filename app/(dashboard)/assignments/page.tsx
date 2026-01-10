@@ -70,7 +70,11 @@ export default function AssignmentsPage() {
 
       <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200 mt-3">
         {loading ? (
-          <LoadingState message="Loading assignments..." />
+          <LoadingState 
+            message="Loading assignments..." 
+            description="Please wait while we fetch the assignments data" 
+            className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+          />
         ) : error ? (
           <ErrorState 
             error={error} 
@@ -83,33 +87,23 @@ export default function AssignmentsPage() {
             handleResetFilters={handleResetFilters}
           />
         ) : (
-          <>
-            <AssignmentTable 
-              assignments={assignments} 
-            />
-            
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              setPageSize={handlePageSizeChange}
-              itemsLength={assignments.length}
-              onPageChange={handlePageChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-            />
-          </>
+          <AssignmentTable 
+            assignments={assignments} 
+          />
         )}
-      </div>
-
-      {/* You can add assignment details overlay similar to client details overlay */}
-      {/* {selectedAssignment && (
-        <AssignmentDetailsOverlay 
-          assignment={selectedAssignment} 
-          onClose={() => setSelectedAssignment(null)}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          setPageSize={handlePageSizeChange}
+          itemsLength={assignments.length}
+          onPageChange={handlePageChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          disabled={loading}
         />
-      )} */}
+      </div>
     </div>
   )
 }

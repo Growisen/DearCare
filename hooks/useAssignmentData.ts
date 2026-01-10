@@ -82,6 +82,9 @@ export function useAssignmentData() {
   const [pageSize, setPageSize] = useState(10)
   const [isExporting, setIsExporting] = useState(false)
 
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   const getCategoryFilter = (): string => {
     if (!organization) return "all";
     if (organization === "TataHomeNursing") return "Tata HomeNursing";
@@ -119,6 +122,13 @@ export function useAssignmentData() {
     refetchInterval: 1000 * 60 * 10,
   });
 
+  useEffect(() => {
+    if (data?.count !== undefined) {
+      setTotalPages(Math.max(1, Math.ceil(data.count / pageSize)));
+      setTotalCount(data.count);
+    }
+  }, [data, pageSize]);
+
   const {
     data: stats,
     isLoading: statsLoading,
@@ -138,8 +148,6 @@ export function useAssignmentData() {
   });
 
   const assignments = data?.success ? (data?.data || []) : [];
-  const totalPages = data?.count !== undefined ? Math.max(1, Math.ceil(data.count / pageSize)) : 1;
-  const totalCount = data?.count || 0;
   
   const error = queryError 
     ? 'Unexpected error occurred while fetching assignments' 

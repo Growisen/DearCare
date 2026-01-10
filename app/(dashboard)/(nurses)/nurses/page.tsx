@@ -1,10 +1,9 @@
 "use client"
 import { useEffect, useState } from "react"
-import { NurseDetailsOverlay } from "../../../../components/nurse/nurse-details-overlay"
 import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "@/components/nurse/NurseTable"
 import NurseCard from "@/components/nurse/NurseCard"
-import { NurseBasicInfo, NurseBasicDetails } from "@/types/staff.types"
+import { NurseBasicDetails } from "@/types/staff.types"
 import { fetchBasicDetails, exportNurseData } from "@/app/actions/staff-management/add-nurse"
 import { LoadingState } from "@/components/Loader"
 import { toast } from 'react-hot-toast';
@@ -21,7 +20,6 @@ export default function NursesPage() {
   const [selectedExperience, setSelectedExperience] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
-  const [selectedNurse, setSelectedNurse] = useState<NurseBasicInfo | null>(null)
   const [showAddNurse, setShowAddNurse] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
@@ -78,10 +76,6 @@ export default function NursesPage() {
 
   const totalPages = Math.ceil(totalCount / limit)
   
-  const handleReviewDetails = (nurse: NurseBasicInfo) => {
-    setSelectedNurse(nurse)
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   const handleAddNurse = async (nurseData: any) => {
     try {
@@ -167,18 +161,17 @@ export default function NursesPage() {
             isLoading={isLoading}
           />
           
-          {!isLoading && nurses.length > 0 && (
-            <PaginationControls 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={limit}
-              itemsLength={nurses.length}
-              onPageChange={handlePageChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-            />
-          )}
+          <PaginationControls 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={limit}
+            itemsLength={nurses.length}
+            onPageChange={handlePageChange}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            disabled={isLoading}
+          />
 
           {!isLoading && nurses.length === 0 && (
             <EmptyState
@@ -191,29 +184,19 @@ export default function NursesPage() {
         
         <div className="sm:hidden divide-y divide-gray-200">
           {isLoading ? (
-            <LoadingState message="Loading Nurses..." />
+            <LoadingState 
+              message="Loading Nurses..." 
+              description="Please wait while we fetch the nurses data"
+              className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+            />
           ) : (
             <>
               {nurses.map((nurse) => (
                 <NurseCard 
                   key={nurse.nurse_id} 
                   nurse={nurse} 
-                  onReviewDetails={handleReviewDetails} 
                 />
               ))}
-              
-              {nurses.length > 0 && (
-                <PaginationControls 
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalCount={totalCount}
-                  pageSize={limit}
-                  itemsLength={nurses.length}
-                  onPageChange={handlePageChange}
-                  onPreviousPage={handlePreviousPage}
-                  onNextPage={handleNextPage}
-                />
-              )}
 
               {nurses.length === 0 && (
                 <EmptyState
@@ -222,26 +205,29 @@ export default function NursesPage() {
                   handleResetFilters={handleResetFilters}
                 />
               )}
+              
+              <PaginationControls 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={limit}
+                itemsLength={nurses.length}
+                onPageChange={handlePageChange}
+                onPreviousPage={handlePreviousPage}
+                onNextPage={handleNextPage}
+                disabled={isLoading || nurses.length === 0}
+              />
             </>
           )}
         </div>
       </div>
 
-      <div className="fixed inset-0 z-50" style={{display: showAddNurse || selectedNurse ? 'block' : 'none', pointerEvents: 'none'}}>
+      <div className="fixed inset-0 z-50" style={{display: showAddNurse ? 'block' : 'none', pointerEvents: 'none'}}>
         {showAddNurse && (
           <div style={{pointerEvents: 'auto'}}>
             <AddNurseOverlay 
               onClose={() => setShowAddNurse(false)}
               onAdd={handleAddNurse}
-            />
-          </div>
-        )}
-
-        {selectedNurse && (
-          <div style={{pointerEvents: 'auto'}}>
-            <NurseDetailsOverlay 
-              nurse={selectedNurse} 
-              onClose={() => setSelectedNurse(null)} 
             />
           </div>
         )}

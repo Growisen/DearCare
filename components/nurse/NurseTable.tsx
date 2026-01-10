@@ -1,4 +1,4 @@
-import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Eye, MapPin } from "lucide-react"
+import { CheckCircle, CalendarX, AlertCircle, Clock, FileClock, XCircle, Eye } from "lucide-react"
 import { NurseBasicDetails } from "@/types/staff.types"
 import { LoadingState } from '@/components/Loader'
 import { formatName } from "@/utils/formatters"
@@ -32,7 +32,9 @@ const NurseTable = ({
 }: NurseTableProps) => {
 
   if (isLoading) {
-    return <LoadingState message="Loading Nurses..." />;
+    return <LoadingState message="Loading Nurses..." 
+              className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]" 
+            />;
   }
 
   const thClass = "py-3 px-6 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap";
@@ -86,17 +88,6 @@ const NurseTable = ({
                       </span>
                     </div>
                   </td>
-
-                  {/* <td className="py-3 px-6 align-top whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                        statusColors[nurse.status as keyof typeof statusColors]
-                      }`}
-                    >
-                      {StatusIcon && <StatusIcon className="w-3 h-3" />}
-                      {nurse.status.replace("_", " ").toUpperCase()}
-                    </span>
-                  </td> */}
 
                   <td className="py-3 px-6 text-gray-700 align-top text-sm">
                     {nurse.experience || 0} years

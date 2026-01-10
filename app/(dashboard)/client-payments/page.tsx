@@ -166,24 +166,24 @@ export default function ClientPaymentsListPage() {
         {loading ? (
           <LoadingState
             message="Loading payments..."
-            className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200"
+            className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]
+             bg-white rounded-sm shadow-none overflow-hidden border border-slate-200"
           />
         ) : (
-          <>
-            <PaymentTable payments={payments} />
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
-              itemsLength={payments.length}
-              onPageChange={handlePageChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-            />
-          </>
+          <PaymentTable payments={payments} />
         )}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          itemsLength={payments.length}
+          onPageChange={handlePageChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          disabled={loading}
+        />
       </div>
     </div>
   );

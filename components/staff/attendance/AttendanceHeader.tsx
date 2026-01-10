@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Download, Loader, Search, X } from "lucide-react";
+import { Download, Loader, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 type AttendanceHeaderProps = {

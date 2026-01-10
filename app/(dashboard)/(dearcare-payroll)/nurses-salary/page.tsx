@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, X, Download, Loader2, Info, ArrowUpRight} from "lucide-react";
+import { Search, X, Download, Info, ArrowUpRight} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
 import Loader, { LoadingState } from '@/components/Loader';
@@ -113,11 +113,15 @@ export default function NursesSalaryPage() {
         advanceTotalsLoading={advanceTotalsQuery.isLoading}
       />
 
-      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden min-h-[700px] flex flex-col mt-4">
+      <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden flex flex-col mt-4">
         <div className="overflow-x-auto flex-1">
           {loading ? (
             <div className="flex justify-center items-center p-8 min-h-[700px]">
-              <LoadingState message="Loading salary data..." />
+              <LoadingState 
+                message="Loading salary data..." 
+                description="Please wait while we fetch the salary records data"
+                className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+              />
             </div>
           ) : salaryRecords.length > 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
