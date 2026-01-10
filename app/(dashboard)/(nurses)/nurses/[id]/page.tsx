@@ -3,7 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Loader from '@/components/Loader'
-import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails, deleteNurse } from '@/app/actions/staff-management/add-nurse';
+import { 
+  fetchNurseAssignments, 
+  fetchNurseDetailsmain, 
+  NurseAssignmentWithClient, 
+  SimplifiedNurseDetails, 
+  deleteNurse 
+} from '@/app/actions/staff-management/add-nurse';
 import ProfileHeader from '@/components/nurseProfile/ProfileHeader';
 import TabNavigation from '@/components/nurseProfile/TabNavigation';
 import ProfileContent from '@/components/nurseProfile/ProfileContent';

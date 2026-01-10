@@ -309,7 +309,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             Cancel
           </button>
           <button
-            className="px-5 py-2.5 rounded-sm bg-slate-700 text-white font-medium hover:bg-slate-800 transition-colors
+            className="px-5 py-2.5 rounded-sm bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors
              disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             onClick={handleSubmit}
             disabled={!!errors.date || !!errors.amount || !!errors.installmentAmount || !!errors.paymentMethod || isSubmitting}

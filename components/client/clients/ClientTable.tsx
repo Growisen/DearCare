@@ -197,7 +197,7 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
     all: Eye
   }
 
-  const thClass = "py-3 px-6 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap";
+  const thClass = "py-3 px-6 text-left text-sm font-medium text-gray-700 tracking-wider whitespace-nowrap";
 
   return (
     <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden">

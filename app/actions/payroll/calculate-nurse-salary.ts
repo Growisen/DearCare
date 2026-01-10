@@ -137,48 +137,6 @@ async function checkOverlappingPayments(
   };
 }
 
-// /**
-//  * Build salary breakdown info string
-//  */
-// function buildSalaryInfo(
-//   daysWorked: number,
-//   salaryDayMap: Map<number, number>,
-//   skippedRecords: SkippedRecord[]
-// ): string {
-//   let info = `${daysWorked} days`;
-
-//   if (salaryDayMap.size > 0) {
-//     const breakdown = Array.from(salaryDayMap.entries())
-//       .map(([salary, count]) => `${count} days (${salary}/day)`)
-//       .join(", ");
-//     info += ` [${breakdown}]`;
-//   }
-
-//   if (skippedRecords.length > 0) {
-//     const missingDataCount = skippedRecords.filter(
-//       (r) => r.reason === "Missing attendance data"
-//     ).length;
-//     const invalidHoursCount = skippedRecords.filter(
-//       (r) => r.reason === "Invalid or zero worked hours"
-//     ).length;
-//     const noAssignmentCount = skippedRecords.filter(
-//       (r) => r.reason === "No valid nurse_client assignment"
-//     ).length;
-
-//     info += ` | SKIPPED: ${skippedRecords.length} records`;
-//     const details: string[] = [];
-//     if (missingDataCount > 0) details.push(`${missingDataCount} missing data`);
-//     if (invalidHoursCount > 0) details.push(`${invalidHoursCount} invalid hours`);
-//     if (noAssignmentCount > 0) details.push(`${noAssignmentCount} no assignment`);
-//     if (details.length > 0) {
-//       info += ` (${details.join(", ")})`;
-//     }
-//   }
-
-//   return info;
-// }
-
-
 function validateDateRange(startDate: string, endDate: string): string | null {
   if (startDate > endDate) {
     return "Start date must be before or equal to end date";

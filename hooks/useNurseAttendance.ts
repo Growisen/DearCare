@@ -21,6 +21,9 @@ export interface AttendanceRecord {
   notes?: string;
   location?: string | null;
   isAdminAction?: boolean;
+  nurseName?: string;
+  nursePrevRegNo?: string;
+  nurseRegNo?: string;
 }
 
 export function useNurseAttendance(

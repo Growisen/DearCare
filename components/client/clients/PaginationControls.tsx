@@ -1,7 +1,8 @@
 import React, { useMemo } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 type PaginationControlsProps = {
-  currentPage: number
+  currentPage?: number
   totalPages: number
   totalCount: number
   pageSize: number
@@ -10,10 +11,11 @@ type PaginationControlsProps = {
   onPreviousPage: () => void
   onNextPage: () => void
   setPageSize?: (size: number) => void
+  loading?: boolean
 }
 
 export function PaginationControls({
-  currentPage,
+  currentPage = 1,
   totalPages,
   totalCount,
   pageSize,
@@ -21,10 +23,12 @@ export function PaginationControls({
   itemsLength,
   onPageChange,
   onPreviousPage,
-  onNextPage
+  onNextPage,
+  loading = false
 }: PaginationControlsProps) {
   
   const paginationRange = useMemo(() => {
+    if (loading) return []
     const range = []
     const showEllipsisStart = currentPage > 3
     const showEllipsisEnd = currentPage < totalPages - 2
@@ -63,7 +67,7 @@ export function PaginationControls({
       }
     }
     return range
-  }, [currentPage, totalPages])
+  }, [currentPage, totalPages, loading])
 
   return (
     <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 
@@ -71,7 +75,13 @@ export function PaginationControls({
     >
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="text-sm text-gray-700">
-          Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> results
+          {loading ? (
+            <span>Loading...</span>
+          ) : (
+            <>
+              Showing <span className="font-medium">{itemsLength > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-medium">{totalCount}</span> results
+            </>
+          )}
         </div>
         
         {setPageSize && (
@@ -85,6 +95,7 @@ export function PaginationControls({
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="block w-16 pl-2 pr-3 py-1 text-sm text-gray-700 bg-white border 
               border-slate-200 rounded-sm focus:outline-none"
+              disabled={loading}
             >
               <option value="10">10</option>
               <option value="25">25</option>
@@ -97,54 +108,55 @@ export function PaginationControls({
       <div className="flex items-center gap-2">
         <button
           onClick={onPreviousPage}
-          disabled={currentPage === 1}
+          disabled={loading || currentPage === 1}
           className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M15 18l-6-6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <ChevronLeft size={16} />
           Previous
         </button>
         
         <div className="hidden sm:flex items-center gap-1">
-          {paginationRange.map((page, index) => {
-            if (page === '...') {
+          {loading ? (
+            <span className="px-2 py-2 text-sm text-gray-500 select-none">...</span>
+          ) : (
+            paginationRange.map((page, index) => {
+              if (page === '...') {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-2 py-2 text-sm text-gray-500 select-none">
+                    ...
+                  </span>
+                )
+              }
+              
               return (
-                <span key={`ellipsis-${index}`} className="px-2 py-2 text-sm text-gray-500 select-none">
-                  ...
-                </span>
+                <button
+                  key={index}
+                  onClick={() => onPageChange(page as number)}
+                  className={`min-w-[2rem] px-3 py-2 text-sm font-medium rounded-sm transition-colors ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white border border-blue-600" 
+                      : "text-gray-700 bg-white border border-slate-200 hover:bg-gray-50"
+                  }`}
+                  disabled={loading}
+                >
+                  {page}
+                </button>
               )
-            }
-            
-            return (
-              <button
-                key={index}
-                onClick={() => onPageChange(page as number)}
-                className={`min-w-[2rem] px-3 py-2 text-sm font-medium rounded-sm transition-colors ${
-                  currentPage === page
-                    ? "bg-blue-600 text-white border border-blue-600" 
-                    : "text-gray-700 bg-white border border-slate-200 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </button>
-            )
-          })}
+            })
+          )}
         </div>
         
         <div className="sm:hidden text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
+          {loading ? "Loading..." : `Page ${currentPage} of ${totalPages}`}
         </div>
         
         <button
           onClick={onNextPage}
-          disabled={currentPage === totalPages}
+          disabled={loading || currentPage === totalPages}
           className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M9 18l6-6-6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <ChevronRight size={16} />
         </button>
       </div>
     </div>

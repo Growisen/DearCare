@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../Loader";
-import { fetchNurseSalaryPayments } from "@/app/actions/payroll/salary-actions";
-import { calculateNurseSalary, addNurseBonus, addNurseSalaryDeduction, updateSalaryPaymentStatus } from "@/app/actions/payroll/calculate-nurse-salary";
+import { 
+  fetchNurseSalaryPayments,
+  fetchAggregatedSalaries
+ } from "@/app/actions/payroll/salary-actions";
+import { 
+  calculateNurseSalary, 
+  addNurseBonus, 
+  addNurseSalaryDeduction, 
+  updateSalaryPaymentStatus 
+} from "@/app/actions/payroll/calculate-nurse-salary";
 import ConfirmationModal from "../common/ConfirmationModal";
 import ModalPortal from "../ui/ModalPortal";
 import HourlySalaryCard from "./salary/HourlySalaryCard";
@@ -27,7 +35,11 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [processingBonus, setProcessingBonus] = useState(false);
   const [processingDeduction, setProcessingDeduction] = useState(false);
   const [approvingId, setApprovingId] = useState<number | null>(null);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [paymentToApprove, setPaymentToApprove] = useState<SalaryPayment | null>(null);
   const { organization } = useOrgStore()
+  const [aggregates, setAggregates] = useState<{ approved: number; pending: number } | null>(null);
+  const [aggregatesLoading, setAggregatesLoading] = useState(false);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -75,8 +87,21 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     }
   };
 
+  const fetchSalaryAggregates = async () => {
+    try {
+      setAggregatesLoading(true);
+      const aggregates = await fetchAggregatedSalaries(nurseId);
+      setAggregates(aggregates.data);
+    } catch (error) {
+      console.error("Error fetching salary aggregates:", error);
+    } finally {
+      setAggregatesLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchPayments();
+    fetchSalaryAggregates();
   }, [nurseId]);
 
   const handleRecalculate = async (payment: SalaryPayment) => {
@@ -129,11 +154,23 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     setShowDeductionModal(true);
   };
 
+  const handleOpenApproveConfirm = (payment: SalaryPayment) => {
+    setPaymentToApprove(payment);
+    setShowApproveConfirm(true);
+  };
+
   const handleConfirmRecalculate = async () => {
     if (!selectedPayment) return;
     setShowConfirm(false);
     await handleRecalculate(selectedPayment);
     setSelectedPayment(null);
+  };
+
+  const handleConfirmApprove = async () => {
+    if (!paymentToApprove) return;
+    setShowApproveConfirm(false);
+    await handleApprove(paymentToApprove);
+    setPaymentToApprove(null);
   };
 
   const handleAddBonus = async (paymentId: number, bonusAmount: number, bonusReason: string) => {
@@ -240,7 +277,6 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
 
   const handleApprove = async (payment: SalaryPayment) => {
     setApprovingId(payment.id);
-    console.log("Approving payment:", payment, nurseId);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
         method: "POST",
@@ -291,13 +327,13 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     }
   };
 
-  if (loading && payments.length === 0) {
-    return <Loader message="Loading salary details..." />;
-  }
-
   return (
     <div className="space-y-8 p-5">
-      <HourlySalaryCard hourlySalary={hourlySalary} />
+      <HourlySalaryCard 
+        hourlySalary={hourlySalary}
+        aggregatedSalaries={aggregates || { approved: 0, pending: 0 }} 
+        loading={aggregatesLoading}
+      />
 
       <PaymentHistoryTable
         payments={payments}
@@ -307,8 +343,9 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         onOpenConfirmModal={handleOpenConfirm}
         onOpenBonusModal={handleOpenBonusModal}
         onOpenDeductionModal={handleOpenDeductionModal}
-        handleApprove={handleApprove}
+        handleApprove={handleOpenApproveConfirm}
         approvingId={approvingId}
+        loading={loading && payments.length === 0}
       />
 
       <ModalPortal>
@@ -350,6 +387,19 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
           payment={selectedPayment}
           onClose={() => setShowDeductionModal(false)}
           onSubmit={handleAddDeduction}
+        />
+      </ModalPortal>
+
+      <ModalPortal>
+        <ConfirmationModal
+          isOpen={showApproveConfirm}
+          title="Approve Salary Payment?"
+          message="Are you sure you want to approve this salary payment? This action cannot be undone."
+          onConfirm={handleConfirmApprove}
+          onCancel={() => setShowApproveConfirm(false)}
+          confirmButtonText="Approve"
+          confirmButtonColor="blue"
+          isLoading={!!approvingId}
         />
       </ModalPortal>
     </div>

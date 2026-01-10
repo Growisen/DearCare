@@ -520,3 +520,28 @@ export async function fetchNurseSalaryPayments(nurseId: number) {
 
   return data ?? [];
 }
+
+export async function fetchAggregatedSalaries(nurseId: number) {
+  const { supabase } = await getAuthenticatedClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("aggregated_salaries")
+      .select("*")
+      .eq("nurse_id", nurseId);
+
+    if (error) {
+      throw new Error(`Failed to fetch aggregated salaries: ${error.message}`);
+    }
+
+    return {
+      success: true,
+      data: data?.[0] || { approved: 0, pending: 0 },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "An unknown error occurred",
+    };
+  }
+}

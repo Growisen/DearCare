@@ -48,7 +48,8 @@ const ChildCarePreferences: React.FC<ChildCarePreferencesProps> = ({ clientId })
           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
       }`}
       onClick={() => {
-        navigator.clipboard.writeText(`/child-care-preferences/${clientId}`);
+        const fullLink = `${window.location.origin}/child-care-preferences/${clientId}`;
+        navigator.clipboard.writeText(fullLink);
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 3000);
       }}
