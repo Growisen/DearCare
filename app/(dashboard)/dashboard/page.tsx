@@ -5,7 +5,6 @@ import { useDashboardData } from "@/hooks/useDashboardData"
 import { usePaymentsData } from "@/hooks/useClientPaymentsData"
 import { useAdvancePaymentsData } from "@/hooks/useAdvancePaymentsData"
 import { usePagination } from "@/hooks/usePagination"
-import Loader from '@/components/Loader'
 import ErrorState from "@/components/common/ErrorState"
 import DashboardHeader from "@/components/dashboard/DashboardHeader"
 import Stats from "@/components/dashboard/Stats"
@@ -102,14 +101,6 @@ export default function DashboardPage() {
   const handlePrevPage = useCallback(() => changePage(page - 1, totalPages), [changePage, page, totalPages])
   const handleNextPage = useCallback(() => changePage(page + 1, totalPages), [changePage, page, totalPages])
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader message="Loading dashboard..." />
-      </div>
-    )
-  }
-
   if (error || (dashboard.data && !dashboard.data.success)) {
     return <ErrorState message={errorMessage} />
   }
@@ -121,23 +112,28 @@ export default function DashboardPage() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
         todayFormatted={todayFormatted}
+        isLoading={isLoading}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-5 content-start">
           <Stats 
             statsData={dashboardData?.stats} 
+            isLoading={isLoading}
           />
           <StaffAttendance 
             currentTime={currentTime} 
             attendanceData={dashboardData?.attendance} 
+            isLoading={isLoading}
           />
           <RecentActivities 
             complaintsData={dashboardData?.complaints} 
+            isLoading={isLoading}
           />
         </div>
         <UpcomingSchedules 
           todosData={dashboardData?.todos} 
+          isLoading={isLoading}
         />
       </div>
 

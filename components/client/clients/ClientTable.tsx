@@ -197,13 +197,13 @@ export const ClientTable = memo(function ClientTable({ clients, onReviewDetails 
     all: Eye
   }
 
-  const thClass = "py-3 px-6 text-left text-sm font-medium text-gray-700 tracking-wider whitespace-nowrap";
+  const thClass = "py-5 px-6 text-left text-sm font-medium text-gray-700 tracking-wider whitespace-nowrap";
 
   return (
     <div className="bg-white rounded-sm border border-slate-200 shadow-none overflow-hidden">
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full min-w-[1000px]">
-          <thead className="bg-gray-50 border-b border-slate-200">
+          <thead className="bg-gray-100 border-b border-slate-200">
             <tr>
               <th className={`${thClass} min-w-[180px]`}>Client Name</th>
               <th className={`${thClass} min-w-[140px]`}>Reg No</th>

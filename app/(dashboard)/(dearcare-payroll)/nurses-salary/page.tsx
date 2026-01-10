@@ -4,7 +4,7 @@ import React from "react";
 import { Search, X, Download, Loader2, Info, ArrowUpRight} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
-import { LoadingState } from '@/components/Loader';
+import Loader, { LoadingState } from '@/components/Loader';
 import Link from "next/link";
 import { useNursesSalary } from "@/hooks/useNursesSalary";
 import { formatDate } from "@/utils/formatters";
@@ -54,13 +54,14 @@ export default function NursesSalaryPage() {
 
           <button 
             onClick={handleExport}
-            disabled={isExporting || salaryRecords.length === 0}
-            className="px-3 py-2 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center gap-1 min-w-[100px]"
+            disabled={isExporting || loading || salaryRecords.length === 0}
+            className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 
+            transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
           >
             {isExporting ? (
               <span className="flex items-center">
-                <Loader2 className="animate-spin mr-1 h-3 w-3" />
-                Exporting
+                <Loader className="animate-spin mr-1 h-3 w-3 text-white" />
+                Exporting...
               </span>
             ) : (
               <>
@@ -75,8 +76,9 @@ export default function NursesSalaryPage() {
           <div className="relative w-full">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by name, reg no, or info..."
-              className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800 w-full"
+              placeholder="Type to search"
+              className="pl-9 pr-20 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400
+               text-gray-800 w-full"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={e => {
@@ -93,7 +95,8 @@ export default function NursesSalaryPage() {
               </button>
             )}
             <button
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded text-xs transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white
+               px-2.5 py-1 rounded-sm text-xs transition-colors"
               onClick={handleSearchClick}
               disabled={loading}
             >
@@ -118,7 +121,7 @@ export default function NursesSalaryPage() {
             </div>
           ) : salaryRecords.length > 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-100">
                 <tr>
                   <th className="px-6 py-5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nurse Details</th>
                   <th className="px-4 py-5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Pay Period</th>
@@ -182,7 +185,9 @@ export default function NursesSalaryPage() {
                      
                      <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                        {record.active_loan_count > 0 ? (
-                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 
+                            text-gray-800"
+                          >
                              {record.active_loan_count}
                            </span>
                        ) : '-'}

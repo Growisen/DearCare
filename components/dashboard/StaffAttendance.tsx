@@ -1,18 +1,22 @@
 import { Card } from "../ui/card"
-import { Users, UserCheck, UserX, Calendar } from "lucide-react"
+import { Users, UserCheck, UserX, Calendar, Circle } from "lucide-react"
 import { StaffAttendanceProps } from "@/types/staff.types" 
 import { useRouter } from "next/navigation"
 
-export default function StaffAttendance({ currentTime, attendanceData }: 
-  StaffAttendanceProps & { 
-    attendanceData?: { 
-      present: number; 
-      absent: number; 
-      onLeave: number; 
-      total: number; 
-      presentPercentage: number;
-    } 
-  }) {
+export default function StaffAttendance({ 
+  currentTime, 
+  attendanceData, 
+  isLoading = false 
+}: StaffAttendanceProps & { 
+  attendanceData?: { 
+    present: number; 
+    absent: number; 
+    onLeave: number; 
+    total: number; 
+    presentPercentage: number;
+  },
+  isLoading?: boolean
+}) {
   const router = useRouter()
   
   const present = attendanceData?.present ?? 0
@@ -20,6 +24,9 @@ export default function StaffAttendance({ currentTime, attendanceData }:
   const onLeave = attendanceData?.onLeave ?? 0
   const presentPercentage = attendanceData?.presentPercentage ?? 0
   
+  const CIRCUMFERENCE = 62.83;
+  const strokeDashoffset = CIRCUMFERENCE - (presentPercentage / 100) * CIRCUMFERENCE;
+
   const handleDetailsClick = () => {
     router.push('/staff-attendance') 
   }
@@ -31,12 +38,17 @@ export default function StaffAttendance({ currentTime, attendanceData }:
           <Users className="w-5 h-5 text-slate-700 mr-2" />
           <div>
             <h3 className="text-md font-medium text-slate-800">Staff Attendance</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{currentTime}</p>
+            {isLoading ? (
+              <div className="h-3 w-24 bg-slate-200 rounded-sm mt-1 animate-pulse" />
+            ) : (
+              <p className="text-xs text-slate-500 mt-0.5">{currentTime}</p>
+            )}
           </div>
         </div>
         <button 
-          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+          className="text-xs font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleDetailsClick}
+          disabled={isLoading}
         >
           View details →
         </button>
@@ -44,37 +56,28 @@ export default function StaffAttendance({ currentTime, attendanceData }:
       
       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
         <div className="col-span-1 sm:col-span-2 flex justify-center items-center">
-          <div className="relative w-32 h-32">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle 
-                className="text-slate-200" 
-                strokeWidth="8" 
-                stroke="currentColor" 
-                fill="transparent" 
-                r="44" 
-                cx="50" 
-                cy="50" 
-              />
-              <circle 
-                className="text-emerald-500 transition-all duration-1000 ease-out" 
-                strokeWidth="8" 
-                strokeDasharray={276.46} 
-                strokeDashoffset={276.46 * (1 - presentPercentage/100)} 
-                strokeLinecap="round" 
-                stroke="currentColor" 
-                fill="transparent" 
-                r="44" 
-                cx="50" 
-                cy="50" 
-                style={{
-                  filter: 'drop-shadow(0 0 2px rgba(16, 185, 129, 0.3))'
-                }}
-              />
-            </svg>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-              <p className="text-2xl font-bold text-slate-900">{presentPercentage}%</p>
-              <p className="text-xs text-slate-600 font-medium">Present</p>
-            </div>
+          <div className="relative w-32 h-32 flex items-center justify-center">
+            {isLoading ? (
+              <div className="w-28 h-28 rounded-full border-[6px] border-slate-100 animate-pulse bg-slate-50" />
+            ) : (
+              <>
+                <Circle 
+                  className="w-full h-full text-slate-100" 
+                  strokeWidth={2}
+                />
+                <Circle 
+                  className="absolute inset-0 w-full h-full text-emerald-500 transition-all duration-1000 ease-out -rotate-90"
+                  strokeWidth={2}
+                  strokeDasharray={CIRCUMFERENCE}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-2xl font-bold text-slate-900">{presentPercentage}%</p>
+                  <p className="text-xs text-slate-600 font-medium">Present</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -87,7 +90,11 @@ export default function StaffAttendance({ currentTime, attendanceData }:
                 </div>
                 <span className="text-sm font-medium text-slate-800">Present</span>
               </div>
-              <span className="text-lg font-semibold text-slate-900">{present}</span>
+              {isLoading ? (
+                <div className="h-6 w-8 bg-slate-200 rounded-sm animate-pulse" />
+              ) : (
+                <span className="text-lg font-semibold text-slate-900">{present}</span>
+              )}
             </div>
           </div>
 
@@ -99,7 +106,11 @@ export default function StaffAttendance({ currentTime, attendanceData }:
                 </div>
                 <span className="text-sm font-medium text-slate-800">Absent</span>
               </div>
-              <span className="text-lg font-semibold text-slate-900">{absent}</span>
+              {isLoading ? (
+                <div className="h-6 w-8 bg-slate-200 rounded-sm animate-pulse" />
+              ) : (
+                <span className="text-lg font-semibold text-slate-900">{absent}</span>
+              )}
             </div>
           </div>
 
@@ -111,7 +122,11 @@ export default function StaffAttendance({ currentTime, attendanceData }:
                 </div>
                 <span className="text-sm font-medium text-slate-800">On Leave</span>
               </div>
-              <span className="text-lg font-semibold text-slate-900">{onLeave}</span>
+              {isLoading ? (
+                <div className="h-6 w-8 bg-slate-200 rounded-sm animate-pulse" />
+              ) : (
+                <span className="text-lg font-semibold text-slate-900">{onLeave}</span>
+              )}
             </div>
           </div>
         </div>
