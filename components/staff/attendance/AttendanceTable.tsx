@@ -2,7 +2,7 @@ import React, { memo } from "react"
 import { Clock, MapPin, ArrowUpRight } from "lucide-react"
 import { AttendanceRecord } from "@/app/actions/attendance/attendance-actions"
 import LocationMap from "@/components/staff/attendance/LocationMap"
-import { formatDate, formatName } from "@/utils/formatters"
+import { formatDate, formatName, format12HourTime } from "@/utils/formatters"
 import Link from "next/link"
 
 type AttendanceTableProps = {
@@ -30,11 +30,11 @@ const AttendanceTableRow = memo(({ record }: {
         <div className="space-y-1">
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-2 text-gray-500" />
-            <span className="font-medium">Start:</span> {record.scheduledStart || "N/A"}
+            <span className="font-medium">Start:</span> {format12HourTime(record.scheduledStart) || "N/A"}
           </div>
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-2 text-gray-500" />
-            <span className="font-medium">End:</span> {record.scheduledEnd || "N/A"}
+            <span className="font-medium">End:</span> {format12HourTime(record.scheduledEnd) || "N/A"}
           </div>
         </div>
       </td>
@@ -42,11 +42,11 @@ const AttendanceTableRow = memo(({ record }: {
         <div className="space-y-1">
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-2 text-gray-500" />
-            <span className="font-medium">Start:</span> {record.shiftStart || "N/A"}
+            <span className="font-medium">Start:</span> {format12HourTime(record.shiftStart) || "N/A"}
           </div>
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-2 text-gray-500" />
-            <span className="font-medium">End:</span> {record.shiftEnd || "N/A"}
+            <span className="font-medium">End:</span> {format12HourTime(record.shiftEnd) || "N/A"}
           </div>
         </div>
       </td>
@@ -112,9 +112,9 @@ const AttendanceMobileCard = memo(({ record }: {
       
       <div className="grid grid-cols-2 gap-y-2 text-sm bg-white border border-slate-200 p-3 rounded-sm">
         <p className="text-gray-500">Scheduled Time:</p>
-        <p className="text-gray-800 font-medium">{record.scheduledStart || "N/A"} - {record.scheduledEnd || "N/A"}</p>
+        <p className="text-gray-800 font-medium">{format12HourTime(record.scheduledStart) || "N/A"} - {format12HourTime(record.scheduledEnd) || "N/A"}</p>
         <p className="text-gray-500">Actual Time:</p>
-        <p className="text-gray-800">{record.shiftStart || "N/A"} - {record.shiftEnd || "N/A"}</p>
+        <p className="text-gray-800">{format12HourTime(record.shiftStart) || "N/A"} - {format12HourTime(record.shiftEnd) || "N/A"}</p>
         <p className="text-gray-500">Hours Worked:</p>
         <p className="text-gray-800">{record.hoursWorked || "N/A"}</p>
         <p className="text-gray-500">Location:</p>
