@@ -1,5 +1,5 @@
 import React from "react"
-import { Search, X, Download, Calendar, RefreshCw, Plus } from "lucide-react"
+import { Search, X, Download, Calendar, RefreshCw, Plus, Loader } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type LeaveRequestsHeaderProps = {
@@ -34,7 +34,6 @@ export function LeaveRequestsHeader({
   statuses,
   admittedTypeFilter = ""
 }: LeaveRequestsHeaderProps) {
-  
   const hasActiveFilters = searchTerm || statusFilter || dateRange.startDate || dateRange.endDate
 
   const getAdmittedTypeDisplay = (): string => {
@@ -52,7 +51,6 @@ export function LeaveRequestsHeader({
           <p className="text-xs text-gray-500">Manage and review leave requests</p>
         </div>
         <div className="flex gap-2">
-
           {onAddLeaveRequest && (
             <button
               onClick={onAddLeaveRequest}
@@ -62,7 +60,6 @@ export function LeaveRequestsHeader({
               Add Leave
             </button>
           )}
-
           {onExport && (
             <button 
               onClick={onExport}
@@ -71,10 +68,7 @@ export function LeaveRequestsHeader({
             >
               {isExporting ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <Loader className="animate-spin mr-1 h-3 w-3 text-white" />
                   Exporting...
                 </span>
               ) : (
@@ -87,13 +81,12 @@ export function LeaveRequestsHeader({
           )}
         </div>
       </div>
-
-      <div className="p-3 bg-gray-50 grid gap-2 grid-cols-1 sm:grid-cols-[1fr_auto]">
-        <div className="relative">
+      <div className="p-4 bg-gray-50 flex flex-col gap-2">
+        <div className="relative w-full">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Enter search term and press Enter"
-            className="pl-9 pr-16 py-1 h-9 bg-white text-sm text-gray-800 border-slate-200 focus-visible:ring-blue-400"
+            placeholder="Type to search"
+            className="pl-9 pr-16 py-1 h-9 bg-white text-sm text-gray-800 border-slate-200 rounded-sm w-full outline-none"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -112,99 +105,20 @@ export function LeaveRequestsHeader({
           )}
           <button
             onClick={handleSearch}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white 
+              px-2.5 py-1 rounded-sm text-xs transition-colors outline-none"
           >
             Search
           </button>
         </div>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="relative">
-              <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="date"
-                className="pl-9 pr-3 py-1 h-9 bg-white text-sm border border-slate-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
-                value={dateRange.startDate || ''}
-                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value || null})}
-              />
-            </div>
-            <span className="text-gray-500">to</span>
-            <input
-              type="date"
-              className="pl-3 pr-3 py-1 h-9 bg-white text-sm border border-slate-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
-              value={dateRange.endDate || ''}
-              onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
-            />
-          </div>
-
-          <div className="sm:hidden flex flex-col w-full gap-2">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="date"
-                  className="w-full pl-9 pr-3 py-1.5 bg-white text-sm border border-slate-200 rounded-sm"
-                  value={dateRange.startDate || ''}
-                  onChange={(e) => setDateRange({...dateRange, startDate: e.target.value || null})}
-                />
-              </div>
-              <div className="flex-1">
-                <input
-                  type="date"
-                  className="w-full pl-3 pr-3 py-1.5 bg-white text-sm border border-slate-200 rounded-sm"
-                  value={dateRange.endDate || ''}
-                  onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={statusFilter || 'All'}
-                onChange={(e) => setStatusFilter(e.target.value === 'All' ? null : e.target.value)}
-                className="flex-1 rounded-sm border border-slate-200 bg-white py-1.5 px-2 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
-                style={{ 
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: `right 0.5rem center`,
-                  backgroundRepeat: `no-repeat`,
-                  backgroundSize: `1.5em 1.5em`,
-                  paddingRight: `2rem`
-                }}
-              >
-                <option value="All">All Statuses</option>
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-
-              {hasActiveFilters && (
-                <button
-                  onClick={handleResetFilters}
-                  className="px-3 py-1.5 rounded-sm text-xs font-medium bg-gray-100 text-gray-700 border border-slate-200 hover:bg-gray-200 transition-colors flex items-center gap-1 whitespace-nowrap"
-                >
-                  <RefreshCw className="h-3 w-3" />
-                  Reset
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-3 pb-5 mb-3 bg-gray-50">
-
-        <div className="hidden sm:flex items-center gap-4 flex-wrap">
-
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full mt-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
             <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
               {getAdmittedTypeDisplay()}
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</span>
             <div className="flex gap-1.5 items-center">
               {['All', ...statuses].map((status) => (
@@ -222,26 +136,37 @@ export function LeaveRequestsHeader({
               ))}
             </div>
           </div>
-
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative">
+              <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="date"
+                className="pl-9 pr-3 py-1 h-7 bg-white text-xs border border-slate-200 rounded-sm text-gray-800 outline-none"
+                style={{ boxShadow: "none" }}
+                value={dateRange.startDate || ''}
+                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value || null})}
+              />
+            </div>
+            <span className="text-gray-500">to</span>
+            <input
+              type="date"
+              className="pl-3 pr-3 py-1 h-7 bg-white text-xs border border-slate-200 rounded-sm text-gray-800 outline-none"
+              style={{ boxShadow: "none" }}
+              value={dateRange.endDate || ''}
+              onChange={(e) => setDateRange({...dateRange, endDate: e.target.value || null})}
+            />
+          </div>
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
               className="px-2.5 py-1 rounded-sm text-xs font-medium bg-gray-100 text-gray-700 border border-slate-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
               title="Reset all filters"
+              style={{ outline: "none", boxShadow: "none" }}
             >
               <RefreshCw className="h-3 w-3" />
               Reset
             </button>
           )}
-        </div>
-
-        <div className="sm:hidden mt-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600">Organization:</span>
-            <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-              {getAdmittedTypeDisplay()}
-            </div>
-          </div>
         </div>
       </div>
     </div>

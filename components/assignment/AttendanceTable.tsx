@@ -39,6 +39,48 @@ function createGoogleMapsLink(location: string | null): { url: string | null, is
   return { url, isValidLocation: true };
 }
 
+function AttendanceTableHeader({ displaySalaryPerDay }: { displaySalaryPerDay: boolean }) {
+  return (
+    <thead>
+      <tr className="bg-slate-50 border-b border-slate-200">
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Date</th>
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Check-in Time</th>
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Check-out Time</th>
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Total Hours</th>
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Status</th>
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Location</th>
+        {displaySalaryPerDay && (
+          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Salary Per Day</th>
+        )}
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Entry Type</th>
+        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Actions</th>
+      </tr>
+    </thead>
+  );
+}
+
+function AttendanceTableLoader({ displaySalaryPerDay }: { displaySalaryPerDay: boolean }) {
+  return (
+    <tbody className="divide-y divide-slate-100">
+      {[...Array(10)].map((_, i) => (
+        <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-3/4 animate-pulse"></div></td>
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-2/3 animate-pulse"></div></td>
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-2/3 animate-pulse"></div></td>
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-1/2 animate-pulse"></div></td>
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-1/2 animate-pulse"></div></td>
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-2/3 animate-pulse"></div></td>
+          {displaySalaryPerDay && (
+            <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-1/2 animate-pulse"></div></td>
+          )}
+          <td className="px-4 py-4"><div className="h-4 bg-slate-200 rounded w-1/2 animate-pulse"></div></td>
+          <td className="px-4 py-4"><div className="h-8 bg-slate-200 rounded w-3/4 animate-pulse"></div></td>
+        </tr>
+      ))}
+    </tbody>
+  );
+}
+
 export function AttendanceTable({
   attendanceRecords,
   tableLoading,
@@ -79,7 +121,6 @@ export function AttendanceTable({
   
   const handleConfirmDelete = async () => {
     if (!recordToDelete) return;
-
     setDeleteLoading(true);
     await handleUnmarkAttendance(recordToDelete);
     setDeleteLoading(false);
@@ -92,149 +133,125 @@ export function AttendanceTable({
     setRecordToDelete(null);
   };
 
-  if (tableLoading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-8 bg-slate-200 rounded w-1/3 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-10 bg-slate-200 rounded w-full"></div>
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-12 bg-slate-100 rounded w-full"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (attendanceRecords.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <div className="bg-slate-50 border border-slate-200 rounded-sm px-6 py-8 max-w-md mx-auto">
-          <CalendarIcon className="h-12 w-12 mx-auto text-slate-400" />
-          <h3 className="mt-4 text-lg font-medium text-slate-700">No attendance records</h3>
-          <p className="mt-2 text-sm text-slate-500">
-            There are no attendance records available for this assignment yet.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const showTable = tableLoading || attendanceRecords.length > 0;
+  const showEmptyState = !tableLoading && attendanceRecords.length === 0;
 
   return (
     <>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Date</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Check-in Time</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Check-out Time</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Total Hours</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Location</th>
-              { 
-                displaySalaryPerDay && 
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Salary Per Day</th>
-              }
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Entry Type</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {attendanceRecords.map((record, index) => {
-              const { url: locationUrl, isValidLocation } = createGoogleMapsLink(record.location || null);
-              return (
-                <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-slate-50 transition-colors' : 'bg-slate-50 hover:bg-slate-100 transition-colors'}>
-                  <td className="px-4 py-4 text-sm text-slate-900 font-medium">
-                    {formatDate(record.date)}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700">
-                    {record.checkIn ? formatTime(record.checkIn) : '—'}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700">
-                    {record.checkOut ? formatTime(record.checkOut) : '—'}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700">
-                    {record.totalHours === '0' ? '—' : `${record.totalHours}`}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClasses(record.status)}`}>
-                      {record.status.charAt(0).toUpperCase() + record.status.slice(1).replace('-', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700 max-w-xs">
-                    {isValidLocation ? (
-                      <a
-                        href={locationUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        <MapPinIcon className="h-4 w-4 mr-1" />
-                        View on Map
-                      </a>
-                    ) : (
-                      <span className="text-slate-500">—</span>
-                    )}
-                  </td>
-                  {displaySalaryPerDay && (
-                    <td className="px-4 py-4 text-sm text-slate-700">
-                      {record.salaryPerDay ? `₹${record.salaryPerDay.toFixed(2)}` : '—'}
-                    </td>
-                  )}
-                  <td className="px-4 py-4 text-sm">
-                    {record.status === 'Absent' ? (
-                      '—'
-                    ) : record.isAdminAction ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-                        Admin
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                        Self
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    {(record.status?.toLowerCase() === 'absent') && (
-                      <button
-                        className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition"
-                        onClick={() => openModal(record)}
-                      >
-                        Mark Attendance
-                      </button>
-                    )}
-                    {(record.status?.toLowerCase() !== 'absent') && record.id !== undefined && (
-                      <button
-                        className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition"
-                        onClick={() => openDeleteConfirmation(record.id as number)}
-                      >
-                        Unmark Attendance
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-4">
-        {attendanceRecords.length > 0 && (
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalCount={recordsCount}
-            pageSize={pageSize}
-            setPageSize={handlePageSizeChange}
-            itemsLength={attendanceRecords.length}
-            onPageChange={handlePageChange}
-            onPreviousPage={handlePreviousPage}
-            onNextPage={handleNextPage}
-          />
-        )}
-      </div>
+      {showTable && (
+        <div className="overflow-x-auto min-h-[400px]">
+          <table className="w-full border-collapse">
+            <AttendanceTableHeader displaySalaryPerDay={displaySalaryPerDay} />
+            {tableLoading ? (
+              <AttendanceTableLoader displaySalaryPerDay={displaySalaryPerDay} />
+            ) : (
+              <tbody className="divide-y divide-slate-100">
+                {attendanceRecords.map((record, index) => {
+                  const { url: locationUrl, isValidLocation } = createGoogleMapsLink(record.location || null);
+                  return (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-slate-50 transition-colors' : 'bg-slate-50 hover:bg-slate-100 transition-colors'}>
+                      <td className="px-4 py-4 text-sm text-slate-900 font-medium">
+                        {formatDate(record.date)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-slate-700">
+                        {record.checkIn ? formatTime(record.checkIn) : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-slate-700">
+                        {record.checkOut ? formatTime(record.checkOut) : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-slate-700">
+                        {record.totalHours === '0' ? '—' : `${record.totalHours}`}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClasses(record.status)}`}>
+                          {record.status.charAt(0).toUpperCase() + record.status.slice(1).replace('-', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-slate-700 max-w-xs">
+                        {isValidLocation ? (
+                          <a
+                            href={locationUrl || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            <MapPinIcon className="h-4 w-4 mr-1" />
+                            View on Map
+                          </a>
+                        ) : (
+                          <span className="text-slate-500">—</span>
+                        )}
+                      </td>
+                      {displaySalaryPerDay && (
+                        <td className="px-4 py-4 text-sm text-slate-700">
+                          {record.salaryPerDay ? `₹${record.salaryPerDay.toFixed(2)}` : '—'}
+                        </td>
+                      )}
+                      <td className="px-4 py-4 text-sm">
+                        {record.status === 'Absent' ? (
+                          '—'
+                        ) : record.isAdminAction ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                            Admin
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                            Self
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        {(record.status?.toLowerCase() === 'absent') && (
+                          <button
+                            className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition"
+                            onClick={() => openModal(record)}
+                          >
+                            Mark Attendance
+                          </button>
+                        )}
+                        {(record.status?.toLowerCase() !== 'absent') && record.id !== undefined && (
+                          <button
+                            className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition"
+                            onClick={() => openDeleteConfirmation(record.id as number)}
+                          >
+                            Unmark Attendance
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            )}
+          </table>
+        </div>
+      )}
 
+      {showEmptyState && (
+        <div className="py-12 text-center">
+          <div className="bg-slate-50 border border-slate-200 rounded-sm px-6 py-8 max-w-md mx-auto">
+            <CalendarIcon className="h-12 w-12 mx-auto text-slate-400" />
+            <h3 className="mt-4 text-lg font-medium text-slate-700">No attendance records</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              There are no attendance records available for this assignment yet.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={recordsCount}
+          pageSize={pageSize}
+          setPageSize={handlePageSizeChange}
+          itemsLength={attendanceRecords.length}
+          onPageChange={handlePageChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+        />
+      </div>
 
       <ConfirmationModal
         isOpen={confirmationOpen}

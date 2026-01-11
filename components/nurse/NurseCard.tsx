@@ -28,20 +28,7 @@ interface NurseCardProps {
 const NurseCard = ({ nurse }: NurseCardProps) => {
   const StatusIcon = statusIcons[nurse.status as keyof typeof statusIcons]
   const router = useRouter();
-  
-  // Convert NurseBasicDetails to NurseBasicInfo format
-  // const convertToNurseBasicInfo = (nurseDetails: NurseBasicDetails): NurseBasicInfo => {
-  //   return {
-  //     nurse_id: nurseDetails.nurse_id,
-  //     first_name: nurseDetails.name.first,
-  //     last_name: nurseDetails.name.last,
-  //     email: nurseDetails.contact.email || "",
-  //     phone_number: nurseDetails.contact.phone || "",
-  //     status: nurseDetails.status,
-  //     experience: nurseDetails.experience,
-  //     rating: nurseDetails.rating,
-  //   };
-  // };
+
   
   const handleReviewDetails = () => {
     router.push(`/nurses/${nurse.nurse_id}`);

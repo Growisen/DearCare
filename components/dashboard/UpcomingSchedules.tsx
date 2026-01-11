@@ -10,9 +10,10 @@ import ModalPortal from "../ui/ModalPortal"
 
 interface UpcomingSchedulesProps {
   todosData?: Todo[];
+  isLoading?: boolean;
 }
 
-export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
+export default function TodoScheduler({ todosData, isLoading = false }: UpcomingSchedulesProps) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -22,7 +23,6 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   const [newUrgent, setNewUrgent] = useState(false);
   const [dateError, setDateError] = useState(false);
   const [timeError, setTimeError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [loadingTodoIds, setLoadingTodoIds] = useState<string[]>([]);
   const [isAddingTodo, setIsAddingTodo] = useState(false);
   
@@ -39,13 +39,11 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   useEffect(() => {
     if (todosData) {
       setTodos(todosData);
-      setIsLoading(false);
     }
   }, [todosData]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
-    
     setNewDate(selectedDate);
     
     if (selectedDate < today) {
@@ -58,9 +56,7 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedTime = e.target.value;
-    
     setNewTime(selectedTime);
-    
     validateTimeWithDate(newDate, selectedTime);
   };
 
@@ -221,11 +217,11 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
   };
 
   return (
-    <Card className="p-3 sm:p-4 bg-gradient-to-br from-white to-indigo-50/30 hover:from-white
-     hover:to-indigo-50/30 border border-slate-200 shadow-none rounded-sm h-[383px]"
+    <Card className="p-3 sm:p-4 bg-gradient-to-br from-white to-indigo-50/30 hover:from-white 
+      hover:to-indigo-50/30 border border-slate-200 shadow-none rounded-sm h-[383px]"
     >
-      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center
-       sm:items-center justify-between mb-3 sm:mb-4 border-b border-indigo-100 pb-2"
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center
+       justify-between mb-3 sm:mb-4 border-b border-indigo-100 pb-2"
       >
         <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
           <div className="mr-2">
@@ -237,7 +233,8 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
           <button
             onClick={() => setShowForm(!showForm)}
             disabled={isLoading}
-            className="p-1.5 rounded-sm bg-indigo-100 hover:bg-indigo-200 transition-colors disabled:opacity-70"
+            className="p-1.5 rounded-sm bg-indigo-100 hover:bg-indigo-200 transition-colors disabled:opacity-70
+             disabled:cursor-not-allowed"
           >
             {showForm ? (
               <X className="w-4 h-4 text-indigo-700" />
@@ -256,8 +253,7 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
               value={newTodo}
               onChange={(e) => setNewTodo(e.target.value)}
               placeholder="Add a new task..."
-              className="w-full p-2 rounded-sm border border-indigo-200 focus:border-indigo-300
-               focus:ring-1 focus:ring-indigo-300 text-sm text-slate-700"
+              className="w-full p-2 rounded-sm border border-indigo-200 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300 text-sm text-slate-700"
               disabled={isAddingTodo}
             />
             <div className="flex flex-wrap gap-2">
@@ -344,12 +340,23 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
       ) : (
         <div className="space-y-2 overflow-y-auto custom-scrollbar" style={{ height: "calc(100% - 55px)" }}>
           {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
-                <span className="text-sm text-slate-500">Loading tasks...</span>
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-2 sm:p-3 rounded-sm border border-slate-100 bg-white/50 
+                relative shadow-none animate-pulse"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-6 h-6 rounded-sm bg-slate-200 flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-200 rounded-sm w-3/4" />
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 ml-9">
+                  <div className="h-3 w-16 bg-slate-200 rounded-sm" />
+                  <div className="h-3 w-16 bg-slate-200 rounded-sm" />
+                  <div className="h-3 w-16 bg-slate-200 rounded-sm" />
+                </div>
               </div>
-            </div>
+            ))
           ) : todos.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 p-4">
               <div className="mb-2">
@@ -370,7 +377,9 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                       : "bg-gradient-to-r from-white to-indigo-50/40 border-indigo-100"}`}
               >
                 {loadingTodoIds.includes(todo.id) && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] rounded-sm flex items-center justify-center z-10">
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] rounded-sm flex items-center
+                   justify-center z-10"
+                  >
                     <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
                   </div>
                 )}
@@ -397,7 +406,9 @@ export default function TodoScheduler({ todosData }: UpcomingSchedulesProps) {
                       ${todo.completed ? "line-through text-slate-500" : ""}`}>
                       {todo.text}
                       {todo.urgent && !todo.completed && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-600 text-xs border border-rose-200 shadow-none">
+                        <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-600 text-xs border border-rose-200
+                         shadow-none"
+                        >
                           Urgent
                         </span>
                       )}

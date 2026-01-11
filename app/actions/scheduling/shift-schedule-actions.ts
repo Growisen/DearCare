@@ -966,3 +966,44 @@ export async function getAssignmentById(
     };
   }
 }
+
+
+export interface AssignmentStats {
+  starting_today_count: number;
+  ending_today_count: number;
+  active_count: number;
+  expiring_soon_count: number;
+}
+
+interface FetchStatsParams {
+  date: Date | string;
+}
+
+export const fetchAssignmentStats = async ({
+  date
+}: FetchStatsParams): Promise<AssignmentStats | null> => {
+  try {
+    const { supabase, nursesOrg} = await getAuthenticatedClient();
+
+    const formattedDate = typeof date === 'string' ? date : date.toISOString().split('T')[0];
+
+    const { data, error } = await supabase.rpc('get_daily_assignment_stats', {
+      target_date: formattedDate,
+      admitted_type_filter: nursesOrg, 
+    });
+
+    if (error) {
+      console.error('Error fetching assignment stats:', error);
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      return data[0] as AssignmentStats;
+    }
+
+    return null;
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    return null;
+  }
+};

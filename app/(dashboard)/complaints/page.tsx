@@ -65,29 +65,29 @@ export default function ComplaintsPage() {
       
       <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
         {loading ? (
-          <LoadingState message="Loading complaints..." description="Please wait while we fetch the complaints data" />
+          <LoadingState 
+            message="Loading complaints..." 
+            description="Please wait while we fetch the complaints data" 
+            className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+          />
         ) : (
-          <>
-            <ComplaintTable 
-              complaints={complaints}
-              onViewComplaint={handleViewComplaint}
-            />
-            
-            {complaints.length > 0 && (
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
-                pageSize={pageSize}
-                setPageSize={handlePageSizeChange}
-                itemsLength={itemsLength}
-                onPageChange={goToPage}
-                onPreviousPage={goToPreviousPage}
-                onNextPage={goToNextPage}
-              />
-            )}
-          </>
+          <ComplaintTable 
+            complaints={complaints}
+            onViewComplaint={handleViewComplaint}
+          />
         )}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          setPageSize={handlePageSizeChange}
+          itemsLength={itemsLength}
+          onPageChange={goToPage}
+          onPreviousPage={goToPreviousPage}
+          onNextPage={goToNextPage}
+          disabled={loading}
+        />
       </div>
     </div>
   );

@@ -171,7 +171,7 @@ export default function AddLeaveModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
-      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+      <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
       <form
         className="relative bg-white rounded-sm shadow-xl w-full max-w-md mx-4"
         onSubmit={handleSubmit}

@@ -10,16 +10,13 @@ export function useLeaveRequestData() {
   const [searchInput, setSearchInput] = useState('')
   const [appliedSearchTerm, setAppliedSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  
   const getAdmittedTypeFilter = (): 'Dearcare_Llp' | 'Tata_Homenursing' | "" => {
     if (!organization) return "";
     if (organization === "TataHomeNursing") return "Tata_Homenursing";
     if (organization === "DearCare") return "Dearcare_Llp";
     return "";
   };
-
   const admittedTypeFilter = getAdmittedTypeFilter();
-  
   const [dateRange, setDateRange] = useState<{startDate: string | null, endDate: string | null}>({
     startDate: null,
     endDate: null
@@ -39,10 +36,9 @@ export function useLeaveRequestData() {
     requestId: null,
     action: null,
   })
-  
-
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const statuses = ['Pending', 'Approved', 'Rejected']
-  
   const getStatusFilter = (): LeaveRequestStatus | null => {
     if (statusFilter && statusFilter !== 'All') {
       const lowercaseStatus = statusFilter.toLowerCase() as LeaveRequestStatus
@@ -52,11 +48,9 @@ export function useLeaveRequestData() {
     }
     return null
   }
-
   useEffect(() => {
     setCurrentPage(1)
   }, [statusFilter, appliedSearchTerm, dateRange.startDate, dateRange.endDate])
-
   const { 
     data, 
     isLoading, 
@@ -83,68 +77,58 @@ export function useLeaveRequestData() {
           currentPage,
           pageSize
         )
-        
         if (!result.success) {
           toast.error(result.error || 'Failed to fetch leave requests')
           return { leaveRequests: [], totalCount: 0 }
         }
-        
         return { 
           leaveRequests: result.leaveRequests || [], 
           totalCount: result.totalCount || 0 
         }
       } catch (error) {
-        console.error('Error fetching leave requests:', error)
         toast.error('An error occurred while fetching leave requests')
         return { leaveRequests: [], totalCount: 0 }
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 10, // 10 minutes
+    refetchInterval: 1000 * 60 * 10,
   })
-
   const leaveRequests = data?.leaveRequests || []
-  const totalCount = data?.totalCount || 0
-  const totalPages = Math.ceil(totalCount / pageSize)
-  
+  useEffect(() => {
+    setTotalCount(data?.totalCount || 0)
+    setTotalPages(Math.ceil((data?.totalCount || 0) / pageSize) || 1)
+  }, [data, pageSize])
   const applySearch = () => {
     setAppliedSearchTerm(searchInput)
     setCurrentPage(1)
   }
-  
   const clearAllFilters = () => {
     setSearchInput('')
     setAppliedSearchTerm('')
     setStatusFilter(null)
     setDateRange({startDate: null, endDate: null})
   }
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return
     setCurrentPage(page)
   }
-
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1)
     }
   }
-
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1)
     }
   }
-  
   const handleViewLeaveRequest = (request: LeaveRequest) => {
     setSelectedLeaveRequest(request)
     setIsModalOpen(true)
   }
-
   const handleApproveLeaveRequest = async (id: string) => {
     setProcessingRequestIds(prev => new Set(prev).add(id))
-    
     try {
       const result = await updateLeaveRequestStatus(id, 'approved')
       if (result.success) {
@@ -166,16 +150,13 @@ export function useLeaveRequestData() {
       })
     }
   }
-
   const handleRejectLeaveRequest = async (id: string, rejectionReason?: string) => {
     try {
       if (!rejectionReason?.trim()) {
         toast.error('Please provide a reason for rejection');
         return;
       }
-      
       setProcessingRequestIds(prev => new Set(prev).add(id))
-      
       const result = await updateLeaveRequestStatus(id, 'rejected', rejectionReason)
       if (result.success) {
         toast.success('Leave request rejected')
@@ -201,82 +182,63 @@ export function useLeaveRequestData() {
       })
     }
   }
-  
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize)
     setCurrentPage(1)
   }
-
-
-
   const handleSearch = () => {
     applySearch()
   }
-
   const handleResetFilters = () => {
     clearAllFilters()
     refetch()
   }
-
   const handleExport = async () => {
     setIsExporting(true)
     try {
       const currentStatus = statusFilter && statusFilter !== 'All' 
         ? statusFilter.toLowerCase() as 'pending' | 'approved' | 'rejected' 
         : null
-  
       const result = await exportLeaveRequests(
         currentStatus,
         searchInput,
         dateRange.startDate,
         dateRange.endDate
       )
-  
       if (!result.success) {
         toast.error(result.error || 'Failed to export leave requests')
         return
       }
-  
       if (result.recordCount === 0) {
         toast.error('No data to export based on current filters')
         return
       }
-  
       const csvData = result.csvData || '';
       const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
-      
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
-      
-      // Set filename with current date
       const date = new Date().toISOString().split('T')[0]
       link.setAttribute('href', url)
       link.setAttribute('download', `leave_requests_${date}.csv`)
       link.style.visibility = 'hidden'
-      
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
       if (result.recordCount !== undefined) {
         toast.success(`${result.recordCount} leave requests exported successfully`)
       } else {
         toast.success('Leave requests exported successfully')
       }
     } catch (error) {
-      console.error('Export error:', error)
       toast.error('Failed to export leave requests')
     } finally {
       setIsExporting(false)
     }
   }
-
   const queryClient = useQueryClient();
-
   const invalidateLeaveRequests = () => {
     queryClient.invalidateQueries({ queryKey: ['leaveRequests'] });
   };
-
   return {
     statuses,
     isModalOpen, 

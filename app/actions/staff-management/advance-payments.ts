@@ -435,6 +435,39 @@ export async function deleteDeductionFromPayment(input: {
   }
 }
 
+
+export async function fetchAdvancePaymentTotals({
+  date,
+  searchTerm,
+}: {
+  date?: string | null;
+  searchTerm?: string;
+}) {
+  const { supabase, nursesOrg } = await getAuthenticatedClient();
+
+  const totalsResult = await supabase.rpc('get_advance_payment_totals', {
+    p_org: nursesOrg,
+    p_date: date,
+    p_search: searchTerm || null,
+  });
+
+  if (totalsResult.error) {
+    return {
+      totalAmountGiven: 0,
+      totalAmountReturned: 0,
+      error: totalsResult.error?.message,
+    };
+  }
+
+  const stats = totalsResult.data?.[0] || { total_given: 0, total_returned: 0 };
+
+  return {
+    totalAmountGiven: Number(stats.total_given),
+    totalAmountReturned: Number(stats.total_returned),
+    error: null,
+  };
+}
+
 export async function fetchAdvancePaymentRecords({
   startDate,
   page = 1,
@@ -495,15 +528,10 @@ export async function fetchAdvancePaymentRecords({
       .range(from, to)
   );
 
-  const totalsRpc = supabase.rpc('get_advance_payment_totals', {
-    p_org: nursesOrg,
-    p_date: dateFilter,
-    p_search: searchTerm || null,
-  });
 
-  const [listResult, totalsResult] = await Promise.all([listQuery, totalsRpc]);
+  const [listResult] = await Promise.all([listQuery]);
 
-  if (listResult.error || totalsResult.error) {
+  if (listResult.error) {
     return {
       status: 'error',
       data: [],
@@ -512,15 +540,12 @@ export async function fetchAdvancePaymentRecords({
         page,
         pageSize,
         totalPages: 0,
-        totalAmountGiven: 0,
-        totalAmountReturned: 0,
-        error: listResult.error?.message || totalsResult.error?.message,
+        error: listResult.error?.message,
       },
     };
   }
 
   const total = listResult.count || 0;
-  const stats = totalsResult.data?.[0] || { total_given: 0, total_returned: 0 };
 
   return {
     status: 'success',
@@ -530,8 +555,6 @@ export async function fetchAdvancePaymentRecords({
       page,
       pageSize,
       totalPages: exportMode ? 1 : Math.ceil(total / pageSize),
-      totalAmountGiven: Number(stats.total_given),
-      totalAmountReturned: Number(stats.total_returned),
     },
   };
 }

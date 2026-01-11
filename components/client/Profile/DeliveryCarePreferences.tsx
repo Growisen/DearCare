@@ -37,7 +37,8 @@ const DeliveryCarePreferences: React.FC<DeliveryCarePreferencesProps> = ({ clien
           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
       }`}
       onClick={() => {
-        navigator.clipboard.writeText(`/delivery-care-preferences/${clientId}`);
+        const fullLink = `${window.location.origin}/delivery-care-preferences/${clientId}`;
+        navigator.clipboard.writeText(fullLink);
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 3000);
       }}

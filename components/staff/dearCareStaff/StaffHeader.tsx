@@ -1,5 +1,5 @@
 import React from "react"
-import { Search, X, Plus, Download } from "lucide-react"
+import { Search, X, Plus, Download, Loader } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { StaffOrganization } from "@/types/dearCareStaff.types"
 
@@ -34,22 +34,21 @@ export function StaffHeader({
         <div className="flex gap-2">
           <button 
             onClick={onAddStaff}
-            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-sm hover:bg-green-600 transition-colors flex items-center gap-1"
+            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-sm hover:bg-green-600
+             transition-colors flex items-center gap-1"
           >
             <Plus size={16} />
-            Add Staff
+            Add
           </button>
           <button 
             onClick={onExport}
             disabled={isExporting}
-            className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
+            className="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-sm hover:bg-blue-600
+             transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1"
           >
             {isExporting ? (
               <span className="flex items-center">
-                <svg className="animate-spin mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <Loader className="animate-spin mr-1 h-3 w-3 text-white" />
                 Exporting...
               </span>
             ) : (
@@ -61,12 +60,11 @@ export function StaffHeader({
           </button>
         </div>
       </div>
-
-      <div className="p-3 bg-gray-50 grid gap-2 grid-cols-1 sm:grid-cols-[1fr_auto]">
+      <div className="p-4 bg-gray-50 grid gap-2 grid-cols-1">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Enter search term and press Enter..."
+            placeholder="Type to search"
             className="pl-9 pr-16 py-1 h-9 bg-white text-sm border-slate-200 focus-visible:ring-blue-400 text-gray-800"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -86,58 +84,28 @@ export function StaffHeader({
           )}
           <button
             onClick={handleSearch}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-sm text-xs transition-colors"
           >
             Search
           </button>
         </div>
-
-        <div className="flex items-center gap-2">
-          {/* Organization badge - read only for desktop */}
-          <span className="text-xs font-medium text-gray-600 whitespace-nowrap hidden sm:inline">Organization:</span>
-          <div className="hidden sm:flex gap-1.5 items-center">
-            <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-              {selectedCategory === "all" ? "All Organizations" : selectedCategory}
-            </div>
-            
-            <button
-              onClick={handleResetFilters}
-              disabled={!searchInput}
-              className={`ml-1 px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border flex items-center gap-1 ${
-                !searchInput
-                  ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
-              }`}
-            >
-              <X className="h-3 w-3" />
-              Reset All
-            </button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full mt-1">
+          <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Organization:</span>
+          <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            {selectedCategory === "all" ? "All Organizations" : selectedCategory}
           </div>
-          
-          {/* Mobile view - organization badge and reset button */}
-          <div className="sm:hidden w-full flex flex-col gap-2">
-            {/* Organization badge - read only for mobile */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-600">Organization:</span>
-              <div className="px-2.5 py-1 rounded-sm text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {selectedCategory === "all" ? "All Organizations" : selectedCategory}
-              </div>
-            </div>
-            
-            {/* Reset button for mobile */}
-            <button
-              onClick={handleResetFilters}
-              disabled={!searchInput}
-              className={`py-1.5 rounded text-xs font-medium transition-colors border flex items-center justify-center gap-1 ${
-                !searchInput
-                  ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
-              }`}
-            >
-              <X className="h-3 w-3" />
-              Reset All Filters
-            </button>
-          </div>
+          <button
+            onClick={handleResetFilters}
+            disabled={!searchInput}
+            className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border flex items-center gap-1 ${
+              !searchInput
+                ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
+            }`}
+          >
+            <X className="h-3 w-3" />
+            Reset All
+          </button>
         </div>
       </div>
     </div>

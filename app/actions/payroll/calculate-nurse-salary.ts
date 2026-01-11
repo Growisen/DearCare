@@ -3,6 +3,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { differenceInCalendarDays, max, min } from "date-fns";
 import { getAuthenticatedClient } from "@/app/actions/helpers/auth.helper";
+import { jsonToCSV } from '@/utils/jsonToCSV';
+import { fetchAllRecords } from '@/app/actions/helpers/fetchAll';
 
 function calculateShiftHours(startTime: string, endTime: string): number {
   try {
@@ -134,48 +136,6 @@ async function checkOverlappingPayments(
     overlapping: overlapping || undefined,
   };
 }
-
-// /**
-//  * Build salary breakdown info string
-//  */
-// function buildSalaryInfo(
-//   daysWorked: number,
-//   salaryDayMap: Map<number, number>,
-//   skippedRecords: SkippedRecord[]
-// ): string {
-//   let info = `${daysWorked} days`;
-
-//   if (salaryDayMap.size > 0) {
-//     const breakdown = Array.from(salaryDayMap.entries())
-//       .map(([salary, count]) => `${count} days (${salary}/day)`)
-//       .join(", ");
-//     info += ` [${breakdown}]`;
-//   }
-
-//   if (skippedRecords.length > 0) {
-//     const missingDataCount = skippedRecords.filter(
-//       (r) => r.reason === "Missing attendance data"
-//     ).length;
-//     const invalidHoursCount = skippedRecords.filter(
-//       (r) => r.reason === "Invalid or zero worked hours"
-//     ).length;
-//     const noAssignmentCount = skippedRecords.filter(
-//       (r) => r.reason === "No valid nurse_client assignment"
-//     ).length;
-
-//     info += ` | SKIPPED: ${skippedRecords.length} records`;
-//     const details: string[] = [];
-//     if (missingDataCount > 0) details.push(`${missingDataCount} missing data`);
-//     if (invalidHoursCount > 0) details.push(`${invalidHoursCount} invalid hours`);
-//     if (noAssignmentCount > 0) details.push(`${noAssignmentCount} no assignment`);
-//     if (details.length > 0) {
-//       info += ` (${details.join(", ")})`;
-//     }
-//   }
-
-//   return info;
-// }
-
 
 function validateDateRange(startDate: string, endDate: string): string | null {
   if (startDate > endDate) {
@@ -783,67 +743,91 @@ export async function fetchSalaryPaymentDebts({
   page = 1,
   pageSize = 20,
   search = "",
+  exportMode = false,
 }: {
   page?: number;
   pageSize?: number;
   search?: string;
+  exportMode?: boolean;
 }) {
   const { supabase, nursesOrg } = await getAuthenticatedClient();
 
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  const query = supabase
+  let query = supabase
     .from("view_salary_payment_debts")
     .select("*", { count: "exact" })
     .eq("admitted_type", nursesOrg)
-    .order("pay_period_end", { ascending: false })
-    .range(from, to);
+    .order("pay_period_end", { ascending: false });
 
   if (search.trim()) {
-    const { data, error } = await query;
-    if (error) {
+    const term = search.trim();
+    query = query.or(`full_name.ilike.%${term}%,nurse_reg_no.ilike.%${term}%`);
+  }
+
+  try {
+    if (exportMode) {
+      const allRecords = await fetchAllRecords(query);
       return {
-        success: false,
-        error: error.message,
-        records: [],
-        page,
-        pageSize,
-        total: 0,
+        success: true,
+        records: jsonToCSV(allRecords),
+        page: 1,
+        pageSize: allRecords.length,
+        total: allRecords.length,
       };
     }
-    const lowerSearch = search.trim().toLowerCase();
-    const filtered = (data ?? []).filter((record: SalaryPaymentDebtRecord) =>
-      record.full_name?.toLowerCase().includes(lowerSearch) ||
-      record.nurse_reg_no?.toLowerCase().includes(lowerSearch)
-    );
-    return {
-      success: true,
-      records: filtered,
-      page,
-      pageSize,
-      total: filtered.length,
-    };
-  } else {
-    const { data, error, count } = await query;
-    if (error) {
-      return {
-        success: false,
-        error: error.message,
-        records: [],
-        page,
-        pageSize,
-        total: 0,
-      };
-    }
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    
+    const { data, error, count } = await query.range(from, to);
+
+    if (error) throw error;
+
     return {
       success: true,
       records: data ?? [],
       page,
       pageSize,
-      total: count ?? (data?.length ?? 0),
+      total: count ?? 0,
+    };
+
+  } catch (error: unknown) {
+    console.error("Error fetching salary debts:", error);
+    return {
+      success: false,
+      error: (error as Error).message,
+      records: [],
+      page,
+      pageSize,
+      total: 0,
     };
   }
+}
+
+export async function fetchSalaryDataAggregates({
+  date = null,
+  search = null,
+}: {
+  date?: string | null;
+  search?: string | null;
+}) {
+  const { supabase, nursesOrg } = await getAuthenticatedClient();
+  const { data, error } = await supabase.rpc('get_salary_stats', {
+    p_org: nursesOrg,
+    p_date: date,
+    p_search: search || null,
+  });
+
+  if (error) return { 
+    success: false, 
+    error: error.message, 
+    aggregates: null 
+  };
+
+  return { 
+    success: true, 
+    aggregates: data?.[0] || 
+    { total_paid: 0, total_net_paid: 0 } 
+  };
 }
 
 interface AdvanceSalaryPayment {

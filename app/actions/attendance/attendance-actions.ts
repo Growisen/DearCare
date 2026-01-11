@@ -57,32 +57,6 @@ export interface UnmarkAttendanceParams {
   date?: string;
 }
 
-interface Nurse {
-  nurse_id: number;
-  first_name: string;
-  last_name: string;
-  admitted_type: "Dearcare_Llp" | "Tata_Homenursing";
-}
-
-interface NurseClient {
-  id: number;
-  nurse_id: number;
-  shift_start_time: string;
-  shift_end_time: string;
-  nurse: Nurse | Nurse[];
-}
-
-interface RawAttendanceRecord {
-  id: number;
-  date: string;
-  start_time: string | null;
-  end_time: string | null;
-  total_hours: string | null;
-  location: string | null;
-  assigned_id: number | null;
-  nurse_client: NurseClient | NurseClient[] | null;
-}
-
 function convertTo12HourFormat(time24: string | null): string {
   if (!time24) return '';
   
@@ -165,67 +139,6 @@ function parseLocation(location: string | null): string | null {
     return location;
   }
 }
-
-function processAttendanceRecord(record: RawAttendanceRecord): AttendanceRecord {
-  const nurseClient = record.nurse_client && 
-    (Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client);
-  
-  const nurse = nurseClient?.nurse &&
-    (Array.isArray(nurseClient.nurse) ? nurseClient.nurse[0] : nurseClient.nurse);
-  
-  const nurseName = nurse?.first_name && nurse?.last_name
-    ? `${nurse.first_name} ${nurse.last_name}`
-    : 'Unknown Nurse';
-    
-  const actualStart = record.start_time ? convertTo12HourFormat(record.start_time) : '';
-  const actualEnd = record.end_time ? convertTo12HourFormat(record.end_time) : '';
-  const scheduledStart = nurseClient?.shift_start_time ? convertTo12HourFormat(nurseClient.shift_start_time) : '';
-  const scheduledEnd = nurseClient?.shift_end_time ? convertTo12HourFormat(nurseClient.shift_end_time) : '';
-
-  let status = 'Absent';
-  if (record.start_time) {
-    status = 'Present';
-    
-    if (nurseClient?.shift_start_time && record.start_time) {
-      const [shiftH, shiftM] = nurseClient.shift_start_time.split(':').map(Number);
-      const [actualH, actualM] = record.start_time.split(':').map(Number);
-      
-      const expectedMinutes = shiftH * 60 + shiftM;
-      const actualMinutes = actualH * 60 + actualM;
-      
-      if (actualMinutes > expectedMinutes + 15) {
-        status = 'Late';
-      }
-    }
-  }
-
-  const hoursWorked = calculateHoursWorked(
-    record.total_hours,
-    record.start_time, 
-    record.end_time
-  );
-
-  const locationInfo = parseLocation(record.location);
-
-  return {
-    id: record.id,
-    nurseName,
-    date: record.date,
-    shiftStart: actualStart,
-    shiftEnd: actualEnd,
-    scheduledStart,
-    scheduledEnd,
-    hoursWorked, 
-    status,
-    location: locationInfo,
-    nurseId: nurse?.nurse_id || null
-  };
-}
-
-/**
- * CORE ATTENDANCE FUNCTIONS
- * ------------------------
- */
 
 export async function getTodayAttendanceForAssignment(
   assignmentId: number
@@ -731,157 +644,85 @@ export async function markLongShiftAttendance(
   }
 }
 
+interface AttendanceRpcResponse {
+  id: number | null;
+  assigned_id: number;
+  nurseName: string;
+  date: string;
+  shiftStart: string | null;
+  shiftEnd: string | null;
+  scheduledStart: string | null;
+  scheduledEnd: string | null;
+  hoursWorked: string | null;
+  status: string;
+  location: string | null;
+  nurseId: number;
+  total_count: number;
+}
+
 export async function fetchStaffAttendance(
   date?: string,
   page: number = 1,
   pageSize: number = 50,
-  includeAbsent: boolean = true,
-  admittedType?: string,
+  status: 'present' | 'absent' | 'all' = 'all',
   debouncedSearchTerm?: string
-): Promise<{ 
-  success: boolean; 
-  data: AttendanceRecord[]; 
+): Promise<{
+  success: boolean;
+  data: AttendanceRecord[];
   pagination?: {
     currentPage: number;
     totalPages: number;
     totalRecords: number;
     pageSize: number;
   };
-  error?: string 
+  error?: string;
 }> {
   try {
-    const { supabase } = await getAuthenticatedClient();
+    const { supabase, nursesOrg } = await getAuthenticatedClient();
     const targetDate = date || new Date().toISOString().split('T')[0];
-    const searchTerm = debouncedSearchTerm?.trim().toLowerCase();
+    const searchTerm = debouncedSearchTerm?.trim().toLowerCase() || null;
 
-    let attendanceQuery = supabase
-      .from('attendence_individual')
-      .select(`
-        id, date, start_time, end_time, total_hours, location, assigned_id,
-        nurse_client:assigned_id!inner (
-          id, nurse_id, shift_start_time, shift_end_time,
-          nurse:nurse_id!inner (
-            nurse_id, first_name, last_name, full_name, 
-            nurse_reg_no, admitted_type
-          )
-        )
-      `, { count: 'exact' })
-      .eq('date', targetDate);
+    const { data, error } = await supabase.rpc('get_nurse_attendance_report', {
+      input_date: targetDate,
+      page_number: page,
+      page_size: pageSize,
+      status_filter: status,
+      admitted_type_filter: nursesOrg,
+      search_term: searchTerm
+    });
 
-    if (admittedType) {
-      attendanceQuery = attendanceQuery.eq('nurse_client.nurse.admitted_type', admittedType);
-    }
+    if (error) throw new Error(error.message);
 
-    let scheduleQuery = null;
-    if (includeAbsent) {
-      scheduleQuery = supabase
-        .from('nurse_client')
-        .select(`
-          id, nurse_id, shift_start_time, shift_end_time, start_date, end_date,
-          nurse:nurse_id!inner (
-            nurse_id, first_name, last_name, full_name, admitted_type
-          )
-        `)
-        .lte('start_date', targetDate)
-        .gte('end_date', targetDate);
+    const rpcData = data as unknown as AttendanceRpcResponse[] | null;
+    const safeData = rpcData || [];
+    const totalRecords = safeData.length > 0 ? safeData[0].total_count : 0;
 
-      if (admittedType) {
-        scheduleQuery = scheduleQuery.eq('nurse.admitted_type', admittedType);
-      }
-    }
-
-    let leaveQuery = null;
-    if (includeAbsent) {
-      leaveQuery = supabase
-        .from('nurse_leave_requests')
-        .select('nurse_id, leave_type')
-        .eq('status', 'approved')
-        .lte('start_date', targetDate)
-        .gte('end_date', targetDate);
-    }
-
-    const [attendanceRes, scheduleRes, leaveRes] = await Promise.all([
-      attendanceQuery,
-      includeAbsent ? scheduleQuery : Promise.resolve({ data: [] }),
-      includeAbsent ? leaveQuery : Promise.resolve({ data: [] })
-    ]);
-
-    if (attendanceRes.error) throw new Error(attendanceRes.error.message);
-    if (scheduleRes && 'error' in scheduleRes && scheduleRes.error) throw new Error(scheduleRes.error.message);
-
-    const rawAttendance = attendanceRes.data || [];
-    const rawSchedules = scheduleRes?.data || [];
-    const rawLeaves = leaveRes?.data || [];
-
-    const presentAssignmentIds = new Set<number>();
-    
-    let allRecords: AttendanceRecord[] = rawAttendance.map(record => {
-      const nc = Array.isArray(record.nurse_client) ? record.nurse_client[0] : record.nurse_client;
-      if (nc) presentAssignmentIds.add(nc.id);
-      return processAttendanceRecord(record); 
-    }).filter(r => r !== null);
-
-    if (includeAbsent && rawSchedules.length > 0) {
-      const leaveMap = new Map(rawLeaves.map(l => [l.nurse_id, l.leave_type]));
-
-      const absentRecords = rawSchedules
-        .filter(assignment => !presentAssignmentIds.has(assignment.id))
-        .map(assignment => {
-          const nurse = Array.isArray(assignment.nurse) ? assignment.nurse[0] : assignment.nurse;
-          if (!nurse) return null;
-
-          const nurseId = nurse.nurse_id;
-          const nurseName = nurse.full_name || `${nurse.first_name} ${nurse.last_name}`;
-          
-          let status = 'Absent';
-          if (nurseId && leaveMap.has(nurseId)) {
-            status = `On Leave (${formatLeaveType(leaveMap.get(nurseId))})`;
-          }
-
-          return {
-            id: -assignment.id,
-            nurseName,
-            date: targetDate,
-            shiftStart: '',
-            shiftEnd: '',
-            scheduledStart: assignment.shift_start_time ? convertTo12HourFormat(assignment.shift_start_time) : '',
-            scheduledEnd: assignment.shift_end_time ? convertTo12HourFormat(assignment.shift_end_time) : '',
-            hoursWorked: 0,
-            status,
-            location: null,
-            nurseId
-          } as AttendanceRecord;
-        })
-        .filter((r): r is AttendanceRecord => r !== null);
-
-      allRecords = [...allRecords, ...absentRecords];
-    }
-
-    if (searchTerm) {
-      allRecords = allRecords.filter(record => 
-        record.nurseName.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    allRecords.sort((a, b) => a.nurseName.localeCompare(b.nurseName));
-
-    const totalRecords = allRecords.length;
-    const from = (page - 1) * pageSize;
-    const paginatedRecords = allRecords.slice(from, from + pageSize);
+    const formattedData: AttendanceRecord[] = safeData.map((record) => ({
+      id: record.id || record.assigned_id,
+      nurseName: record.nurseName,
+      date: record.date,
+      shiftStart: record.shiftStart ?? '',
+      shiftEnd: record.shiftEnd ?? '',
+      scheduledStart: record.scheduledStart ?? '',
+      scheduledEnd: record.scheduledEnd ?? '',
+      hoursWorked: record.hoursWorked || '0',
+      status: record.status,
+      location: record.location,
+      nurseId: record.nurseId
+    }));
 
     return {
       success: true,
-      data: paginatedRecords,
+      data: formattedData,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalRecords / pageSize),
-        totalRecords,
-        pageSize
+        totalRecords: totalRecords,
+        pageSize: pageSize
       }
     };
 
   } catch (error) {
-    console.error('Error fetching attendance records:', error);
     return {
       success: false,
       data: [],
@@ -1116,6 +957,39 @@ export async function getAttendanceRecords(
   }
 }
 
+interface AssignmentData {
+  id: number;
+  shift_start_time: string | null;
+  shift_end_time: string | null;
+  start_date: string;
+  end_date: string;
+  salary_per_day: number | null;
+}
+
+interface AttendanceData {
+  id: number;
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+  total_hours: string | null;
+  is_admin_action: boolean | null;
+  location: string | null;
+  assigned_id: number;
+  notes: string | null;
+}
+
+interface LeaveData {
+  start_date: string;
+  end_date: string;
+  leave_type: string;
+}
+
+type AttendanceResult = AttendanceRecordById & { 
+  salaryPerDay?: number;
+  nurseName?: string;
+  nursePrevRegNo?: string;
+  nurseRegNo?: string;
+};
 
 export async function getNurseAttendanceRecordsByDate(
   nurseId: number,
@@ -1125,7 +999,7 @@ export async function getNurseAttendanceRecordsByDate(
   pageSize: number = 10
 ): Promise<{
   success: boolean;
-  data?: (AttendanceRecordById & { salaryPerDay?: number })[];
+  data?: AttendanceResult[];
   count?: number;
   totalPages?: number;
   currentPage?: number;
@@ -1134,24 +1008,58 @@ export async function getNurseAttendanceRecordsByDate(
   try {
     const { supabase } = await getAuthenticatedClient();
 
-    const { data: assignments, error: assignmentError } = await supabase
-      .from('nurse_client')
-      .select('id, shift_start_time, shift_end_time, start_date, end_date, salary_per_day')
-      .eq('nurse_id', nurseId)
-      .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
+    const [nurseResponse, assignmentsResponse, leavesResponse] = await Promise.all([
+      supabase
+        .from('nurses')
+        .select('full_name, nurse_prev_reg_no, nurse_reg_no')
+        .eq('nurse_id', nurseId)
+        .single(),
 
-    if (assignmentError) {
-      return { success: false, error: assignmentError.message };
-    }
-    if (!assignments || assignments.length === 0) {
+      supabase
+        .from('nurse_client')
+        .select('id, shift_start_time, shift_end_time, start_date, end_date, salary_per_day')
+        .eq('nurse_id', nurseId)
+        .or(`start_date.lte.${endDate},end_date.gte.${startDate}`)
+        .returns<AssignmentData[]>(),
+
+      supabase
+        .from('nurse_leave_requests')
+        .select('start_date, end_date, leave_type')
+        .eq('nurse_id', nurseId)
+        .eq('status', 'approved')
+        .or(`start_date.lte.${endDate},end_date.gte.${startDate}`)
+        .returns<LeaveData[]>()
+    ]);
+
+    if (assignmentsResponse.error) return { success: false, error: assignmentsResponse.error.message };
+    if (nurseResponse.error) return { success: false, error: nurseResponse.error.message };
+    if (leavesResponse.error) return { success: false, error: leavesResponse.error.message };
+
+    const assignments = assignmentsResponse.data || [];
+    const nurseDetails = nurseResponse.data;
+    const leaves = leavesResponse.data || [];
+
+    if (assignments.length === 0) {
       return { success: true, data: [], count: 0, totalPages: 0, currentPage: page };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dateAssignmentMap: Record<string, any> = {};
-    const allDates: string[] = [];
+    const assignmentIds = assignments.map(a => a.id);
+    const { data: attendanceData, error: attendanceError } = await supabase
+      .from('attendence_individual')
+      .select('id, date, start_time, end_time, total_hours, is_admin_action, location, assigned_id')
+      .in('assigned_id', assignmentIds)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .returns<AttendanceData[]>();
+
+    if (attendanceError) {
+      return { success: false, error: attendanceError.message };
+    }
+
+    const dateAssignmentMap: Record<string, AssignmentData> = {};
     const currentDate = new Date(startDate);
     const lastDate = new Date(endDate);
+    const allDates: string[] = [];
 
     while (currentDate <= lastDate) {
       const dateStr = currentDate.toISOString().split('T')[0];
@@ -1165,43 +1073,35 @@ export async function getNurseAttendanceRecordsByDate(
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    const assignmentIds = assignments.map(a => a.id);
-    const { data: attendanceData, error: attendanceError } = await supabase
-      .from('attendence_individual')
-      .select('id, date, start_time, end_time, total_hours, is_admin_action, location, assigned_id')
-      .in('assigned_id', assignmentIds)
-      .gte('date', startDate)
-      .lte('date', endDate);
+    const attendanceMap = new Map<string, AttendanceData>();
+    attendanceData?.forEach(record => {
+      attendanceMap.set(record.date, record);
+    });
 
-    if (attendanceError) {
-      return { success: false, error: attendanceError.message };
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const attendanceMap = new Map<string, any>();
-      attendanceData.forEach(record => {
-        attendanceMap.set(record.date, record);
-      });
-
-    const results: ((AttendanceRecordById & { salaryPerDay?: number }) | null)[] = await Promise.all(allDates.map(async date => {
+    const results = allDates.map((date): AttendanceResult | null => {
       const assignment = dateAssignmentMap[date];
-      if (!assignment) {
-        return null;
-      }
-      const record = attendanceMap.get(date);
+      if (!assignment) return null;
 
+      const record = attendanceMap.get(date);
       const shiftStartTime = assignment.shift_start_time || null;
       const shiftEndTime = assignment.shift_end_time || null;
-      const salaryPerDay = assignment.salary_per_day ?? null;
+      const salaryPerDay = assignment.salary_per_day ?? undefined;
+
+      const nurseInfo = {
+        nurseName: nurseDetails.full_name,
+        nursePrevRegNo: nurseDetails.nurse_prev_reg_no,
+        nurseRegNo: nurseDetails.nurse_reg_no,
+      };
 
       if (record) {
         let status = 'Absent';
         if (record.start_time) {
           if (assignment.shift_start_time) {
-            const scheduledStart = assignment.shift_start_time.split(':').map(Number);
-            const actualStart = record.start_time.split(':').map(Number);
-            const scheduledMinutes = scheduledStart[0] * 60 + scheduledStart[1];
-            const actualMinutes = actualStart[0] * 60 + actualStart[1];
+            const [schedH, schedM] = assignment.shift_start_time.split(':').map(Number);
+            const [actH, actM] = record.start_time.split(':').map(Number);
+            const scheduledMinutes = schedH * 60 + schedM;
+            const actualMinutes = actH * 60 + actM;
+            
             if (actualMinutes > scheduledMinutes + 15) {
               status = 'Late';
             } else {
@@ -1211,38 +1111,30 @@ export async function getNurseAttendanceRecordsByDate(
             status = record.end_time ? 'Present' : 'Checked In';
           }
         }
+
         return {
           id: record.id,
           date,
           checkIn: record.start_time || null,
           checkOut: record.end_time || null,
-          totalHours: calculateHoursWorked(
-            record.total_hours,
-            record.start_time,
-            record.end_time
-          ),
+          totalHours: calculateHoursWorked(record.total_hours, record.start_time, record.end_time),
           status,
           location: parseLocation(record.location),
           isAdminAction: !!record.is_admin_action,
-          notes: record.notes,
+          notes: record.notes ?? undefined,
           assignmentId: assignment.id,
           shiftStartTime,
           shiftEndTime,
-          salaryPerDay
+          salaryPerDay,
+          ...nurseInfo
         };
       } else {
         let status = 'Absent';
-        const { data: leaveData } = await supabase
-          .from('nurse_leave_requests')
-          .select('leave_type')
-          .eq('nurse_id', nurseId)
-          .eq('status', 'approved')
-          .lte('start_date', date)
-          .gte('end_date', date)
-          .maybeSingle();
-
-        if (leaveData) {
-          status = `On Leave (${formatLeaveType(leaveData.leave_type)})`;
+        
+        const activeLeave = leaves.find(l => l.start_date <= date && l.end_date >= date);
+        
+        if (activeLeave) {
+          status = `On Leave (${formatLeaveType(activeLeave.leave_type)})`;
         }
 
         return {
@@ -1257,11 +1149,14 @@ export async function getNurseAttendanceRecordsByDate(
           assignmentId: assignment.id,
           shiftStartTime,
           shiftEndTime,
-          salaryPerDay
+          salaryPerDay,
+          ...nurseInfo
         };
       }
-    }));
-    const filteredResults = results.filter(Boolean) as (AttendanceRecordById & { salaryPerDay?: number })[];
+    });
+
+    const filteredResults = results.filter((item): item is AttendanceResult => item !== null);
+    
     filteredResults.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const totalRecords = filteredResults.length;
@@ -1275,6 +1170,7 @@ export async function getNurseAttendanceRecordsByDate(
       totalPages,
       currentPage: page
     };
+
   } catch (error) {
     logger.error('Failed to fetch nurse attendance records:', error);
     return {

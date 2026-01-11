@@ -25,7 +25,6 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
 
   const selectedRequest = housemaidRequests[0];
 
-  // Always show copy button
   const CopyLinkButton = (
     <button
       className={`px-4 py-2 rounded flex items-center gap-1 ${
@@ -34,11 +33,12 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
       }`}
       onClick={() => {
-        navigator.clipboard.writeText(`/home-maid-preferences/${clientId}`);
+        const fullLink = `${window.location.origin}/home-maid-preferences/${clientId}`;
+        navigator.clipboard.writeText(fullLink);
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 3000);
       }}
-      title="Copy link to open form"
+      title="Copy full link to open form"
     >
       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
         <path d="M15 7h2a5 5 0 0 1 0 10h-2M9 17H7a5 5 0 0 1 0-10h2" />
@@ -48,7 +48,6 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
     </button>
   );
 
-  // New: External link button
   const ExternalLinkButton = (
     <a
       href={`/home-maid-preferences/${clientId}`}

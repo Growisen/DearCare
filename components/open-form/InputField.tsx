@@ -33,7 +33,7 @@ const InputField = memo(({
       type={type}
       id={id}
       name={id}
-      className={`w-full border py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent ${
+      className={`w-full border py-2 px-3 text-gray-700 focus:outline-none focus:border-slate-300 ${
         error ? 'border-red-500' : 'border-slate-200'
       }`}
       placeholder={placeholder}

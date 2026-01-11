@@ -35,6 +35,7 @@ const LineItemInput: React.FC<LineItemInputProps> = ({
           onChange={(e) => onUpdate(item.id, 'amount', e.target.value)}
           placeholder="Amount (₹)"
           className="w-[140px] no-spinner px-3 py-2 border border-slate-200 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+          onWheel={e => e.currentTarget.blur()}
         />
         <input
           type="number"
@@ -44,6 +45,7 @@ const LineItemInput: React.FC<LineItemInputProps> = ({
           min="0"
           max="100"
           className="w-[120px] no-spinner px-3 py-2 border border-slate-200 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+          onWheel={e => e.currentTarget.blur()}
         />
         <input
           type="number"
@@ -53,6 +55,7 @@ const LineItemInput: React.FC<LineItemInputProps> = ({
           min="0"
           max="100"
           className="w-[160px] no-spinner px-3 py-2 border border-slate-200 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+          onWheel={e => e.currentTarget.blur()}
         />
         <button
           onClick={() => onRemove(item.id)}

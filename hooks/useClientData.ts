@@ -16,8 +16,10 @@ export function useClientData() {
   const [createdAt, setCreatedAt] = useState<Date | null>(null)
 
   const [currentPage, setCurrentPage] = useState(1)
-
   const [pageSize, setPageSize] = useState(10)
+
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
   const getClientCategory = (): ClientCategory | "all" => {
     if (!organization) return "all";
@@ -50,22 +52,16 @@ export function useClientData() {
     refetchInterval: 1000 * 60 * 10,
   });
 
+  useEffect(() => {
+    if (data?.pagination) {
+      setTotalPages(data.pagination.totalPages || 1);
+      setTotalCount(data.pagination.totalCount || 0);
+    }
+  }, [data]);
+
   const invalidateClientCache = () => {
     queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
-
-  const clients = data?.success && data?.clients 
-    ? data.clients.map(client => ({
-        ...client,
-        service: client.service || "Not specified",
-        email: client.email || "No email provided",
-        phone: client.phone || "No phone provided",
-        status: client.status as ClientStatus
-      }))
-    : [];
-
-  const totalPages = data?.pagination?.totalPages || 1;
-  const totalCount = data?.pagination?.totalCount || 0;
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -108,6 +104,16 @@ export function useClientData() {
   }
 
   const refreshData = () => refetch();
+
+  const clients = data?.success && data?.clients 
+    ? data.clients.map(client => ({
+        ...client,
+        service: client.service || "Not specified",
+        email: client.email || "No email provided",
+        phone: client.phone || "No phone provided",
+        status: client.status as ClientStatus
+      }))
+    : [];
 
   return {
     clients,

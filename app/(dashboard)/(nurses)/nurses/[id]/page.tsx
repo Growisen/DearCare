@@ -2,8 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Loader from '@/components/Loader'
-import { fetchNurseAssignments, fetchNurseDetailsmain, NurseAssignmentWithClient, SimplifiedNurseDetails, deleteNurse } from '@/app/actions/staff-management/add-nurse';
+import { 
+  fetchNurseAssignments, 
+  fetchNurseDetailsmain, 
+  NurseAssignmentWithClient, 
+  SimplifiedNurseDetails, 
+  deleteNurse 
+} from '@/app/actions/staff-management/add-nurse';
 import ProfileHeader from '@/components/nurseProfile/ProfileHeader';
 import TabNavigation from '@/components/nurseProfile/TabNavigation';
 import ProfileContent from '@/components/nurseProfile/ProfileContent';
@@ -103,7 +108,10 @@ const NurseProfilePage: React.FC = () => {
             {activeTab === 'profile' ? (
               <ProfileContent nurse={nurse} calculateAge={calculateAge} />
             ) : activeTab === 'assignments' ? (
-              assignmentsLoading ? <Loader /> : <AssignmentsContent assignments={assignments} />
+              <AssignmentsContent 
+                assignments={assignments} 
+                loading={assignmentsLoading} 
+              />
             ) : activeTab === 'analytics' ? (
               <AnalyticsContent nurseId={Number(params.id)} />
             ) : activeTab === 'salaryDetails' ? (

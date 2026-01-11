@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { getAllNurseAssignments, NurseAssignmentData } from '@/app/actions/scheduling/shift-schedule-actions';
+import { getAllNurseAssignments, NurseAssignmentData, fetchAssignmentStats } from '@/app/actions/scheduling/shift-schedule-actions';
 import useOrgStore from '@/app/stores/UseOrgStore';
 
 function convertToCSV(assignments: NurseAssignmentData[]): string {
@@ -82,7 +82,9 @@ export function useAssignmentData() {
   const [pageSize, setPageSize] = useState(10)
   const [isExporting, setIsExporting] = useState(false)
 
-  // Map organization from store to category filter
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   const getCategoryFilter = (): string => {
     if (!organization) return "all";
     if (organization === "TataHomeNursing") return "Tata HomeNursing";
@@ -120,9 +122,32 @@ export function useAssignmentData() {
     refetchInterval: 1000 * 60 * 10,
   });
 
+  useEffect(() => {
+    if (data?.count !== undefined) {
+      setTotalPages(Math.max(1, Math.ceil(data.count / pageSize)));
+      setTotalCount(data.count);
+    }
+  }, [data, pageSize]);
+
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useQuery({
+    queryKey: ['assignmentStats', new Date().toISOString().split('T')[0], categoryFilter],
+    queryFn: async () => {
+      const today = new Date();
+      const result = await fetchAssignmentStats({ date: dateFilter || today });
+      if (!result) throw new Error('Failed to fetch assignment stats');
+      return result;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: isFiltersLoaded,
+    refetchOnWindowFocus: true,
+    refetchInterval: false,
+  });
+
   const assignments = data?.success ? (data?.data || []) : [];
-  const totalPages = data?.count !== undefined ? Math.max(1, Math.ceil(data.count / pageSize)) : 1;
-  const totalCount = data?.count || 0;
   
   const error = queryError 
     ? 'Unexpected error occurred while fetching assignments' 
@@ -232,6 +257,9 @@ export function useAssignmentData() {
       refreshData: () => {},
       handleExport: () => {},
       invalidateAssignmentsCache: () => {},
+      stats: null,
+      statsLoading: true,
+      statsError: null,
     };
   }
 
@@ -260,6 +288,9 @@ export function useAssignmentData() {
     handleResetFilters,
     refreshData,
     handleExport,
-    invalidateAssignmentsCache
+    invalidateAssignmentsCache,
+    stats,
+    statsLoading,
+    statsError: statsError ? (statsError instanceof Error ? statsError.message : String(statsError)) : null,
   }
 }

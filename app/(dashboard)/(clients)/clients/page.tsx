@@ -17,8 +17,6 @@ import { logger } from "@/utils/logger"
 export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [showAddClient, setShowAddClient] = useState(false)
-  
-
   const { 
     clients,
     isLoading,
@@ -87,19 +85,13 @@ export default function ClientsPage() {
           createdAt={createdAt ? createdAt.toISOString().split('T')[0] : ""}
           setCreatedAt={(date: string) => setCreatedAt(date ? new Date(date) : null)}
         />
-
-        {/* <ClientFilters
-          searchInput={searchInput}
-          setSearchInput={setSearchInput}
-          selectedStatus={selectedStatus}
-          handleStatusChange={handleStatusChange}
-          handleSearch={handleSearch}
-          handleResetFilters={handleResetFilters}
-        /> */}
-
         <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
           {isLoading ? (
-            <LoadingState message="Loading clients..." />
+            <LoadingState 
+              message="Loading clients..." 
+              description="Please wait while we fetch the clients data"
+              className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+            />
           ) : error ? (
             <ErrorState 
               error={error} 
@@ -112,25 +104,23 @@ export default function ClientsPage() {
               handleResetFilters={handleResetFilters}
             />
           ) : (
-            <>
-              <ClientTable 
-                clients={clients} 
-                onReviewDetails={setSelectedClient} 
-              />
-              
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
-                pageSize={pageSize}
-                setPageSize={handlePageSizeChange}
-                itemsLength={clients.length}
-                onPageChange={handlePageChange}
-                onPreviousPage={handlePreviousPage}
-                onNextPage={handleNextPage}
-              />
-            </>
+            <ClientTable 
+              clients={clients} 
+              onReviewDetails={setSelectedClient} 
+            />
           )}
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            setPageSize={handlePageSizeChange}
+            itemsLength={clients.length}
+            onPageChange={handlePageChange}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            disabled={isLoading}
+          />
         </div>
       </div>
 

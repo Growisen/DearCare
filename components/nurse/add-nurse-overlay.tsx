@@ -180,7 +180,7 @@ const [referenceData, setReferenceData] = useState<NurseReferenceData>({
   };
 
 return (
-  <div className="fixed inset-0 bg-gray-900/40 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200">
     <div className="bg-white rounded-sm w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden shadow-xl">
 
       <div className="shrink-0 border-b border-slate-200 px-6 py-5 flex items-center justify-between bg-gray-50">
@@ -198,7 +198,7 @@ return (
         <div className="flex items-center justify-between relative">
           <div className="absolute top-3 sm:top-4 left-0 right-0 h-0.5 bg-gray-200 hidden sm:block">
             <div 
-              className="h-full bg-gray-400 transition-all duration-300"
+              className="h-full bg-blue-400 transition-all duration-300"
               style={{ width: `${(currentStep / (FORM_CONFIG.steps.length - 1)) * 100}%` }}
             />
           </div>
@@ -207,9 +207,9 @@ return (
             <div key={index} className="flex flex-col items-center relative z-10">
               <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-medium text-xs sm:text-sm transition-colors ${
                 index < currentStep 
-                  ? 'bg-gray-600 text-white' 
+                  ? 'bg-blue-600 text-white' 
                   : index === currentStep
-                  ? 'bg-gray-700 text-white ring-2 sm:ring-4 ring-gray-200'
+                  ? 'bg-blue-700 text-white ring-2 sm:ring-4 ring-blue-200'
                   : 'bg-white text-gray-400 border-2 border-slate-200'
               }`}>
                 {index < currentStep ? '✓' : index + 1}
@@ -239,7 +239,8 @@ return (
         <button
           onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
-          className="px-5 py-2.5 text-sm font-medium border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-1.5 text-sm font-medium border border-slate-200 rounded-sm text-gray-700 hover:bg-gray-100
+           disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Previous
         </button>
@@ -251,7 +252,8 @@ return (
         <button
           onClick={() => currentStep === FORM_CONFIG.steps.length - 1 ? handleSubmit() : handleNext()}
           disabled={!canProceed()}
-          className="px-5 py-2.5 text-sm font-medium bg-gray-700 text-white rounded-sm hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-1.5 text-sm font-medium bg-blue-700 text-white rounded-sm hover:bg-blue-800
+           disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {currentStep === FORM_CONFIG.steps.length - 1 ? 'Submit' : 'Next'}
         </button>

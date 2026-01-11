@@ -77,7 +77,11 @@ export default function StaffPage() {
 
         <div className="bg-white rounded-sm shadow-none overflow-hidden border border-slate-200">
           {isLoading ? (
-            <LoadingState message="Loading staff members..." />
+            <LoadingState 
+              message="Loading staff members..." 
+              description="Please wait while we fetch the staff data"
+              className="xl:h-[770px] lg:h-[670px] md:h-[570px] sm:h-[470px] h-[370px]"
+            />
           ) : error ? (
             <ErrorState 
               error={error} 
@@ -90,25 +94,23 @@ export default function StaffPage() {
               handleResetFilters={handleResetFilters}
             />
           ) : (
-            <>
-              <StaffTable 
-                staff={staff} 
-                onReviewDetails={setSelectedStaff} 
-              />
-              
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
-                pageSize={pageSize}
-                setPageSize={handlePageSizeChange}
-                itemsLength={staff.length}
-                onPageChange={handlePageChange}
-                onPreviousPage={handlePreviousPage}
-                onNextPage={handleNextPage}
-              />
-            </>
+            <StaffTable 
+              staff={staff} 
+              onReviewDetails={setSelectedStaff} 
+            />
           )}
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            setPageSize={handlePageSizeChange}
+            itemsLength={staff.length}
+            onPageChange={handlePageChange}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            disabled={isLoading}
+          />
         </div>
       </div>
 

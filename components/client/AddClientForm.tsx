@@ -54,7 +54,7 @@ interface ClientFormComponentProps {
   const baseInputStyles = `
     w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
     placeholder:text-gray-400
-    focus:border-slate-200 focus:outline-none focus:ring-0 
+    focus:border-slate-300 focus:outline-none focus:ring-0 
     transition-colors duration-200
   `;
   
@@ -234,8 +234,8 @@ export const ClientFormComponent: React.FC<ClientFormComponentProps> = ({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-sm shadow-none hover:bg-blue-700 focus:outline-none
-           focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
+          className="px-5 py-1.5 bg-blue-700 text-white rounded-sm shadow-none hover:bg-blue-800 focus:outline-none
+           transition-colors duration-200 font-medium"
         >
           {isSubmitting ? 'Submitting...' : submitButtonText}
         </button>
