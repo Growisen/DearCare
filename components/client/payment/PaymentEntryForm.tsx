@@ -89,8 +89,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g., Monthly Retainer - October"
-              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none 
-              focus:ring-1 focus:ring-gray-400 focus:border-transparent"
+              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none focus:border-slate-300"
             />
             <p className="text-[11px] text-gray-500 mt-1">
               A short, recognizable name for this transaction.
@@ -105,8 +104,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               value={modeOfPayment}
               onChange={(e) => setModeOfPayment(e.target.value)}
               placeholder="e.g., UPI, Bank Transfer"
-              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none 
-              focus:ring-1 focus:ring-gray-400 focus:border-transparent"
+              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none focus:border-slate-300"
             />
              <p className="text-[11px] text-gray-500 mt-1">
               The method used for this payment.
@@ -128,8 +126,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
                 required
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded
-                 focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
+                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded focus:outline-none focus:border-slate-300 bg-white"
               />
             </div>
             <div>
@@ -141,8 +138,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
                 required
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded
-                 focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
+                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded focus:outline-none focus:border-slate-300 bg-white"
               />
             </div>
             <div>
@@ -152,8 +148,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               <select
                 value={groupShowToClient ? 'yes' : 'no'}
                 onChange={(e) => setGroupShowToClient(e.target.value === 'yes')}
-                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded
-                 bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                className="w-full text-gray-700 text-sm px-3 py-1.5 border border-slate-200 rounded bg-white focus:outline-none focus:border-slate-300"
               >
                 <option value="yes">Visible to Client</option>
                 <option value="no">Hidden (Internal Only)</option>
@@ -205,8 +200,7 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
             onChange={(e) => setGroupNotes(e.target.value)}
             placeholder="e.g. Client requested split payment..."
             rows={2}
-            className="w-full text-sm px-3 py-2 border border-slate-200 rounded focus:outline-none 
-            focus:ring-1 focus:ring-gray-400 focus:border-transparent"
+            className="w-full text-sm px-3 py-2 border border-slate-200 rounded focus:outline-none focus:border-slate-300"
           />
           <p className="text-[11px] text-gray-500 mt-1">
             These notes are for your record keeping and usually not shown on simple invoices.
@@ -216,15 +210,15 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
         <div className="flex justify-end items-center gap-3 pt-2 border-t border-slate-200">
           <button
             onClick={onCancel}
-            className="text-sm text-gray-600 hover:text-gray-800 px-4 py-2 transition-colors"
+            className="text-sm text-gray-600 hover:text-gray-800 px-4 py-2 hover:bg-gray-100 border border-slate-200 transition-colors"
           >
             Discard
           </button>
           <button
             onClick={onSave}
             disabled={loading}
-            className="bg-gray-900 hover:bg-black text-white text-sm font-medium py-2 px-6
-             rounded shadow-none transition-colors disabled:opacity-70"
+            className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium py-2 px-6
+             rounded-sm shadow-none transition-colors disabled:opacity-70"
           >
             {isSaving ? "Saving..." : "Save Entry"}
           </button>
