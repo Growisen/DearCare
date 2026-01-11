@@ -3,6 +3,7 @@ import { EntryGroup } from "@/types/paymentDetails.types";
 import ModalPortal from "@/components/ui/ModalPortal";
 import { updateClientPaymentGroup } from "@/app/actions/clients/client-payment-records";
 import { toast } from "sonner";
+import { X, ChevronDown } from "lucide-react";
 
 interface ExtendedEntryGroup extends EntryGroup {
   startDate?: string;
@@ -70,34 +71,20 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
   return (
     <ModalPortal>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4"
+        className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200"
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-sm shadow-2xl w-full max-w-lg overflow-hidden transform transition-all ring-1 ring-black/5"
+          className="bg-white rounded-sm w-full max-w-2xl overflow-hidden transform transition-all ring-1 ring-black/5"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
             <h2 className="text-lg font-semibold text-slate-800">Edit Entry Group</h2>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-sm hover:bg-slate-100
-                focus:outline-none focus:ring-1 focus:ring-slate-300"
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-sm hover:bg-slate-100"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="h-5 w-5" />
             </button>
           </div>
 
@@ -110,8 +97,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                 type="text"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 
-                placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-gray-400
+                className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-slate-900 
+                placeholder:text-slate-400 focus:outline-none focus:border-slate-300
                   transition-shadow sm:text-sm shadow-none"
                 placeholder="e.g. Monthly Subscriptions"
               />
@@ -126,8 +113,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 focus:outline-none 
-                  focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-none"
+                  className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-slate-900 focus:outline-none 
+                  focus:border-slate-300 sm:text-sm shadow-none"
                 />
               </div>
               <div>
@@ -139,8 +126,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                   value={endDate}
                   min={startDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 focus:outline-none
-                   focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-none"
+                  className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-slate-900 focus:outline-none
+                   focus:border-slate-300 sm:text-sm shadow-none"
                 />
               </div>
             </div>
@@ -153,16 +140,14 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                 <select
                   value={showToClient ? 'yes' : 'no'}
                   onChange={(e) => setShowToClient(e.target.value === 'yes')}
-                  className="w-full appearance-none border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 
-                  bg-white focus:outline-none focus:ring-1 focus:ring-gray-400 sm:text-sm shadow-none cursor-pointer"
+                  className="w-full appearance-none border border-slate-200 rounded-sm px-3 py-2.5 text-slate-900 
+                  bg-white focus:outline-none focus:border-slate-300 sm:text-sm shadow-none cursor-pointer"
                 >
                   <option value="yes">Visible to Client</option>
                   <option value="no">Hidden (Internal Only)</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronDown className="h-4 w-4" />
                 </div>
               </div>
             </div>
@@ -175,8 +160,8 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full border border-slate-300 rounded-sm px-3 py-2.5 text-slate-900 placeholder:text-slate-400 
-                focus:outline-none focus:ring-1 focus:ring-gray-400 transition-shadow sm:text-sm shadow-none resize-none"
+                className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-slate-900 placeholder:text-slate-400 
+                focus:outline-none focus:border-slate-300 transition-shadow sm:text-sm shadow-none resize-none"
                 placeholder="Add any additional details here..."
               />
             </div>
@@ -185,15 +170,15 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-sm
-                hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-300 transition-all"
+              className="px-5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-sm
+                hover:bg-slate-100 hover:text-slate-900 transition-all"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-sm hover:bg-blue-700 shadow-none
-                hover:shadow focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 transition-all"
+              className="px-5 py-2 text-sm font-medium text-white bg-blue-700 rounded-sm hover:bg-blue-800 shadow-none
+                hover:shadow focus:outline-none focus:border-slate-300 transition-all"
             >
               Save Changes
             </button>

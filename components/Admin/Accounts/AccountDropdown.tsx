@@ -1,8 +1,8 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { User, UserCircle, LogOut, AlertCircle, Loader2 } from "lucide-react"
+import { User, UserCircle, LogOut } from "lucide-react"
 import { useAuth } from '@/contexts/AuthContext'
-import ModalPortal from '@/components/ui/ModalPortal'
+import Modal from '@/components/ui/Modal'
 import { useQueryClient } from "@tanstack/react-query"
 
 export default function AccountDropdown() {
@@ -75,13 +75,6 @@ export default function AccountDropdown() {
             </a>
           </div>
           
-          {/* <div className="py-1 border-t border-slate-200">
-            <p className="px-4 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">Security</p>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-              <Key className="w-4 h-4 text-gray-500" />
-              <span>Reset Password</span>
-            </button>
-          </div> */}
           
           <div className="border-t border-slate-200 pt-1 mt-1">
             <button 
@@ -95,49 +88,16 @@ export default function AccountDropdown() {
         </div>
       )}
 
-      {/* Confirmation Modal with Portal */}
-      {showConfirmModal && (
-        <ModalPortal>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-            <div 
-              className="bg-white rounded-sm shadow-lg max-w-md w-full p-6"
-              style={{ animation: 'fadeIn 0.2s ease-out' }}
-            >
-              <div className="flex items-center gap-3 text-amber-500 mb-4">
-                <AlertCircle className="w-6 h-6" />
-                <h3 className="text-lg font-medium">Sign Out Confirmation</h3>
-              </div>
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to sign out? You will need to log in again to access your account.
-              </p>
-              <div className="flex justify-end gap-3">
-                {!isSigningOut && (
-                  <button 
-                    onClick={cancelSignOut}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-sm"
-                  >
-                    Cancel
-                  </button>
-                )}
-                <button 
-                  onClick={confirmSignOut}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-sm flex items-center justify-center min-w-[80px]"
-                  disabled={isSigningOut}
-                >
-                  {isSigningOut ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      <span>Signing out...</span>
-                    </>
-                  ) : (
-                    <span>Sign Out</span>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
+      <Modal
+        open={showConfirmModal}
+        onClose={isSigningOut ? () => {} : cancelSignOut}
+        onConfirm={confirmSignOut}
+        variant="delete"
+        title="Sign Out Confirmation"
+        description="Are you sure you want to sign out? You will need to log in again to access your account."
+        confirmText={isSigningOut ? "Signing out..." : "Sign Out"}
+        cancelText="Cancel"
+      />
     </div>
   );
 }
