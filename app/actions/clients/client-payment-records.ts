@@ -383,7 +383,7 @@ export async function fetchPaymentOverview({
 
 export async function fetchClientPaymentAggregates({
   startDate,
-  endDate = startDate,
+  endDate,
   searchText,
 }: {
   startDate?: string;
@@ -391,17 +391,26 @@ export async function fetchClientPaymentAggregates({
   searchText?: string;
 } = {}) {
   try {
+    let computedEndDate = endDate;
+    if (startDate && !endDate) {
+      const end = new Date(startDate);
+      end.setDate(end.getDate() + 1);
+      computedEndDate = end.toISOString().split('T')[0];
+    }
+
     const { supabase } = await getAuthenticatedClient();
     const { data: { user } } = await supabase.auth.getUser();
     const organization = user?.user_metadata?.organization;
 
     const { clientsOrg } = getOrgMappings(organization);
 
+    console.log('Fetching aggregates with:', { clientsOrg, startDate, computedEndDate, searchText });
+
     const { data, error } = await supabase
       .rpc('get_client_payment_aggregates', {
         filter_client_category: clientsOrg,
         filter_start_date: startDate ?? null,
-        filter_end_date: endDate ?? null,
+        filter_end_date: computedEndDate ?? null,
         search_text: searchText ?? null
       });
 
@@ -427,7 +436,6 @@ export async function fetchClientPaymentAggregates({
     };
   }
 }
-
 export interface UpdatePaymentGroupInput {
   paymentRecordId: number | string;
   groupName?: string;
