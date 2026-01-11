@@ -80,7 +80,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
   
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center overflow-y-auto p-4"
+      className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200"
       onClick={handleOutsideClick}
     >
       <div 

@@ -38,7 +38,7 @@ interface NurseListModalProps {
   isLoading: boolean;
 }
 
-const INPUT_BASE_CLASS = "w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-slate-400 transition-colors";
+const INPUT_BASE_CLASS = "w-full border border-slate-200 rounded-sm py-2 px-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-slate-300 transition-colors";
 
 export default function NurseListModal({
   isOpen,
@@ -140,7 +140,7 @@ export default function NurseListModal({
   const endRecord = Math.min(startRecord + nurses.length - 1, totalNurses);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2">
+    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200 p-1 sm:p-2">
       <div className="bg-white w-full max-w-6xl max-h-[95vh] overflow-y-auto relative shadow-xl rounded-sm">
         <div className="sticky top-0 bg-white z-10 border-b border-slate-200">
           <div className="flex items-center justify-between p-4">

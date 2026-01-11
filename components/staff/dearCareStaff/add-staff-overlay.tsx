@@ -109,7 +109,7 @@ export function AddStaffOverlay({ onClose, onAdd }: AddStaffOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200 p-4 overflow-y-auto">
       <div className="bg-white shadow-lg w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-sm">
         <div className="flex items-center justify-between p-4 border-b border-slate-200 rounded-sm">
           <h2 className="text-xl font-semibold text-gray-800">Add New Staff Member</h2>

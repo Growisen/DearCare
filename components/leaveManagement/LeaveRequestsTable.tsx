@@ -2,12 +2,10 @@ import React, { memo } from 'react'
 import { format, parseISO } from 'date-fns'
 import { Eye, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { LeaveRequest } from '@/types/leave.types'
-import Loader from '../Loader'
 import { formatName } from '@/utils/formatters'
 
 type LeaveRequestsTableProps = {
   leaveRequests: LeaveRequest[]
-  isLoading: boolean
   processingRequestIds: Set<string>
   onView: (request: LeaveRequest) => void
 }
@@ -130,7 +128,6 @@ LeaveRequestMobileCard.displayName = 'LeaveRequestMobileCard';
 
 export function LeaveRequestsTable({
   leaveRequests,
-  isLoading,
   processingRequestIds,
   onView,
 }: LeaveRequestsTableProps) {
@@ -150,15 +147,8 @@ export function LeaveRequestsTable({
     default: Eye
   }
 
-  if (isLoading) {
-    return (
-      <Loader message="Loading Leave Requests..."/>
-    )
-  }
-
   return (
     <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
-      {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-100 border-b border-slate-200">
@@ -195,8 +185,6 @@ export function LeaveRequestsTable({
           </tbody>
         </table>
       </div>
-
-      {/* Mobile Cards */}
       <div className="sm:hidden bg-white">
         {leaveRequests.length > 0 ? (
           leaveRequests.map((request) => (

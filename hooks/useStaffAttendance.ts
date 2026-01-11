@@ -4,6 +4,7 @@ import useOrgStore from '@/app/stores/UseOrgStore';
 
 export const useStaffAttendance = () => {
   const { organization } = useOrgStore();
+  
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [filteredData, setFilteredData] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -11,15 +12,14 @@ export const useStaffAttendance = () => {
   
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Map organization from store to category (database enum format)
+  const [attendanceStatus, setAttendanceStatus] = useState<'present' | 'absent' | 'all'>('all');   
+
   const getCategoryFilter = (): string => {
     if (!organization) return "";
     if (organization === "TataHomeNursing") return "Tata_Homenursing";
     if (organization === "DearCare") return "Dearcare_Llp";
     return "";
   };
-
   const selectedCategory = getCategoryFilter();
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,31 +33,28 @@ export const useStaffAttendance = () => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
     }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
   useEffect(() => {
     loadAttendanceData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, currentPage, pageSize, selectedCategory, debouncedSearchTerm]);
+  }, [selectedDate, currentPage, pageSize, selectedCategory, debouncedSearchTerm, attendanceStatus]);
 
   const loadAttendanceData = async () => {
     setLoading(true);
+    
     try {
       const date = new Date(selectedDate);
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const formattedDate = date.toLocaleDateString('en-CA');
+
       const result = await fetchStaffAttendance(
         formattedDate,
         currentPage,
         pageSize,
-        true,
-        selectedCategory,
+        attendanceStatus,
         debouncedSearchTerm
       );
-  
+      
       if (result.success) {
         setAttendanceData(result.data);
         setFilteredData(result.data);
@@ -66,18 +63,15 @@ export const useStaffAttendance = () => {
           setTotalPages(result.pagination.totalPages);
           setTotalCount(result.pagination.totalRecords); 
         }
-        
         setError(null);
       } else {
-        setError(result.error || 'Failed to load attendance data');
-        setAttendanceData([]);
-        setFilteredData([]);
-        setTotalCount(0);
+        throw new Error(result.error);
       }
-    } catch {
-      setError('An error occurred while fetching attendance data');
+    } catch{
+      setError('Failed to load attendance data');
       setAttendanceData([]);
       setFilteredData([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -86,16 +80,42 @@ export const useStaffAttendance = () => {
   const handleSearchChange = (newSearchTerm: string) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1);
+    setAttendanceData([]);
+    setFilteredData([]);
+    setLoading(true);
   };
   
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAttendanceData([]);
+    setFilteredData([]);
+    setLoading(true); 
+    
     setSelectedDate(e.target.value);
     setCurrentPage(1);
   };
 
+  const handleStatusChange = (status: 'present' | 'absent' | 'all') => {
+    setAttendanceData([]); 
+    setFilteredData([]);
+    setLoading(true);
+
+    setCurrentPage(1);
+    setAttendanceStatus(status);
+  };
+
+  const handleSearch = () => {
+    setAttendanceData([]); 
+    setFilteredData([]);
+    setCurrentPage(1);
+    setSearchTerm(debouncedSearchTerm);
+  }
+
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setCurrentPage(1);
+    setAttendanceData([]);
+    setFilteredData([]);
+    setLoading(true);
   };
 
   const handlePageChange = (page: number) => {
@@ -103,19 +123,18 @@ export const useStaffAttendance = () => {
   };
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const handleResetFilters = () => {
+    setAttendanceData([]); 
+    setLoading(true);
     setSearchTerm('');
+    setAttendanceStatus('all');
     setCurrentPage(1);
   };
 
@@ -123,7 +142,7 @@ export const useStaffAttendance = () => {
     setIsExporting(true);
     try {
       const date = new Date(selectedDate);
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const formattedDate = date.toLocaleDateString('en-CA');
 
       const batchSize = 500;
       let allRecords: AttendanceRecord[] = [];
@@ -135,13 +154,11 @@ export const useStaffAttendance = () => {
           formattedDate,
           exportPage,
           batchSize,
-          true,
-          selectedCategory
+          attendanceStatus,
+          searchTerm
         );
         
-        if (!batchResult.success) {
-          throw new Error(batchResult.error || 'Failed to export data');
-        }
+        if (!batchResult.success) throw new Error(batchResult.error);
         
         allRecords = [...allRecords, ...batchResult.data];
         
@@ -153,44 +170,37 @@ export const useStaffAttendance = () => {
           exportPage++;
         }
       }
-      
-      const filteredRecords = searchTerm ? 
-        allRecords.filter(record => record.nurseName.toLowerCase().includes(searchTerm.toLowerCase())) : 
-        allRecords;
-      
+
+      let finalRecords = allRecords;
+      if (attendanceStatus !== 'all') {
+         finalRecords = allRecords.filter(r => 
+            attendanceStatus === 'present' ? r.status === 'present' : r.status !== 'present'
+         );
+      }
+
       const headers = ["Nurse Name", "Date", "Scheduled Start", "Scheduled End", 
                        "Actual Start", "Actual End", "Hours Worked", "Location", "Status"];
       
       const csvRows = [headers.join(',')];
       
-      const chunkSize = 100;
-      for (let i = 0; i < filteredRecords.length; i += chunkSize) {
-        const chunk = filteredRecords.slice(i, i + chunkSize);
-        
-        chunk.forEach(record => {
-          let locationValue = 'N/A';
-          if (record.location) {
-            const [lat, lng] = record.location.split(',').map(coord => parseFloat(coord.trim()));
-            if (!isNaN(lat) && !isNaN(lng)) {
-              locationValue = `https://www.google.com/maps?q=${lat},${lng}`;
-            } else {
-              locationValue = record.location;
-            }
-          }
-          
-          csvRows.push([
-            `"${record.nurseName}"`,
-            `"${record.date}"`,
-            `"${record.scheduledStart || 'N/A'}"`,
-            `"${record.scheduledEnd || 'N/A'}"`,
-            `"${record.shiftStart || 'N/A'}"`,
-            `"${record.shiftEnd || 'N/A'}"`,
-            `"${record.hoursWorked || 'N/A'}"`,
-            `"${locationValue}"`,
-            `"${record.status}"`
-          ].join(','));
-        });
-      }
+      finalRecords.forEach(record => {
+         let locationValue = 'N/A';
+         if (record.location) {
+            locationValue = record.location.replace(/,/g, ';'); 
+         }
+
+         csvRows.push([
+           `"${record.nurseName}"`,
+           `"${record.date}"`,
+           `"${record.scheduledStart || 'N/A'}"`,
+           `"${record.scheduledEnd || 'N/A'}"`,
+           `"${record.shiftStart || 'N/A'}"`,
+           `"${record.shiftEnd || 'N/A'}"`,
+           `"${record.hoursWorked || 'N/A'}"`,
+           `"${locationValue}"`,
+           `"${record.status}"`
+         ].join(','));
+      });
       
       const csvContent = csvRows.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -201,10 +211,10 @@ export const useStaffAttendance = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
       
     } catch (error) {
-      console.error('Error exporting data:', error);
+      console.error(error);
+      alert('Failed to export data');
     } finally {
       setIsExporting(false);
     }
@@ -223,6 +233,7 @@ export const useStaffAttendance = () => {
     totalPages,
     totalCount,
     isExporting,
+    attendanceStatus,
 
     loadAttendanceData,
     handleSearchChange,
@@ -233,5 +244,7 @@ export const useStaffAttendance = () => {
     handleNextPage,
     handleResetFilters,
     handleExport,
+    setAttendanceStatus: handleStatusChange, 
+    handleSearch,
   };
 };

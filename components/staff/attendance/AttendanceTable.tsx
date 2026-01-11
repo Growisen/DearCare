@@ -68,8 +68,8 @@ const AttendanceTableRow = memo(({ record }: {
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          record.status === 'Present' ? 'bg-green-100 text-green-800 border border-green-200' : 
-          record.status === 'Late' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 
+          record.status === 'present' ? 'bg-green-100 text-green-800 border border-green-200' : 
+          record.status === 'late' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 
           'bg-red-100 text-red-800 border border-red-200'
         }`}>
           {record.status}
@@ -136,9 +136,9 @@ AttendanceMobileCard.displayName = 'AttendanceMobileCard';
 export const AttendanceTable = memo(function AttendanceTable({ 
   attendanceData, 
 }: AttendanceTableProps) {
+  console.log('Rendering AttendanceTable with data:', attendanceData);
   return (
     <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
-      {/* Desktop Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-100 border-b border-slate-200">
@@ -171,7 +171,6 @@ export const AttendanceTable = memo(function AttendanceTable({
         </table>
       </div>
 
-      {/* Mobile Cards */}
       <div className="sm:hidden bg-white">
         {attendanceData.length > 0 ? (
           attendanceData.map((record) => (

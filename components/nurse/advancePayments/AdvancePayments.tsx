@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
-import Table, { TableColumn } from "../../common/Table";
-import { IoAdd, IoTrash, IoDocumentTextOutline, IoTimeOutline } from 'react-icons/io5';
+import { IoAdd } from 'react-icons/io5';
 import CreateAdvancePaymentModal from "./CreateAdvancePaymentModal";
 import { 
-  fetchAdvancePayments,
+  fetchAdvancePayments, 
   deleteAdvancePayment, 
-  approveAdvancePayment,
-  deleteDeductionFromPayment,
- } from "@/app/actions/staff-management/advance-payments";
+  approveAdvancePayment, 
+  deleteDeductionFromPayment 
+} from "@/app/actions/staff-management/advance-payments";
 import Modal from "../../ui/Modal";
 import AddInstallmentModal from "./AddInstallmentModal";
-import { formatDate } from "@/utils/formatters";
 import { toast } from 'sonner';
 import TransactionHistoryModal from "./TransactionHistoryModal";
 import { getNurseTenantName } from "@/utils/formatters";
+import AdvancePaymentsTable from "./AdvancePaymentsTable";
 
 type Deduction = {
   date: string;
@@ -36,7 +35,6 @@ type AdvancePayment = {
   installment_amount?: number;
   remaining_amount: number;
   deductions?: Deduction[];
-  actions?: React.ReactNode;
   payment_method?: string;
   receipt_url?: string | null;
   info?: string | null;
@@ -48,15 +46,14 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [payments, setPayments] = useState<AdvancePayment[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<AdvancePayment | null>(null);
-
   const [addInstallmentModalOpen, setAddInstallmentModalOpen] = useState(false);
   const [installmentPayment, setInstallmentPayment] = useState<AdvancePayment | null>(null);
-
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedHistoryPayment, setSelectedHistoryPayment] = useState<AdvancePayment | null>(null);
+  const [approvalModalOpen, setApprovalModalOpen] = useState(false);
+  const [approvalPayment, setApprovalPayment] = useState<AdvancePayment | null>(null);
 
   const loadPayments = async () => {
     setLoading(true);
@@ -71,6 +68,7 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
 
   useEffect(() => {
     loadPayments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nurseId]);
 
   const handleDelete = (payment: AdvancePayment) => {
@@ -91,19 +89,12 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       setDeleteModalOpen(false);
       setSelectedPayment(null);
       await loadPayments();
+      toast.success("Payment deleted successfully.");
     } catch (err: unknown) {
       const errorMessage = typeof err === "object" && err !== null && "message" in err
         ? (err as { message?: string }).message
         : "Failed to delete payment.";
-      toast.error(
-        errorMessage || "Failed to delete payment.",
-        {
-          action: {
-            label: "OK",
-            onClick: () => toast.dismiss(),
-          },
-        }
-      );
+      toast.error(errorMessage);
       setDeleteModalOpen(false);
       setSelectedPayment(null);
     }
@@ -116,17 +107,21 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
   };
 
   const handleSendAdvanceAmount = async (payment: AdvancePayment) => {
+    setApprovalPayment(payment);
+    setApprovalModalOpen(true);
+  };
+
+  const confirmApproval = async () => {
+    if (!approvalPayment) return;
     setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nurse_id: String(nurseId),
-          amount: payment.advance_amount,
-          description: payment.info,
+          amount: approvalPayment.advance_amount,
+          description: approvalPayment.info,
           tenant: nurseTenantName,
           payment_type: "outgoing",
           pay_status: "paid",
@@ -136,15 +131,10 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       const result = await response.json();
 
       if (!result.error) {
-        if (!payment.approved) {
-          await approveAdvancePayment(payment.id);
+        if (!approvalPayment.approved) {
+          await approveAdvancePayment(approvalPayment.id);
         }
-        toast.success("Advance amount sent and payment approved!", {
-          action: {
-            label: "OK",
-            onClick: () => toast.dismiss(),
-          },
-        });
+        toast.success("Advance amount sent and payment approved!");
         await loadPayments();
       } else {
         toast.error("Failed to send: " + (result.error || response.statusText));
@@ -153,6 +143,8 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       console.error("Send advance error:", error);
       toast.error("Error sending advance amount.");
     } finally {
+      setApprovalModalOpen(false);
+      setApprovalPayment(null);
       setLoading(false);
     }
   };
@@ -165,192 +157,62 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         deduction: item,
       });
       if (res.success && res.data) {
-        toast.success("Deduction deleted successfully.", {
-          action: {
-            label: "OK",
-            onClick: () => toast.dismiss(),
-          },
-        });
-        setSelectedHistoryPayment({
+        toast.success("Deduction deleted successfully.");
+        const updatedPayment = {
           ...selectedHistoryPayment,
           advance_amount: res.data.advance_amount,
           deductions: res.data.deductions,
           remaining_amount: res.data.remaining_amount ?? selectedHistoryPayment.remaining_amount,
           return_amount: res.data.return_amount ?? selectedHistoryPayment.return_amount,
-        });
+        };
+        setSelectedHistoryPayment(updatedPayment);
         setPayments((prev) =>
-          prev.map((p) =>
-            p.id === selectedHistoryPayment.id
-              ? { ...p, deductions: res.data.deductions, remaining_amount: res.data.remaining_amount ?? p.remaining_amount, return_amount: res.data.return_amount ?? p.return_amount }
-              : p
-          )
+          prev.map((p) => p.id === selectedHistoryPayment.id ? updatedPayment : p)
         );
       } else {
         throw new Error("Failed to delete deduction.");
       }
     } catch (err: unknown) {
-      const errorMessage = typeof err === "object" && err !== null && "message" in err
+        const errorMessage = typeof err === "object" && err !== null && "message" in err
         ? (err as { message?: string }).message
         : "Failed to delete deduction.";
-      toast.error(errorMessage || "Failed to delete deduction.", {
-        action: {
-          label: "OK",
-          onClick: () => toast.dismiss(),
-        },
-      });
+      toast.error(errorMessage);
     }
-  }; 
-
-  const columns: TableColumn<AdvancePayment>[] = [
-    { 
-      key: "date", 
-      header: "Issue Date", 
-      render: (v) => formatDate(v as string) 
-    },
-        { 
-      key: "advance_amount", 
-      header: "Total Advance", 
-      align: "left", 
-      render: (_v, row) => (
-        <div>
-          <div className="font-medium">₹{row.advance_amount}</div>
-          {row.payment_method && (
-            <div className="text-xs text-gray-500">{row.payment_method}</div>
-          )}
-          {row.receipt_url ? (
-            <a 
-              href={row.receipt_url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-blue-600 hover:text-blue-800 underline text-xs flex items-center gap-1 mt-0.5"
-            >
-              <IoDocumentTextOutline /> Receipt
-            </a>
-          ) : (
-            <div className="text-xs text-gray-400 mt-0.5">No receipt</div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: "info",
-      header: "Notes",
-      align: "left",
-      render: (v) => (
-        <div style={{ maxWidth: 180, whiteSpace: "pre-wrap", overflowWrap: "break-word" }}>
-          {v ? String(v) : "-"}
-        </div>
-      ),
-    },
-    { key: "return_amount", header: "Total Repaid", align: "left", render: (v) => v ? `₹${v}` : "-" },
-    { key: "return_type", header: "Plan" },
-    { key: "installment_amount", header: "Installment", align: "left", render: (v) => v ? `₹${v}` : "-" },
-    { 
-      key: "remaining_amount", 
-      header: "Balance Due",  
-    },
-    {
-      key: "deductions",
-      header: "History",
-      align: "center",
-      render: (_v, row) => {
-        const count = row.deductions?.length || 0;
-        return (
-            <button 
-                onClick={() => handleViewHistory(row)}
-                className={`
-                    flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium transition-all
-                    ${count > 0 
-                        ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200' 
-                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-slate-200'
-                    }
-                `}
-            >
-                <IoTimeOutline size={14} />
-                {count > 0 ? `View (${count})` : 'Empty'}
-            </button>
-        );
-      }
-    },
-    {
-      key: "actions",
-      header: "",
-      align: "center",
-      render: (_v, row) => (
-        <div className="flex flex-col gap-2 items-center justify-center">
-          <button
-            type="button"
-            className="flex items-center gap-2 px-3 py-1.5 border border-green-300 rounded-sm
-             bg-green-50 text-green-700 text-xs font-medium shadow-none hover:bg-green-100
-              hover:text-green-800 transition-all focus:outline-none focus:ring-2 focus:ring-green-400"
-            onClick={() => handleAddInstallment(row)}
-            title="Repayment"
-          >
-            <IoAdd size={18} />
-            Repayment
-          </button>
-          {row.approved ? (
-            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs 
-            font-semibold border border-green-200">
-              Approved
-            </span>
-          ) : (
-            <button
-              type="button"
-              className="text-blue-600 hover:text-blue-800 px-2 py-1 transition-colors 
-              flex items-center gap-1"
-              onClick={() => handleSendAdvanceAmount(row)}
-              disabled={loading}
-              title="Approve"
-            >
-              {loading ? (
-                <span className="animate-spin mr-1 w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full"></span>
-              ) : null}
-              Approve
-            </button>
-          )}
-          <button
-            type="button"
-            className="text-red-600 hover:text-red-800 px-2 py-1 transition-colors"
-            onClick={() => handleDelete(row)}
-            title="Delete"
-          >
-            <IoTrash size={18} />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4 p-2">
-        <h2 className="text-lg font-semibold text-gray-800">Staff Advances</h2>
+    <div className="w-full min-h-[400px] bg-white border border-slate-200 rounded-sm p-4">
+      <div className="border border-slate-200 flex items-center justify-between p-4">
+        <div>
+          <h3 className="text-lg font-medium text-slate-900">Staff Advances</h3>
+          <p className="text-sm text-slate-500 mt-1">
+            Track advances, repayments, and history.
+          </p>
+        </div>
         <button
           type="button"
-          className="px-5 py-2 bg-white/30 text-gray-800 border border-slate-200 
-            rounded-sm font-medium tracking-wide flex items-center gap-2 hover:bg-gray-50 transition-colors"
           onClick={() => setIsModalOpen(true)}
+          className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium px-5 py-2.5 
+          rounded-sm transition-colors flex items-center gap-2"
         >
-          <IoAdd size={20} />
+          <IoAdd size={18} />
           New Advance
         </button>
       </div>
-      
-      <Table
-        columns={columns}
-        data={payments}
-        rowKey={(row) => row.id}
+      <AdvancePaymentsTable
+        payments={payments}
         loading={loading}
+        onViewHistory={handleViewHistory}
+        onAddInstallment={handleAddInstallment}
+        onSendAdvanceAmount={handleSendAdvanceAmount}
+        onDelete={handleDelete}
       />
-
       <CreateAdvancePaymentModal
         isOpen={isModalOpen}
         nurseId={nurseId}
         onClose={() => setIsModalOpen(false)}
         onCreated={() => loadPayments()}
       />
-
       <AddInstallmentModal
         open={addInstallmentModalOpen}
         paymentId={installmentPayment ? installmentPayment.id : ""}
@@ -364,7 +226,6 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
           setInstallmentPayment(null);
         }}
       />
-
       <Modal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -375,7 +236,19 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         confirmText="Yes, delete"
         cancelText="Cancel"
       />
-
+      <Modal
+        open={approvalModalOpen}
+        onClose={() => {
+          setApprovalModalOpen(false);
+          setApprovalPayment(null);
+        }}
+        onConfirm={confirmApproval}
+        variant="approve"
+        title="Approve this payment?"
+        description={`Date: ${approvalPayment?.date}\nAmount: ₹${approvalPayment?.advance_amount}`}
+        confirmText="Yes, approve"
+        cancelText="Cancel"
+      />
       <TransactionHistoryModal 
         isOpen={historyModalOpen}
         onClose={() => {

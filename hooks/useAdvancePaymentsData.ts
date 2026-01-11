@@ -1,5 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchAdvancePaymentRecords } from "@/app/actions/staff-management/advance-payments";
+import { 
+  fetchAdvancePaymentRecords,
+  fetchAdvancePaymentTotals
+} from "@/app/actions/staff-management/advance-payments";
 
 export function useAdvancePaymentsData({
   selectedDate,
@@ -15,6 +18,7 @@ export function useAdvancePaymentsData({
   const queryClient = useQueryClient();
   const dateKey = selectedDate ? selectedDate.toISOString() : null;
   const advancePaymentsQueryKey = ["advancePayments", dateKey, page, pageSize, advancePaymentsSearchTerm];
+  const advancePaymentsTotalsQueryKey = ["advancePaymentsTotals", dateKey, advancePaymentsSearchTerm];
 
   const advancePaymentsQuery = useQuery({
     queryKey: advancePaymentsQueryKey,
@@ -30,8 +34,24 @@ export function useAdvancePaymentsData({
     throwOnError: false,
   });
 
+  const advancePaymentsTotalsQuery = useQuery({
+    queryKey: advancePaymentsTotalsQueryKey,
+    queryFn: () =>
+      fetchAdvancePaymentTotals({
+        date: selectedDate ? selectedDate.toISOString().slice(0, 10) : undefined,
+        searchTerm: advancePaymentsSearchTerm,
+      }),
+    staleTime: 1000 * 60 * 2,
+    refetchOnWindowFocus: true,
+    throwOnError: false,
+  });
+
   const invalidateAdvancePaymentsCache = () => {
     queryClient.invalidateQueries({ queryKey: advancePaymentsQueryKey });
+  };
+
+  const invalidateAdvancePaymentsTotalsCache = () => {
+    queryClient.invalidateQueries({ queryKey: advancePaymentsTotalsQueryKey });
   };
 
   const exportAdvancePaymentsCSV = async () => {
@@ -58,7 +78,9 @@ export function useAdvancePaymentsData({
 
   return {
     advancePayments: advancePaymentsQuery,
+    advancePaymentsTotals: advancePaymentsTotalsQuery,
     invalidateAdvancePaymentsCache,
+    invalidateAdvancePaymentsTotalsCache,
     exportAdvancePaymentsCSV,
   };
 }

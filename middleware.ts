@@ -35,29 +35,45 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
     
-    // Define public routes that don't require authentication
     const pathname = request.nextUrl.pathname
-    const publicRoutes = ['/signin', '/register', '/', '/about', '/client-registration', '/dc/client-registration', '/th/client-registration',  '/forgot-password', '/client-enquiry', '/reassessment/:id', '/delivery-care-preferences/:id']
-    const isPublicRoute = publicRoutes.includes(pathname) || 
-                          pathname.startsWith('/api/') || 
-                          pathname.startsWith('/patient-assessment/') ||
-                          pathname.startsWith('/reassessment/') ||
-                          pathname.startsWith('/client-enquiry') ||
-                          pathname.startsWith('/delivery-care-preferences/') ||
-                          pathname.startsWith('/home-maid-preferences/') ||
-                          pathname.startsWith('/child-care-preferences/') ||
-                          pathname.includes('.')
+    const staticPublicRoutes = [
+      '/signin', '/register', '/', '/about', '/client-registration',
+      '/dc/client-registration', '/th/client-registration',
+      '/forgot-password', '/client-enquiry'
+    ]
+    const dynamicPublicRoutePatterns = [
+      /^\/reassessment\/[^/]+$/,
+      /^\/delivery-care-preferences\/[^/]+$/,
+      /^\/client-enquiry\/[^/]+$/
+    ]
+    const publicPrefixes = [
+      '/api/',
+      '/patient-assessment/',
+      '/reassessment/',
+      '/client-enquiry',
+      '/delivery-care-preferences/',
+      '/home-maid-preferences/',
+      '/child-care-preferences/'
+    ]
 
-    // Check auth status and redirect if needed
+    const isStaticPublicRoute = staticPublicRoutes.includes(pathname)
+    const isDynamicPublicRoute = dynamicPublicRoutePatterns.some(rx => rx.test(pathname))
+    const isPrefixPublicRoute = publicPrefixes.some(prefix => pathname.startsWith(prefix))
+    const isAsset = pathname.includes('.')
+
+    const isPublicRoute =
+      isStaticPublicRoute ||
+      isDynamicPublicRoute ||
+      isPrefixPublicRoute ||
+      isAsset
+
     if (!user && !isPublicRoute) {
       console.log('Middleware: Unauthenticated access to', pathname)
-      // Redirect unauthenticated users to login page
       const redirectUrl = new URL('/signin', request.url)
       redirectUrl.searchParams.set('redirectTo', pathname)
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Check admin role for authenticated routes
     if (user && !isPublicRoute && (!user.user_metadata?.role || user.user_metadata.role !== 'admin')) {
       // Sign out users without admin privileges
       await supabase.auth.signOut()
