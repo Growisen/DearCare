@@ -35,19 +35,37 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
     
-    // Define public routes that don't require authentication
     const pathname = request.nextUrl.pathname
-    const publicRoutes = ['/signin', '/register', '/', '/about', '/client-registration', '/dc/client-registration', '/th/client-registration',  '/forgot-password', '/client-enquiry', '/reassessment/:id', '/delivery-care-preferences/:id']
-    const isPublicRoute = publicRoutes.includes(pathname) || 
-                          pathname.startsWith('/api/') || 
-                          pathname.startsWith('/patient-assessment/') ||
-                          pathname.startsWith('/reassessment/') ||
-                          pathname.startsWith('/client-enquiry') ||
-                          pathname.startsWith('/delivery-care-preferences/') ||
-                          pathname.startsWith('/home-maid-preferences/') ||
-                          pathname.startsWith('/child-care-preferences/') ||
-                          pathname.includes('.')
+    const staticPublicRoutes = [
+      '/signin', '/register', '/', '/about', '/client-registration',
+      '/dc/client-registration', '/th/client-registration',
+      '/forgot-password', '/client-enquiry'
+    ]
+    const dynamicPublicRoutePatterns = [
+      /^\/reassessment\/[^/]+$/,
+      /^\/delivery-care-preferences\/[^/]+$/,
+      /^\/client-enquiry\/[^/]+$/
+    ]
+    const publicPrefixes = [
+      '/api/',
+      '/patient-assessment/',
+      '/reassessment/',
+      '/client-enquiry',
+      '/delivery-care-preferences/',
+      '/home-maid-preferences/',
+      '/child-care-preferences/'
+    ]
 
+    const isStaticPublicRoute = staticPublicRoutes.includes(pathname)
+    const isDynamicPublicRoute = dynamicPublicRoutePatterns.some(rx => rx.test(pathname))
+    const isPrefixPublicRoute = publicPrefixes.some(prefix => pathname.startsWith(prefix))
+    const isAsset = pathname.includes('.')
+
+    const isPublicRoute =
+      isStaticPublicRoute ||
+      isDynamicPublicRoute ||
+      isPrefixPublicRoute ||
+      isAsset
 
     if (!user && !isPublicRoute) {
       console.log('Middleware: Unauthenticated access to', pathname)
