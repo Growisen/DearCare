@@ -392,12 +392,17 @@ export async function fetchClientPaymentAggregates({
 } = {}) {
   try {
     const { supabase } = await getAuthenticatedClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const organization = user?.user_metadata?.organization;
+
+    const { clientsOrg } = getOrgMappings(organization);
 
     const { data, error } = await supabase
       .rpc('get_client_payment_aggregates', {
+        filter_client_category: clientsOrg,
         filter_start_date: startDate ?? null,
         filter_end_date: endDate ?? null,
-        search_text: searchText ?? null,
+        search_text: searchText ?? null
       });
 
     if (error) {
