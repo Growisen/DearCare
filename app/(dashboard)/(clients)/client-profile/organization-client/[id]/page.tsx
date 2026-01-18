@@ -178,7 +178,7 @@ const OrganizationClientProfile = () => {
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-red-700">Error Loading Profile</h1>
             <p className="mt-2 text-gray-600">{error || "Organization profile not found"}</p>
-            <Link href="/clients" className="mt-4 inline-block text-indigo-600 hover:underline">
+            <Link prefetch={false} href="/clients" className="mt-4 inline-block text-indigo-600 hover:underline">
               Return to Clients
             </Link>
           </div>

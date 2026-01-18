@@ -17,6 +17,7 @@ const AttendanceTableRow = memo(({ record }: {
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
         <Link
           href={`/nurses/${record.nurseId}`}
+          prefetch={false}
           className="text-gray-800 hover:underline inline-flex items-center gap-1"
           target="_blank"
           rel="noopener noreferrer"
@@ -91,6 +92,7 @@ const AttendanceMobileCard = memo(({ record }: {
           <h3 className="font-semibold text-gray-800">
             <Link
               href={`/nurses/${record.nurseId}`}
+              prefetch={false}
               className="text-gray-800 hover:underline inline-flex items-center gap-1"
               target="_blank"
               rel="noopener noreferrer"

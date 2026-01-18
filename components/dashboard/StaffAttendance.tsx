@@ -1,7 +1,9 @@
+"use client"
+
 import { Card } from "../ui/card"
 import { Users, UserCheck, UserX, Calendar, Circle } from "lucide-react"
 import { StaffAttendanceProps } from "@/types/staff.types" 
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export default function StaffAttendance({ 
   currentTime, 
@@ -17,7 +19,6 @@ export default function StaffAttendance({
   },
   isLoading?: boolean
 }) {
-  const router = useRouter()
   
   const present = attendanceData?.present ?? 0
   const absent = attendanceData?.absent ?? 0
@@ -26,10 +27,6 @@ export default function StaffAttendance({
   
   const CIRCUMFERENCE = 62.83;
   const strokeDashoffset = CIRCUMFERENCE - (presentPercentage / 100) * CIRCUMFERENCE;
-
-  const handleDetailsClick = () => {
-    router.push('/staff-attendance') 
-  }
   
   return (
     <Card className="p-4 bg-white border border-slate-200 shadow-none rounded-sm col-span-full sm:col-span-2">
@@ -45,13 +42,13 @@ export default function StaffAttendance({
             )}
           </div>
         </div>
-        <button 
-          className="text-xs font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={handleDetailsClick}
-          disabled={isLoading}
+        <Link
+          href="/staff-attendance"
+          prefetch={false} 
+          className="text-xs font-medium text-blue-600 hover:text-blue-800"
         >
           View details →
-        </button>
+        </Link>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">

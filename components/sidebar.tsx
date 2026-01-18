@@ -122,6 +122,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setCollapsed }: 
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   title={isCollapsed ? item.label : ""}
                   className={`flex items-center gap-3 py-2.5 rounded-sm transition-all duration-200 group relative
                     ${isCollapsed ? 'justify-center px-0' : 'px-3'}

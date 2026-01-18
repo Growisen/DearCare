@@ -131,6 +131,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
                   <h3 className="font-medium text-gray-900">
                     <Link
                       href={`/nurses/${assignment.nurseId}`}
+                      prefetch={false}
                       title="View profile"
                       className="hover:text-blue-600 flex items-center gap-1 text-blue-700"
                       target="_blank"
@@ -148,6 +149,7 @@ const NurseAssignmentsList: React.FC<NurseAssignmentsListProps> = ({
               <div className="flex items-center gap-2">
                 <Link
                   href={`/assignments/${assignment.id}`}
+                  prefetch={false}
                   className="ml-2 px-2 py-1 text-xs font-medium rounded border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1"
                   target="_blank"
                   rel="noopener noreferrer"

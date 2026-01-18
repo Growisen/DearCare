@@ -283,14 +283,15 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
     setFormErrors({});
   };
 
-  const handleClientCategoryChange = (category: ClientCategory) => {
-    setFormData(prev => ({
-      ...prev,
-      clientCategory: category
-    }));
+  const handleClientCategoryChange = useCallback(
+    (category: ClientCategory) => {
+      setFormData(prev => ({
+        ...prev,
+        clientCategory: category
+      }));
 
-    setFormErrors({});
-  };
+      setFormErrors({});
+  },[]);
 
   const handleSameAddressToggle = (checked: boolean) => {
     setIsSameAddress(checked);

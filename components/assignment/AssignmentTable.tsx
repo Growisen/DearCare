@@ -84,6 +84,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
           <div>
             <Link
               href={`/nurses/${assignment.nurse_id}`}
+              prefetch={false}
               className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
               target="_blank"
               rel="noopener noreferrer"
@@ -143,6 +144,7 @@ const AssignmentTableRow = memo(({ assignment, onViewDetails }: {
         <div className="space-y-1">
           <Link
             href={clientProfileUrl}
+            prefetch={false}
             className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"
@@ -223,6 +225,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
           <div>
             <Link
               href={`/nurses/${assignment.nurse_id}`}
+              prefetch={false}
               className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
               target="_blank"
               rel="noopener noreferrer"
@@ -265,6 +268,7 @@ const AssignmentMobileCard = memo(({ assignment, onViewDetails }: {
               <p className="text-gray-500">Client:</p>
               <Link
                 href={clientProfileUrl}
+                prefetch={false}
                 className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
                 target="_blank"
                 rel="noopener noreferrer"

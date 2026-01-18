@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { IoAdd } from 'react-icons/io5';
 import CreateAdvancePaymentModal from "./CreateAdvancePaymentModal";
 import { 
@@ -55,7 +55,7 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [approvalPayment, setApprovalPayment] = useState<AdvancePayment | null>(null);
 
-  const loadPayments = async () => {
+  const loadPayments = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchAdvancePayments(nurseId);
@@ -64,13 +64,12 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       setPayments([]);
     }
     setLoading(false);
-  };
+  }, [nurseId]);
 
   useEffect(() => {
     loadPayments();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nurseId]);
-
+  }, [loadPayments]);
+  
   const handleDelete = (payment: AdvancePayment) => {
     setSelectedPayment(payment);
     setDeleteModalOpen(true);

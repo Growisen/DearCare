@@ -302,8 +302,8 @@ export function useAssignment(id: string) {
     } finally {
       setAttendanceLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRecord, checkIn, checkOut, assignmentDetails?.id, closeModal, refreshData]);
+
+  }, [selectedRecord, checkIn, checkOut, closeModal, refreshData, assignmentDetails]);
 
 
   const handleUnmarkAttendance = useCallback(async (id: number) => {

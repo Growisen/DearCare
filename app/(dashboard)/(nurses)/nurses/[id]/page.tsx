@@ -66,7 +66,7 @@ const NurseProfilePage: React.FC = () => {
       }
     }
     loadAssignments()
-  }, [activeTab, params.id])
+  }, [activeTab, params.id, assignments])
 
   const calculateAge = (dateOfBirth: string | null): number => {
     if (!dateOfBirth) return 0;

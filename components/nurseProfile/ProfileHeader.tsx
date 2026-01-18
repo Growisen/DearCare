@@ -72,6 +72,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ nurse, onDelete }) => {
         <div className="flex gap-2">
           <Link 
             href={`/nurses/${basicInfo.nurse_id}/edit`}
+            prefetch={false}
             className="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 hover:border-indigo-300 text-gray-600 hover:text-indigo-600 text-xs font-semibold rounded-sm transition-all shadow-none hover:shadow"
           >
             <Pencil className="w-3.5 h-3.5 mr-1.5" />

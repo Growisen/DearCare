@@ -1,10 +1,14 @@
+import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDashboardData, DashboardData } from "@/app/actions/dashboard/dashboard-actions";
 
 export function useDashboardData(selectedDate?: Date | null) {
   const queryClient = useQueryClient();
   const dateKey = selectedDate ? selectedDate.toISOString() : null;
-  const dashboardQueryKey = dateKey ? ["dashboardData", dateKey] : ["dashboardData"];
+  const dashboardQueryKey = useMemo(
+    () => (dateKey ? ["dashboardData", dateKey] : ["dashboardData"]),
+    [dateKey]
+  );
 
   const dashboardQuery = useQuery<{
     success: boolean;
@@ -19,9 +23,9 @@ export function useDashboardData(selectedDate?: Date | null) {
     throwOnError: false,
   });
 
-  const invalidateDashboardCache = () => {
+  const invalidateDashboardCache = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: dashboardQueryKey });
-  };
+  }, [queryClient, dashboardQueryKey]);
 
   return { dashboard: dashboardQuery, invalidateDashboardCache };
 }

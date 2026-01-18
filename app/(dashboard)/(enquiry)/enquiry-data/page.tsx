@@ -35,7 +35,6 @@ export default function EnquiryDataPage() {
 
   const [searchInput, setSearchInput] = useState(""); 
   const [searchTerm, setSearchTerm] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const [pagination, setPagination] = useState<PaginationInfo>({
     totalCount: 0,
@@ -70,7 +69,7 @@ export default function EnquiryDataPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.currentPage, pagination.pageSize, searchTerm, refreshKey]);
+  }, [pagination.currentPage, pagination.pageSize, searchTerm]);
 
   useEffect(() => {
     fetchData();
@@ -89,7 +88,7 @@ export default function EnquiryDataPage() {
   };
 
   const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+    fetchData();
   };
 
   const handlePageChange = (newPage: number) => {
@@ -104,7 +103,6 @@ export default function EnquiryDataPage() {
     }
   };
 
-  // PaginationControls handlers
   const handlePreviousPage = () => handlePageChange(pagination.currentPage - 1);
   const handleNextPage = () => handlePageChange(pagination.currentPage + 1);
 

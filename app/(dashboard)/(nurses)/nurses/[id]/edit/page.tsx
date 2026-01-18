@@ -227,7 +227,7 @@ const EditNurseProfilePage: React.FC = () => {
         <div className="max-w-md w-full bg-white rounded-sm shadow-none p-6">
           <h1 className="text-xl font-semibold text-red-600 mb-2">Error Loading Profile</h1>
           <p className="text-gray-600 mb-4">{error || "Nurse profile not found"}</p>
-          <Link href="/nurses" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+          <Link prefetch={false} href="/nurses" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
             Return to Nurses List
           </Link>
         </div>
@@ -247,6 +247,7 @@ const EditNurseProfilePage: React.FC = () => {
               <div className="flex gap-3">
                 <Link
                   href={`/nurses/${nurse.basic.nurse_id}`}
+                  prefetch={false}
                   className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-sm transition-all duration-200 text-sm font-medium ${
                     saving ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-gray-200"
                   }`}

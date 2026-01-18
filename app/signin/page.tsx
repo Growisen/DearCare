@@ -60,16 +60,16 @@ const LoginPage = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 70, damping: 15 }}
-        className="relative z-10 w-full max-w-sm bg-white shadow-md rounded-sm overflow-hidden border border-dCblue/10"
+        className="relative z-10 w-full max-w-sm bg-white shadow-sm rounded-sm overflow-hidden border border-dCblue/10"
       >
-        <div className="p-6 space-y-6">
+        <div className="pt-10 pb-16 px-6 space-y-6">
           <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
             className="flex flex-col items-center space-y-3"
           >
-            <Image src="/logo2.png" alt="Logo" width={150} height={50} className="mb-2 object-contain" />
+            <Image src="/logo2.png" alt="Logo" width={150} height={50} className="object-contain" />
             <h1 className="text-2xl font-bold text-dCblue">Admin Portal</h1>
             <p className="text-dCblack/70 text-center text-sm">Secure Access to Your Dashboard</p>
           </motion.div>
@@ -124,10 +124,6 @@ const LoginPage = () => {
               <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </form>
-
-          <div className="text-center">
-            <a href="#" className="text-xs text-dCblue hover:text-dCorange transition">Forgot Password?</a>
-          </div>
         </div>
       </motion.div>
     </div>

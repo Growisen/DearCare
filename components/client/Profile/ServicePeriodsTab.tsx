@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   addServiceHistoryItem, 
   getServiceHistory, 
@@ -55,19 +55,18 @@ const ServicePeriodsTab: React.FC<{ clientId: string }> = ({ clientId }) => {
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const fetchPeriods = async () => {
+  const fetchPeriods = useCallback(async () => {
     setLoading(true);
     const result = await getServiceHistory(clientId);
     if (result.success) {
       setServicePeriods((result.data || []).map(mapBackendPeriod));
     }
     setLoading(false);
-  };
+  }, [clientId]);
 
   useEffect(() => {
     fetchPeriods();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId]);
+  }, [clientId, fetchPeriods]);
 
   const handleOpenAdd = () => {
     setEditingPeriod(null);

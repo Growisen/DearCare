@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Loader from '@/components/Loader';
 import EditProfileModal from '@/components/client/Profile/EditProfileModal';
@@ -47,22 +47,6 @@ const PatientProfilePage = () => {
   const id = params.id as string;
   const { activeTab, handleTabChange } = useTabManagement(id);
   const [selectedAssessmentId, setSelectedAssessmentId] = React.useState<string | undefined>(undefined);
-
-
-  React.useEffect(() => {
-    window.onNurseAssignmentComplete = () => {
-      invalidateDashboardCache()
-      invalidateAssignmentsCache()
-      setShowNurseList(false);
-      if (refetch) {
-        refetch();
-      }
-    };
-    
-    return () => {
-      window.onNurseAssignmentComplete = null;
-    };
-  }, []);
   
   const {
     patient,
@@ -118,6 +102,21 @@ const PatientProfilePage = () => {
     endAssignmentNotes,
     setEndAssignmentNotes,
   } = useNurseAssignments(id, activeTab);
+
+  useEffect(() => {
+    window.onNurseAssignmentComplete = () => {
+      invalidateDashboardCache()
+      invalidateAssignmentsCache()
+      setShowNurseList(false);
+      if (refetch) {
+        refetch();
+      }
+    };
+    
+    return () => {
+      window.onNurseAssignmentComplete = null;
+    };
+  }, [invalidateAssignmentsCache, invalidateDashboardCache, refetch, setShowNurseList]);
 
   const {
     files,
