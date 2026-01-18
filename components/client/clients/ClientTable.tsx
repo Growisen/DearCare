@@ -38,6 +38,7 @@ const ClientTableRow = memo(({ client, onReviewDetails, statusColors, statusIcon
           href={clientProfileUrl}
           className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
           target="_blank"
+          prefetch={false}
           rel="noopener noreferrer"
         >
           {formatName(client.name)}
@@ -123,6 +124,7 @@ const ClientMobileCard = memo(({ client, onReviewDetails, statusColors, statusIc
           <h3 className="font-semibold text-gray-800 text-sm">
             <Link
               href={clientProfileUrl}
+              prefetch={false}
               className="hover:underline inline-flex items-center gap-1"
               target="_blank"
               rel="noopener noreferrer"

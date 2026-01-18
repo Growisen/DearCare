@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent, useCallback } from 'react';
 import { FormData, VitalsData, BedSoreData, BedSoreStage, ReassessmentData } from '@/types/reassessment.types';
 import { insertReassessment, fetchReassessments } from '@/app/actions/clients/reassessment';
 
@@ -30,7 +30,7 @@ export const useReassessmentForm = (clientId: string, activeTab?: string) => {
 
   const [selectedReassessmentId, setSelectedReassessmentId] = useState<string | undefined>(undefined);
 
-  const fetchReassessmentData = async () => {
+  const fetchReassessmentData = useCallback(async () => {
     setFetchLoading(true);
     setFetchError(null);
     try {
@@ -51,21 +51,19 @@ export const useReassessmentForm = (clientId: string, activeTab?: string) => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [clientId, selectedReassessmentId]);
 
   useEffect(() => {
     if (clientId && activeTab === 'reassessment') {
       fetchReassessmentData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId, activeTab]);
+  }, [clientId, activeTab, fetchReassessmentData]);
 
   useEffect(() => {
     if (selectedReassessmentId) {
       fetchReassessmentData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedReassessmentId]);
+  }, [selectedReassessmentId, fetchReassessmentData]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

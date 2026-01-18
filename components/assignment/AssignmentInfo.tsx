@@ -39,6 +39,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
               <p className="text-sm font-medium text-slate-500">Name</p>
               <Link
                 target='_blank'
+                prefetch={false}
                 href={`/nurses/${assignmentDetails.nurseDetails.id}`}
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
@@ -69,6 +70,7 @@ export function AssignmentInfo({ assignmentDetails }: { assignmentDetails: Forma
               <p className="text-sm font-medium text-slate-500">Name</p>
               <Link
                 target='_blank'
+                prefetch={false}
                 href={assignmentDetails.clientDetails.clientProfileUrl || ""}
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >

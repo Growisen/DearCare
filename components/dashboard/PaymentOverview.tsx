@@ -192,6 +192,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
                         className="text-gray-700 hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
+                        prefetch={false}
                       >
                         {formatName(p.clientName)}
                         <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
@@ -216,6 +217,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
        <div className="text-center mt-4">
         <Link 
           href="/client-payments" 
+          prefetch={false}
           className="text-xs font-medium text-blue-600 hover:text-blue-800"
         >
           View All Payments from clients →

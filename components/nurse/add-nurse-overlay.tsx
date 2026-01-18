@@ -96,8 +96,7 @@ const [referenceData, setReferenceData] = useState<NurseReferenceData>({
     if (admittedTypeValue && nurseData.admitted_type !== admittedTypeValue) {
       setNurseData(prev => ({ ...prev, admitted_type: admittedTypeValue }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [admittedTypeValue]);
+  }, [admittedTypeValue, nurseData.admitted_type]);
 
   const renderStep = () => {
     switch (currentStep) {

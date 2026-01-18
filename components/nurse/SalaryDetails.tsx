@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   fetchNurseSalaryPayments,
   fetchAggregatedSalaries
@@ -40,7 +40,7 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
   const [aggregates, setAggregates] = useState<{ approved: number; pending: number } | null>(null);
   const [aggregatesLoading, setAggregatesLoading] = useState(false);
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchNurseSalaryPayments(nurseId);
@@ -84,9 +84,9 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [nurseId]);
 
-  const fetchSalaryAggregates = async () => {
+  const fetchSalaryAggregates = useCallback(async () => {
     try {
       setAggregatesLoading(true);
       const aggregates = await fetchAggregatedSalaries(nurseId);
@@ -96,12 +96,12 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
     } finally {
       setAggregatesLoading(false);
     }
-  };
+  }, [nurseId]);
 
   useEffect(() => {
     fetchPayments();
     fetchSalaryAggregates();
-  }, [nurseId]);
+  }, [nurseId, fetchPayments, fetchSalaryAggregates]);
 
   const handleRecalculate = async (payment: SalaryPayment) => {
     setRecalculatingId(payment.id);

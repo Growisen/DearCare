@@ -57,6 +57,7 @@ export default function ComplaintsStats({ complaintsData, isLoading = false }: C
         </div>
         <Link 
           href="/complaints" 
+          prefetch={false}
           className={`text-xs font-medium text-blue-600 hover:text-blue-800 ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
         >
           View details →

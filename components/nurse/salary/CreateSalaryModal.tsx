@@ -53,7 +53,7 @@ const CreateSalaryModal: React.FC<CreateSalaryModalProps> = ({
     }
 
     setErrors(newErrors);
-  }, [startDate, endDate]);
+  }, [startDate, endDate, minYear, maxYear]);
   
   const handleSubmit = () => {
     const newErrors = { startDate: "", endDate: "" };

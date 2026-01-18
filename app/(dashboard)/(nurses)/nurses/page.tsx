@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { AddNurseOverlay } from "../../../../components/nurse/add-nurse-overlay"
 import NurseTable from "@/components/nurse/NurseTable"
 import NurseCard from "@/components/nurse/NurseCard"
@@ -40,11 +40,7 @@ export default function NursesPage() {
     setCurrentPage(1);
   }, [selectedStatus, selectedExperience, debouncedSearch]);
 
-  useEffect(() => {
-    loadNurses()
-  }, [currentPage, debouncedSearch, selectedStatus, selectedExperience])
-
-  const loadNurses = async () => {
+  const loadNurses = useCallback(async () => {
     setIsLoading(true)
     const { data, count, error } = await fetchBasicDetails(
       {
@@ -65,7 +61,11 @@ export default function NursesPage() {
     }
     
     setIsLoading(false)
-  }
+  }, [currentPage, limit, selectedStatus, selectedExperience, debouncedSearch])
+
+  useEffect(() => {
+    loadNurses()
+  }, [currentPage, debouncedSearch, selectedStatus, selectedExperience, loadNurses])
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber)
@@ -75,9 +75,8 @@ export default function NursesPage() {
   const handleNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
 
   const totalPages = Math.ceil(totalCount / limit)
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  const handleAddNurse = async (nurseData: any) => {
+
+  const handleAddNurse = async () => {
     try {
       setShowAddNurse(false);
       await loadNurses();

@@ -67,7 +67,7 @@ export default function NurseListModal({
       });
     }, 400);
     return () => clearTimeout(handler);
-  }, [statusFilter, searchTerm]);
+  }, [statusFilter, searchTerm, onFilterChange]);
 
   useEffect(() => {
     setStatusFilter(filters.status || '');

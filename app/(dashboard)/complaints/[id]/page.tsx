@@ -74,7 +74,7 @@ export default function ComplaintDetailPage() {
         <div className="text-red-500 text-xl mb-4">
           {error || "Complaint not found"}
         </div>
-        <Link href="/complaints" className="text-blue-600 hover:underline">
+        <Link prefetch={false} href="/complaints" className="text-blue-600 hover:underline">
           Return to Complaints
         </Link>
       </div>

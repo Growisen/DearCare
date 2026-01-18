@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getClientDetails, getPatientAssessment, getClientStatus, updateClientCategory, deleteClient } from '@/app/actions/clients/client-actions';
 import { Patient, ClientResponse, ClientCategory } from '@/types/client.types';
 import { toast } from 'sonner';
@@ -16,7 +16,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [assessmentLoaded, setAssessmentLoaded] = useState(false);
 
-  const fetchBasicClientData = async () => {
+  const fetchBasicClientData = useCallback(async () => {
     if (!id) return;
 
     setLoading(true);
@@ -99,9 +99,9 @@ export const usePatientData = (id: string, activeTab?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  const fetchAssessmentData = async (assessmentId?: string) => {
+  const fetchAssessmentData = useCallback(async (assessmentId?: string) => {
     if (!id) return;
 
     if (assessmentId) {
@@ -120,7 +120,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
         ? assessmentResponse.assessments
         : [];
 
-        console.log("totalAssessments", assessmentData);
+      console.log("totalAssessments", assessmentData);
 
       if (assessmentData) {
         setPatient(prev => prev ? {
@@ -178,7 +178,7 @@ export const usePatientData = (id: string, activeTab?: string) => {
     } finally {
       setIsLoadingAssessment(false);
     }
-  };
+  }, [id, assessmentLoaded]);
 
   const handleEdit = () => setIsEditing(true);
   
@@ -243,14 +243,14 @@ export const usePatientData = (id: string, activeTab?: string) => {
 
   useEffect(() => {
     fetchBasicClientData();
-  }, [id]);
+  }, [fetchBasicClientData]);
 
 
   useEffect(() => {
     if (activeTab === 'medical' && !assessmentLoaded) {
       fetchAssessmentData();
     }
-  }, [activeTab, id]);
+  }, [activeTab, id, fetchAssessmentData, assessmentLoaded]);
 
   return {
     patient,

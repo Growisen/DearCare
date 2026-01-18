@@ -30,7 +30,7 @@ export default function ClientEditForm({ client, onSave, onCancel }: ClientEditF
       const isMonthFormat = /\d+\s*months?$/.test(ageValue);
       setIsLessThanOneYear(isMonthFormat);
     }
-  }, [client, isBabyCare]);
+  }, [client, isBabyCare, isIndividual]);
 
   const saveActiveElementState = () => {
     if (document.activeElement instanceof HTMLInputElement || 

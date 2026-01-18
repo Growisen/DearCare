@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [isExporting, setIsExporting] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [currentTime, setCurrentTime] = useState("")
 
   const { 
     page, 
@@ -33,15 +34,25 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setGreeting(getGreeting())
+    setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
   }, [])
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm)
-      resetPage()
+      if (searchTerm !== debouncedSearch) {
+        resetPage()
+      }
     }, 500)
     return () => clearTimeout(timer)
-  }, [searchTerm, resetPage])
+  }, [searchTerm, resetPage, debouncedSearch])
+
+  const advancePaymentOptions = useMemo(() => ({
+    selectedDate,
+    page,
+    pageSize,
+    advancePaymentsSearchTerm: debouncedSearch,
+  }), [selectedDate, page, pageSize, debouncedSearch])
 
   const { dashboard } = useDashboardData(selectedDate)
   const { paymentOverview } = usePaymentsData(selectedDate)
@@ -49,12 +60,7 @@ export default function DashboardPage() {
     advancePayments,
     advancePaymentsTotals,
     exportAdvancePaymentsCSV,
-  } = useAdvancePaymentsData({
-    selectedDate,
-    page,
-    pageSize,
-    advancePaymentsSearchTerm: debouncedSearch,
-  })
+  } = useAdvancePaymentsData(advancePaymentOptions)
 
   const dashboardData = useMemo(() => 
     dashboard.data?.success ? dashboard.data.data : null, 
@@ -83,8 +89,6 @@ export default function DashboardPage() {
   const todayFormatted = useMemo(() => 
     new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }), 
   [])
-  
-  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
   const handleExport = useCallback(async () => {
     setIsExporting(true)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getAllNurseAssignments, NurseAssignmentData, fetchAssignmentStats } from '@/app/actions/scheduling/shift-schedule-actions';
 import useOrgStore from '@/app/stores/UseOrgStore';
@@ -155,9 +155,9 @@ export function useAssignmentData() {
         ? `No matches found for "${searchQuery}". Please try a different search term.` 
         : (data?.success ? null : (data?.error || 'Failed to load assignments')));
 
-  const invalidateAssignmentsCache = () => {
+  const invalidateAssignmentsCache = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['assignments'] });
-  };
+  }, [queryClient]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

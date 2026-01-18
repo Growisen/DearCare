@@ -91,6 +91,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                     <td className="py-4 px-6 text-gray-800 font-medium">
                       <Link
                         href={`/client-profile/${payment.clientId}`}
+                        prefetch={false}
                         className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -146,6 +147,7 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                       href={`/client-profile/${payment.clientId}`}
                       className="font-medium text-gray-700 hover:underline inline-flex items-center gap-1"
                       target="_blank"
+                      prefetch={false}
                       rel="noopener noreferrer"
                     >
                       {payment.clientName || "N/A"}

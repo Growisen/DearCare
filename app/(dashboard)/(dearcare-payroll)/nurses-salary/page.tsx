@@ -148,6 +148,7 @@ export default function NursesSalaryPage() {
                            href={`/nurses/${record.nurse_id}`}
                            className="font-semibold text-sm text-gray-700 hover:underline inline-flex items-center gap-1"
                            target="_blank"
+                           prefetch={false}
                            rel="noopener noreferrer"
                          >
                            {record.full_name}

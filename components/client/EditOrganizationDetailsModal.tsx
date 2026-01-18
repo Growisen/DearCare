@@ -36,7 +36,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
   onSave,
   organizationData
 }) => {
-  // Organization name validation
   const {
     name: organizationName,
     setName: setOrganizationName,
@@ -44,7 +43,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     checkNameValidity: checkOrganizationNameValidity
   } = useNameValidation(organizationData?.details.organization_name || '');
   
-  // Contact person name validation
   const {
     name: contactPersonName,
     setName: setContactPersonName,
@@ -52,7 +50,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     checkNameValidity: checkContactPersonNameValidity
   } = useNameValidation(organizationData?.details.contact_person_name || '');
   
-  // Contact email validation
   const {
     email,
     setEmail,
@@ -60,7 +57,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     checkEmailValidity
   } = useEmailValidation(organizationData?.details.contact_email || '');
   
-  // Contact phone validation
   const {
     phone,
     setPhone,
@@ -68,15 +64,13 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     checkPhoneValidity
   } = usePhoneValidation(organizationData?.details.contact_phone || '');
   
-  // Address validation (simple text field)
   const {
     value: address,
     setValue: setAddress,
     error: addressError,
     checkValidity: checkAddressValidity
   } = useTextFieldValidation(organizationData?.details.organization_address || '', 'Address');
-  
-  // City validation
+
   const {
     value: city,
     setValue: setCity,
@@ -84,15 +78,13 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     checkValidity: checkCityValidity
   } = useTextFieldValidation(organizationData?.details.organization_city || '', 'City', true);
   
-  // District validation
   const {
     value: district,
     setValue: setDistrict,
     error: districtError,
     checkValidity: checkDistrictValidity
   } = useTextFieldValidation(organizationData?.details.organization_district || '', 'District', true);
-  
-  // State validation
+
   const {
     value: state,
     setValue: setState,
@@ -100,22 +92,19 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     checkValidity: checkStateValidity
   } = useTextFieldValidation(organizationData?.details.organization_state || '', 'State', true);
   
-  // Pincode validation
   const {
     pincode,
     setPincode,
     pincodeError,
     checkPincodeValidity
   } = usePincodeValidation(organizationData?.details.organization_pincode || '');
-  
-  // For fields that don't require strict validation
+
   const [contactPersonRole, setContactPersonRole] = useState(organizationData?.details.contact_person_role || '');
   const [generalNotes, setGeneralNotes] = useState(organizationData?.general_notes || '');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Update form data when organizationData changes
   useEffect(() => {
     if (organizationData) {
       setOrganizationName(organizationData.details.organization_name || '');
@@ -130,9 +119,21 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
       setPincode(organizationData.details.organization_pincode || '');
       setGeneralNotes(organizationData.general_notes || '');
     }
-  }, [organizationData]);
+  }, [
+    organizationData,
+    setOrganizationName,
+    setContactPersonName,
+    setContactPersonRole,
+    setEmail,
+    setPhone,
+    setAddress,
+    setCity,
+    setDistrict,
+    setState,
+    setPincode,
+    setGeneralNotes
+  ]);
 
-  // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -142,7 +143,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      // Prevent body scrolling when modal is open
       document.body.style.overflow = 'hidden';
     }
 
@@ -152,7 +152,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     };
   }, [isOpen, onClose]);
 
-  // Handle escape key press
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -170,13 +169,11 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
   }, [isOpen, onClose]);
 
   const validateForm = () => {
-    // Use each field's validation function
     const isOrgNameValid = checkOrganizationNameValidity();
     const isContactNameValid = checkContactPersonNameValidity();
     const isEmailValid = checkEmailValidity();
     const isPhoneValid = checkPhoneValidity();
-    
-    // Return true only if required fields are valid
+
     return isOrgNameValid && isContactNameValid && isEmailValid && isPhoneValid;
   };
 
@@ -187,8 +184,7 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     
     try {
       setIsSubmitting(true);
-      
-      // Construct the updated organization details
+
       const updatedData = {
         details: {
           organization_name: organizationName,
@@ -220,7 +216,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
     <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-600 bg-opacity-50">
       <div className="flex items-center justify-center min-h-screen px-4 py-6 sm:p-0">
         <div ref={modalRef} className="relative bg-white rounded-sm shadow-xl w-full max-w-4xl mx-auto max-h-[90vh] overflow-hidden flex flex-col">
-          {/* Modal Header */}
           <div className="sticky top-0 z-10 flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white">
             <h2 className="text-xl font-semibold text-gray-800">Edit Organization Details</h2>
             <button 
@@ -234,7 +229,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
             </button>
           </div>
 
-          {/* Modal Content - Scrollable */}
           <div className="flex-1 p-6 overflow-y-auto">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="mb-6">
@@ -439,7 +433,6 @@ const EditOrganizationDetailsModal: React.FC<EditOrganizationDetailsModalProps> 
             </form>
           </div>
 
-          {/* Modal Footer - Sticky at bottom */}
           <div className="sticky bottom-0 flex justify-end space-x-3 px-6 py-4 border-t border-slate-200 bg-white">
             <button
               type="button"

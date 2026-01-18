@@ -109,7 +109,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
       newErrors.paymentMethod = "Payment method is required";
     }
     setErrors(newErrors);
-  }, [date, amount, repaymentType, installmentAmount, paymentMethod]);
+  }, [date, amount, repaymentType, installmentAmount, paymentMethod, minYear, maxYear]);
   
   const handleSubmit = async () => {
     const newErrors = { date: "", amount: "", installmentAmount: "", paymentMethod: "" };

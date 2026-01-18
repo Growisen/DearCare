@@ -62,7 +62,7 @@ const AddDeductionModal: React.FC<AddDeductionModalProps> = ({
         <div className="mb-1">
           <div className="text-sm text-gray-600 mb-3">
             <p><span className="font-medium">Pay Period:</span> {payment.payPeriodStart} to {payment.payPeriodEnd}</p>
-            <p><span className="font-medium">Current Salary:</span> ₹ {payment.salary.toLocaleString()}</p>
+            <p><span className="font-medium">Current Salary:</span> ₹ {payment.netSalary.toLocaleString()}</p>
           </div>
         </div>
         <div className="mb-3">

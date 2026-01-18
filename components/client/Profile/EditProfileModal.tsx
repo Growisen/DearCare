@@ -19,6 +19,91 @@ interface EditProfileModalProps {
   onSave: () => void;
 }
 
+const baseInputStyles = `
+  w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
+  placeholder:text-gray-400
+  focus:border-slate-200 focus:outline-none focus:ring-0 
+  transition-colors duration-200 appearance-none
+`;
+const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
+const sectionStyles = "p-5 bg-white rounded-sm border border-slate-200 mb-4";
+const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
+const errorStyles = "mt-1 text-xs text-red-500";
+
+const FormField = ({ 
+  label, 
+  id, 
+  type = 'text', 
+  value, 
+  onChange, 
+  onBlur,
+  error,
+  options = [],
+  placeholder = '',
+  required = false
+}: { 
+  label: string; 
+  id: string; 
+  type?: string; 
+  value: string | number | null | undefined; 
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onBlur?: () => void;
+  error?: string;
+  options?: Array<{value: string; label: string}>;
+  placeholder?: string;
+  required?: boolean;
+}) => {
+  return (
+    <div className="w-full">
+      <label htmlFor={id} className={labelStyles}>
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      {type === 'select' ? (
+        <select
+          id={id}
+          value={value || ''}
+          onChange={onChange}
+          onBlur={onBlur}
+          className={`${baseInputStyles} ${error ? 'border-red-300' : ''}`}
+          required={required}
+          style={{ backgroundImage: 'none' }}
+        >
+          <option value="" className="text-gray-400">Select {label}</option>
+          {options.map(option => (
+            <option key={option.value} value={option.value} className="text-gray-900">
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : type === 'textarea' ? (
+        <textarea
+          id={id}
+          value={value || ''}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          rows={3}
+          className={`${baseInputStyles} ${error ? 'border-red-300' : ''}`}
+          required={required}
+        />
+      ) : (
+        <input
+          type={type}
+          id={id}
+          value={value || ''}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          className={`${baseInputStyles} ${error ? 'border-red-300' : ''}`}
+          required={required}
+        />
+      )}
+      {error && <p className={errorStyles}>{error}</p>}
+    </div>
+  );
+};
+
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
   isOpen, 
   onClose, 
@@ -148,7 +233,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     requestorStateValidation
   ]);
 
-  // Age calculation helper
   const calculateAge = (dob?: string) => {
     if (!dob) return '';
     const birthDate = new Date(dob);
@@ -192,7 +276,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     if (requestorStateValidation.validateTextField(formData.requestorState))
       errors.requestorState = requestorStateValidation.validateTextField(formData.requestorState);
 
-    // Validate DOBs
     if (formData.patientDOB && isNaN(Date.parse(formData.patientDOB)))
       errors.patientDOB = "Invalid date of birth";
     if (formData.requestorDOB && isNaN(Date.parse(formData.requestorDOB)))
@@ -326,91 +409,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     } else {
       setFormErrors(prev => ({ ...prev, [id]: '' }));
     }
-  };
-
-  const baseInputStyles = `
-    w-full border border-slate-200 bg-white rounded-sm py-2 px-3 text-sm text-gray-800 
-    placeholder:text-gray-400
-    focus:border-slate-200 focus:outline-none focus:ring-0 
-    transition-colors duration-200 appearance-none
-  `;
-  const labelStyles = "block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5";
-  const sectionStyles = "p-5 bg-white rounded-sm border border-slate-200 mb-4";
-  const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
-  const errorStyles = "mt-1 text-xs text-red-500";
-
-  const FormField = ({ 
-    label, 
-    id, 
-    type = 'text', 
-    value, 
-    onChange, 
-    onBlur,
-    error,
-    options = [],
-    placeholder = '',
-    required = false
-  }: { 
-    label: string; 
-    id: string; 
-    type?: string; 
-    value: string | number | null | undefined; 
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-    onBlur?: () => void;
-    error?: string;
-    options?: Array<{value: string; label: string}>;
-    placeholder?: string;
-    required?: boolean;
-  }) => {
-    return (
-      <div className="w-full">
-        <label htmlFor={id} className={labelStyles}>
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        {type === 'select' ? (
-          <select
-            id={id}
-            value={value || ''}
-            onChange={onChange}
-            onBlur={onBlur}
-            className={`${baseInputStyles} ${error ? 'border-red-300' : ''}`}
-            required={required}
-            style={{ backgroundImage: 'none' }}
-          >
-            <option value="" className="text-gray-400">Select {label}</option>
-            {options.map(option => (
-              <option key={option.value} value={option.value} className="text-gray-900">
-                {option.label}
-              </option>
-            ))}
-          </select>
-        ) : type === 'textarea' ? (
-          <textarea
-            id={id}
-            value={value || ''}
-            onChange={onChange}
-            onBlur={onBlur}
-            placeholder={placeholder}
-            rows={3}
-            className={`${baseInputStyles} ${error ? 'border-red-300' : ''}`}
-            required={required}
-          />
-        ) : (
-          <input
-            type={type}
-            id={id}
-            value={value || ''}
-            onChange={onChange}
-            onBlur={onBlur}
-            placeholder={placeholder}
-            className={`${baseInputStyles} ${error ? 'border-red-300' : ''}`}
-            required={required}
-          />
-        )}
-        {error && <p className={errorStyles}>{error}</p>}
-      </div>
-    );
   };
 
   if (!isOpen) return null;

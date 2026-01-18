@@ -167,6 +167,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
                             className="text-sm font-medium text-gray-700 hover:underline"
                             target="_blank"
                             rel="noopener noreferrer"
+                            prefetch={false}
                           >
                             {formatName(client.name)}
                             <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 text-blue-700" />
@@ -247,6 +248,7 @@ export default function RecentClients({ clientsData }: RecentClientsProps) {
       <div className="text-center mt-4">
         <Link 
           href="/clients" 
+          prefetch={false}
           className="text-xs font-medium text-blue-600 hover:text-blue-800"
           onClick={() => localStorage.setItem('clientsPageStatus', 'pending')}
         >
