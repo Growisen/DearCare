@@ -217,6 +217,7 @@ export default function AdvancePaymentsOverview({
                         href={`/nurses/${payment.nurse_id}`}
                         className="text-gray-700 hover:underline"
                         target="_blank"
+                        prefetch={false}
                         rel="noopener noreferrer"
                       >
                         {payment.nurse_name || "-"}

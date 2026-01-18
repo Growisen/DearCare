@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { X, Trash2 } from 'lucide-react';
 import { ApprovedContent } from '../components/client/ApprovedContent';
@@ -101,7 +101,7 @@ export function ClientDetailsOverlay({
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  async function fetchClientDetails() {
+  const fetchClientDetails = useCallback(async () => {
     if (!client.id) return;
     setLoading(true);
     const result = await getClientDetails(client.id);
@@ -111,11 +111,11 @@ export function ClientDetailsOverlay({
       setCurrentClientStatus(result.client.status);
     }
     setLoading(false);
-  }
+  }, [client.id, setLoading, setRejectionReason, setDetailedClient, setCurrentClientStatus]);
 
   useEffect(() => {
     fetchClientDetails();
-  }, [client.id]);
+  }, [client.id, fetchClientDetails]);
 
   const handleSaveEdit = async (updatedClient: DetailedClient) => {
     setIsUpdating(true);
@@ -481,6 +481,7 @@ export function ClientDetailsOverlay({
                   <Link 
                     href={isClientIndividual() ? `/client-profile/${client?.id}` : `/client-profile/organization-client/${client?.id}`} 
                     target='_blank'
+                    prefetch={false}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-transparent 
                               rounded-sm text-xs font-medium text-white bg-blue-600 
                               hover:bg-blue-700 transition-colors shadow-none"

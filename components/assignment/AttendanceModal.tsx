@@ -64,7 +64,7 @@ export function AttendanceModal({
         }
       }
     }
-  }, [modalOpen, selectedRecord, shiftStartTime, shiftEndTime, setCheckIn, setCheckOut]);
+  }, [modalOpen, selectedRecord, shiftStartTime, shiftEndTime, setCheckIn, setCheckOut, checkIn, checkOut]);
   
   function formatTimeFor24Hour(timeStr: string): string {
     if (timeStr.includes('AM') || timeStr.includes('PM')) {

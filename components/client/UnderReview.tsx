@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   updateClientStatus, 
   savePatientAssessment, 
@@ -172,7 +172,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       
       setIsSubmitting(true);
       
-      // Update client status to 'rejected' with the rejection reason
        const result = await updateClientStatus(clientId, 'rejected', rejectionReason);
       
       if (!result.success) {
@@ -183,7 +182,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       
       toast.success('Client rejected successfully');
       
-      // Call the onStatusChange callback to refresh the client list
       if (onStatusChange) {
         onStatusChange('rejected');
       }
@@ -220,7 +218,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     }
   };
 
-  const checkFormStatus = async () => {
+  const checkFormStatus = useCallback(async () => {
     try {
       setFormStatus(prev => ({ ...prev, isChecking: true }));
       
@@ -243,7 +241,7 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
       console.error(error instanceof Error ? error.message : 'Failed to check form status');
       setFormStatus(prev => ({ ...prev, isChecking: false }));
     }
-  };
+  }, [clientId]);
 
   const generateSharableLink = () => {
     const baseUrl = window.location.origin;
@@ -271,14 +269,12 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
     if (clientType === "individual") {
       checkFormStatus();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId, clientType]);
+  }, [clientId, clientType, checkFormStatus]);
   
 
   return (
     <div className="space-y-6">
       {clientType === "individual" ? (
-        // Content for individual clients
         <>
           {!showForm ? (
             <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-sm">
@@ -295,14 +291,12 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                   <Link 
                     href={`/client-profile/${clientId}`} 
                     target='_blank'
-                    
+                    prefetch={false}
                   >
                     View Client Profile
                   </Link>
                 </button>
                 
-                
-                {/* Add approve/reject buttons directly on this screen */}
                 <div className="flex w-full gap-4">
                   <button 
                     className="w-3/5 px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 disabled:bg-green-400"
@@ -321,7 +315,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                 </div>
               </div>
               ) : (
-                // When form is not filled, show the regular options
                 <div className="w-full max-w-md">
                   <p className="text-lg text-gray-700 mb-6">Please select how you would like to proceed with the client assessment</p>
                   <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
@@ -342,7 +335,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
                     </button>
                   </div>
                   
-                  {/* New sharable link button */}
                   <button 
                     onClick={generateSharableLink}
                     className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-sm hover:bg-indigo-700 focus:outline-none flex items-center justify-center"
@@ -366,7 +358,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
             </div>
           ) : (
             <>
-              {/* Back button and form components */}
               <div className="mb-4">
                 <button 
                   onClick={() => setShowForm(false)}
@@ -413,7 +404,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
           )}
         </>
       ) : (
-        // Content for non-individual clients
         <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-sm">
           
           <div className="flex w-full gap-4 max-w-md mx-auto">
@@ -447,7 +437,6 @@ export function UnderReviewContent({ clientId, clientType, onClose, onStatusChan
         isSubmitting={isSubmitting}
       />
 
-      {/* New sharable link modal */}
       {showLinkModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-sm p-6 w-full max-w-md">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   uploadClientFiles, 
   deleteClientFile, 
@@ -19,7 +19,7 @@ export const useClientFiles = (clientId: string, shouldFetch: boolean = false) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
     if (!shouldFetch) return;
     
     setLoading(true);
@@ -47,7 +47,7 @@ export const useClientFiles = (clientId: string, shouldFetch: boolean = false) =
     } finally {
       setLoading(false);
     }
-  };
+  }, [clientId, shouldFetch]);
 
   const uploadFiles = async (files: File[], tags: Record<string, string>): Promise<void> => {
     try {
@@ -81,8 +81,7 @@ export const useClientFiles = (clientId: string, shouldFetch: boolean = false) =
 
   useEffect(() => {
     fetchFiles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId, shouldFetch]);
+  }, [fetchFiles]);
 
   return {
     files,

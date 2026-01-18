@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getNurseAssignments, updateNurseAssignment, deleteNurseAssignment } from '@/app/actions/scheduling/shift-schedule-actions';
 import { listNursesWithAssignments } from '@/app/actions/staff-management/add-nurse';
 import { NurseAssignment } from '@/types/client.types';
@@ -100,7 +100,7 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
 
 
 
-  const fetchNurses = async () => {
+  const fetchNurses = useCallback(async () => {
     setIsLoadingNurses(true);
     try {
       const response = await listNursesWithAssignments(
@@ -124,9 +124,9 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     } finally {
       setIsLoadingNurses(false);
     }
-  };
+  }, [currentPage, pageSize, filters]);
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     setIsLoadingAssignments(true);
     try {
       const assignmentsResponse = await getNurseAssignments(clientId);
@@ -157,16 +157,16 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     } finally {
       setIsLoadingAssignments(false);
     }
-  };
+  }, [clientId]);
 
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
     try {
       await fetchAssignments();
     } catch (error) {
       console.error('Error refetching nurse assignments data:', error);
       toast.error('Failed to refresh nurse assignments data');
     }
-  };
+  }, [fetchAssignments]);
 
   const handleOpenNurseList = async () => {
     setIsLoadingNurses(true);
@@ -177,13 +177,13 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     setCurrentPage(page);
   };
 
-  const updateFilters = (newFilters: typeof filters) => {
+  const updateFilters = useCallback((newFilters: typeof filters) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters
     }));
     setCurrentPage(1);
-  };
+  }, []);
 
   const handleAssignNurse = async (nurseId: string) => {
     setShowNurseList(false);
@@ -295,13 +295,13 @@ export const useNurseAssignments = (clientId: string, activeTab?: string) => {
     if (activeTab === 'assignments') {
       fetchAssignments();
     }
-  }, [clientId, activeTab]); 
+  }, [clientId, activeTab, fetchAssignments]); 
   
   useEffect(() => {
     if (showNurseList) {
       fetchNurses();
     }
-  }, [currentPage, pageSize, filters, showNurseList]);
+  }, [currentPage, pageSize, filters, showNurseList, fetchNurses]);
 
   return {
     nurseAssignments,

@@ -98,6 +98,7 @@ const NurseCard: React.FC<NurseCardProps> = ({
           <Link 
             href={`/nurses/${nurse._id}`}
             target="_blank"
+            prefetch={false}
             rel="noopener noreferrer"
             className="px-2 py-1 text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition-colors text-xs font-medium text-center whitespace-nowrap block"
           >

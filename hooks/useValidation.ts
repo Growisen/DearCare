@@ -69,7 +69,6 @@ export const usePasswordValidation = () => {
     return true;
   };
 
-  // Update password match state when passwords change
   useEffect(() => {
     if (newPassword && confirmPassword) {
       if (newPassword !== confirmPassword) {

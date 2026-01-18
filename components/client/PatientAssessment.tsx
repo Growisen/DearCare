@@ -167,7 +167,7 @@ export default function PatientAssessment({ clientId, isEditing, onSave, formRef
     };
 
     fetchAssessmentData();
-  }, [clientId, setFormData]);
+  }, [clientId, setFormData, selectedAssessment]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

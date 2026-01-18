@@ -21,8 +21,7 @@ export const ClientCategorySelector = ({ selectedCategory, onCategoryChange }: C
     if (orgLabel && selectedCategory !== orgLabel) {
       onCategoryChange(orgLabel as ClientCategory);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgLabel]);
+  }, [orgLabel, selectedCategory, onCategoryChange]);
 
   if (!orgLabel) return null;
 

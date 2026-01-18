@@ -9,7 +9,7 @@ import {
 import { format, isBefore, parseISO } from "date-fns"
 import { CalendarIcon, ClockIcon, UserIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
 import { AlertCircle, Building, CheckCircle } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import Link from "next/link" 
 import ConfirmationModal from "@/components/common/ConfirmationModal"
 import { useDashboardData } from "@/hooks/useDashboardData"
@@ -30,12 +30,7 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
   const [showCheckInConfirmation, setShowCheckInConfirmation] = useState(false)
   const [showCheckOutConfirmation, setShowCheckOutConfirmation] = useState(false)
   
-  useEffect(() => {
-    fetchAttendanceData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignment.id])
-  
-  async function fetchAttendanceData() {
+  const fetchAttendanceData = useCallback(async () => {
     setLoading(true)
     try {
       const response = await getTodayAttendanceForAssignment(assignment.id)
@@ -51,7 +46,11 @@ export function AssignmentDetailsOverlay({ assignment, onClose }: AssignmentDeta
     } finally {
       setLoading(false)
     }
-  }
+  }, [assignment.id])
+
+  useEffect(() => {
+    fetchAttendanceData()
+  }, [assignment.id, fetchAttendanceData])
 
 function calculateShiftDurationInHours(startTime: string, endTime: string): number {
   try {

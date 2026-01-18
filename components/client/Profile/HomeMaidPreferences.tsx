@@ -6,7 +6,7 @@ import { useHousemaidData } from "@/hooks/useHousemaidData";
 import InfoField from "./InfoField";
 import { 
   Calendar, Home, Users, CheckSquare, 
-  AlertCircle, Clock, FileText 
+  AlertCircle, Clock, FileText, Link as LinkIcon, ExternalLink 
 } from "lucide-react";
 import EditHomeMaidForm from "@/components/open-form/EditHomeMaidForm";
 import ModalPortal from "@/components/ui/ModalPortal";
@@ -40,10 +40,7 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
       }}
       title="Copy full link to open form"
     >
-      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path d="M15 7h2a5 5 0 0 1 0 10h-2M9 17H7a5 5 0 0 1 0-10h2" />
-        <path d="M8 12h8" />
-      </svg>
+      <LinkIcon className="w-4 h-4" />
       {copySuccess ? "Copied!" : "Copy Link"}
     </button>
   );
@@ -53,43 +50,39 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
       href={`/home-maid-preferences/${clientId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="px-4 py-2 rounded flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-slate-200"
+      className="px-4 py-2 rounded-sm flex items-center gap-1 bg-blue-700 text-white hover:bg-blue-800 border border-slate-200"
       title="Open preferences in new tab"
     >
-      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-        <polyline points="15 3 21 3 21 9" />
-        <line x1="10" y1="14" x2="21" y2="3" />
-      </svg>
+      <ExternalLink className="w-4 h-4" />
       Open in New Tab
     </a>
   );
 
   if (isLoading) return (
-    <div className="py-12 text-center text-gray-500 animate-pulse">
-      <div className="flex justify-end mb-4 space-x-2">
+    <div className="text-center text-gray-500 animate-pulse min-h-[200px]">
+      <div className="flex justify-end space-x-2">
         {CopyLinkButton}
         {ExternalLinkButton}
       </div>
-      Loading preferences...
+      <div className="mt-4">Loading preferences...</div>
     </div>
   );
   if (error) return (
-    <div className="py-12 text-center text-red-600 bg-red-50 rounded-sm border border-red-100">
-      <div className="flex justify-end mb-4 space-x-2">
+    <div className="text-center text-red-600 bg-red-50 rounded-sm border border-red-100 min-h-[200px]">
+      <div className="flex justify-end space-x-2">
         {CopyLinkButton}
         {ExternalLinkButton}
       </div>
-      {error}
+      <div className="mt-4">{error}</div>
     </div>
   );
   if (!selectedRequest) return (
-    <div className="py-12 text-center text-gray-500 italic">
-      <div className="flex justify-end mb-4 space-x-2">
+    <div className="text-center text-gray-500 italic min-h-[400px]">
+      <div className="flex justify-end space-x-2">
         {CopyLinkButton}
         {ExternalLinkButton}
       </div>
-      No home maid preferences found.
+      <div className="mt-4">No home maid preferences found.</div>
     </div>
   );
 
@@ -126,15 +119,15 @@ const HomeMaidPreferences: React.FC<HomeMaidPreferencesProps> = ({ clientId }) =
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex justify-end mb-4 space-x-2">
+      <div className="flex justify-end space-x-2">
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={() => setShowModal(true)}
         >
           Edit
         </button>
-        {/* {CopyLinkButton}
-        {ExternalLinkButton} */}
+        {CopyLinkButton}
+        {ExternalLinkButton}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title="Service Schedule" icon={<Calendar className="w-4 h-4" />}>
