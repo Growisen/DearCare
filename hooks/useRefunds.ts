@@ -16,16 +16,17 @@ export interface Refund {
 }
 
 export interface RefundPaymentsFilters {
-  createdAt?: string;
-  refundDate?: string;
+  createdAt?: Date | null;
+  refundDate?: Date | null;
   search?: string;
   paymentType?: string;
   page?: number;
   limit?: number;
+  date: Date | null;
 }
 
 async function fetchRefunds(filters: RefundPaymentsFilters): Promise<{ refunds: Refund[]; totalCount: number }> {
-  const res = await fetchAllRefunds(filters);
+  const res = await fetchAllRefunds({...filters, createdAt: filters.date, refundDate: filters.date});
   if (!res.success) throw new Error(res.error || "Failed to fetch refunds");
   console.log("Fetched Refund Payments Response:", res.refunds);
   return {
