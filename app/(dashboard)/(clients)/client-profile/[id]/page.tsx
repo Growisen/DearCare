@@ -30,6 +30,7 @@ import Reassessment from '@/components/client/Profile/Reassessment';
 import HomeMaidPreferences from '@/components/client/Profile/HomeMaidPreferences';
 import ChildCarePreferences from '@/components/client/Profile/BabyCarePreferences';
 import DeliveryCarePreferences from '@/components/client/Profile/DeliveryCarePreferences';
+import RefundPayments from '@/components/client/Profile/RefundPayments';
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -298,6 +299,14 @@ const PatientProfilePage = () => {
             {activeTab === 'paymentDetails' && status === 'approved' && (
               <div className="space-y-6">
                 <ClientPaymentHistory clientId={id}  tenant={patient.clientCategory} />
+              </div>
+            )}
+
+            {activeTab === 'refundPayments' && status === 'approved' && (
+              <div className="space-y-6">
+                <RefundPayments
+                  clientId={id}
+                />
               </div>
             )}
 

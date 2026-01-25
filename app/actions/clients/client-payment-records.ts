@@ -4,32 +4,15 @@ import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { logger } from '@/utils/logger';
 import { getOrgMappings } from '@/app/utils/org-utils';
 import { getAuthenticatedClient } from '@/app/utils/auth-utils';
+import { SavePaymentGroupInput } from '@/types/clientPayment.types';
+import toCamelCase from '@/utils/toCamelCase';
 
-interface LineItemInput {
-  fieldName: string;
-  amount: number;
-  gst?: number;
-  totalWithGst?: number;
-  commission?: number;
-}
-
-interface SavePaymentGroupInput {
-  clientId: string;
-  groupName: string;
-  lineItems: LineItemInput[];
-  dateAdded?: string;
-  notes?: string;
-  showToClient?: boolean;
-  modeOfPayment?: string;
-  startDate?: string;
-  endDate?: string;  
-}
 
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
     const { supabase } = await getAuthenticatedClient();
 
-    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate } = input;
+    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate, paymentType } = input;
 
     if (!lineItems || lineItems.length === 0) {
       return { success: false, error: "At least one line item is required." };
@@ -62,6 +45,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
         mode_of_payment: modeOfPayment || null,
         start_date: startDate ? new Date(startDate).toISOString() : null,
         end_date: endDate ? new Date(endDate).toISOString() : null, 
+        payment_type: paymentType || null,
       }])
       .select()
       .single();
@@ -215,6 +199,7 @@ type UnifiedPaymentViewRecord = {
   client_status?: string;
   start_date: string | null;
   end_date: string | null;
+  payment_type: string | null;
 };
 
 type NurseClientJoin = {
@@ -275,8 +260,20 @@ export async function fetchPaymentOverview({
         paymentsQuery = paymentsQuery.ilike('client_display_name', `%${search}%`);
       }
 
+      if (
+        filters.paymentType &&
+        (filters.paymentType === "cash" || filters.paymentType === "bank transfer")
+      ) {
+        paymentsQuery = paymentsQuery.eq('payment_type', filters.paymentType);
+      }
+
       Object.entries(filters).forEach(([key, value]) => {
-        if (key !== "date" && value !== undefined && value !== "") {
+        if (
+          key !== "date" &&
+          key !== "paymentType" &&
+          value !== undefined &&
+          value !== ""
+        ) {
           paymentsQuery = paymentsQuery.eq(key, value);
         }
       });
@@ -355,6 +352,7 @@ export async function fetchPaymentOverview({
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
+        paymentType: p.payment_type || '',
         assignedNurses: relevantNurses,
         startDate: p.start_date,
         endDate: p.end_date,
@@ -404,8 +402,6 @@ export async function fetchClientPaymentAggregates({
 
     const { clientsOrg } = getOrgMappings(organization);
 
-    console.log('Fetching aggregates with:', { clientsOrg, startDate, computedEndDate, searchText });
-
     const { data, error } = await supabase
       .rpc('get_client_payment_aggregates', {
         filter_client_category: clientsOrg,
@@ -445,6 +441,7 @@ export interface UpdatePaymentGroupInput {
   startDate?: string;
   endDate?: string;
   approved?: boolean;
+  paymentType?: string;
 }
 
 export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
@@ -459,7 +456,8 @@ export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
     if (input.startDate !== undefined) updateFields.start_date = input.startDate ? new Date(input.startDate).toISOString() : null;
     if (input.endDate !== undefined) updateFields.end_date = input.endDate ? new Date(input.endDate).toISOString() : null;
     if (input.approved !== undefined) updateFields.approved = input.approved;
-    
+    if (input.paymentType !== undefined) updateFields.payment_type = input.paymentType;
+
     const { error } = await supabase
       .from('client_payment_records')
       .update(updateFields)
@@ -479,3 +477,151 @@ export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
     };
   }
 }
+
+export interface RefundInput {
+  amount: number;
+  reason?: string;
+  paymentMethod: string;
+  paymentType: string;
+  refundDate: string;
+}
+
+export const createRefundPayment = async (input: RefundInput, clientId: string) => {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    if (input.amount <= 0) {
+      return { success: false, error: "Refund amount must be greater than zero." };
+    }
+
+    const { error } = await supabase
+      .from('crm_refund_payments')
+      .insert({
+        client_id: clientId,
+        amount: input.amount,
+        reason: input.reason || null,
+        payment_method: input.paymentMethod,
+        payment_type: input.paymentType,
+        refund_date: input.refundDate ? new Date(input.refundDate).toISOString() : new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error("Supabase Error:", error.message);
+      return { success: false, error: "Failed to create refund" };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Unknown Error:", error);
+    return {
+      success: false,
+      error: 'An unknown error occurred'
+    };
+  }
+};
+
+export const fetchRefundPayments = async (clientId: string) => {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    if (!clientId) {
+      return { success: false, error: "Client ID is required" };
+    }
+
+    const { data, error } = await supabase
+      .from('crm_refund_payments')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Supabase Error:", error.message);
+      return { success: false, error: "Failed to fetch refunds" };
+    }
+
+    return { success: true, refunds: data?.map(toCamelCase) };
+  } catch (error: unknown) {
+    console.error("Unknown Error:", error);
+    return {
+      success: false,
+      error: 'An unknown error occurred'
+    };
+  }
+};
+
+interface RefundPaymentsFilters {
+  createdAt?: string;
+  refundDate?: string;
+  search?: string;
+  paymentType?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const fetchAllRefunds = async (filters: RefundPaymentsFilters) => {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const {
+      createdAt,
+      refundDate,
+      search,
+      paymentType,
+      page = 1,
+      limit = 10,
+    } = filters;
+
+    let query = supabase
+      .from('crm_client_refund_details_view')
+      .select('*', { count: 'exact' });
+
+    if (createdAt) {
+      const start = new Date(createdAt);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(createdAt);
+      end.setHours(23, 59, 59, 999);
+      query = query.gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
+    }
+
+    if (refundDate) {
+      const start = new Date(refundDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(refundDate);
+      end.setHours(23, 59, 59, 999);
+      query = query.gte('refund_date', start.toISOString()).lte('refund_date', end.toISOString());
+    }
+
+    if (paymentType) {
+      query = query.eq('payment_type', paymentType);
+    }
+
+    if (search) {
+      query = query.ilike('reason', `%${search}%`);
+    }
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    query = query.order('created_at', { ascending: false }).range(from, to);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error("Supabase Error:", error.message);
+      return { success: false, error: "Failed to fetch refunds" };
+    }
+
+    return {
+      success: true,
+      refunds: data?.map(toCamelCase),
+      total: count ?? 0,
+      page,
+      limit,
+    };
+  } catch (error: unknown) {
+    console.error("Unknown Error:", error);
+    return {
+      success: false,
+      error: 'An unknown error occurred'
+    };
+  }
+};

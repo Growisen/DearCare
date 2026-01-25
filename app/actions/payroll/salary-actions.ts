@@ -3,6 +3,7 @@
 import { StaffSalary } from '@/types/staffSalary.types';
 import { logger } from '@/utils/logger';
 import { getAuthenticatedClient } from "@/app/actions/helpers/auth.helper";
+import { updateSalaryPaymentStatus } from '@/app/actions/payroll/calculate-nurse-salary';
 
 interface Nurse {
   nurse_id: number;
@@ -509,7 +510,9 @@ export async function fetchNurseSalaryPayments(nurseId: number) {
       salary_config:salary_config_id (
         id,
         hourly_rate
-      )
+      ),
+      payment_history,
+      balance_amount
     `)
     .eq('nurse_id', nurseId)
     .order('pay_period_end', { ascending: false });
@@ -542,6 +545,64 @@ export async function fetchAggregatedSalaries(nurseId: number) {
     return {
       success: false,
       error: error instanceof Error ? error.message : "An unknown error occurred",
+    };
+  }
+}
+
+export interface ApproveSalaryPaymentParams {
+  paymentId: number;
+  nurseId: number;
+  netSalary: number;
+  info: string;
+  tenant: string;
+  paymentType?: string;
+}
+
+export async function approveSalaryPayment({
+  paymentId,
+  nurseId,
+  netSalary,
+  info,
+  tenant,
+  paymentType,
+}: ApproveSalaryPaymentParams) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        salary_id: paymentId,
+        nurse_id: String(nurseId),
+        amount: netSalary,
+        payment_type: "outgoing",
+        pay_status: "un_paid",
+        description: info,
+        tenant,
+      }),
+    }
+  );
+  const result = await response.json();
+
+  if (!result.error) {
+    const statusResult = await updateSalaryPaymentStatus({
+      paymentId,
+      status: "approved",
+      paymentType,
+      amount: netSalary,
+      info,
+    });
+    return {
+      ...result,
+      statusResult,
+      success: statusResult.success,
+    };
+  } else {
+    return {
+      ...result,
+      success: false,
     };
   }
 }

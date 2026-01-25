@@ -17,6 +17,8 @@ export default function HourlySalaryCard({
 }: HourlySalaryCardProps) {
   const total = aggregatedSalaries.approved + aggregatedSalaries.pending;
 
+  console.log('Aggregated Salaries:', aggregatedSalaries);
+
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",

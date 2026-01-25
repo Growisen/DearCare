@@ -22,6 +22,7 @@ type Payment = {
   endDate?: string;
   modeOfPayment?: string;
   assignedNurses?: AssignedNurse[];
+  paymentType?: string;
 };
 
 type PaymentTableProps = {
@@ -113,6 +114,14 @@ export default function PaymentTable({ payments }: PaymentTableProps) {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                         {payment.modeOfPayment || "N/A"}
                       </span>
+                      {payment.paymentType && (
+                        <>
+                          <br />
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                            {payment.paymentType}
+                          </span>
+                        </>
+                      )}
                     </td>
                     <td className="py-4 px-6">
                       {renderNurses(payment.assignedNurses)}
