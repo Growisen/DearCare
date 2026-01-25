@@ -14,7 +14,9 @@ import UpcomingSchedules from "@/components/dashboard/UpcomingSchedules"
 import RecentClients from "@/components/dashboard/RecentClients"
 import PaymentOverview from "@/components/dashboard/PaymentOverview"
 import AdvancePaymentsOverview from "@/components/dashboard/AdvancePaymentsOverview"
+import RefundOverview from "@/components/dashboard/RefundsOverview"
 import { getGreeting } from "@/utils/dateUtils"
+import { useRefunds, RefundPaymentsFilters, Refund } from "@/hooks/useRefunds"
 
 export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -25,6 +27,9 @@ export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState("")
   const [paymentFilters, setPaymentFilters] = useState<{ date?: Date | null; paymentType?: string }>({})
   const [advancePaymentFilters, setAdvancePaymentFilters] = useState<{ date?: Date | null; paymentType?: string }>({})
+  const [refundFilters, setRefundFilters] = useState<RefundPaymentsFilters>({})
+  const [refundSearchTerm, setRefundSearchTerm] = useState("")
+  const [debouncedRefundSearch, setDebouncedRefundSearch] = useState("")
 
   const { 
     page, 
@@ -32,6 +37,14 @@ export default function DashboardPage() {
     changePage, 
     changePageSize, 
     resetPage 
+  } = usePagination()
+
+  const { 
+    page: refundsPage, 
+    pageSize: refundsPageSize, 
+    changePage: changeRefundsPage, 
+    changePageSize: changeRefundsPageSize, 
+    resetPage: resetRefundsPage 
   } = usePagination()
 
   useEffect(() => {
@@ -48,6 +61,23 @@ export default function DashboardPage() {
     }, 500)
     return () => clearTimeout(timer)
   }, [searchTerm, resetPage, debouncedSearch])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedRefundSearch(refundSearchTerm)
+      if (refundSearchTerm !== debouncedRefundSearch) {
+        resetRefundsPage()
+      }
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [refundSearchTerm, resetRefundsPage, debouncedRefundSearch])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedRefundSearch(refundSearchTerm)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [refundSearchTerm])
 
   const advancePaymentOptions = useMemo(() => ({
     selectedDate,
@@ -68,6 +98,17 @@ export default function DashboardPage() {
     advancePaymentsTotals,
     exportAdvancePaymentsCSV,
   } = useAdvancePaymentsData(advancePaymentOptions)
+
+  const { 
+    refunds,
+    isLoading: refundsLoading, 
+    totalCount: refundsTotalCount 
+  } = useRefunds({
+    ...refundFilters,
+    search: debouncedRefundSearch,
+    page: refundsPage,
+    limit: refundsPageSize,
+  })
 
   const dashboardData = useMemo(() => 
     dashboard.data?.success ? dashboard.data.data : null, 
@@ -112,6 +153,21 @@ export default function DashboardPage() {
   const handlePrevPage = useCallback(() => changePage(page - 1, totalPages), [changePage, page, totalPages])
   const handleNextPage = useCallback(() => changePage(page + 1, totalPages), [changePage, page, totalPages])
 
+  const totalRefundPages = Math.ceil(refundsTotalCount / refundsPageSize) || 1
+
+  const handleRefundsPageChange = useCallback((p: number) => 
+    changeRefundsPage(p, totalRefundPages), 
+  [changeRefundsPage, totalRefundPages]
+  )
+  const handleRefundsPrevPage = useCallback(() => 
+    changeRefundsPage(refundsPage - 1, totalRefundPages), 
+  [changeRefundsPage, refundsPage, totalRefundPages]
+  )
+  const handleRefundsNextPage = useCallback(() =>
+    changeRefundsPage(refundsPage + 1, totalRefundPages),
+  [changeRefundsPage, refundsPage, totalRefundPages]
+  )
+
   useEffect(() => {
     if (setPaymentFilters) {
       setPaymentFilters(prev => ({
@@ -120,6 +176,15 @@ export default function DashboardPage() {
       }))
     }
   }, [selectedDate, setPaymentFilters])
+
+  useEffect(() => {
+    if (setRefundFilters) {
+      setRefundFilters(prev => ({
+        ...prev,
+        date: selectedDate
+      }))
+    }
+  }, [selectedDate, setRefundFilters])
 
   if (error || (dashboard.data && !dashboard.data.success)) {
     return <ErrorState message={errorMessage} />
@@ -167,7 +232,24 @@ export default function DashboardPage() {
         paymentFilters={paymentFilters} 
         setPaymentFilters={setPaymentFilters}
       />
-      
+
+      <RefundOverview
+        refunds={refunds as Refund[] || []}
+        loading={refundsLoading}
+        filters={refundFilters}
+        setFilters={setRefundFilters}
+        searchTerm={refundSearchTerm}
+        setSearchTerm={setRefundSearchTerm}
+        page={refundsPage}
+        pageSize={refundsPageSize}
+        totalPages={totalRefundPages}
+        totalCount={refundsTotalCount}
+        onNextPageAction={handleRefundsNextPage}
+        onPreviousPageAction={handleRefundsPrevPage}
+        onPageChangeAction={handleRefundsPageChange}
+        setPageSizeAction={changeRefundsPageSize}
+      />
+
       <AdvancePaymentsOverview 
         loading={advancePayments.isLoading}
         isExporting={isExporting}

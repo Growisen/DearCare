@@ -5,6 +5,9 @@ import { differenceInCalendarDays, max, min } from "date-fns";
 import { getAuthenticatedClient } from "@/app/actions/helpers/auth.helper";
 import { jsonToCSV } from '@/utils/jsonToCSV';
 import { fetchAllRecords } from '@/app/actions/helpers/fetchAll';
+import {
+  PaymentHistoryEntry
+} from "@/types/nurse.salary.types";
 
 function calculateShiftHours(startTime: string, endTime: string): number {
   try {
@@ -966,15 +969,18 @@ export async function createAdvanceSalaryPayment({
   };
 }
 
-
 export async function updateSalaryPaymentStatus({
   paymentId,
   status,
   paymentType,
+  amount,
+  info,
 }: {
   paymentId: number;
   status: string;
   paymentType?: string;
+  amount?: number;
+  info?: string;
 }) {
   if (!paymentId || !status) {
     return {
@@ -984,15 +990,62 @@ export async function updateSalaryPaymentStatus({
   }
 
   const { supabase } = await getAuthenticatedClient();
+  const timestamp = new Date().toISOString();
+  const validAmount = amount ?? 0;
 
-  const updateObj: { 
-    payment_status: string; 
+  const { data: currentData, error: fetchError } = await supabase
+    .from("salary_payments")
+    .select("payment_history, net_salary")
+    .eq("id", paymentId)
+    .single();
+
+  if (fetchError) {
+    return {
+      success: false,
+      error: "Failed to retrieve existing payment data",
+    };
+  }
+
+  const newHistoryEntry: PaymentHistoryEntry = {
+    status: status,
+    amount: validAmount,
+    payment_type: paymentType ?? null,
+    info: info ?? "",
+    approved_at: timestamp,
+    paid_at: timestamp,
+    created_at: timestamp,
+  };
+
+  const rawHistory = currentData?.payment_history;
+  const existingHistory: PaymentHistoryEntry[] = Array.isArray(rawHistory)
+    ? (rawHistory as PaymentHistoryEntry[])
+    : [];
+
+  const updatedHistory: PaymentHistoryEntry[] = [...existingHistory, newHistoryEntry];
+
+  const totalPaid = updatedHistory.reduce(
+    (sum: number, entry: PaymentHistoryEntry) => sum + (Number(entry.amount) || 0),
+    0
+  );
+
+  const netSalary = Number(currentData?.net_salary) || 0;
+  const newBalance = netSalary - totalPaid;
+
+  const shouldApprove = newBalance <= 0;
+
+  const updateObj: {
+    payment_status: string;
     approved_at?: string;
-    payment_type?: string;
-  } = { payment_status: status };
+    payment_history: PaymentHistoryEntry[];
+    balance_amount: number;
+  } = {
+    payment_status: shouldApprove ? "approved" : "pending",
+    payment_history: updatedHistory,
+    balance_amount: newBalance < 0 ? 0 : newBalance,
+  };
 
-  if (status === "approved") {
-    updateObj.approved_at = new Date().toISOString();
+  if (shouldApprove) {
+    updateObj.approved_at = timestamp;
   }
 
   const { error } = await supabase
@@ -1010,6 +1063,7 @@ export async function updateSalaryPaymentStatus({
   return {
     success: true,
     paymentId,
-    status,
+    status: updateObj.payment_status,
+    balanceAmount: updateObj.balance_amount,
   };
 }

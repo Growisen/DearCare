@@ -4,7 +4,6 @@ import { StaffSalary } from '@/types/staffSalary.types';
 import { logger } from '@/utils/logger';
 import { getAuthenticatedClient } from "@/app/actions/helpers/auth.helper";
 import { updateSalaryPaymentStatus } from '@/app/actions/payroll/calculate-nurse-salary';
-import PaymentTable from './../../../components/client/payments/PaymentTable';
 
 interface Nurse {
   nurse_id: number;
@@ -511,7 +510,9 @@ export async function fetchNurseSalaryPayments(nurseId: number) {
       salary_config:salary_config_id (
         id,
         hourly_rate
-      )
+      ),
+      payment_history,
+      balance_amount
     `)
     .eq('nurse_id', nurseId)
     .order('pay_period_end', { ascending: false });
@@ -590,6 +591,8 @@ export async function approveSalaryPayment({
       paymentId,
       status: "approved",
       paymentType,
+      amount: netSalary,
+      info,
     });
     return {
       ...result,

@@ -38,4 +38,15 @@ export interface SalaryPayment {
   createdAt: string;
   updatedAt: string;
   bonus?: number;
+  balanceAmount: number;
 }
+
+export type PaymentHistoryEntry = {
+  status: string;
+  amount: number;
+  payment_type: string | null;
+  info: string;
+  approved_at: string;
+  paid_at: string;
+  created_at: string;
+};

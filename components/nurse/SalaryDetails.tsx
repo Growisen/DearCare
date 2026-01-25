@@ -95,8 +95,10 @@ const SalaryDetails: React.FC<{ nurseId: number }> = ({ nurseId }) => {
         payment={selectedPayment}
         paymentType={approvalForm.type}
         amount={approvalForm.amount}
+        notes={approvalForm.note}
         onPaymentTypeChange={(type) => setApprovalForm(prev => ({ ...prev, type }))}
         onAmountChange={(amount) => setApprovalForm(prev => ({ ...prev, amount }))}
+        onNotesChange={(notes) => setApprovalForm(prev => ({ ...prev, note: notes }))}
         onClose={closeModal}
         onSubmit={handleApprove}
       />

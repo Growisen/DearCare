@@ -29,6 +29,7 @@ type ProcessingState = {
 type ApprovalFormState = {
   amount: number;
   type: string;
+  note: string;
 };
 
 const PAYMENT_TYPES = ["cash", "bank transfer"];
@@ -38,7 +39,7 @@ export const useNurseSalaryById = (nurseId: number) => {
   const [aggregates, setAggregates] = useState<{ approved: number; pending: number } | null>(null);
   const [loading, setLoading] = useState({ payments: true, aggregates: false });
   const [activeModal, setActiveModal] = useState<ModalState>({ type: "IDLE" });
-  const [approvalForm, setApprovalForm] = useState<ApprovalFormState>({ amount: 0, type: PAYMENT_TYPES[0] });
+  const [approvalForm, setApprovalForm] = useState<ApprovalFormState>({ amount: 0, type: PAYMENT_TYPES[0], note: "" });
   const [processing, setProcessing] = useState<ProcessingState>({ type: "IDLE" });
 
   const { organization } = useOrgStore();
@@ -76,6 +77,8 @@ export const useNurseSalaryById = (nurseId: number) => {
         createdAt: p.created_at ?? "",
         updatedAt: p.updated_at ?? "",
         bonus: p.bonus ?? 0,
+				paymentHistory: p.payment_history,
+        balanceAmount: p.balance_amount ?? 0,
       }));
       setPayments(mappedPayments);
     } catch (error) {
@@ -116,7 +119,7 @@ export const useNurseSalaryById = (nurseId: number) => {
     setActiveModal({ type: "ADD_DEDUCTION", payment });
   
   const openApproveModal = (payment: SalaryPayment) => {
-    setApprovalForm({ amount: payment.netSalary || 0, type: PAYMENT_TYPES[0] });
+    setApprovalForm({ amount: payment.balanceAmount || 0, type: PAYMENT_TYPES[0], note: "" });
     setActiveModal({ type: "APPROVE", payment });
   };
 
@@ -222,8 +225,7 @@ export const useNurseSalaryById = (nurseId: number) => {
   const handleApprove = async () => {
     if (activeModal.type !== "APPROVE") return;
     const { payment } = activeModal;
-    
-    closeModal();
+
     setProcessing({ type: "APPROVING", id: payment.id });
 
     const tenantMap = {
@@ -237,7 +239,7 @@ export const useNurseSalaryById = (nurseId: number) => {
         paymentId: payment.id,
         nurseId,
         netSalary: approvalForm.amount,
-        info: payment.info,
+        info: approvalForm.note,
         tenant: tenant, 
         paymentType: approvalForm.type,
       });
@@ -253,6 +255,7 @@ export const useNurseSalaryById = (nurseId: number) => {
       console.error(error);
       toast.error("Error approving salary payment.");
     } finally {
+			closeModal();
       setProcessing({ type: "IDLE" });
     }
   };
