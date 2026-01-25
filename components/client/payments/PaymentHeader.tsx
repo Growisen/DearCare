@@ -12,6 +12,8 @@ type PaymentHeaderProps = {
   isExporting?: boolean
   dateFilter?: string
   setDateFilterAction?: (value: string) => void
+  paymentType?: string
+  handlePaymentTypeChangeAction?: (type: string) => void
 }
 
 export default function PaymentHeader({
@@ -22,7 +24,9 @@ export default function PaymentHeader({
   onExportAction,
   isExporting,
   dateFilter,
-  setDateFilterAction
+  setDateFilterAction,
+  paymentType,
+  handlePaymentTypeChangeAction
 }: PaymentHeaderProps) {
   return (
     <div className="bg-gray-50 rounded-sm border border-slate-200 overflow-hidden">
@@ -84,15 +88,55 @@ export default function PaymentHeader({
             Search
           </button>
         </div>
-        <div className="w-full flex items-center gap-2">
-          <label htmlFor="dateFilter" className="text-xs text-gray-600">Date:</label>
-          <input
-            id="dateFilter"
-            type="date"
-            className="px-2.5 py-1 rounded-sm text-xs font-medium bg-white border border-slate-200 text-gray-800"
-            value={dateFilter || ""}
-            onChange={e => setDateFilterAction && setDateFilterAction(e.target.value)}
-          />
+        <div className="w-full flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex items-center gap-2">
+            <label htmlFor="dateFilter" className="text-xs text-gray-600">Date:</label>
+            <input
+              id="dateFilter"
+              type="date"
+              className="px-2.5 py-1 rounded-sm text-xs font-medium bg-white border border-slate-200 text-gray-800"
+              value={dateFilter || ""}
+              onChange={e => setDateFilterAction && setDateFilterAction(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap mt-1 sm:mt-0">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Payment Type:</span>
+            <div className="flex gap-1.5 items-center flex-wrap">
+              {["all", "cash", "bank transfer"].map((type) => (
+                <button
+                  key={type}
+                  className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border ${
+                    paymentType === type || (!paymentType && type === "all")
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border-slate-200"
+                  }`}
+                  onClick={() => handlePaymentTypeChangeAction && handlePaymentTypeChangeAction(type)}
+                  type="button"
+                >
+                  {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={handleResetFiltersAction}
+            disabled={
+              (!searchInput || searchInput === "") &&
+              (!dateFilter || dateFilter === "") &&
+              (!paymentType || paymentType === "all")
+            }
+            className={`ml-auto px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border flex items-center gap-1 ${
+              (!searchInput || searchInput === "") &&
+              (!dateFilter || dateFilter === "") &&
+              (!paymentType || paymentType === "all")
+                ? "bg-gray-50 text-gray-400 border-slate-200 cursor-not-allowed"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-slate-200"
+            }`}
+            type="button"
+          >
+            <X className="h-3 w-3" />
+            Reset All
+          </button>
         </div>
       </div>
     </div>

@@ -43,6 +43,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
   const [endDate, setEndDate] = useState("");
   const [editModal, setEditModal] = useState<{ open: boolean; group: EntryGroup | null }>({ open: false, group: null });
   const [approvingId, setApprovingId] = useState<number | null>(null);
+  const [paymentType, setPaymentType] = useState("");
 
   useEffect(() => {
     if (apiEntries) {
@@ -64,6 +65,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
         startDate: group.start_date ?? "",
         endDate: group.end_date ?? "",
         approved: group.approved ?? false,
+        paymentType: group.payment_type ?? "",
       }));
       setEntries(updatedEntries);
     }
@@ -125,6 +127,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
       modeOfPayment: modeOfPayment.trim() || undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
+      paymentType: paymentType || undefined,
     });
 
     if (result.success) {
@@ -248,6 +251,8 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
         setStartDate={setStartDate}
         endDate={endDate}
         setEndDate={setEndDate}
+        paymentType={paymentType}
+        setPaymentType={setPaymentType}
       />
 
       {isLoading ? (

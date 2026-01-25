@@ -25,7 +25,7 @@ export default function PaymentStats({ data, loading }: PaymentStatsProps) {
   ];
 
   return (
-    <div className="w-full mb-6">
+    <div className="w-full mb-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-slate-200 border border-slate-200 rounded-sm overflow-hidden">
         {statItems.map((item) => (
           <div key={item.label} className="bg-white p-4 flex items-center gap-4">

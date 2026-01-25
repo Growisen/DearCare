@@ -15,6 +15,7 @@ const TAB_CONFIG: { id: TabType; label: string; requiresApproval?: boolean }[] =
   { id: 'assignments', label: 'Assignments', requiresApproval: true },
   { id: 'servicePeriods', label: 'Service Periods', requiresApproval: true },
   { id: 'paymentDetails', label: 'Payment Details', requiresApproval: true },
+  { id: 'refundPayments', label: 'Refund Payments', requiresApproval: true },
   { id: 'homeMaidPreferences', label: 'Maid Preferences', requiresApproval: true },
   { id: 'babyCarePreferences', label: 'Baby Care', requiresApproval: true },
   { id: 'deliveryCarePreferences', label: 'Delivery Care', requiresApproval: true },

@@ -24,6 +24,7 @@ type AdvancePayment = {
   nurse_admitted_type: string;
   nurse_reg_no?: string;
   nurse_prev_reg_no?: string;
+  payment_type?: string;
 };
 
 export default function AdvancePaymentsOverview({
@@ -43,6 +44,8 @@ export default function AdvancePaymentsOverview({
   setSearchTermAction,
   onExportAction,
   isExporting = false,
+  paymentType,
+  setPaymentTypeAction,
 }: {
   payments: AdvancePayment[],
   loading?: boolean,
@@ -53,6 +56,8 @@ export default function AdvancePaymentsOverview({
   totalReturned?: number,
   totalPages?: number,
   isExporting?: boolean,
+  paymentType?: string,
+  setPaymentTypeAction?: (paymentType: string) => void,
   onPageChangeAction?: (page: number) => void,
   onPreviousPageAction?: () => void,
   onNextPageAction?: () => void,
@@ -130,21 +135,41 @@ export default function AdvancePaymentsOverview({
         </div>
       </div>
 
-      <div className="mb-4 flex gap-6 flex-wrap">
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Records:</span> {displayTotalRecords}
+      <div className="mb-4 flex gap-6 flex-wrap items-center justify-between">
+        <div className="flex gap-6 flex-wrap">
+          <div className="text-sm text-slate-700">
+            <span className="font-semibold">Total Advance Given:</span> ₹
+            {displayTotalGiven.toLocaleString()}
+          </div>
+          <div className="text-sm text-slate-700">
+            <span className="font-semibold">Total Advance Returned:</span> ₹
+            {displayTotalReturned.toLocaleString()}
+          </div>
+          <div className="text-sm text-slate-700">
+            <span className="font-semibold">Total Advance To Be Returned:</span> ₹
+            {(displayTotalGiven - displayTotalReturned).toLocaleString()}
+          </div>
         </div>
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Advance Given:</span> ₹
-          {displayTotalGiven.toLocaleString()}
-        </div>
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Advance Returned:</span> ₹
-          {displayTotalReturned.toLocaleString()}
-        </div>
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Advance To Be Returned:</span> ₹
-          {(displayTotalGiven - displayTotalReturned).toLocaleString()}
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Payment Type:</span>
+          <div className="flex gap-1.5 items-center flex-wrap">
+            {["all", "cash", "bank transfer"].map((type) => (
+              <button
+                key={type}
+                className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border ${
+                  (paymentType === type || (!paymentType && type === "all"))
+                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : "bg-white text-gray-600 hover:bg-gray-100 border-slate-200"
+                }`}
+                onClick={() => setPaymentTypeAction && setPaymentTypeAction(type)}
+                type="button"
+                disabled={loading}
+              >
+                {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -159,9 +184,6 @@ export default function AdvancePaymentsOverview({
                 Name
               </th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
-                Reg No
-              </th>
-              <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
                 Advance Given
               </th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
@@ -172,6 +194,9 @@ export default function AdvancePaymentsOverview({
               </th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
                 Installment
+              </th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-nowrap">
+                Mode / Type
               </th>
               <th
                 className="py-3 px-4 text-sm font-semibold text-slate-600 whitespace-normal break-words max-w-[140px]"
@@ -223,9 +248,7 @@ export default function AdvancePaymentsOverview({
                         {payment.nurse_name || "-"}
                         <ArrowUpRight className="inline-block ml-1 w-4 h-4 text-blue-700" />
                       </Link>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
-                      <div>
+                      <div className="text-xs text-slate-600 mt-1">
                         <div>
                           <span className="font-semibold">Reg:</span>{" "}
                           {payment.nurse_reg_no || "-"}
@@ -251,6 +274,20 @@ export default function AdvancePaymentsOverview({
                       {payment.installment_amount > 0
                         ? `₹${payment.installment_amount.toLocaleString()}`
                         : "-"}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
+                      <div className="flex flex-col items-center gap-2 mt-1">
+                        {payment.payment_method && (
+                          <span className="text-sm text-slate-600">
+                            {payment.payment_method}
+                          </span>
+                        )}
+                        {payment.payment_type && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {payment.payment_type}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-sm whitespace-normal break-words max-w-[140px]">
                       <div className="flex flex-col gap-1">

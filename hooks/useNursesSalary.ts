@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { 
   fetchSalaryPaymentDebts, 
-  SalaryPaymentDebtRecord, 
   fetchSalaryDataAggregates 
 } from "@/app/actions/payroll/calculate-nurse-salary";
+import { SalaryPaymentDebtRecord } from "@/types/nurse.salary.types";
 
 interface SalaryStats {
   total_approved_amount: number;
@@ -21,6 +21,15 @@ export function useNursesSalary() {
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [dateFilters, setDateFilters] = useState<{
+    createdAt: Date | null;
+    paidAt: Date | null;
+    approvedAt: Date | null;
+  }>({
+    createdAt: null,
+    paidAt: null,
+    approvedAt: null,
+  });
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -41,7 +50,10 @@ export function useNursesSalary() {
         const tableData = await fetchSalaryPaymentDebts({
           page: currentPage,
           pageSize,
-          search: searchQuery
+          search: searchQuery,
+          createdAt: dateFilters.createdAt,
+          paidAt: dateFilters.paidAt,
+          approvedAt: dateFilters.approvedAt,
         });
         if (tableData.success) {
           setSalaryRecords(Array.isArray(tableData.records) ? tableData.records : []);
@@ -56,7 +68,7 @@ export function useNursesSalary() {
       }
     };
     fetchSalaryRecords();
-  }, [currentPage, pageSize, searchQuery]);
+  }, [currentPage, pageSize, searchQuery, dateFilters]);
 
   useEffect(() => {
     const fetchAggregates = async () => {
@@ -64,7 +76,10 @@ export function useNursesSalary() {
       try {
         const statsData = await fetchSalaryDataAggregates({
           search: searchQuery,
-          date: null
+          date: null,
+          createdAt: dateFilters.createdAt ? dateFilters.createdAt.toISOString() : null,
+          paidAt: dateFilters.paidAt ? dateFilters.paidAt.toISOString() : null,
+          approvedAt: dateFilters.approvedAt ? dateFilters.approvedAt.toISOString() : null,
         });
         if (statsData.success && statsData.aggregates) {
           setStats({
@@ -78,12 +93,18 @@ export function useNursesSalary() {
       }
     };
     fetchAggregates();
-  }, [searchQuery]);
+  }, [searchQuery, dateFilters]);
+
 
   const handleResetFilters = () => {
     setSearchInput("");
     setSearchQuery("");
     setCurrentPage(1);
+    setDateFilters({
+      createdAt: null,
+      paidAt: null,
+      approvedAt: null,
+    });
   };
 
   const handleSearchClick = () => {
@@ -100,6 +121,9 @@ export function useNursesSalary() {
         pageSize: totalCount,
         search: searchQuery,
         exportMode: true,
+        createdAt: dateFilters.createdAt,
+        paidAt: dateFilters.paidAt,
+        approvedAt: dateFilters.approvedAt,
       });
       if (exportResult.success && exportResult.records) {
         const blob = new Blob([Array.isArray(exportResult.records) ? 
@@ -137,8 +161,10 @@ export function useNursesSalary() {
     searchInput,
     searchQuery,
     isExporting,
+    dateFilters,
     setSearchInput,
     setPageSize,
+    setDateFilters,
     handleResetFilters,
     handleSearchClick,
     handleExport,

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { formatDateToDDMMYYYY } from "@/utils/dateUtils";
 import { SalaryPayment } from "../types";
+import PaymentHistoryModal, { PaymentHistoryEntry } from "./PaymentHistoryModal";
 
 interface PaymentHistoryTableProps {
   payments: SalaryPayment[];
@@ -27,6 +28,8 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   approvingId,
   loading,
 }) => {
+  const [selectedHistory, setSelectedHistory] = useState<PaymentHistoryEntry[] | null>(null);
+
   return (
     <div className="w-full bg-white border border-slate-200 rounded-sm">
       <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
@@ -64,6 +67,9 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
               <th scope="col" className="px-6 py-3 font-medium text-right tracking-wider">
                 Net Salary
               </th>
+              <th scope="col" className="px-6 py-3 font-medium text-right tracking-wider">
+                Balance Amount
+              </th>
               <th scope="col" className="px-6 py-3 font-medium tracking-wider min-w-[140px]">
                 Status
               </th>
@@ -80,47 +86,12 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     <div className="h-4 bg-slate-200 rounded w-32 mb-2"></div>
                     <div className="h-3 bg-slate-100 rounded w-20"></div>
                   </td>
-                  
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="h-4 bg-slate-200 rounded w-16"></div>
-                      <div className="h-3 bg-slate-100 rounded w-12"></div>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end">
-                      <div className="h-4 bg-slate-200 rounded w-16"></div>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end">
-                      <div className="h-4 bg-slate-200 rounded w-20"></div>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end">
-                      <div className="h-5 bg-slate-300 rounded w-24"></div>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="h-6 bg-slate-200 rounded w-20"></div>
-                    <div className="h-3 bg-slate-100 rounded w-32 mt-2"></div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-2">
-                      <div className="h-8 bg-slate-200 rounded w-full"></div>
-                      <div className="flex gap-1.5">
-                        <div className="h-7 bg-slate-100 rounded flex-1"></div>
-                        <div className="h-7 bg-slate-100 rounded flex-1"></div>
-                      </div>
-                      <div className="h-7 bg-slate-100 rounded w-full"></div>
-                    </div>
-                  </td>
+                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-16 ml-auto"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-16 ml-auto"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-20 ml-auto"></div></td>
+                  <td className="px-6 py-4"><div className="h-5 bg-slate-300 rounded w-24 ml-auto"></div></td>
+                  <td className="px-6 py-4"><div className="h-6 bg-slate-200 rounded w-20"></div></td>
+                  <td className="px-6 py-4"><div className="h-8 bg-slate-200 rounded w-full"></div></td>
                 </tr>
               ))
             ) : payments.length === 0 ? (
@@ -179,6 +150,11 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                         ₹{payment.netSalary?.toLocaleString() ?? "—"}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                      <span className="font-semibold text-slate-900">
+                        ₹{payment.balanceAmount?.toLocaleString() ?? "—"}
+                      </span>
+                    </td>
 
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-start gap-2">
@@ -223,45 +199,56 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                         </a>
 
                         {isPending && (
-                          <button
-                            type="button"
-                            onClick={() => handleApprove(payment)}
-                            disabled={approvingId === payment.id}
-                            className="w-full px-2 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm hover:bg-emerald-100 transition-colors disabled:opacity-50"
-                          >
-                            {approvingId === payment.id
-                              ? "Approving..."
-                              : "Approve"}
-                          </button>
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleApprove(payment)}
+                              disabled={approvingId === payment.id}
+                              className="w-full px-2 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                            >
+                              {approvingId === payment.id ? "Approving..." : "Approve"}
+                            </button>
+
+                            {(!payment.paymentHistory || payment.paymentHistory.length === 0) && (
+                              <>
+                                <div className="flex gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => onOpenBonusModal(payment)}
+                                    className="flex-1 px-2 py-1 text-xs font-medium text-blue-700 bg-white border border-blue-200 rounded-sm hover:bg-blue-50 transition-colors"
+                                  >
+                                    Bonus
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => onOpenDeductionModal(payment)}
+                                    className="flex-1 px-2 py-1 text-xs font-medium text-red-700 bg-white border border-red-200 rounded-sm hover:bg-red-50 transition-colors"
+                                  >
+                                    Deduction
+                                  </button>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenConfirmModal(payment)}
+                                  disabled={recalculatingId === payment.id}
+                                  className="w-full px-2 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-sm hover:bg-slate-50 hover:text-indigo-600 transition-colors"
+                                >
+                                  {recalculatingId === payment.id ? "Recalculating..." : "Recalculate"}
+                                </button>
+                              </>
+                            )}
+                          </>
                         )}
 
-                        <div className="flex gap-1.5">
+                        {payment.paymentHistory && payment.paymentHistory.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => onOpenBonusModal(payment)}
-                            className="flex-1 px-2 py-1 text-xs font-medium text-blue-700 bg-white border border-blue-200 rounded-sm hover:bg-blue-50 transition-colors"
+                            className="w-full px-2 py-1 text-xs font-medium text-indigo-700 bg-white border border-indigo-200 rounded-sm hover:bg-indigo-50 transition-colors"
+                            onClick={() => setSelectedHistory(payment.paymentHistory ?? null)}
                           >
-                            Bonus
+                            View Payment History ({payment.paymentHistory.length})
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => onOpenDeductionModal(payment)}
-                            className="flex-1 px-2 py-1 text-xs font-medium text-red-700 bg-white border border-red-200 rounded-sm hover:bg-red-50 transition-colors"
-                          >
-                            Deduction
-                          </button>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => onOpenConfirmModal(payment)}
-                          disabled={recalculatingId === payment.id}
-                          className="w-full px-2 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-sm hover:bg-slate-50 hover:text-indigo-600 transition-colors"
-                        >
-                          {recalculatingId === payment.id
-                            ? "Recalculating..."
-                            : "Recalculate"}
-                        </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -271,6 +258,12 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
           </tbody>
         </table>
       </div>
+
+      <PaymentHistoryModal
+        isOpen={!!selectedHistory}
+        history={selectedHistory || []}
+        onClose={() => setSelectedHistory(null)}
+      />
     </div>
   );
 };

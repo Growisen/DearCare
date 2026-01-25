@@ -16,12 +16,13 @@ type Payment = {
   amount: number;
   date: string;
   modeOfPayment?: string;
+  paymentType?: string;
 };
 
 export default function ClientPaymentsListPage() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<{ paymentType?: string }>({});
   const [dateFilter, setDateFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -147,6 +148,14 @@ export default function ClientPaymentsListPage() {
     }
   };
 
+  const handlePaymentTypeChange = (type: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      paymentType: prev.paymentType === type ? undefined : type,
+    }));
+    setCurrentPage(1);
+  };
+
   return (
     <div>
       <PaymentHeader
@@ -156,6 +165,8 @@ export default function ClientPaymentsListPage() {
         handleResetFiltersAction={handleResetFilters}
         dateFilter={dateFilter}
         setDateFilterAction={setDateFilter}
+        paymentType={filters.paymentType}
+        handlePaymentTypeChangeAction={handlePaymentTypeChange}
         onExportAction={handleExport}
         isExporting={isExporting}
       />

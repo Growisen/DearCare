@@ -1,3 +1,5 @@
+import { PaymentHistoryEntry } from "@/types/nurse.salary.types";
+
 export interface SalaryPayment {
   id: number;
   payPeriodStart: string;
@@ -18,4 +20,6 @@ export interface SalaryPayment {
   createdAt: string;
   updatedAt: string;
   bonus?: number;
+  paymentHistory?: PaymentHistoryEntry[];
+  balanceAmount: number;
 }

@@ -18,6 +18,8 @@ interface PaymentEntryFormProps {
   modeOfPayment: string;
   setModeOfPayment: (value: string) => void;
   startDate: string;
+  paymentType: string;
+  setPaymentType: (value: string) => void;
   setStartDate: (value: string) => void;
   endDate: string;
   setEndDate: (value: string) => void;
@@ -42,6 +44,8 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
   setStartDate,
   endDate,
   setEndDate,
+  paymentType,
+  setPaymentType,
 }) => {
   const addLineItem = () => {
     const newItem: FormLineItem = { 
@@ -106,8 +110,23 @@ const PaymentEntryForm: React.FC<PaymentEntryFormProps> = ({
               placeholder="e.g., UPI, Bank Transfer"
               className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none focus:border-slate-300"
             />
-             <p className="text-[11px] text-gray-500 mt-1">
+            <p className="text-[11px] text-gray-500 mt-1">
               The method used for this payment.
+            </p>
+
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1 mt-3">
+              Payment Type
+            </label>
+            <select
+              value={paymentType}
+              onChange={(e) => setPaymentType(e.target.value)}
+              className="w-full text-sm text-gray-800 px-3 py-2 border border-slate-200 rounded focus:outline-none focus:border-slate-300 bg-white"
+            >
+              <option value="cash">Cash</option>
+              <option value="bank">Bank Transfer</option>
+            </select>
+            <p className="text-[11px] text-gray-500 mt-1">
+              Choose whether this payment was received as cash or via bank transfer.
             </p>
           </div>
         </div>

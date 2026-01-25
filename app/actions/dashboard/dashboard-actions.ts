@@ -303,9 +303,17 @@ type UnifiedPaymentViewRecord = {
   client_type?: string;
   client_status?: string;
   total_commission?: number;
+  payment_type?: string;
 };
 
-export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Date | null }): Promise<{
+export async function fetchPaymentOverview({
+  filters = {}
+}: {
+  filters?: {
+    paymentType?: string;
+    date?: Date | null;
+  };
+}): Promise<{
   success: boolean;
   data?: PaymentOverview;
   error?: string;
@@ -318,7 +326,7 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
 
     const { clientsOrg } = getOrgMappings(organization);
 
-    const dateToUse = selectedDate ?? new Date();
+    const dateToUse = filters.date ?? new Date();
 
     let paymentsQuery = supabase
       .from('unified_payment_records_view_with_comm')
@@ -337,6 +345,10 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
         .lte('date_added', endOfDay.toISOString());
     }
 
+    if (filters.paymentType && filters.paymentType !== 'all') {
+      paymentsQuery = paymentsQuery.eq('payment_type', filters.paymentType);
+    }
+
     const { data: rawPayments, error: paymentsError } = await paymentsQuery.returns<UnifiedPaymentViewRecord[]>();
 
     if (paymentsError) throw new Error(paymentsError.message);
@@ -352,6 +364,7 @@ export async function fetchPaymentOverview({ selectedDate }: { selectedDate?: Da
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
+        paymentType: p.payment_type || '',
         totalCommission: p.total_commission || 0,
       };
     });

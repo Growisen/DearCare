@@ -18,6 +18,7 @@ export interface EntryGroup {
   startDate?: string;
   endDate?: string;
   approved: boolean;
+  paymentType?: string;
 }
 
 export interface FormLineItem {
@@ -53,4 +54,5 @@ export interface ApiEntryGroup {
   start_date?: string | null;
   end_date?: string | null;
   approved: boolean;
+  payment_type?: string | null;
 }
