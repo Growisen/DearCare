@@ -550,12 +550,13 @@ export const fetchRefundPayments = async (clientId: string) => {
 };
 
 interface RefundPaymentsFilters {
-  createdAt?: string;
-  refundDate?: string;
+  createdAt?: Date | null;
+  refundDate?: Date | null;
   search?: string;
   paymentType?: string;
   page?: number;
   limit?: number;
+  date?: Date | null;
 }
 
 export const fetchAllRefunds = async (filters: RefundPaymentsFilters) => {
@@ -575,28 +576,42 @@ export const fetchAllRefunds = async (filters: RefundPaymentsFilters) => {
       .from('crm_client_refund_details_view')
       .select('*', { count: 'exact' });
 
-    if (createdAt) {
-      const start = new Date(createdAt);
+    const getDateRangeISO = (dateStr: Date) => {
+      const start = new Date(dateStr);
       start.setHours(0, 0, 0, 0);
-      const end = new Date(createdAt);
+      const end = new Date(dateStr);
       end.setHours(23, 59, 59, 999);
-      query = query.gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
+      return { start: start.toISOString(), end: end.toISOString() };
+    };
+
+    const dateConditions: string[] = [];
+
+    if (createdAt) {
+      const { start, end } = getDateRangeISO(createdAt);
+      dateConditions.push(`and(created_at.gte.${start},created_at.lte.${end})`);
     }
 
     if (refundDate) {
-      const start = new Date(refundDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(refundDate);
-      end.setHours(23, 59, 59, 999);
-      query = query.gte('refund_date', start.toISOString()).lte('refund_date', end.toISOString());
+      const { start, end } = getDateRangeISO(refundDate);
+      dateConditions.push(`and(refund_date.gte.${start},refund_date.lte.${end})`);
     }
 
+    if (filters.date) {
+      const { start, end } = getDateRangeISO(filters.date);
+      dateConditions.push(`and(created_at.gte.${start},created_at.lte.${end})`);
+    }
+
+    if (dateConditions.length > 0) {
+      query = query.or(dateConditions.join(','));
+    }
     if (paymentType) {
       query = query.eq('payment_type', paymentType);
     }
 
     if (search) {
-      query = query.ilike('reason', `%${search}%`);
+      query = query.or(
+        `reason.ilike.%${search}%,client_name.ilike.%${search}%,payment_method.ilike.%${search}%`
+      );
     }
 
     const from = (page - 1) * limit;

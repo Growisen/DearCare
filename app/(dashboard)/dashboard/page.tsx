@@ -27,7 +27,9 @@ export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState("")
   const [paymentFilters, setPaymentFilters] = useState<{ date?: Date | null; paymentType?: string }>({})
   const [advancePaymentFilters, setAdvancePaymentFilters] = useState<{ date?: Date | null; paymentType?: string }>({})
-  const [refundFilters, setRefundFilters] = useState<RefundPaymentsFilters>({})
+  const [refundFilters, setRefundFilters] = useState<RefundPaymentsFilters>({
+    date: null,
+  })
   const [refundSearchTerm, setRefundSearchTerm] = useState("")
   const [debouncedRefundSearch, setDebouncedRefundSearch] = useState("")
 
