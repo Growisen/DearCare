@@ -116,7 +116,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex items-start justify-center h-full">
-      <div className="w-full max-w-7xl shadow-none border border-slate-200 rounded-sm bg-white">
+      <div className="w-full shadow-none border border-slate-200 rounded-sm bg-white">
         <div className="p-4 md:p-5 pb-0">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <div className="space-y-1">

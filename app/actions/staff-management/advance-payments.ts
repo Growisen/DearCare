@@ -94,6 +94,7 @@ export async function insertAdvancePayment(payment: {
   payment_method?: string
   receipt_file?: File | null
   info?: string
+  paymentType?: string
 }) {
   const { supabase } = await getAuthenticatedClient()
 
@@ -215,7 +216,8 @@ export async function insertAdvancePayment(payment: {
       deductions: payment.deductions ?? [],
       payment_method: payment.payment_method ?? null,
       receipt_file: null,
-      info: payment.info ?? null
+      info: payment.info ?? null,
+      payment_type: payment.paymentType || null
     }])
     .select()
 
@@ -439,9 +441,11 @@ export async function deleteDeductionFromPayment(input: {
 export async function fetchAdvancePaymentTotals({
   date,
   searchTerm,
+  paymentType,
 }: {
   date?: string | null;
   searchTerm?: string;
+  paymentType?: string;
 }) {
   const { supabase, nursesOrg } = await getAuthenticatedClient();
 
@@ -449,6 +453,7 @@ export async function fetchAdvancePaymentTotals({
     p_org: nursesOrg,
     p_date: date,
     p_search: searchTerm || null,
+    p_payment_type: paymentType || null,
   });
 
   if (totalsResult.error) {
@@ -474,12 +479,14 @@ export async function fetchAdvancePaymentRecords({
   pageSize = 5,
   searchTerm = '',
   exportMode = false,
+  paymentType,
 }: {
   startDate?: string | Date | null;
   page?: number;
   pageSize?: number;
   searchTerm?: string;
   exportMode?: boolean;
+  paymentType?: string;
 }) {
   const { supabase, nursesOrg } = await getAuthenticatedClient();
 
@@ -493,6 +500,10 @@ export async function fetchAdvancePaymentRecords({
 
     if (dateFilter) {
       q = q.eq('date', dateFilter);
+    }
+
+    if (paymentType && paymentType !== 'all') {
+      q = q.eq('payment_type', paymentType);
     }
 
     if (searchTerm) {

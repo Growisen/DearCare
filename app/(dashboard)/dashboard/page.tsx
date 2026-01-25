@@ -23,6 +23,8 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [currentTime, setCurrentTime] = useState("")
+  const [paymentFilters, setPaymentFilters] = useState<{ date?: Date | null; paymentType?: string }>({})
+  const [advancePaymentFilters, setAdvancePaymentFilters] = useState<{ date?: Date | null; paymentType?: string }>({})
 
   const { 
     page, 
@@ -52,10 +54,15 @@ export default function DashboardPage() {
     page,
     pageSize,
     advancePaymentsSearchTerm: debouncedSearch,
-  }), [selectedDate, page, pageSize, debouncedSearch])
+    paymentType: advancePaymentFilters.paymentType
+  }), [selectedDate, page, pageSize, debouncedSearch, advancePaymentFilters.paymentType])
 
-  const { dashboard } = useDashboardData(selectedDate)
-  const { paymentOverview } = usePaymentsData(selectedDate)
+  const { 
+    dashboard 
+  } = useDashboardData(selectedDate)
+  const {
+    paymentOverview,
+  } = usePaymentsData(paymentFilters)
   const {
     advancePayments,
     advancePaymentsTotals,
@@ -105,6 +112,15 @@ export default function DashboardPage() {
   const handlePrevPage = useCallback(() => changePage(page - 1, totalPages), [changePage, page, totalPages])
   const handleNextPage = useCallback(() => changePage(page + 1, totalPages), [changePage, page, totalPages])
 
+  useEffect(() => {
+    if (setPaymentFilters) {
+      setPaymentFilters(prev => ({
+        ...prev,
+        date: selectedDate
+      }))
+    }
+  }, [selectedDate, setPaymentFilters])
+
   if (error || (dashboard.data && !dashboard.data.success)) {
     return <ErrorState message={errorMessage} />
   }
@@ -148,6 +164,8 @@ export default function DashboardPage() {
       <PaymentOverview 
         loading={paymentOverview.isLoading} 
         paymentData={paymentData} 
+        paymentFilters={paymentFilters} 
+        setPaymentFilters={setPaymentFilters}
       />
       
       <AdvancePaymentsOverview 
@@ -155,6 +173,10 @@ export default function DashboardPage() {
         isExporting={isExporting}
         payments={Array.isArray(advanceData) ? advanceData : []}
         totalRecords={advanceMeta?.total}
+        paymentType={advancePaymentFilters.paymentType}
+        setPaymentTypeAction={(paymentType: string) =>
+          setAdvancePaymentFilters(prev => ({ ...prev, paymentType }))
+        }
         page={page}
         pageSize={pageSize}
         totalPages={totalPages}

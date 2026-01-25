@@ -19,12 +19,20 @@ interface PaymentOverviewProps {
       date: string;
       modeOfPayment?: string;
       totalCommission?: number;
+      paymentType?: string;
     }>;
   };
   loading?: boolean;
+  paymentFilters?: { date?: Date | null; paymentType?: string };
+  setPaymentFilters?: React.Dispatch<React.SetStateAction<{ date?: Date | null; paymentType?: string }>>;
 }
 
-export default function PaymentOverview({ paymentData, loading = false }: PaymentOverviewProps) {
+export default function PaymentOverview({
+  paymentData,
+  loading = false,
+  paymentFilters,
+  setPaymentFilters
+}: PaymentOverviewProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [payments, setPayments] = useState(paymentData?.recentPayments || [])
   const [isExporting, setIsExporting] = useState(false)
@@ -40,6 +48,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
   )
 
   const handleExport = () => {
+    if (loading) return;
     setIsExporting(true)
     const csvContent = "data:text/csv;charset=utf-8," +
       ["Client Name,Group,Amount,Date,Mode of Payment"]
@@ -56,56 +65,7 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
     setIsExporting(false)
   }
 
-  if (loading) {
-    return (
-      <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-sm">
-        <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center 
-          sm:items-center justify-between mb-3 sm:mb-4 border-b border-slate-200 pb-2"
-        >
-          <div className="flex items-center mb-2 xs:mb-0 sm:mb-0">
-            <CreditCard className="w-5 h-5 text-slate-700 mr-2" />
-            <h3 className="text-sm sm:text-md font-medium text-slate-800">Clients Payments Overview</h3>
-          </div>
-        </div>
-        <div className="mb-4 flex gap-6">
-          <div className="text-sm text-slate-700">
-            <span className="font-semibold">Total Payments:</span> <span className="inline-block h-4 w-10 bg-slate-200 rounded animate-pulse" />
-          </div>
-          <div className="text-sm text-slate-700">
-            <span className="font-semibold">Total Amount:</span> <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse" />
-          </div>
-          <div className="text-sm text-slate-700">
-            <span className="font-semibold">Total Commission:</span> <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="hidden sm:table w-full">
-            <thead>
-              <tr className="text-left border-b border-slate-200">
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Client Name</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Group</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Amount</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Mode</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Total Commission</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <tr key={idx} className="border-b border-slate-100">
-                  {Array.from({ length: 6 }).map((_, colIdx) => (
-                    <td key={colIdx} className="py-3 px-4">
-                      <div className="h-4 bg-slate-200 rounded animate-pulse w-full"></div>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    )
-  }
+  const totalCommission = paymentData?.recentPayments?.reduce((acc, p) => acc + (p.totalCommission ?? 0), 0) ?? 0;
 
   return (
     <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-sm">
@@ -123,16 +83,17 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
               type="text"
               placeholder="Search payments..."
               className="pl-8 pr-3 py-1.5 sm:py-2 text-xs text-gray-800 sm:text-sm border border-slate-300
-               rounded-sm focus:outline-none"
+               rounded-sm focus:outline-none disabled:bg-slate-50"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              disabled={loading}
             />
           </div>
           <button
             className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:px-4 sm:py-2 
-            sm:text-sm font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-none"
+            sm:text-sm font-medium bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors shadow-none disabled:bg-blue-400"
             onClick={handleExport}
-            disabled={isExporting}
+            disabled={isExporting || loading}
           >
             {isExporting ? (
               <span className="flex items-center">
@@ -151,39 +112,82 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
           </button>
         </div>
       </div>
-      <div className="mb-4 flex gap-6">
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Payments:</span> {paymentData?.totalPayments ?? 0}
+
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 justify-between">
+        <div className="flex gap-6">
+          <div className="text-sm text-slate-700 flex items-center gap-2">
+            <span className="font-semibold">Total Payments:</span> 
+            {loading ? <span className="inline-block h-4 w-10 bg-slate-200 rounded animate-pulse" /> : (paymentData?.totalPayments ?? 0)}
+          </div>
+          <div className="text-sm text-slate-700 flex items-center gap-2">
+            <span className="font-semibold">Total Amount:</span> 
+            {loading ? <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse" /> : `₹${paymentData?.totalAmount?.toLocaleString() ?? "0"}`}
+          </div>
+          <div className="text-sm text-slate-700 flex items-center gap-2">
+            <span className="font-semibold">Total Commission:</span> 
+            {loading ? <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse" /> : `₹${totalCommission.toLocaleString()}`}
+          </div>
         </div>
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Amount:</span> ₹{paymentData?.totalAmount?.toLocaleString() ?? "0"}
-        </div>
-        <div className="text-sm text-slate-700">
-          <span className="font-semibold">Total Commission:</span> ₹{paymentData?.recentPayments?.reduce((acc, p) => acc + (p.totalCommission ?? 0), 0).toLocaleString() ?? "0"}
+        
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <span className="text-xs font-medium text-gray-600 whitespace-nowrap">Payment Type:</span>
+          <div className="flex gap-1.5 items-center flex-wrap">
+            {["all", "cash", "bank transfer"].map((type) => (
+              <button
+                key={type}
+                className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors border ${
+                  (paymentFilters?.paymentType === type || (!paymentFilters?.paymentType && type === "all"))
+                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : "bg-white text-gray-600 hover:bg-gray-100 border-slate-200"
+                }`}
+                onClick={() => setPaymentFilters && setPaymentFilters((prev) => ({
+                  ...prev,
+                  paymentType: type
+                }))}
+                type="button"
+                disabled={loading}
+              >
+                {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
       <div className="overflow-x-auto">
-        {filteredPayments.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-sm">
-              <p className="text-lg font-medium mb-1">No payments found</p>
-              <p className="text-sm">No payments available for the selected date</p>
-            </div>
-          </div>
-        ) : (
-          <table className="hidden sm:table w-full">
-            <thead>
-              <tr className="text-left border-b border-slate-200">
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Client Name</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Group</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Amount</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Mode</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-600">Total Commission</th>
+        <table className="hidden sm:table w-full">
+          <thead>
+            <tr className="text-left border-b border-slate-200">
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Client Name</th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Group</th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Amount</th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Mode</th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Total Commission</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <tr key={idx} className="border-b border-slate-100">
+                  {Array.from({ length: 6 }).map((_, colIdx) => (
+                    <td key={colIdx} className="py-3 px-4">
+                      <div className="h-4 bg-slate-200 rounded animate-pulse w-full"></div>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : filteredPayments.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-8 text-center">
+                  <div className="bg-slate-50 border border-slate-200 text-slate-600 px-6 py-5 rounded-sm inline-block">
+                    <p className="text-lg font-medium mb-1">No payments found</p>
+                    <p className="text-sm">No payments available for the selected criteria</p>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredPayments.map((p) => (
+            ) : (
+              filteredPayments.map((p) => (
                 <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                   <td className="py-3 px-4 text-sm font-medium text-slate-800">
                     {p.clientId ? (
@@ -204,21 +208,33 @@ export default function PaymentOverview({ paymentData, loading = false }: Paymen
                   <td className="py-3 px-4 text-sm text-slate-600">{p.groupName}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">₹{p.amount.toLocaleString()}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{formatDate(p.date)}</td>
-                  <td className="py-3 px-4 text-sm text-slate-600">{p.modeOfPayment || "-"}</td>
+                  <td className="py-3 px-4 text-sm text-slate-600">
+                    {p.modeOfPayment || "-"}
+                    {p.paymentType && (
+                      <>
+                        <br />
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                          {p.paymentType}
+                        </span>
+                      </>
+                    )}
+                  </td>
                   <td className="py-3 px-4 text-sm text-slate-600">
                     {p.totalCommission ? `₹${p.totalCommission.toLocaleString()}` : "N/A"}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              ))
+            )}
+          </tbody>
+        </table>
+        
       </div>
-       <div className="text-center mt-4">
-        <Link 
-          href="/client-payments" 
+
+      <div className="text-center mt-4">
+        <Link
+          href="/client-payments"
           prefetch={false}
-          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+          className={`text-xs font-medium text-blue-600 hover:text-blue-800 ${loading ? 'pointer-events-none opacity-50' : ''}`}
         >
           View All Payments from clients →
         </Link>

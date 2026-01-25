@@ -4,32 +4,14 @@ import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { logger } from '@/utils/logger';
 import { getOrgMappings } from '@/app/utils/org-utils';
 import { getAuthenticatedClient } from '@/app/utils/auth-utils';
+import { SavePaymentGroupInput } from '@/types/clientPayment.types';
 
-interface LineItemInput {
-  fieldName: string;
-  amount: number;
-  gst?: number;
-  totalWithGst?: number;
-  commission?: number;
-}
-
-interface SavePaymentGroupInput {
-  clientId: string;
-  groupName: string;
-  lineItems: LineItemInput[];
-  dateAdded?: string;
-  notes?: string;
-  showToClient?: boolean;
-  modeOfPayment?: string;
-  startDate?: string;
-  endDate?: string;  
-}
 
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
   try {
     const { supabase } = await getAuthenticatedClient();
 
-    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate } = input;
+    const { clientId, groupName, lineItems, dateAdded, notes, showToClient, modeOfPayment, startDate, endDate, paymentType } = input;
 
     if (!lineItems || lineItems.length === 0) {
       return { success: false, error: "At least one line item is required." };
@@ -62,6 +44,7 @@ export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
         mode_of_payment: modeOfPayment || null,
         start_date: startDate ? new Date(startDate).toISOString() : null,
         end_date: endDate ? new Date(endDate).toISOString() : null, 
+        payment_type: paymentType || null,
       }])
       .select()
       .single();
@@ -215,6 +198,7 @@ type UnifiedPaymentViewRecord = {
   client_status?: string;
   start_date: string | null;
   end_date: string | null;
+  payment_type: string | null;
 };
 
 type NurseClientJoin = {
@@ -275,8 +259,20 @@ export async function fetchPaymentOverview({
         paymentsQuery = paymentsQuery.ilike('client_display_name', `%${search}%`);
       }
 
+      if (
+        filters.paymentType &&
+        (filters.paymentType === "cash" || filters.paymentType === "bank transfer")
+      ) {
+        paymentsQuery = paymentsQuery.eq('payment_type', filters.paymentType);
+      }
+
       Object.entries(filters).forEach(([key, value]) => {
-        if (key !== "date" && value !== undefined && value !== "") {
+        if (
+          key !== "date" &&
+          key !== "paymentType" &&
+          value !== undefined &&
+          value !== ""
+        ) {
           paymentsQuery = paymentsQuery.eq(key, value);
         }
       });
@@ -355,6 +351,7 @@ export async function fetchPaymentOverview({
         amount: p.total_amount,
         date: p.date_added ? new Date(p.date_added).toISOString().split('T')[0] : '',
         modeOfPayment: p.mode_of_payment || '',
+        paymentType: p.payment_type || '',
         assignedNurses: relevantNurses,
         startDate: p.start_date,
         endDate: p.end_date,
@@ -404,8 +401,6 @@ export async function fetchClientPaymentAggregates({
 
     const { clientsOrg } = getOrgMappings(organization);
 
-    console.log('Fetching aggregates with:', { clientsOrg, startDate, computedEndDate, searchText });
-
     const { data, error } = await supabase
       .rpc('get_client_payment_aggregates', {
         filter_client_category: clientsOrg,
@@ -445,6 +440,7 @@ export interface UpdatePaymentGroupInput {
   startDate?: string;
   endDate?: string;
   approved?: boolean;
+  paymentType?: string;
 }
 
 export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
@@ -459,7 +455,8 @@ export async function updateClientPaymentGroup(input: UpdatePaymentGroupInput) {
     if (input.startDate !== undefined) updateFields.start_date = input.startDate ? new Date(input.startDate).toISOString() : null;
     if (input.endDate !== undefined) updateFields.end_date = input.endDate ? new Date(input.endDate).toISOString() : null;
     if (input.approved !== undefined) updateFields.approved = input.approved;
-    
+    if (input.paymentType !== undefined) updateFields.payment_type = input.paymentType;
+
     const { error } = await supabase
       .from('client_payment_records')
       .update(updateFields)

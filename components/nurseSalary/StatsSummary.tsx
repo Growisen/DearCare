@@ -60,7 +60,7 @@ export function StatsSummary({
               <span className="text-xs uppercase text-gray-500 font-medium leading-none mb-1">
                 {item.label}
               </span>
-              {item.isLoading && (!item.value || item.value === 0) ? (
+              {item.isLoading ? (
                 <div className="h-5 w-20 bg-gray-200 animate-pulse rounded" />
               ) : (
                 <span className="text-base font-bold text-gray-900 leading-none">

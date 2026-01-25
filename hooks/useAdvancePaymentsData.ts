@@ -9,16 +9,18 @@ export function useAdvancePaymentsData({
   page = 1,
   pageSize = 10,
   advancePaymentsSearchTerm = "",
+  paymentType,
 }: {
   selectedDate?: Date | null;
   page?: number;
   pageSize?: number;
   advancePaymentsSearchTerm?: string;
+  paymentType?: string;
 } = {}) {
   const queryClient = useQueryClient();
   const dateKey = selectedDate ? selectedDate.toISOString() : null;
-  const advancePaymentsQueryKey = ["advancePayments", dateKey, page, pageSize, advancePaymentsSearchTerm];
-  const advancePaymentsTotalsQueryKey = ["advancePaymentsTotals", dateKey, advancePaymentsSearchTerm];
+  const advancePaymentsQueryKey = ["advancePayments", dateKey, page, pageSize, advancePaymentsSearchTerm, paymentType];
+  const advancePaymentsTotalsQueryKey = ["advancePaymentsTotals", dateKey, advancePaymentsSearchTerm, paymentType];
 
   const advancePaymentsQuery = useQuery({
     queryKey: advancePaymentsQueryKey,
@@ -28,6 +30,7 @@ export function useAdvancePaymentsData({
         page,
         pageSize,
         searchTerm: advancePaymentsSearchTerm,
+        paymentType,
       }),
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
@@ -40,6 +43,7 @@ export function useAdvancePaymentsData({
       fetchAdvancePaymentTotals({
         date: selectedDate ? selectedDate.toISOString().slice(0, 10) : undefined,
         searchTerm: advancePaymentsSearchTerm,
+        paymentType,
       }),
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,

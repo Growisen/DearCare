@@ -1,25 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { saveClientPaymentGroup, getClientPaymentGroups } from "@/app/actions/clients/client-payment-records";
-
-interface LineItemInput {
-  fieldName: string;
-  amount: number;
-  gst?: number;
-  totalAmount?: number;
-}
-
-interface SavePaymentGroupInput {
-  clientId: string;
-  groupName: string;
-  lineItems: LineItemInput[];
-  dateAdded: string;
-  notes?: string;
-  showToClient: boolean;
-  modeOfPayment?: string;
-  startDate?: string;
-  endDate?: string;  
-}
+import { SavePaymentGroupInput } from "@/types/clientPayment.types";
 
 export function useSaveClientPaymentGroup() {
   const [isSaving, setIsSaving] = useState(false);

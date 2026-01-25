@@ -20,7 +20,6 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
   approvingId,
 }) => {
 
-  console.log("Rendering EntriesTable with entries:", entries);
   return (
     <div className="hidden xl:block overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -142,6 +141,23 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                   <span className="text-sm text-gray-600">
                     {group.modeOfPayment || <span className="text-gray-400 italic">N/A</span>}
                   </span>
+                  {true && (
+                    <div className="mt-1 inline-block">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        ${group.paymentType === "cash"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : group.paymentType === "bank"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}>
+                        {group.paymentType === "cash"
+                          ? "Cash"
+                          : group.paymentType === "bank"
+                            ? "Bank Transfer"
+                            : group.paymentType}
+                      </span>
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4 align-top text-center">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

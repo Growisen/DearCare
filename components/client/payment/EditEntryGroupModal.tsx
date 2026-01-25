@@ -9,6 +9,7 @@ interface ExtendedEntryGroup extends EntryGroup {
   startDate?: string;
   endDate?: string;
   showToClient: boolean;
+  paymentType?: string;
 }
 
 interface EditEntryGroupModalProps {
@@ -26,6 +27,7 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
   const [notes, setNotes] = useState(group.notes || "");
   
   const [showToClient, setShowToClient] = useState(group.showToClient ?? true);
+  const [paymentType, setPaymentType] = useState(group.paymentType || "cash");
 
   const formatDateForInput = (dateString?: string) => {
     if (!dateString) return "";
@@ -44,6 +46,7 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
   }, [onClose]);
 
   const handleSave = async () => {
+    console.log({ groupName, notes, showToClient, startDate, endDate, paymentType });
     const result = await updateClientPaymentGroup({
       paymentRecordId: group.id,
       groupName,
@@ -51,6 +54,7 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
       showToClient,
       startDate,
       endDate,
+      paymentType,
     });
 
     if (result.success) {
@@ -61,6 +65,7 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
         startDate,
         endDate,
         showToClient,
+        paymentType,
       });
       onClose();
     } else {
@@ -150,6 +155,21 @@ const EditEntryGroupModal: React.FC<EditEntryGroupModalProps> = ({
                   <ChevronDown className="h-4 w-4" />
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Payment Type
+              </label>
+              <select
+                value={paymentType}
+                onChange={e => setPaymentType(e.target.value)}
+                className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-slate-900 
+                  bg-white focus:outline-none focus:border-slate-300 sm:text-sm shadow-none cursor-pointer"
+              >
+                <option value="cash">Cash</option>
+                <option value="bank">Bank Transfer</option>
+              </select>
             </div>
 
             <div>

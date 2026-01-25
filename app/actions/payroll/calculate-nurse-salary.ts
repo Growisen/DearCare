@@ -718,37 +718,22 @@ export async function fetchSalaryPaymentsWithNurseInfo({
   };
 }
 
-
-export interface SalaryPaymentDebtRecord {
-  nurse_reg_no: string;
-  full_name: string;
-  salary_payment_id: number;
-  nurse_id: number;
-  pay_period_start: string;
-  pay_period_end: string;
-  net_salary: number;
-  payment_status: string;
-  gross_salary?: number;
-  info?: string;
-  created_at: string;
-  bonus?: number;
-  deductions?: number;
-  total_outstanding_debt: number;
-  total_installments_due: number;
-  active_loan_count: number;
-  has_active_debt: boolean;
-}
-
 export async function fetchSalaryPaymentDebts({
   page = 1,
   pageSize = 20,
   search = "",
   exportMode = false,
+  createdAt = null,
+  approvedAt = null,
+  paidAt = null,
 }: {
   page?: number;
   pageSize?: number;
   search?: string;
   exportMode?: boolean;
+  createdAt?: Date | null;
+  approvedAt?: Date | null;
+  paidAt?: Date | null;
 }) {
   const { supabase, nursesOrg } = await getAuthenticatedClient();
 
@@ -761,6 +746,19 @@ export async function fetchSalaryPaymentDebts({
   if (search.trim()) {
     const term = search.trim();
     query = query.or(`full_name.ilike.%${term}%,nurse_reg_no.ilike.%${term}%`);
+  }
+
+  if (createdAt) {
+    const createdAtISO = createdAt instanceof Date ? createdAt.toISOString() : createdAt;
+    query = query.gte("created_at", createdAtISO);
+  }
+  if (approvedAt) {
+    const approvedAtISO = approvedAt instanceof Date ? approvedAt.toISOString() : approvedAt;
+    query = query.gte("approved_at", approvedAtISO);
+  }
+  if (paidAt) {
+    const paidAtISO = paidAt instanceof Date ? paidAt.toISOString() : paidAt;
+    query = query.gte("paid_at", paidAtISO);
   }
 
   try {
@@ -806,15 +804,24 @@ export async function fetchSalaryPaymentDebts({
 export async function fetchSalaryDataAggregates({
   date = null,
   search = null,
+  createdAt = null,
+  approvedAt = null,
+  paidAt = null,
 }: {
   date?: string | null;
   search?: string | null;
+  createdAt?: string | null;
+  approvedAt?: string | null;
+  paidAt?: string | null;
 }) {
   const { supabase, nursesOrg } = await getAuthenticatedClient();
   const { data, error } = await supabase.rpc('get_salary_stats', {
     p_org: nursesOrg,
     p_date: date,
     p_search: search || null,
+    p_created_at: createdAt,
+    p_approved_at: approvedAt,
+    p_paid_at: paidAt,
   });
 
   if (error) return { 
@@ -963,9 +970,11 @@ export async function createAdvanceSalaryPayment({
 export async function updateSalaryPaymentStatus({
   paymentId,
   status,
+  paymentType,
 }: {
   paymentId: number;
   status: string;
+  paymentType?: string;
 }) {
   if (!paymentId || !status) {
     return {
@@ -976,9 +985,19 @@ export async function updateSalaryPaymentStatus({
 
   const { supabase } = await getAuthenticatedClient();
 
+  const updateObj: { 
+    payment_status: string; 
+    approved_at?: string;
+    payment_type?: string;
+  } = { payment_status: status };
+
+  if (status === "approved") {
+    updateObj.approved_at = new Date().toISOString();
+  }
+
   const { error } = await supabase
     .from("salary_payments")
-    .update({ payment_status: status })
+    .update(updateObj)
     .eq("id", paymentId);
 
   if (error) {

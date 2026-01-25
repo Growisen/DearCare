@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { SalaryPayment } from "../types";
+import ModalPortal from "@/components/ui/ModalPortal";
 
 interface AddBonusModalProps {
   isOpen: boolean;
@@ -54,7 +55,8 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
   if (!isOpen || !payment) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200 p-1 sm:p-2">
+    <ModalPortal>
+      <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200 p-1 sm:p-2">
       <div className="bg-white rounded-sm p-6 w-full max-w-md text-slate-800">
         <h2 className="text-lg font-semibold mb-4">Add Bonus</h2>
         <div className="mb-1">
@@ -115,6 +117,7 @@ const AddBonusModal: React.FC<AddBonusModalProps> = ({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };
 

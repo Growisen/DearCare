@@ -43,13 +43,15 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
   const [repaymentType, setRepaymentType] = useState("full");
   const [installmentAmount, setInstallmentAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentType, setPaymentType] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [info, setInfo] = useState(""); // Add this state
+  const [info, setInfo] = useState("");
   const [errors, setErrors] = useState({ 
     date: "", 
     amount: "", 
     installmentAmount: "",
-    paymentMethod: ""
+    paymentMethod: "",
+    paymentType: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -64,9 +66,10 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
       setRepaymentType("full");
       setInstallmentAmount("");
       setPaymentMethod("");
+      setPaymentType("");
       setReceiptFile(null);
-      setInfo(""); // Reset info on open
-      setErrors({ date: "", amount: "", installmentAmount: "", paymentMethod: "" });
+      setInfo("");
+      setErrors({ date: "", amount: "", installmentAmount: "", paymentMethod: "", paymentType: "" });
     }
   }, [isOpen]);
 
@@ -78,7 +81,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
   }, [repaymentType]);
   
   useEffect(() => {
-    const newErrors = { date: "", amount: "", installmentAmount: "", paymentMethod: "" };
+    const newErrors = { date: "", amount: "", installmentAmount: "", paymentMethod: "", paymentType: "" };
 
     if (date) {
       const dateYear = new Date(date).getFullYear();
@@ -108,11 +111,14 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
     if (!paymentMethod) {
       newErrors.paymentMethod = "Payment method is required";
     }
+    if (!paymentType) {
+      newErrors.paymentType = "Payment type is required";
+    }
     setErrors(newErrors);
-  }, [date, amount, repaymentType, installmentAmount, paymentMethod, minYear, maxYear]);
+  }, [date, amount, repaymentType, installmentAmount, paymentMethod, paymentType, minYear, maxYear]);
   
   const handleSubmit = async () => {
-    const newErrors = { date: "", amount: "", installmentAmount: "", paymentMethod: "" };
+    const newErrors = { date: "", amount: "", installmentAmount: "", paymentMethod: "", paymentType: "" };
     let isValid = true;
 
     if (!date) {
@@ -159,6 +165,10 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
       newErrors.paymentMethod = "Payment method is required";
       isValid = false;
     }
+    if (!paymentType) {
+      newErrors.paymentType = "Payment type is required";
+      isValid = false;
+    }
     setErrors(newErrors);
     if (isValid) {
       setIsSubmitting(true);
@@ -172,6 +182,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
           return_type: repaymentType as "full" | "installments",
           installment_amount: installmentAmt,
           payment_method: paymentMethod,
+          paymentType,
           deductions: [],
           receipt_file: receiptFile,
           info,
@@ -191,10 +202,10 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center
-     animate-in fade-in duration-200 p-1 sm:p-2"
+      animate-in fade-in duration-200 p-1 sm:p-2"
     >
       <div className="bg-white rounded-sm p-6 w-full max-w-2xl text-gray-800 border border-slate-200
-       max-h-[90vh] overflow-y-auto"
+        max-h-[90vh] overflow-y-auto"
       >
         <h2 className="text-xl font-semibold mb-6 text-gray-900 border-b border-slate-200 pb-3">
           Create Advance Payment
@@ -206,7 +217,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             <input
               type="date"
               className={`border border-slate-200 rounded-sm px-3 py-[9px] w-full focus:outline-none focus:border-slate-300
-               transition-colors ${errors.date ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+                transition-colors ${errors.date ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
               value={date}
               onChange={(e) => setDate(e.target.value)}
               max={today}
@@ -257,7 +268,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
                 step="0.01"
                 min="0"
                 className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300
-                transition-colors ${errors.installmentAmount ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+                 transition-colors ${errors.installmentAmount ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
                 value={installmentAmount}
                 onChange={(e) => setInstallmentAmount(e.target.value)}
                 placeholder="0.00"
@@ -273,7 +284,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             <input
               type="text"
               className={`border border-slate-200 rounded-sm px-3 py-2.5 w-full focus:outline-none focus:border-slate-300
-               transition-colors ${errors.paymentMethod ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
+                transition-colors ${errors.paymentMethod ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
               placeholder="Method"
@@ -283,7 +294,26 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             )}
           </div>
 
-          <div className="col-span-1 md:col-span-2">
+          <div className="col-span-1">
+            <label className="block text-sm font-medium mb-2 text-gray-700">Payment Type</label>
+            <Select value={paymentType} onValueChange={setPaymentType}>
+              <SelectTrigger className={`w-full py-[22.5px] border border-slate-200 rounded-sm focus:outline-none focus:border-slate-300 transition-colors bg-white ${errors.paymentType ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}>
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent className="bg-white text-gray-800">
+                <SelectGroup>
+                  <SelectLabel>Payment Type</SelectLabel>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="bank transfer">Bank Transfer</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {errors.paymentType && (
+              <p className="text-red-600 text-xs mt-1.5">{errors.paymentType}</p>
+            )}
+          </div>
+
+          <div className="col-span-1">
             <FileUpload
               label="Receipt / Screenshot"
               value={receiptFile}
@@ -292,6 +322,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
               helperText="Optional: Upload a transaction receipt."
             />
           </div>
+          
           <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium mb-2 text-gray-700">Additional Info</label>
             <textarea
@@ -317,7 +348,7 @@ const CreateAdvancePaymentModal: React.FC<CreateAdvancePaymentModalProps> = ({
             className="px-5 py-1.5 rounded-sm bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors
             disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             onClick={handleSubmit}
-            disabled={!!errors.date || !!errors.amount || !!errors.installmentAmount || !!errors.paymentMethod || isSubmitting}
+            disabled={!!errors.date || !!errors.amount || !!errors.installmentAmount || !!errors.paymentMethod || !!errors.paymentType || isSubmitting}
           >
             {isSubmitting ? (
               <Loader className="w-5 h-5 mr-2 animate-spin" />
