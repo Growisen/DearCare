@@ -137,7 +137,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 align-top">
+                <td className="px-6 py-4 align-top flex flex-col gap-1 justify-center items-center">
                   <span className="text-sm text-gray-600">
                     {group.modeOfPayment || <span className="text-gray-400 italic">N/A</span>}
                   </span>
@@ -169,35 +169,41 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                   </span>
                 </td>
                 <td className="px-6 py-4 align-top text-center">
-                  <button 
-                    onClick={() => onEdit(group.id)}
-                    className="text-blue-600 hover:text-blue-900 text-sm font-medium hover:bg-blue-50 px-3 py-1 rounded transition-colors mr-2"
-                  >
-                    Edit
-                  </button>
-                  {!group.approved && (
-                    <button 
-                      onClick={() => onApprove(group)}
-                      className={`text-green-600 hover:text-green-900 text-sm font-medium hover:bg-green-50 px-3 py-1 rounded transition-colors mr-2 ${
-                        approvingId === group.id ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      disabled={approvingId === group.id}
-                    >
-                      {approvingId === group.id ? "Approving..." : "Approve"}
-                    </button>
-                  )}
-                  {group.approved && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
-                      Approved
-                    </span>
-                  )}
-                  <button 
-                    onClick={() => onDelete(group.id)} 
-                    className="text-red-600 hover:text-red-900 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"
-                    disabled={deletingId === group.id.toString()}
-                  >
-                    {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
-                  </button>
+                  <div className="flex flex-col gap-1 items-center">
+                    {!group.approved && (
+                      <>
+                        <button 
+                          onClick={() => onEdit(group.id)}
+                          className="w-full px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-sm hover:bg-blue-100 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => onDelete(group.id)} 
+                          className="w-full px-2 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-sm hover:bg-red-100 transition-colors"
+                          disabled={deletingId === group.id.toString()}
+                        >
+                          {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
+                        </button>
+                      </>
+                    )}
+                    {!group.approved && (
+                      <button 
+                        onClick={() => onApprove(group)}
+                        className={`w-full px-2 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm hover:bg-emerald-100 transition-colors ${
+                          approvingId === group.id ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={approvingId === group.id}
+                      >
+                        {approvingId === group.id ? "Approving..." : "Approve"}
+                      </button>
+                    )}
+                    {group.approved && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+                        Approved
+                      </span>
+                    )}
+                  </div>
                 </td>
               </tr>
             );

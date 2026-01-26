@@ -31,7 +31,7 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
                 {group.groupName}
               </h3>
               <div className="flex flex-col items-end space-y-2 ml-4">
-                {onEdit && (
+                {onEdit && group.approved === false && (
                   <button
                     onClick={() => onEdit(group.id)}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-50 px-2 py-1 rounded transition-colors"
@@ -39,13 +39,15 @@ const EntriesMobileView: React.FC<EntriesMobileViewProps> = ({
                     Edit
                   </button>
                 )}
-                <button
-                  onClick={() => onDelete(group.id)}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                  disabled={deletingId === group.id.toString()}
-                >
-                  {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
-                </button>
+                {group.approved === false && (
+                  <button
+                    onClick={() => onDelete(group.id)}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                    disabled={deletingId === group.id.toString()}
+                  >
+                    {deletingId === group.id.toString() ? "Deleting..." : "Delete"}
+                  </button>
+                )}
                 {onApprove && group.approved === false && (
                   <button
                     onClick={() => onApprove(group)}

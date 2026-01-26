@@ -3,9 +3,10 @@
 import { createSupabaseServerClient } from '@/app/actions/authentication/auth';
 import { logger } from '@/utils/logger';
 import { getOrgMappings } from '@/app/utils/org-utils';
-import { getAuthenticatedClient } from '@/app/utils/auth-utils';
+import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 import { SavePaymentGroupInput } from '@/types/clientPayment.types';
 import toCamelCase from '@/utils/toCamelCase';
+import { getNurseTenantName } from '@/utils/formatters';
 
 
 export async function saveClientPaymentGroup(input: SavePaymentGroupInput) {
@@ -640,3 +641,215 @@ export const fetchAllRefunds = async (filters: RefundPaymentsFilters) => {
     };
   }
 };
+
+export async function approveRefundPayment({
+  refundId
+}: {
+  refundId: number;
+}) {
+  const { supabase } = await getAuthenticatedClient();
+
+  const { data: refund, error: fetchError } = await supabase
+    .from('crm_refund_payments')
+    .select('client_id, amount, reason, payment_type')
+    .eq('id', refundId)
+    .single();
+
+  if (fetchError || !refund) {
+    return { success: false, error: fetchError?.message || "Refund not found" };
+  }
+
+  const { client_id, amount, reason, payment_type } = refund;
+
+  const { nursesOrg } = await getAuthenticatedClient();
+  const tenant = getNurseTenantName(nursesOrg);
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        refund_id: refundId,
+        client_id: String(client_id),
+        amount,
+        payment_type: "outgoing",
+        pay_status: "un_paid",
+        description: reason,
+        tenant,
+      }),
+    }
+  );
+  const result = await response.json();
+
+  if (!result.error) {
+    const statusResult = await updateRefundPaymentStatus({
+      refundId,
+      status: "approved",
+      paymentType: payment_type,
+    });
+
+    if (!statusResult.success) {
+      return {
+        ...result,
+        success: false,
+        error: statusResult.error,
+      };
+    }
+
+    return {
+      ...result,
+      success: true,
+    };
+  } else {
+    return {
+      ...result,
+      success: false,
+    };
+  }
+}
+
+
+export async function updateRefundPaymentStatus({
+  refundId,
+  status,
+  paymentType,
+}: {
+  refundId: string | number;
+  status: string;
+  paymentType?: string;
+}) {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const updateFields: Record<string, unknown> = {
+      payment_status: status,
+    };
+
+    if (paymentType !== undefined) {
+      updateFields.payment_type = paymentType;
+    }
+
+    if (status === "approved") {
+      updateFields.approved_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from('crm_refund_payments')
+      .update(updateFields)
+      .eq('id', refundId);
+
+    if (error) {
+      logger.error('Error updating refund payment status:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error updating refund payment status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+export async function editRefundPayment(
+  refundId: string | number,
+  updates: Partial<{
+    amount: number;
+    reason: string;
+    paymentMethod: string;
+    paymentType: string;
+    refundDate: string;
+  }>
+) {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const { data: refund, error: fetchError } = await supabase
+      .from('crm_refund_payments')
+      .select('payment_status')
+      .eq('id', refundId)
+      .single();
+
+    if (fetchError) {
+      logger.error('Error fetching refund payment:', fetchError);
+      return { success: false, error: fetchError.message };
+    }
+
+    if (refund?.payment_status === "approved") {
+      return { success: false, error: "Cannot edit an approved refund payment." };
+    }
+
+    const updateFields: Record<string, unknown> = {};
+    if (updates.amount !== undefined) updateFields.amount = updates.amount;
+    if (updates.reason !== undefined) updateFields.reason = updates.reason;
+    if (updates.paymentMethod !== undefined) updateFields.payment_method = updates.paymentMethod;
+    if (updates.paymentType !== undefined) updateFields.payment_type = updates.paymentType;
+    if (updates.refundDate !== undefined) updateFields.refund_date = new Date(updates.refundDate).toISOString();
+
+    if (Object.keys(updateFields).length === 0) {
+      return { success: false, error: "No fields to update." };
+    }
+
+    const { error } = await supabase
+      .from('crm_refund_payments')
+      .update(updateFields)
+      .eq('id', refundId);
+
+    if (error) {
+      logger.error('Error editing refund payment:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error editing refund payment:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
+
+export async function deleteRefundPayment(refundId: number) {
+  try {
+    const { supabase } = await getAuthenticatedClient();
+
+    const { data: refund, error: fetchError } = await supabase
+      .from('crm_refund_payments')
+      .select('payment_status')
+      .eq('id', refundId)
+      .single();
+
+    if (fetchError) {
+      logger.error('Error fetching refund payment:', fetchError);
+      return { success: false, error: fetchError.message };
+    }
+
+    if (refund?.payment_status === "approved") {
+      return { success: false, error: "Cannot delete an approved refund payment." };
+    }
+
+    const { error } = await supabase
+      .from('crm_refund_payments')
+      .delete()
+      .eq('id', refundId);
+
+    if (error) {
+      logger.error('Error deleting refund payment:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    logger.error('Error deleting refund payment:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
+}
