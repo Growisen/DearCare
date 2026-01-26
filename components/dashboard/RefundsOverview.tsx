@@ -155,6 +155,7 @@ export default function RefundOverview({
               <th className="py-3 px-4 text-sm font-semibold text-slate-600">Payment Method</th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600">Payment Type</th>
               <th className="py-3 px-4 text-sm font-semibold text-slate-600">Reason</th>
+              <th className="py-3 px-4 text-sm font-semibold text-slate-600">Payment Status</th>
             </tr>
           </thead>
           <tbody>
@@ -202,6 +203,28 @@ export default function RefundOverview({
                   <td className="py-3 px-4 text-sm text-slate-600">{r.paymentMethod}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{r.paymentType}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">{r.reason || "-"}</td>
+                  <td className="py-3 px-4 text-sm">
+                    {r.paymentStatus === "approved" ? (
+                      <span className="flex flex-col">
+                        <span className="inline-flex flex-col items-start px-2 py-0.5 rounded-full bg-green-50 text-green-700
+                          text-xs font-semibold max-w-fit border border-green-200"
+                        >Approved</span>
+                        {r.approvedAt && (
+                          <span className="text-gray-700 font-normal mt-0.5">
+                            {formatDate(r.approvedAt, true)}
+                          </span>
+                        )}
+                      </span>
+                    ) : r.paymentStatus === "pending" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-800
+                        text-xs font-semibold border border-yellow-200"
+                      >
+                        Pending
+                      </span>
+                    ) : (
+                      <span className="text-slate-600">{r.paymentStatus || "-"}</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

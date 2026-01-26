@@ -31,6 +31,7 @@ import HomeMaidPreferences from '@/components/client/Profile/HomeMaidPreferences
 import ChildCarePreferences from '@/components/client/Profile/BabyCarePreferences';
 import DeliveryCarePreferences from '@/components/client/Profile/DeliveryCarePreferences';
 import RefundPayments from '@/components/client/Profile/RefundPayments';
+import Modal from '@/components/ui/Modal';
 
 import { usePatientData } from '@/hooks/usePatientData';
 import { useNurseAssignments } from '@/hooks/useNurseAssignments';
@@ -347,6 +348,19 @@ const PatientProfilePage = () => {
         isLoading={isLoadingNurses}
       />
 
+      <Modal
+        open={showDeleteConfirmation}
+        onClose={() => setShowDeleteConfirmation(false)}
+        onConfirm={handleDeleteConfirmation}
+        variant="delete"
+        title="Delete Client"
+        description={
+          "Warning: This action cannot be undone!\n\nAre you sure you want to delete this client?\n\nAll associated data including assessments and nurse assignments will be permanently removed."
+        }
+        confirmText="Delete Client"
+        cancelText="Cancel"
+      />
+
       <ConfirmationModal 
         isOpen={showConfirmation}
         title="Confirm Assignment"
@@ -376,24 +390,6 @@ const PatientProfilePage = () => {
           setEditingAssignment(null);
         }}
         onSave={handleUpdateAssignment}
-      />
-
-      <ConfirmationModal
-        isOpen={showDeleteConfirmation}
-        title="Delete Client"
-        message={
-          <div className="text-center">
-            <p className="text-red-600 font-semibold mb-2">Warning: This action cannot be undone!</p>
-            <p>Are you sure you want to delete this client?</p>
-            <p className="mt-2 text-sm text-gray-600">
-              All associated data including assessments and nurse assignments will be permanently removed.
-            </p>
-          </div>
-        }
-        onConfirm={handleDeleteConfirmation}
-        onCancel={() => setShowDeleteConfirmation(false)}
-        confirmText="Delete Client"
-        confirmButtonClassName="bg-red-600 hover:bg-red-700"
       />
 
       <ConfirmationModal
