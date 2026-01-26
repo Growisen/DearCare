@@ -13,6 +13,8 @@ export interface Refund {
   registrationNumber?: string;
   prevRegistrationNumber?: string;
   clientName?: string;
+  approvedAt?: string;
+  paymentStatus?: string;
 }
 
 export interface RefundPaymentsFilters {
@@ -28,7 +30,6 @@ export interface RefundPaymentsFilters {
 async function fetchRefunds(filters: RefundPaymentsFilters): Promise<{ refunds: Refund[]; totalCount: number }> {
   const res = await fetchAllRefunds({...filters, createdAt: filters.date, refundDate: filters.date});
   if (!res.success) throw new Error(res.error || "Failed to fetch refunds");
-  console.log("Fetched Refund Payments Response:", res.refunds);
   return {
     refunds: (res.refunds || []).map((r: Record<string, unknown>) => ({
       id: r.id as string,
@@ -42,6 +43,8 @@ async function fetchRefunds(filters: RefundPaymentsFilters): Promise<{ refunds: 
       registrationNumber: r.registrationNumber as string | undefined,
       prevRegistrationNumber: r.prevRegistrationNumber as string | undefined,
       clientName: r.clientName as string | undefined,
+      approvedAt: r.approvedAt as string | undefined,
+      paymentStatus: r.paymentStatus as string | undefined,
     })) as Refund[],
     totalCount: res.total ?? 1,
   };

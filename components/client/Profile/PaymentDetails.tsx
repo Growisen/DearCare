@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSaveClientPaymentGroup } from "@/hooks/useSaveClientPaymentGroup";
 import Loader from '@/components/Loader';
 import { deleteClientPaymentGroup, updateClientPaymentGroup } from "@/app/actions/clients/client-payment-records";
-import ConfirmationModal from "@/components/common/ConfirmationModal";
-import ModalPortal from "@/components/ui/ModalPortal";
+import Modal from "@/components/ui/Modal";
 import PaymentEntryForm from "@/components/client/payment/PaymentEntryForm";
 import EntriesTable from "@/components/client/payment/EntriesTable";
 import EntriesMobileView from "@/components/client/payment/EntriesMobileView";
@@ -44,6 +43,12 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
   const [editModal, setEditModal] = useState<{ open: boolean; group: EntryGroup | null }>({ open: false, group: null });
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [paymentType, setPaymentType] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const [approveModal, setApproveModal] = useState<{
+    open: boolean;
+    group: EntryGroup | null;
+  }>({ open: false, group: null });
 
   useEffect(() => {
     if (apiEntries) {
@@ -76,6 +81,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
     setLineItems([{ id: `field-${Date.now()}`, fieldName: "", amount: "", gst: "" }]);
     setGroupNotes("");
     setGroupShowToClient(false);
+    setShowPaymentModal(false);
   };
 
   const saveEntryGroup = async () => {
@@ -178,6 +184,16 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
     }
   };
 
+  const handleApproveClick = (group: EntryGroup) => {
+    setApproveModal({ open: true, group });
+  };
+
+  const confirmApprove = async () => {
+    if (!approveModal.group) return;
+    await handleApprove(approveModal.group);
+    setApproveModal({ open: false, group: null });
+  };
+
   const handleEditClick = (id: number) => {
     const group = entries.find(g => g.id === id);
     if (group) setEditModal({ open: true, group });
@@ -232,28 +248,30 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
 
   return (
     <div className="mx-auto space-y-6">
-      <PaymentEntryForm
-        groupName={groupName}
-        setGroupName={setGroupName}
-        lineItems={lineItems}
-        setLineItems={setLineItems}
-        groupNotes={groupNotes}
-        setGroupNotes={setGroupNotes}
-        groupShowToClient={groupShowToClient}
-        setGroupShowToClient={setGroupShowToClient}
-        onSave={saveEntryGroup}
-        onCancel={resetForm}
-        isSaving={isSaving}
-        loading={isLoading}
-        modeOfPayment={modeOfPayment}
-        setModeOfPayment={setModeOfPayment}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-        paymentType={paymentType}
-        setPaymentType={setPaymentType}
-      />
+      {showPaymentModal && (
+        <PaymentEntryForm
+          groupName={groupName}
+          setGroupName={setGroupName}
+          lineItems={lineItems}
+          setLineItems={setLineItems}
+          groupNotes={groupNotes}
+          setGroupNotes={setGroupNotes}
+          groupShowToClient={groupShowToClient}
+          setGroupShowToClient={setGroupShowToClient}
+          onSave={saveEntryGroup}
+          onCancel={resetForm}
+          isSaving={isSaving}
+          loading={isLoading}
+          modeOfPayment={modeOfPayment}
+          setModeOfPayment={setModeOfPayment}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          paymentType={paymentType}
+          setPaymentType={setPaymentType}
+        />
+      )}
 
       {isLoading ? (
         <div className="flex justify-center items-center py-16">
@@ -265,10 +283,17 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
         </div>
       ) : (
         <div className="bg-white rounded border border-slate-200 overflow-hidden">
-          <div className="p-4 bg-gray-50 border-b border-slate-200">
+          <div className="p-4 bg-gray-50 border-b border-slate-200 flex items-center justify-between">
             <h2 className="text-base font-semibold text-gray-900">
               All Entries ({entries.length})
             </h2>
+            <button
+              className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium py-2 px-4 rounded-sm
+              transition-colors duration-200 flex items-center gap-2"
+              onClick={() => setShowPaymentModal(true)}
+            >
+              + Add Payment
+            </button>
           </div>
           
           <EntriesTable
@@ -276,7 +301,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
             onDelete={handleDeleteClick}
             deletingId={deletingId}
             onEdit={handleEditClick}
-            onApprove={handleApprove}
+            onApprove={handleApproveClick}
             approvingId={approvingId}
           />
           
@@ -285,7 +310,7 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
             onDelete={handleDeleteClick}
             deletingId={deletingId}
             onEdit={handleEditClick}
-            onApprove={handleApprove}
+            onApprove={handleApproveClick}
             approvingId={approvingId}
           />
         </div>
@@ -293,17 +318,25 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
 
       {entries.length > 0 && <SummaryStats entries={entries} />}
 
-      <ModalPortal>
-        <ConfirmationModal
-          isOpen={confirmModal.open}
-          title="Delete Entry Group"
-          message="Are you sure you want to delete this entire entry group? This action cannot be undone."
+        <Modal
+          open={confirmModal.open}
+          onClose={() => setConfirmModal({ open: false, groupId: null })}
           onConfirm={confirmDelete}
-          onCancel={() => setConfirmModal({ open: false, groupId: null })}
-          confirmButtonText="Delete"
-          cancelButtonText="Cancel"
-          confirmButtonColor="red"
-          isLoading={!!deletingId}
+          variant="delete"
+          title="Delete Entry Group"
+          description="Are you sure you want to delete this entire entry group? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+        />
+        <Modal
+          open={approveModal.open}
+          onClose={() => setApproveModal({ open: false, group: null })}
+          onConfirm={confirmApprove}
+          variant="approve"
+          title="Approve Payment Group"
+          description="Are you sure you want to approve this payment group? This action cannot be undone."
+          confirmText="Approve"
+          cancelText="Cancel"
         />
         {editModal.open && editModal.group && (
           <EditEntryGroupModal
@@ -315,7 +348,6 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
             }}
           />
         )}
-      </ModalPortal>
     </div>
   );
 };
