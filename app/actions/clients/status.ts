@@ -14,12 +14,14 @@ import { logger } from '@/utils/logger';
  * @param clientId - Unique client identifier
  * @param newStatus - New status for the client
  * @param rejectionReason - Reason for rejection (if applicable)
+ * @param shouldCreateAccount - Whether to create a user account if needed
  * @returns Promise<{ success: boolean; client?: any; error?: string }>
  */
 export async function updateClientStatus(
     clientId: string,
     newStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'assigned',
-    rejectionReason?: string
+    rejectionReason?: string,
+    shouldCreateAccount: boolean = false
   ) {
     try {
       const supabase = await createSupabaseAdminClient();
@@ -85,7 +87,7 @@ export async function updateClientStatus(
           client.client_category
         );
         
-        if (clientEmail) {
+        if (clientEmail && shouldCreateAccount) {
           await createUserAccountIfNeeded(supabase, clientEmail, clientName, clientId, client.client_category);
         }
   

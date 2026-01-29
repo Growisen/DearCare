@@ -146,11 +146,12 @@ export async function createUserAccountIfNeeded(
       email: clientEmail,
       password: password,
       email_confirm: true,
-      user_metadata: {
+      app_metadata: {
         name: clientName,
         role: 'client',
         client_id: clientId,
-        requiresPasswordChange: true
+        requiresPasswordChange: true,
+        client_category: clientCategory
       }
     });
 

@@ -1,6 +1,8 @@
 'use server'
 import { getOrgMappings } from '@/app/utils/org-utils';
 import { getProtectedDocumentUrl } from '@/app/utils/supabase-storage-utils';
+import { logger } from '@/utils/logger';
+import { createSupabaseAdminClient } from '@/lib/supabaseServiceAdmin';
 
 type NurseDocuments = {
   adhar: File | null
@@ -158,11 +160,77 @@ async function generateNurseRegNo(
 }
 
 
+/**
+ * Creates a user account for a nurse if one does not already exist.
+ *
+ * @param supabase - Supabase admin client instance
+ * @param nurseEmail - Email address of the nurse
+ * @param nurseName - Name of the nurse
+ * @param nurseId - Unique nurse identifier
+ * @returns Promise<void>
+ */
+export async function createNurseAccountIfNeeded(
+  nurseEmail: string,
+  nurseName: string,
+  nurseId: string,
+  nurseCategory: string
+): Promise<void> {
+  const supabase = await createSupabaseAdminClient();
+
+  const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
+
+  if (userListError) {
+    logger.error('Error listing users:', userListError);
+    return;
+  }
+
+  const existingUser = userList?.users?.find(user =>
+    user.email?.toLowerCase() === nurseEmail.toLowerCase()
+  );
+
+  if (!existingUser) {
+    const generateUniquePassword = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      const timestamp = Date.now().toString(36);
+      let password = timestamp.slice(0, 4);
+
+      for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      return password;
+    };
+
+    const password = generateUniquePassword();
+
+    const { error: createError } = await supabase.auth.admin.createUser({
+      email: nurseEmail,
+      password: password,
+      email_confirm: true,
+      app_metadata: {
+        name: nurseName,
+        role: 'nurse',
+        nurse_id: nurseId,
+        requiresPasswordChange: true,
+        nurse_category: nurseCategory
+      }
+    });
+
+    if (createError) {
+      logger.error('Error creating nurse user account:', createError);
+    } else {
+      logger.info(`Nurse user account created for ${nurseEmail}`);
+    }
+  }
+}
+
+
 export async function createNurse(
   nurseData: NurseFormData,
   referenceData: NurseReferenceData,
   healthData: NurseHealthData,
-  documents: NurseDocuments
+  documents: NurseDocuments,
+  shouldCreateAccount: boolean = false
   
 ): Promise<{ success: boolean; nurseId?: number; error?: string }> {
   
@@ -204,9 +272,9 @@ export async function createNurse(
     const { data: nurse, error: nurseError } = await supabase
       .from('nurses')
       .insert({
-        first_name: nurseData.first_name,
-        email:nurseData.email ? String(nurseData.email) : null,
-        last_name: nurseData.last_name,
+        first_name: nurseData.first_name ? nurseData.first_name.trim() : null,
+        email: nurseData.email ? String(nurseData.email).trim() : null,
+        last_name: nurseData.last_name ? nurseData.last_name.trim() : null,
         gender: nurseData.gender,
         date_of_birth: nurseData.date_of_birth,
         address: nurseData.address,
@@ -235,6 +303,15 @@ export async function createNurse(
       .single()
 
     if (nurseError) throw nurseError
+
+    if (nurseData.email && shouldCreateAccount) {
+      await createNurseAccountIfNeeded(
+        nurseData.email,
+        `${nurseData.first_name} ${nurseData.last_name}`,
+        nurse.nurse_id.toString(),
+        nurseData.category
+      );
+    }
 
     const { error: referenceError } = await supabase
       .from('nurse_references')

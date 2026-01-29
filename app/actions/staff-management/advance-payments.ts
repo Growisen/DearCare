@@ -2,250 +2,150 @@
 
 import { getAuthenticatedClient } from '@/app/actions/helpers/auth.helper';
 import { jsonToCSV } from '@/utils/jsonToCSV';
+import toCamelCase from '@/utils/toCamelCase';
 
-type Deduction = {
-  date: string;
-  amount_paid?: number;
-  lend?: number;
-  remaining: number;
-  type?: string;
-  payment_method?: string;
-  receipt_file?: string | null;
-  info?: string | null;
-};
+export async function fetchAdvancePaymentsById(nurseId: number) {
+  const { supabase } = await getAuthenticatedClient();
 
-export async function fetchAdvancePayments(nurseId: number) {
-  const { supabase } = await getAuthenticatedClient()
   const { data, error } = await supabase
-    .from('advance_payments')
+    .from('crm_nurse_advance_ledger')
     .select(`
       id,
-      date,
-      advance_amount,
-      return_type,
-      return_amount,
-      remaining_amount,
-      installment_amount,
-      info,
+      transaction_date,
+      amount,
+      transaction_type,
+      status,
+      notes,
       payment_method,
       receipt_file,
-      deductions,
-      approved
+      return_type,
+      installment_amount
     `)
     .eq('nurse_id', nurseId)
-    .order('date', { ascending: false })
+    .order('transaction_date', { ascending: false });
 
-  if (error) throw error
-  if (!data) return []
+  if (error) {
+    return {
+      success: false,
+      message: error.message || 'Failed to fetch advance payments',
+      data: [],
+      meta: { total: 0 }
+    };
+  }
+
+  if (!data) {
+    return {
+      success: true,
+      message: 'No advance payments found',
+      data: [],
+      meta: { total: 0 }
+    };
+  }
 
   const paymentsWithUrls = await Promise.all(
-    data.map(async (payment) => {
-      let receipt_url = null
+    data.map(async (transaction) => {
+      let receipt_url = '';
 
-      if (payment.receipt_file) {
+      if (transaction.receipt_file) {
         const { data: urlData, error: urlError } = await supabase.storage
           .from('DearCare')
-          .createSignedUrl(payment.receipt_file, 60 * 60)
-        
-        if (urlError) throw urlError
-        receipt_url = urlData?.signedUrl
+          .createSignedUrl(transaction.receipt_file, 60 * 60);
+
+        if (!urlError) {
+          receipt_url = urlData?.signedUrl;
+        }
       }
 
-      let processedDeductions = payment.deductions
-
-      if (Array.isArray(payment.deductions)) {
-        processedDeductions = await Promise.all(
-          payment.deductions.map(async (deduction: Deduction) => {
-            if (deduction.receipt_file) {
-              const { data: dedUrlData } = await supabase.storage
-                .from('DearCare')
-                .createSignedUrl(deduction.receipt_file, 60 * 60)
-
-              if (dedUrlData?.signedUrl) {
-                return { ...deduction, receipt_file: dedUrlData.signedUrl }
-              }
-            }
-            return deduction
-          })
-        )
-      }
-
-      return { 
-        ...payment, 
-        receipt_url,
-        deductions: processedDeductions
-      }
+      return toCamelCase({
+        ...transaction,
+        date: transaction.transaction_date,
+        info: transaction.notes,
+        receiptUrl: receipt_url
+      });
     })
-  )
+  );
 
-  return paymentsWithUrls
+  return {
+    success: true,
+    message: 'Advance payments fetched successfully',
+    data: paymentsWithUrls,
+    meta: { total: paymentsWithUrls.length }
+  };
 }
 
-
-export async function insertAdvancePayment(payment: {
-  nurse_id: number
-  date: string
-  advance_amount: number
-  return_type: 'full' | 'installments'
-  return_amount?: number
-  remaining_amount?: number
-  installment_amount?: number
-  deductions?: Deduction[]
-  payment_method?: string
-  receipt_file?: File | null
-  info?: string
-  paymentType?: string
+export async function createAdvancePayment(payment: {
+  nurse_id: number;
+  date: string;
+  advance_amount: number;
+  transaction_type: string;
+  payment_method?: string;
+  payment_type?: string;
+  receipt_file?: File | null;
+  info?: string;
+  return_type: 'full' | 'installments';
+  installment_amount?: number;
 }) {
-  const { supabase } = await getAuthenticatedClient()
+  const { supabase } = await getAuthenticatedClient();
 
-  const uploadReceipt = async (id: number, file: File) => {
-    const timestamp = new Date().getTime()
-    const filePath = `Nurses/advance/${id}/${timestamp}_${file.name}`
+  const { data, error } = await supabase
+    .from('crm_nurse_advance_ledger')
+    .insert([
+      {
+        nurse_id: payment.nurse_id,
+        transaction_date: payment.date,
+        amount: payment.advance_amount,
+        transaction_type: payment.transaction_type,
+        status: 'PENDING',
+        payment_method: payment.payment_method || null,
+        notes: payment.info || null,
+        return_type: payment.return_type,
+        installment_amount: payment.installment_amount || null,
+        receipt_file: null,
+        payment_type: payment.payment_type || null,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    return { success: false, message: error.message || 'Failed to insert advance payment' };
+  }
+  if (!data) {
+    return { success: false, message: 'Failed to insert advance payment' };
+  }
+
+  if (payment.receipt_file) {
+    const timestamp = new Date().getTime();
+    const filePath = `Nurses/advances/${data.id}/${timestamp}_${payment.receipt_file.name}`;
 
     const { error: uploadError } = await supabase.storage
       .from('DearCare')
-      .upload(filePath, file, { upsert: true })
+      .upload(filePath, payment.receipt_file, { upsert: true });
 
-    if (uploadError) throw uploadError
-    return filePath
-  }
-
-  const { data: sameDateData, error: sameDateError } = await supabase
-    .from('advance_payments')
-    .select('*')
-    .eq('nurse_id', payment.nurse_id)
-    .eq('date', payment.date)
-    .single()
-
-  if (sameDateError && sameDateError.code !== 'PGRST116') throw sameDateError
-
-  if (sameDateData) {
-    let newReceiptPath = null
-    if (payment.receipt_file) {
-      newReceiptPath = await uploadReceipt(sameDateData.id, payment.receipt_file)
+    if (uploadError) {
+      return { success: false, message: uploadError.message || 'Failed to upload receipt file' };
     }
 
-    const newDeduction = {
-      date: payment.date,
-      lend: payment.advance_amount,
-      remaining: (sameDateData.remaining_amount ?? 0) + payment.advance_amount,
-      type: 'addition',
-      payment_method: payment.payment_method,
-      receipt_file: newReceiptPath,
-      info: payment.info
-    }
-
-    const updatedDeductions = Array.isArray(sameDateData.deductions)
-      ? [...sameDateData.deductions, newDeduction]
-      : [newDeduction]
-
-    const { data: updateData, error: updateError } = await supabase
-      .from('advance_payments')
-      .update({
-        advance_amount: (sameDateData.advance_amount ?? 0) + payment.advance_amount,
-        remaining_amount: (sameDateData.remaining_amount ?? 0) + payment.advance_amount,
-        deductions: updatedDeductions
-      })
-      .eq('id', sameDateData.id)
-      .select()
-
-    if (updateError) throw updateError
-    return updateData?.[0]
-  }
-
-  const { data: remainingData, error: remainingError } = await supabase
-    .from('advance_payments')
-    .select('*')
-    .eq('nurse_id', payment.nurse_id)
-    .gt('remaining_amount', 0)
-    .order('date', { ascending: false })
-    .limit(1)
-    .single()
-
-  if (remainingError && remainingError.code !== 'PGRST116') throw remainingError
-
-  if (remainingData) {
-    let newReceiptPath = null
-    if (payment.receipt_file) {
-      newReceiptPath = await uploadReceipt(remainingData.id, payment.receipt_file)
-    }
-
-    const newDeduction = {
-      date: payment.date,
-      lend: payment.advance_amount,
-      remaining: (remainingData.remaining_amount ?? 0) + payment.advance_amount,
-      type: 'addition',
-      payment_method: payment.payment_method,
-      receipt_file: newReceiptPath,
-      info: payment.info
-    }
-
-    const updatedDeductions = Array.isArray(remainingData.deductions)
-      ? [...remainingData.deductions, newDeduction]
-      : [newDeduction]
-
-    const { data: updateData, error: updateError } = await supabase
-      .from('advance_payments')
-      .update({
-        advance_amount: (remainingData.advance_amount ?? 0) + payment.advance_amount,
-        remaining_amount: (remainingData.remaining_amount ?? 0) + payment.advance_amount,
-        deductions: updatedDeductions
-      })
-      .eq('id', remainingData.id)
-      .select()
-
-    if (updateError) throw updateError
-    return updateData?.[0]
-  }
-
-  const installmentAmount =
-    payment.return_type === 'full'
-      ? payment.advance_amount
-      : payment.installment_amount
-
-  const { data, error } = await supabase
-    .from('advance_payments')
-    .insert([{
-      nurse_id: payment.nurse_id,
-      date: payment.date,
-      advance_amount: payment.advance_amount,
-      return_type: payment.return_type,
-      return_amount: payment.return_amount,
-      remaining_amount: payment.remaining_amount ?? payment.advance_amount,
-      installment_amount: installmentAmount,
-      deductions: payment.deductions ?? [],
-      payment_method: payment.payment_method ?? null,
-      receipt_file: null,
-      info: payment.info ?? null,
-      payment_type: payment.paymentType || null
-    }])
-    .select()
-
-  if (error) throw error
-  const inserted = data?.[0]
-  if (!inserted) throw new Error('Failed to insert advance payment')
-
-  if (payment.receipt_file) {
-    const filePath = await uploadReceipt(inserted.id, payment.receipt_file)
-
-    const { data: updateData, error: updateError } = await supabase
-      .from('advance_payments')
+    const { error: updateError } = await supabase
+      .from('crm_nurse_advance_ledger')
       .update({ receipt_file: filePath })
-      .eq('id', inserted.id)
+      .eq('id', data.id)
       .select()
+      .single();
 
-    if (updateError) throw updateError
-    return updateData?.[0]
+    if (updateError) {
+      return { success: false, message: updateError.message || 'Failed to update receipt file path' };
+    }
   }
 
-  return inserted
+  return { success: true, message: 'Advance payment created successfully' };
 }
 
-export async function deleteAdvancePayment(paymentId: string) {
+export async function deleteAdvancePaymentById(paymentId: string) {
   const { supabase } = await getAuthenticatedClient()
 
   const { data: payment, error: fetchError } = await supabase
-    .from('advance_payments')
+    .from('nurse_advance_ledger')
     .select('created_at, receipt_file')
     .eq('id', paymentId)
     .single()
@@ -263,80 +163,57 @@ export async function deleteAdvancePayment(paymentId: string) {
     const { error: fileDeleteError } = await supabase.storage
       .from('DearCare')
       .remove([payment.receipt_file])
+
     if (fileDeleteError) throw fileDeleteError
   }
 
-  const { data, error } = await supabase
-    .from('advance_payments')
+  const { error } = await supabase
+    .from('nurse_advance_ledger')
     .delete()
     .eq('id', paymentId)
-    .select()
 
   if (error) throw error
-  return data?.[0]
+
+  return { success: true, message: 'Payment deleted successfully' }
 }
 
-export async function updateAdvancePayment(paymentId: number, updates: {
+export async function updateAdvancePayment(paymentId: string, updates: {
   date?: string
   advance_amount?: number
-  return_type?: 'full' | 'partial'
-  return_amount?: number
-  remaining_amount?: number
-  deductions?: object[]
+  return_type?: 'full' | 'installments'
+  installment_amount?: number
+  info?: string
+  payment_method?: string
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED'
 }) {
   const { supabase } = await getAuthenticatedClient()
-  const { data, error } = await supabase
-    .from('advance_payments')
-    .update(updates)
+
+  const mappedUpdates: {
+    transaction_date?: string;
+    amount?: number;
+    return_type?: 'full' | 'installments';
+    installment_amount?: number;
+    notes?: string;
+    payment_method?: string;
+    status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+  } = {}
+  if (updates.date) mappedUpdates.transaction_date = updates.date
+  if (updates.advance_amount !== undefined) mappedUpdates.amount = updates.advance_amount
+  if (updates.return_type) mappedUpdates.return_type = updates.return_type
+  if (updates.installment_amount !== undefined) mappedUpdates.installment_amount = updates.installment_amount
+  if (updates.info) mappedUpdates.notes = updates.info
+  if (updates.payment_method) mappedUpdates.payment_method = updates.payment_method
+  if (updates.status) mappedUpdates.status = updates.status
+
+  const { error } = await supabase
+    .from('nurse_advance_ledger')
+    .update(mappedUpdates)
     .eq('id', paymentId)
-    .select()
 
   if (error) throw error
-  return data?.[0]
+  
+  return { success: true, message: 'Payment updated successfully' }
 }
-
-export async function addManualInstallment(paymentId: string, installmentAmount: number, installmentDate: string, note: string) {
-  const { supabase } = await getAuthenticatedClient()
-
-  const { data: paymentData, error: fetchError } = await supabase
-    .from('advance_payments')
-    .select('remaining_amount, deductions, return_amount')
-    .eq('id', paymentId)
-    .single()
-
-  if (fetchError) throw fetchError
-  if (!paymentData) throw new Error('Advance payment not found')
-
-  const prevRemaining = Number(paymentData.remaining_amount)
-  const newRemaining = prevRemaining - installmentAmount
-  if (newRemaining < 0) throw new Error('Installment amount exceeds remaining amount')
-
-  const prevReturnAmount = Number(paymentData.return_amount) || 0
-  const newReturnAmount = prevReturnAmount + installmentAmount
-
-  const prevDeductions = Array.isArray(paymentData.deductions) ? paymentData.deductions : []
-  const newDeduction = {
-    amount_paid: installmentAmount,
-    date: installmentDate,
-    remaining: newRemaining,
-    info: note
-  }
-  const updatedDeductions = [...prevDeductions, newDeduction]
-
-  const { data: updateData, error: updateError } = await supabase
-    .from('advance_payments')
-    .update({
-      remaining_amount: newRemaining,
-      return_amount: newReturnAmount,
-      deductions: updatedDeductions
-    })
-    .eq('id', paymentId)
-    .select()
-
-  if (updateError) throw updateError
-  return updateData?.[0]
-}
-
 
 export async function approveAdvancePayment(paymentId: string) {
   const { supabase } = await getAuthenticatedClient()
@@ -349,94 +226,6 @@ export async function approveAdvancePayment(paymentId: string) {
   if (error) throw error
   return data?.[0]
 }
-
-
-export async function deleteDeductionFromPayment(input: {
-  payment_id: string,
-  deduction: {
-    date: string;
-    amount_paid?: number;
-    lend?: number;
-    remaining: number;
-    type?: string;
-    payment_method?: string;
-    receipt_file?: string | null;
-    info?: string | null;
-  }
-}) {
-  const { supabase } = await getAuthenticatedClient()
-
-  try {
-    const { data: payment, error: fetchError } = await supabase
-      .from('advance_payments')
-      .select('deductions, advance_amount, remaining_amount, return_amount')
-      .eq('id', input.payment_id)
-      .single();
-
-    if (fetchError || !payment) {
-      return { success: false, data: null };
-    }
-
-    const prevDeductions = Array.isArray(payment.deductions) ? payment.deductions : [];
-
-    const fields = [
-      'date', 'amount_paid', 'lend', 'remaining', 'type', 'payment_method', 'receipt_file', 'info'
-    ];
-    const deductionToDelete = prevDeductions.find((ded: Deduction) =>
-      fields.every(field => {
-        const a = ded[field as keyof Deduction];
-        const b = input.deduction[field as keyof Deduction];
-        return (a === b) || (a == null && b == null);
-      })
-    );
-
-    const updatedDeductions = prevDeductions.filter((ded: Deduction) =>
-      !fields.every(field => {
-        const a = ded[field as keyof Deduction];
-        const b = input.deduction[field as keyof Deduction];
-        return (a === b) || (a == null && b == null);
-      })
-    );
-
-    let newAdvanceAmount = payment.advance_amount;
-    let newRemainingAmount = payment.remaining_amount;
-    let newReturnAmount = payment.return_amount ?? 0;
-
-    if (deductionToDelete) {
-      if (deductionToDelete.lend) {
-        newAdvanceAmount = (payment.advance_amount ?? 0) - (deductionToDelete.lend ?? 0);
-        newRemainingAmount = (payment.remaining_amount ?? 0) - (deductionToDelete.lend ?? 0);
-      } else if (deductionToDelete.amount_paid) {
-        newRemainingAmount = (payment.remaining_amount ?? 0) + (deductionToDelete.amount_paid ?? 0);
-        newReturnAmount = (payment.return_amount ?? 0) - (deductionToDelete.amount_paid ?? 0);
-      }
-    }
-
-    if (newReturnAmount === 0) {
-      newReturnAmount = null;
-    }
-
-    const { data: updateData, error: updateError } = await supabase
-      .from('advance_payments')
-      .update({
-        deductions: updatedDeductions,
-        advance_amount: newAdvanceAmount,
-        remaining_amount: newRemainingAmount,
-        return_amount: newReturnAmount
-      })
-      .eq('id', input.payment_id)
-      .select();
-
-    if (updateError || !updateData?.[0]) {
-      return { success: false, data: null };
-    }
-
-    return { success: true, data: updateData[0] };
-  } catch {
-    return { success: false, data: null };
-  }
-}
-
 
 export async function fetchAdvancePaymentTotals({
   date,
