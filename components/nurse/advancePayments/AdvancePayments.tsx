@@ -1,108 +1,32 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { IoAdd } from 'react-icons/io5';
 import CreateAdvancePaymentModal from "./CreateAdvancePaymentModal";
-import { 
-  fetchAdvancePayments, 
-  deleteAdvancePayment, 
-  approveAdvancePayment, 
-  deleteDeductionFromPayment 
-} from "@/app/actions/staff-management/advance-payments";
 import Modal from "../../ui/Modal";
-import AddInstallmentModal from "./AddInstallmentModal";
 import { toast } from 'sonner';
-import TransactionHistoryModal from "./TransactionHistoryModal";
 import { getNurseTenantName } from "@/utils/formatters";
 import AdvancePaymentsTable from "./AdvancePaymentsTable";
-
-type Deduction = {
-  date: string;
-  amount_paid?: number;
-  lend?: number;
-  remaining: number;
-  type?: string;
-  payment_method?: string;
-  receipt_file?: string | null;
-  info?: string | null;
-};
-
-type AdvancePayment = {
-  id: string;
-  date: string;
-  advance_amount: number;
-  status?: string;
-  return_type: string;
-  return_amount?: number;
-  installment_amount?: number;
-  remaining_amount: number;
-  deductions?: Deduction[];
-  payment_method?: string;
-  receipt_url?: string | null;
-  info?: string | null;
-  approved: boolean;
-};
+import { useAdvancePaymentsById, AdvancePayment } from "@/hooks/useAdvancePaymentsById";
 
 export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, tenant: string }) {
   const nurseTenantName = getNurseTenantName(tenant);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [payments, setPayments] = useState<AdvancePayment[]>([]);
-  const [loading, setLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<AdvancePayment | null>(null);
-  const [addInstallmentModalOpen, setAddInstallmentModalOpen] = useState(false);
-  const [installmentPayment, setInstallmentPayment] = useState<AdvancePayment | null>(null);
-  const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [selectedHistoryPayment, setSelectedHistoryPayment] = useState<AdvancePayment | null>(null);
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [approvalPayment, setApprovalPayment] = useState<AdvancePayment | null>(null);
+  const [approvalLoading, setApprovalLoading] = useState(false);
 
-  const loadPayments = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchAdvancePayments(nurseId);
-      setPayments(data || []);
-    } catch {
-      setPayments([]);
-    }
-    setLoading(false);
-  }, [nurseId]);
+  const {
+    advancePayments: payments,
+    isLoading: loading,
+    deleteAdvancePayment,
+    approveAdvancePaymentAndSend,
+  } = useAdvancePaymentsById(nurseId);
 
-  useEffect(() => {
-    loadPayments();
-  }, [loadPayments]);
-  
   const handleDelete = (payment: AdvancePayment) => {
     setSelectedPayment(payment);
     setDeleteModalOpen(true);
-  };
-
-  const handleViewHistory = (payment: AdvancePayment) => {
-    setSelectedHistoryPayment(payment);
-    setHistoryModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedPayment) return;
-    setLoading(true);
-    try {
-      await deleteAdvancePayment(selectedPayment.id);
-      setDeleteModalOpen(false);
-      setSelectedPayment(null);
-      await loadPayments();
-      toast.success("Payment deleted successfully.");
-    } catch (err: unknown) {
-      const errorMessage = typeof err === "object" && err !== null && "message" in err
-        ? (err as { message?: string }).message
-        : "Failed to delete payment.";
-      toast.error(errorMessage);
-      setDeleteModalOpen(false);
-      setSelectedPayment(null);
-    }
-    setLoading(false);
-  };
-
-  const handleAddInstallment = async(payment: AdvancePayment) => {
-    setInstallmentPayment(payment);
-    setAddInstallmentModalOpen(true);
   };
 
   const handleSendAdvanceAmount = async (payment: AdvancePayment) => {
@@ -110,72 +34,35 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
     setApprovalModalOpen(true);
   };
 
-  const confirmApproval = async () => {
-    if (!approvalPayment) return;
-    setLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nurse_id: String(nurseId),
-          amount: approvalPayment.advance_amount,
-          description: approvalPayment.info,
-          tenant: nurseTenantName,
-          payment_type: "outgoing",
-          pay_status: "paid",
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!result.error) {
-        if (!approvalPayment.approved) {
-          await approveAdvancePayment(approvalPayment.id);
-        }
-        toast.success("Advance amount sent and payment approved!");
-        await loadPayments();
-      } else {
-        toast.error("Failed to send: " + (result.error || response.statusText));
-      }
-    } catch (error) {
-      console.error("Send advance error:", error);
-      toast.error("Error sending advance amount.");
-    } finally {
-      setApprovalModalOpen(false);
-      setApprovalPayment(null);
-      setLoading(false);
+  const confirmDelete = async () => {
+    if (!selectedPayment) return;
+    setDeleteLoading(true);
+    const result = await deleteAdvancePayment(selectedPayment.id);
+    setDeleteLoading(false);
+    setDeleteModalOpen(false);
+    setSelectedPayment(null);
+    if (result?.success) {
+      toast.success(result?.message || "Payment deleted successfully.");
+    } else {
+      toast.error(result?.message || "Failed to delete payment.");
     }
   };
 
-  const handleDeleteDeduction = async (item: Deduction) => {
-    if (!selectedHistoryPayment) return;
-    try {
-      const res = await deleteDeductionFromPayment({
-        payment_id: selectedHistoryPayment.id,
-        deduction: item,
-      });
-      if (res.success && res.data) {
-        toast.success("Deduction deleted successfully.");
-        const updatedPayment = {
-          ...selectedHistoryPayment,
-          advance_amount: res.data.advance_amount,
-          deductions: res.data.deductions,
-          remaining_amount: res.data.remaining_amount ?? selectedHistoryPayment.remaining_amount,
-          return_amount: res.data.return_amount ?? selectedHistoryPayment.return_amount,
-        };
-        setSelectedHistoryPayment(updatedPayment);
-        setPayments((prev) =>
-          prev.map((p) => p.id === selectedHistoryPayment.id ? updatedPayment : p)
-        );
-      } else {
-        throw new Error("Failed to delete deduction.");
-      }
-    } catch (err: unknown) {
-        const errorMessage = typeof err === "object" && err !== null && "message" in err
-        ? (err as { message?: string }).message
-        : "Failed to delete deduction.";
-      toast.error(errorMessage);
+  const confirmApproval = async () => {
+    if (!approvalPayment) return;
+    setApprovalLoading(true);
+    const result = await approveAdvancePaymentAndSend({
+      payment: approvalPayment,
+      nurseTenantName,
+      nurseId,
+    });
+    setApprovalLoading(false);
+    setApprovalModalOpen(false);
+    setApprovalPayment(null);
+    if (result?.success) {
+      toast.success(result?.message || "Advance amount sent and payment approved!");
+    } else {
+      toast.error(result?.message || "Failed to send: " + (result?.error || ""));
     }
   };
 
@@ -199,41 +86,31 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         </button>
       </div>
       <AdvancePaymentsTable
-        payments={payments}
+        payments={payments ?? []}
         loading={loading}
-        onViewHistory={handleViewHistory}
-        onAddInstallment={handleAddInstallment}
-        onSendAdvanceAmount={handleSendAdvanceAmount}
+        onApprove={handleSendAdvanceAmount}
         onDelete={handleDelete}
       />
       <CreateAdvancePaymentModal
         isOpen={isModalOpen}
         nurseId={nurseId}
         onClose={() => setIsModalOpen(false)}
-        onCreated={() => loadPayments()}
       />
-      <AddInstallmentModal
-        open={addInstallmentModalOpen}
-        paymentId={installmentPayment ? installmentPayment.id : ""}
-        onClose={() => {
-          setAddInstallmentModalOpen(false);
-          setInstallmentPayment(null);
-        }}
-        onConfirm={async () => {
-          await loadPayments();
-          setAddInstallmentModalOpen(false);
-          setInstallmentPayment(null);
-        }}
-      />
+      
       <Modal
         open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedPayment(null);
+          setDeleteLoading(false);
+        }}
         onConfirm={confirmDelete}
         variant="delete"
         title="Delete this record?"
-        description={`Date: ${selectedPayment?.date}\nAmount: ₹${selectedPayment?.advance_amount}`}
-        confirmText="Yes, delete"
+        description={`Date: ${selectedPayment?.date}\nAmount: ₹${selectedPayment?.amount}`}
+        confirmText={deleteLoading ? "Deleting..." : "Yes, delete"}
         cancelText="Cancel"
+        loading={deleteLoading}
       />
       <Modal
         open={approvalModalOpen}
@@ -244,18 +121,10 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         onConfirm={confirmApproval}
         variant="approve"
         title="Approve this payment?"
-        description={`Date: ${approvalPayment?.date}\nAmount: ₹${approvalPayment?.advance_amount}`}
-        confirmText="Yes, approve"
+        description={`Date: ${approvalPayment?.date}\nAmount: ₹${approvalPayment?.amount}`}
+        confirmText={approvalLoading ? "Approving..." : "Yes, approve"}
         cancelText="Cancel"
-      />
-      <TransactionHistoryModal 
-        isOpen={historyModalOpen}
-        onClose={() => {
-            setHistoryModalOpen(false);
-            setSelectedHistoryPayment(null);
-        }}
-        payment={selectedHistoryPayment}
-        onDeleteItem={handleDeleteDeduction}
+        loading={approvalLoading}
       />
     </div>
   );

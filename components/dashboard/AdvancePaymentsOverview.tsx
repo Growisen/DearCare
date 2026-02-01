@@ -2,30 +2,11 @@
 
 import React, { useRef } from "react";
 import { Card } from "@/components/ui/card";
-import { CreditCard, Download, Search, ArrowUpRight } from "lucide-react";
+import { CreditCard, Download, Search, ArrowUpRight, Loader } from "lucide-react";
 import { formatDate } from "@/utils/formatters";
 import { PaginationControls } from "@/components/client/clients/PaginationControls";
 import Link from "next/link";
-
-type AdvancePayment = {
-  id: number;
-  date: string;
-  advance_amount: number;
-  return_type: string;
-  return_amount: number;
-  remaining_amount: number;
-  installment_amount: number;
-  info?: string;
-  payment_method?: string;
-  receipt_url?: string | null;
-  approved?: boolean;
-  nurse_id?: number;
-  nurse_name: string;
-  nurse_admitted_type: string;
-  nurse_reg_no?: string;
-  nurse_prev_reg_no?: string;
-  payment_type?: string;
-};
+import { AdvancePayment } from "@/types/advancePayment.types";
 
 export default function AdvancePaymentsOverview({
   payments = [],
@@ -119,10 +100,7 @@ export default function AdvancePaymentsOverview({
           >
             {isExporting ? (
               <span className="flex items-center">
-                <svg className="animate-spin mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <Loader className="animate-spin mr-1 h-3 w-3 text-white" />
                 Exporting...
               </span>
             ) : (
@@ -235,7 +213,7 @@ export default function AdvancePaymentsOverview({
                     className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                   >
                     <td className="py-3 px-4 text-sm text-slate-600 whitespace-nowrap">
-                      {formatDate(payment.date)}
+                      {formatDate(payment.transaction_date)}
                     </td>
                     <td className="py-3 px-4 text-sm font-medium text-slate-800 whitespace-nowrap">
                       <Link
