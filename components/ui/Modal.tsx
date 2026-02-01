@@ -1,6 +1,6 @@
 import ModalPortal from './ModalPortal'
 import React from 'react'
-import { AlertTriangle, CheckCircle2, X } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, X, Loader2 } from 'lucide-react'
 
 type ModalVariant = 'delete' | 'approve'
 
@@ -13,6 +13,7 @@ type ModalProps = {
   description?: string
   confirmText?: string
   cancelText?: string
+  loading?: boolean 
 }
 
 export default function Modal({
@@ -24,6 +25,7 @@ export default function Modal({
   description,
   confirmText,
   cancelText,
+  loading = false,
 }: ModalProps) {
   if (!open) return null
 
@@ -63,6 +65,7 @@ export default function Modal({
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Close modal"
+              disabled={loading}
             >
               <X className="h-5 w-5" strokeWidth={2} />
             </button>
@@ -79,6 +82,7 @@ export default function Modal({
               onClick={onClose}
               className="px-5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-slate-300
                rounded-sm hover:bg-gray-100 transition-colors"
+              disabled={loading}
             >
               {cancelText || 'No, cancel'}
             </button>
@@ -88,9 +92,17 @@ export default function Modal({
                 isDelete
                   ? 'bg-red-700 hover:bg-red-800'
                   : 'bg-blue-700 hover:bg-blue-800'
-              }`}
+              } flex items-center gap-2`}
+              disabled={loading}
             >
-              {confirmText || (isDelete ? "Yes, I'm sure" : 'Approve')}
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin h-4 w-4 text-white" />{' '}
+                  <span>Processing...</span>
+                </>
+              ) : (
+                confirmText || (isDelete ? "Yes, I'm sure" : 'Approve')
+              )}
             </button>
           </div>
         </div>

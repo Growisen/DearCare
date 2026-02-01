@@ -277,10 +277,6 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
         <div className="flex justify-center items-center py-16">
           <Loader message="Loading data..." />
         </div>
-      ) : entries.length === 0 ? (
-        <div className="bg-gray-50 rounded border border-slate-200 p-8 text-center text-gray-500">
-          No entries yet. Use the form above to add the first one!
-        </div>
       ) : (
         <div className="bg-white rounded border border-slate-200 overflow-hidden">
           <div className="p-4 bg-gray-50 border-b border-slate-200 flex items-center justify-between">
@@ -295,59 +291,65 @@ const DynamicFieldTracker: React.FC<DynamicFieldTrackerProps> = ({ clientId, ten
               + Add Payment
             </button>
           </div>
-          
-          <EntriesTable
-            entries={entries}
-            onDelete={handleDeleteClick}
-            deletingId={deletingId}
-            onEdit={handleEditClick}
-            onApprove={handleApproveClick}
-            approvingId={approvingId}
-          />
-          
-          <EntriesMobileView
-            entries={entries}
-            onDelete={handleDeleteClick}
-            deletingId={deletingId}
-            onEdit={handleEditClick}
-            onApprove={handleApproveClick}
-            approvingId={approvingId}
-          />
+          {entries.length === 0 ? (
+            <div className="p-12 flex flex-col items-center justify-center text-gray-500">
+              <div className="mb-4">No entries yet. Click Add Payment to add the first one!</div>
+            </div>
+          ) : (
+            <>
+              <EntriesTable
+                entries={entries}
+                onDelete={handleDeleteClick}
+                deletingId={deletingId}
+                onEdit={handleEditClick}
+                onApprove={handleApproveClick}
+                approvingId={approvingId}
+              />
+              <EntriesMobileView
+                entries={entries}
+                onDelete={handleDeleteClick}
+                deletingId={deletingId}
+                onEdit={handleEditClick}
+                onApprove={handleApproveClick}
+                approvingId={approvingId}
+              />
+            </>
+          )}
         </div>
       )}
 
       {entries.length > 0 && <SummaryStats entries={entries} />}
 
-        <Modal
-          open={confirmModal.open}
-          onClose={() => setConfirmModal({ open: false, groupId: null })}
-          onConfirm={confirmDelete}
-          variant="delete"
-          title="Delete Entry Group"
-          description="Are you sure you want to delete this entire entry group? This action cannot be undone."
-          confirmText="Delete"
-          cancelText="Cancel"
+      <Modal
+        open={confirmModal.open}
+        onClose={() => setConfirmModal({ open: false, groupId: null })}
+        onConfirm={confirmDelete}
+        variant="delete"
+        title="Delete Entry Group"
+        description="Are you sure you want to delete this entire entry group? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
+      <Modal
+        open={approveModal.open}
+        onClose={() => setApproveModal({ open: false, group: null })}
+        onConfirm={confirmApprove}
+        variant="approve"
+        title="Approve Payment Group"
+        description="Are you sure you want to approve this payment group? This action cannot be undone."
+        confirmText="Approve"
+        cancelText="Cancel"
+      />
+      {editModal.open && editModal.group && (
+        <EditEntryGroupModal
+          group={editModal.group}
+          onClose={closeEditModal}
+          onSave={() => {
+            closeEditModal();
+            invalidateGroups(clientId);
+          }}
         />
-        <Modal
-          open={approveModal.open}
-          onClose={() => setApproveModal({ open: false, group: null })}
-          onConfirm={confirmApprove}
-          variant="approve"
-          title="Approve Payment Group"
-          description="Are you sure you want to approve this payment group? This action cannot be undone."
-          confirmText="Approve"
-          cancelText="Cancel"
-        />
-        {editModal.open && editModal.group && (
-          <EditEntryGroupModal
-            group={editModal.group}
-            onClose={closeEditModal}
-            onSave={() => {
-              closeEditModal();
-              invalidateGroups(clientId);
-            }}
-          />
-        )}
+      )}
     </div>
   );
 };

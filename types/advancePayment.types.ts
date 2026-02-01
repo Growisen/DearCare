@@ -1,0 +1,20 @@
+export type AdvancePayment = {
+  id: number;
+  date: string;
+  transaction_date: string;
+  advance_amount: number;
+  return_type: string;
+  return_amount: number;
+  remaining_amount: number;
+  installment_amount: number;
+  info?: string;
+  payment_method?: string;
+  receipt_url?: string | null;
+  approved?: boolean;
+  nurse_id?: number;
+  nurse_name: string;
+  nurse_admitted_type: string;
+  nurse_reg_no?: string;
+  nurse_prev_reg_no?: string;
+  payment_type?: string;
+};

@@ -64,7 +64,7 @@ export type NurseDetailsProps = {
 }
 
 export interface NurseFormData {
-  email: string | number | readonly string[] | undefined;
+  email: string;
   first_name: string;
   last_name: string;
   gender: string;
