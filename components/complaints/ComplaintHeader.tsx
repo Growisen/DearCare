@@ -38,7 +38,7 @@ export function ComplaintHeader({
         <button 
           onClick={onExport}
           disabled={isExporting}
-          className="px-3 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600 transition-colors
+          className="px-3 py-1.5 bg-blue-500 text-white rounded-sm hover:bg-blue-600 transition-colors
            disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-1.5 text-sm"
         >
           {isExporting ? (

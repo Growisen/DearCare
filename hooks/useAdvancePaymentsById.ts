@@ -60,38 +60,48 @@ export function useAdvancePaymentsById(nurseId: number) {
     return result;
   };
 
-  const approveAdvancePaymentAndSend = async ({
-    payment,
-    nurseTenantName,
-    nurseId,
-  }: {
-    payment: AdvancePayment;
-    nurseTenantName: string;
-    nurseId: number;
-  }) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nurse_id: String(nurseId),
-        amount: payment.amount,
-        description: payment.info,
-        tenant: nurseTenantName,
-        payment_type: "outgoing",
-        pay_status: "paid",
-      }),
-    });
+const approveAdvancePaymentAndSend = async ({
+  payment,
+  nurseTenantName,
+  nurseId,
+}: {
+  payment: AdvancePayment;
+  nurseTenantName: string;
+  nurseId: number;
+}) => {
+  const paymentType =
+    payment.transactionType === "ADVANCE" ? "outgoing" : "incoming";
 
-    const result = await response.json();
+  const response = await fetch(`${process.env.NEXT_PUBLIC_DAYBOOK_API_URL}/daybook/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nurse_id: String(nurseId),
+      amount: payment.amount,
+      description: payment.info,
+      tenant: nurseTenantName,
+      payment_type: paymentType,
+      pay_status: "paid",
+    }),
+  });
 
-    if (!result.error) {
-      if (!payment.status || payment.status !== "APPROVED") {
-        await approveAdvancePayment(payment.id);
-      }
-      await refetch();
+  const result = await response.json();
+
+  const isSuccess =
+    result.message &&
+    result.message === "Day book entry created successfully";
+
+  console.log("Approve advance payment result:", result);
+
+  if (isSuccess) {
+    console.log("Approving advance payment with ID:", payment.id);
+    if (!payment.status || payment.status !== "APPROVED") {
+      await approveAdvancePayment(payment.id);
     }
-    return result;
-  };
+    await refetch();
+  }
+  return { ...result, success: !!isSuccess };
+};
 
   const createAdvancePayment = async (params: Parameters<typeof createAdvancePaymentAction>[0]) => {
     const result = await createAdvancePaymentAction(params);

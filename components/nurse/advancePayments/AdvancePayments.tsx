@@ -11,9 +11,11 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
   const nurseTenantName = getNurseTenantName(tenant);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<AdvancePayment | null>(null);
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [approvalPayment, setApprovalPayment] = useState<AdvancePayment | null>(null);
+  const [approvalLoading, setApprovalLoading] = useState(false);
 
   const {
     advancePayments: payments,
@@ -34,7 +36,9 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
 
   const confirmDelete = async () => {
     if (!selectedPayment) return;
+    setDeleteLoading(true);
     const result = await deleteAdvancePayment(selectedPayment.id);
+    setDeleteLoading(false);
     setDeleteModalOpen(false);
     setSelectedPayment(null);
     if (result?.success) {
@@ -46,11 +50,13 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
 
   const confirmApproval = async () => {
     if (!approvalPayment) return;
+    setApprovalLoading(true);
     const result = await approveAdvancePaymentAndSend({
       payment: approvalPayment,
       nurseTenantName,
       nurseId,
     });
+    setApprovalLoading(false);
     setApprovalModalOpen(false);
     setApprovalPayment(null);
     if (result?.success) {
@@ -93,13 +99,18 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
       
       <Modal
         open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedPayment(null);
+          setDeleteLoading(false);
+        }}
         onConfirm={confirmDelete}
         variant="delete"
         title="Delete this record?"
         description={`Date: ${selectedPayment?.date}\nAmount: ₹${selectedPayment?.amount}`}
-        confirmText="Yes, delete"
+        confirmText={deleteLoading ? "Deleting..." : "Yes, delete"}
         cancelText="Cancel"
+        loading={deleteLoading}
       />
       <Modal
         open={approvalModalOpen}
@@ -111,8 +122,9 @@ export default function AdvancePayments({ nurseId, tenant }: { nurseId: number, 
         variant="approve"
         title="Approve this payment?"
         description={`Date: ${approvalPayment?.date}\nAmount: ₹${approvalPayment?.amount}`}
-        confirmText="Yes, approve"
+        confirmText={approvalLoading ? "Approving..." : "Yes, approve"}
         cancelText="Cancel"
+        loading={approvalLoading}
       />
     </div>
   );

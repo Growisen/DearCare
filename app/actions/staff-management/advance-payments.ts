@@ -145,7 +145,7 @@ export async function deleteAdvancePaymentById(paymentId: string) {
   const { supabase } = await getAuthenticatedClient()
 
   const { data: payment, error: fetchError } = await supabase
-    .from('nurse_advance_ledger')
+    .from('crm_nurse_advance_ledger')
     .select('created_at, receipt_file')
     .eq('id', paymentId)
     .single()
@@ -168,7 +168,7 @@ export async function deleteAdvancePaymentById(paymentId: string) {
   }
 
   const { error } = await supabase
-    .from('nurse_advance_ledger')
+    .from('crm_nurse_advance_ledger')
     .delete()
     .eq('id', paymentId)
 
@@ -206,7 +206,7 @@ export async function updateAdvancePayment(paymentId: string, updates: {
   if (updates.status) mappedUpdates.status = updates.status
 
   const { error } = await supabase
-    .from('nurse_advance_ledger')
+    .from('crm_nurse_advance_ledger')
     .update(mappedUpdates)
     .eq('id', paymentId)
 
@@ -218,8 +218,11 @@ export async function updateAdvancePayment(paymentId: string, updates: {
 export async function approveAdvancePayment(paymentId: string) {
   const { supabase } = await getAuthenticatedClient()
   const { data, error } = await supabase
-    .from('advance_payments')
-    .update({ approved: true })
+    .from('crm_nurse_advance_ledger')
+    .update({ 
+      status: "APPROVED",
+      approved_at: new Date().toISOString()
+    })
     .eq('id', paymentId)
     .select()
 
@@ -288,7 +291,7 @@ export async function fetchAdvancePaymentRecords({
     let q = queryBuilder.eq('nurse_admitted_type', nursesOrg);
 
     if (dateFilter) {
-      q = q.eq('date', dateFilter);
+      q = q.eq('transaction_date', dateFilter);
     }
 
     if (paymentType && paymentType !== 'all') {
@@ -322,12 +325,11 @@ export async function fetchAdvancePaymentRecords({
 
   const listQuery = applyFilters(
     supabase
-      .from('advance_payments_view')
+      .from('advance_payments_view_v2')
       .select('*', { count: 'exact' })
-      .order('date', { ascending: false })
+      .order('transaction_date', { ascending: false })
       .range(from, to)
   );
-
 
   const [listResult] = await Promise.all([listQuery]);
 

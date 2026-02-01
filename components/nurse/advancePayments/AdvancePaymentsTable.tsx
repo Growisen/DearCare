@@ -197,7 +197,7 @@ const AdvancePaymentsTable: React.FC<AdvancePaymentsTableProps> = ({
                         <button
                           type="button"
                           onClick={() => onEdit && onEdit(payment)}
-                          className="w-full max-w-[100px] px-2 py-1 text-xs font-medium text-blue-700 bg-white border border-blue-200 rounded-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-1 shadow-sm"
+                          className="hidden w-full max-w-[100px] px-2 py-1 text-xs font-medium text-blue-700 bg-white border border-blue-200 rounded-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-1 shadow-sm"
                         >
                           <IoPencil size={12} /> Edit
                         </button>
