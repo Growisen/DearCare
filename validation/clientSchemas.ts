@@ -136,7 +136,7 @@ export const homeMaidSchema = z.object({
   bedrooms: z.number().int().min(0),
   bathrooms: z.number().int().min(0),
   householdSize: z.number().int().min(1),
-  hasPets: z.boolean().optional(),
+  hasPets: z.enum(['yes', 'no']).optional(),
   petDetails: z.string().optional(),
   duties: dutiesSchema,
   mealPrepDetails: z.string().optional(),
