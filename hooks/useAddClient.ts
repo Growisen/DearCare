@@ -434,7 +434,6 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
       }
     }
 
-    // ADD THIS BLOCK FOR BABY CARE SERVICES
     if (
       formData.serviceRequired === 'baby_care' ||
       formData.serviceRequired === 'baby_care_with_house_keeping'
@@ -476,8 +475,11 @@ export const useClientForm = ({ onSuccess, initialData = {} }: UseClientFormProp
 
   const handleHomeMaidInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setHomeMaidFormData(prev => ({ ...prev, [name]: value }));
+      const { name, value, type } = e.target;
+      setHomeMaidFormData(prev => ({
+        ...prev,
+        [name]: type === 'number' ? Number(value) : value
+      }));
       if (homeMaidFormErrors[name]) {
         setHomeMaidFormErrors(prev => ({ ...prev, [name]: '' }));
       }
