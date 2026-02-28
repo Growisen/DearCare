@@ -326,7 +326,8 @@ export async function getClientDetails(clientId: string) {
         *,
         individual_clients (*),
         organization_clients (*),
-        staff_requirements (*)
+        staff_requirements (*),
+        housemaid_requests (*)
       `)
       .eq('id', clientId)
       .single()
@@ -342,9 +343,36 @@ export async function getClientDetails(clientId: string) {
     const { 
       individual_clients, 
       organization_clients, 
-      staff_requirements, 
+      staff_requirements,
+      housemaid_requests,
       ...baseClient 
     } = clientData
+
+    const housemaidDetails = housemaid_requests && housemaid_requests.length > 0 
+      ? {
+          id: housemaid_requests[0].id,
+          createdAt: housemaid_requests[0].created_at,
+          updatedAt: housemaid_requests[0].updated_at,
+          clientId: housemaid_requests[0].client_id,
+          serviceType: housemaid_requests[0].service_type,
+          serviceTypeOther: housemaid_requests[0].service_type_other,
+          frequency: housemaid_requests[0].frequency,
+          preferredSchedule: housemaid_requests[0].preferred_schedule,
+          startDate: housemaid_requests[0].start_date,
+          homeType: housemaid_requests[0].home_type,
+          bedrooms: housemaid_requests[0].bedrooms,
+          bathrooms: housemaid_requests[0].bathrooms,
+          householdSize: housemaid_requests[0].household_size,
+          hasPets: housemaid_requests[0].has_pets,
+          petDetails: housemaid_requests[0].pet_details,
+          duties: housemaid_requests[0].duties,
+          mealPrepDetails: housemaid_requests[0].meal_prep_details,
+          childcareDetails: housemaid_requests[0].childcare_details,
+          allergies: housemaid_requests[0].allergies,
+          restrictedAreas: housemaid_requests[0].restricted_areas,
+          specialInstructions: housemaid_requests[0].special_instructions
+        }
+      : null;
 
     if (baseClient.client_type === 'individual') {
       const individualDetails = individual_clients
@@ -352,6 +380,7 @@ export async function getClientDetails(clientId: string) {
       if (!individualDetails) {
          return { success: false, error: 'Individual client details not found' }
       }
+      
       const [patientPicUrl, requestorPicUrl] = await Promise.all([
         individualDetails.patient_profile_pic 
           ? getStorageUrl(individualDetails.patient_profile_pic) 
@@ -367,11 +396,12 @@ export async function getClientDetails(clientId: string) {
           ...baseClient,
           details: {
             ...individualDetails,
-            patient_profile_pic_url: patientPicUrl,
-            requestor_profile_pic_url: requestorPicUrl,
-            patient_profile_pic: individualDetails.patient_profile_pic,
-            requestor_profile_pic: individualDetails.requestor_profile_pic,
-          }
+            patientProfilePicUrl: patientPicUrl,
+            requestorProfilePicUrl: requestorPicUrl,
+            patientProfilePic: individualDetails.patient_profile_pic,
+            requestorProfilePic: individualDetails.requestor_profile_pic,
+          },
+          housemaidRequests: housemaidDetails
         }
       }
     } else {
@@ -386,7 +416,8 @@ export async function getClientDetails(clientId: string) {
         client: {
           ...baseClient,
           details: organizationDetails,
-          staffRequirements: staff_requirements || []
+          staffRequirements: staff_requirements || [],
+          housemaidRequests: housemaidDetails
         }
       }
     }

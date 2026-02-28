@@ -160,6 +160,34 @@ export interface ClientInformationProps {
 
 
 
+export interface HousemaidDuties {
+  [key: string]: boolean | string | number | undefined;
+}
+
+export interface HousemaidRequest {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  clientId: string;
+  serviceType: string | null;
+  serviceTypeOther: string | null;
+  frequency: string | null;
+  preferredSchedule: string | null;
+  startDate: string | null;
+  homeType: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  householdSize: number | null;
+  hasPets: boolean | null;
+  petDetails: string | null;
+  duties: HousemaidDuties | null;
+  mealPrepDetails: string | null;
+  childcareDetails: string | null;
+  allergies: string | null;
+  restrictedAreas: string | null;
+  specialInstructions: string | null;
+}
+
 export interface DetailedClientIndividual {
   registration_number?: string;
   prev_registration_number?: string;
@@ -167,6 +195,7 @@ export interface DetailedClientIndividual {
   client_category?: ClientCategory;
   duty_period?: string;
   duty_period_reason?: string;
+  housemaidRequests?: HousemaidRequest | null;
   details?: {
     client_id?: string;
     patient_name?: string;
