@@ -200,125 +200,159 @@ export function ClientDetailsOverlay({
   const sectionHeaderStyles = "text-xs font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b border-gray-50 pb-2";
 
   const renderIndividualDetails = (client: DetailedClientIndividual) => (
-    <div className="space-y-4">
-      {(client.details?.patient_profile_pic_url || client.details?.requestor_profile_pic_url) && (
-        <div className={sectionStyles}>
-          <h4 className={sectionHeaderStyles}>Profiles</h4>
-          <div className="flex flex-wrap gap-10">
-            {client.details?.patient_profile_pic_url && (
-              <div className="flex items-center gap-3">
-                <ProfileImage 
-                  src={client.details.patient_profile_pic_url} 
-                  alt="Patient" 
-                  size="md" 
-                />
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Patient</p>
-                  <p className="text-xs text-gray-500">{formatName(client.details?.patient_name || "") || 'Unknown'}</p>
-                </div>
-              </div>
-            )}
-            
-            {client.details?.requestor_profile_pic_url && (
-              <div className="flex items-center gap-3">
-                <ProfileImage 
-                  src={client.details.requestor_profile_pic_url} 
-                  alt="Requestor" 
-                  size="md" 
-                />
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Requestor</p>
-                  <p className="text-xs text-gray-500">{formatName(client.details?.requestor_name || "") || 'Unknown'}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
+  <div className="space-y-4">
+    {(client.details?.patient_profile_pic_url || client.details?.requestor_profile_pic_url) && (
       <div className={sectionStyles}>
-        <h4 className={sectionHeaderStyles}>Requestor Information</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-          <div className="space-y-4">
-            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Details</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-              <DetailItem label="Name" value={formatName(client.details?.requestor_name || "")} />
-              <DetailItem label="Relation" value={getRelationLabel(relationOptions, client.details?.relation_to_patient || '')} />
-              <DetailItem label="Email" value={client.details?.requestor_email} />
-              <DetailItem label="Phone" value={client.details?.requestor_phone} />
-              <DetailItem label="Emergency Phone" value={client.details?.requestor_emergency_phone} />
-              <DetailItem label="Job Details" value={client.details?.requestor_job_details} />
+        <h4 className={sectionHeaderStyles}>Profiles</h4>
+        <div className="flex flex-wrap gap-10">
+          {client.details?.patient_profile_pic_url && (
+            <div className="flex items-center gap-3">
+              <ProfileImage 
+                src={client.details.patient_profile_pic_url} 
+                alt="Patient" 
+                size="md" 
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Patient</p>
+                <p className="text-xs text-gray-500">{formatName(client.details?.patient_name || "") || 'Unknown'}</p>
+              </div>
             </div>
-          </div>
+          )}
           
-          {(client.details?.requestor_address || client.details?.requestor_city || client.details?.requestor_district) && (
-            <div className="space-y-4">
-              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Address</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <DetailItem label="Address" value={client.details?.requestor_address} />
-                <DetailItem label="City" value={client.details?.requestor_city} />
-                <DetailItem label="District" value={client.details?.requestor_district} />
-                <DetailItem label="State" value={client.details?.requestor_state} />
-                <DetailItem label="Pincode" value={client.details?.requestor_pincode} />
+          {client.details?.requestor_profile_pic_url && (
+            <div className="flex items-center gap-3">
+              <ProfileImage 
+                src={client.details.requestor_profile_pic_url} 
+                alt="Requestor" 
+                size="md" 
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Requestor</p>
+                <p className="text-xs text-gray-500">{formatName(client.details?.requestor_name || "") || 'Unknown'}</p>
               </div>
             </div>
           )}
         </div>
       </div>
+    )}
 
-      {(
-        client.details?.patient_name ||
-        client.details?.patient_age ||
-        client.details?.patient_gender ||
-        client.details?.patient_phone ||
-        client.details?.patient_address ||
-        client.details?.complete_address ||
-        client.details?.patient_city ||
-        client.details?.patient_district ||
-        client.details?.patient_state ||
-        client.details?.patient_pincode
-      ) && (
-        <div className={sectionStyles}>
-          <h4 className={sectionHeaderStyles}>Patient Information</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-            <div className="space-y-4">
-              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Personal Details</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
-                <DetailItem label="Date of Birth" value={formatDate(client.details?.patient_dob || "")} />
-                <DetailItem label="Age" value={calculateAge(client.details?.patient_dob || '')} />
-                <DetailItem label="Gender" value={client.details?.patient_gender} />
-                <DetailItem label="Phone" value={client.details?.patient_phone} />
-              </div>
+    <div className={sectionStyles}>
+      <h4 className={sectionHeaderStyles}>Requestor Information</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+        <div className="space-y-4">
+          <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Details</h5>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            <DetailItem label="Name" value={formatName(client.details?.requestor_name || "")} />
+            <DetailItem label="Relation" value={getRelationLabel(relationOptions, client.details?.relation_to_patient || '')} />
+            <DetailItem label="Email" value={client.details?.requestor_email} />
+            <DetailItem label="Phone" value={client.details?.requestor_phone} />
+            <DetailItem label="Emergency Phone" value={client.details?.requestor_emergency_phone} />
+            <DetailItem label="Job Details" value={client.details?.requestor_job_details} />
+          </div>
+        </div>
+        
+        {(client.details?.requestor_address || client.details?.requestor_city || client.details?.requestor_district) && (
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Address</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <DetailItem label="Address" value={client.details?.requestor_address} />
+              <DetailItem label="City" value={client.details?.requestor_city} />
+              <DetailItem label="District" value={client.details?.requestor_district} />
+              <DetailItem label="State" value={client.details?.requestor_state} />
+              <DetailItem label="Pincode" value={client.details?.requestor_pincode} />
             </div>
-            
-            <div className="space-y-4">
-              <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Address</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
-                <DetailItem label="City" value={client.details?.patient_city} />
-                <DetailItem label="District" value={client.details?.patient_district} />
-                <DetailItem label="State" value={client.details?.patient_state} />
-                <DetailItem label="Pincode" value={client.details?.patient_pincode} />
-              </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div className={sectionStyles}>
+      <h4 className={sectionHeaderStyles}>Care Requirements</h4>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+        <DetailItem label="Service Required" value={getServiceLabel(serviceOptions, client.details?.service_required || '')} />
+        <DetailItem label="Duty Period" value={getServiceLabel(dutyPeriodOptions, client.duty_period || '')} />
+        <DetailItem label="Preferred Gender" value={client.details?.preferred_caregiver_gender} />
+        <DetailItem label="Expected Start Date" value={formatDate(client.details?.start_date || '') || 'Not specified'} />
+        <DetailItem label="Period Reason" value={client.duty_period_reason} columns={3} />
+      </div>
+    </div>
+
+    {client.housemaidRequests && (
+      <div className={sectionStyles}>
+        <h4 className={sectionHeaderStyles}>Housemaid Requirements</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Service Details</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <DetailItem label="Service Type" value={client.housemaidRequests.serviceType === 'other' ? client.housemaidRequests.serviceTypeOther : client.housemaidRequests.serviceType} />
+              <DetailItem label="Frequency" value={client.housemaidRequests.frequency} />
+              <DetailItem label="Start Date" value={formatDate(client.housemaidRequests.startDate || '')} />
+              <DetailItem label="Schedule" value={client.housemaidRequests.preferredSchedule} />
+              <DetailItem label="Home Type" value={client.housemaidRequests.homeType} />
+              <DetailItem label="Household Size" value={client.housemaidRequests.householdSize?.toString()} />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Environment & Specifics</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <DetailItem label="Bedrooms/Baths" value={`${client.housemaidRequests.bedrooms} BHK / ${client.housemaidRequests.bathrooms} Bath`} />
+              <DetailItem label="Has Pets" value={client.housemaidRequests.hasPets ? `Yes (${client.housemaidRequests.petDetails})` : 'No'} />
+              <DetailItem label="Allergies" value={client.housemaidRequests.allergies || 'None'} />
+              <DetailItem label="Restricted Areas" value={client.housemaidRequests.restrictedAreas || 'None'} />
             </div>
           </div>
         </div>
-      )}
-
-      <div className={sectionStyles}>
-        <h4 className={sectionHeaderStyles}>Care Requirements</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-          <DetailItem label="Service Required" value={getServiceLabel(serviceOptions, client.details?.service_required || '')} />
-          {/* <DetailItem label="Care Duration" value={client.details?.care_duration || 'Not specified'} /> */}
-          <DetailItem label="Duty Period" value={getServiceLabel(dutyPeriodOptions, client.duty_period || '')} />
-          <DetailItem label="Preferred Gender" value={client.details?.preferred_caregiver_gender} />
-          <DetailItem label="Expected Start Date" value={formatDate(client.details?.start_date || '') || 'Not specified'} />
-          <DetailItem label="Period Reason" value={client.duty_period_reason} columns={3} />
+        
+        <div className="mt-6 grid grid-cols-1 gap-y-4 border-t border-gray-50 pt-4">
+          <DetailItem label="Meal Prep Details" value={client.housemaidRequests.mealPrepDetails} columns={3} />
+          <DetailItem label="Childcare Details" value={client.housemaidRequests.childcareDetails} columns={3} />
+          <DetailItem label="Special Instructions" value={client.housemaidRequests.specialInstructions} columns={3} />
         </div>
       </div>
-    </div>
-  );
+    )}
+
+    {(
+      client.details?.patient_name ||
+      client.details?.patient_age ||
+      client.details?.patient_gender ||
+      client.details?.patient_phone ||
+      client.details?.patient_address ||
+      client.details?.complete_address ||
+      client.details?.patient_city ||
+      client.details?.patient_district ||
+      client.details?.patient_state ||
+      client.details?.patient_pincode
+    ) && (
+      <div className={sectionStyles}>
+        <h4 className={sectionHeaderStyles}>Patient Information</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Personal Details</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <DetailItem label="Name" value={formatName(client.details?.patient_name || "")} />
+              <DetailItem label="Date of Birth" value={formatDate(client.details?.patient_dob || "")} />
+              <DetailItem label="Age" value={calculateAge(client.details?.patient_dob || '')} />
+              <DetailItem label="Gender" value={client.details?.patient_gender} />
+              <DetailItem label="Phone" value={client.details?.patient_phone} />
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Address</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <DetailItem label="Address" value={client.details?.patient_address || client.details?.complete_address} />
+              <DetailItem label="City" value={client.details?.patient_city} />
+              <DetailItem label="District" value={client.details?.patient_district} />
+              <DetailItem label="State" value={client.details?.patient_state} />
+              <DetailItem label="Pincode" value={client.details?.patient_pincode} />
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
 
   const renderOrganizationDetails = (client: DetailedClientOrganization) => (
     <div className={sectionStyles}>
